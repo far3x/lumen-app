@@ -1,0 +1,102 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@font-face {
+    font-family: 'Satoshi';
+    src: url('/fonts/Satoshi-Variable.woff2') format('woff2');
+    font-weight: 300 900;
+    font-display: swap;
+    font-style: normal;
+}
+
+body {
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+}
+
+.gradient-text {
+    @apply bg-hero-gradient bg-clip-text text-transparent;
+}
+
+.pulse-text {
+    @apply bg-clip-text text-transparent;
+    background-image: 
+        linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.8) 50%, transparent 100%),
+        linear-gradient(90deg, theme('colors.accent-purple') 0%, theme('colors.accent-pink') 50%, theme('colors.accent-cyan') 100%);
+    background-size: 50% 100%, 100% 100%;
+    background-repeat: no-repeat;
+    background-position: -200% center, 0% center;
+    @apply animate-pulse-right;
+}
+
+details > summary {
+    list-style: none;
+}
+details > summary::-webkit-details-marker {
+    display: none;
+}
+
+::-webkit-scrollbar {
+    width: 8px;
+}
+
+::-webkit-scrollbar-track {
+    background: #13131A;
+}
+
+::-webkit-scrollbar-thumb {
+    background: #3F3F4D;
+    border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: #5a5a6b;
+}
+
+.prose-custom {
+    @apply prose prose-invert max-w-none prose-h1:text-4xl prose-h1:font-bold prose-h1:tracking-tighter prose-h2:text-3xl prose-h2:font-bold prose-h2:border-b prose-h2:border-primary prose-h2:pb-3 prose-h2:mb-6 prose-h3:text-xl prose-h3:font-bold prose-a:text-accent-cyan prose-a:no-underline hover:prose-a:underline prose-strong:text-text-main prose-blockquote:border-l-accent-purple prose-blockquote:bg-surface prose-blockquote:px-4 prose-code:bg-primary prose-code:p-1 prose-code:rounded-md prose-code:font-mono prose-li:my-1 prose-table:border-primary prose-th:border-b-2 prose-th:border-primary prose-tr:border-b prose-tr:border-subtle/50;
+}
+.prose-custom p, 
+.prose-custom ul, 
+.prose-custom ol {
+    @apply text-text-secondary text-base leading-relaxed;
+}
+.prose-custom h1, .prose-custom h2, .prose-custom h3, .prose-custom h4 {
+    @apply text-text-main;
+}
+
+.prose-custom code::before,
+.prose-custom code::after {
+  content: none;
+}
+
+.code-block {
+    @apply bg-primary my-6 rounded-lg border border-subtle/50 shadow-lg overflow-hidden;
+}
+.code-block-header {
+    @apply bg-surface px-4 py-2 text-xs text-text-secondary font-semibold border-b border-subtle/50;
+}
+.code-block-content {
+    @apply p-4 text-sm font-mono overflow-x-auto;
+}
+.code-block-content .command {
+    @apply text-accent-cyan;
+}
+.code-block-content .output {
+    @apply text-text-secondary;
+}
+.code-block-content .comment {
+    @apply text-green-400;
+}
+
+.footer-gradient-border::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 1px;
+    background: linear-gradient(90deg, theme('colors.accent-purple') 0%, theme('colors.accent-pink') 50%, theme('colors.accent-cyan') 100%);
+    opacity: 0.5;
+}
