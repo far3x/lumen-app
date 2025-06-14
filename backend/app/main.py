@@ -8,7 +8,6 @@ import random
 from datetime import timedelta
 from starlette.middleware.sessions import SessionMiddleware
 
-# NEW: Import slowapi for rate limiting
 from slowapi import Limiter, _rate_limit_exceeded_handler
 from slowapi.util import get_remote_address
 from slowapi.errors import RateLimitExceeded
@@ -17,7 +16,8 @@ from . import crud, models, schemas, auth, database
 from .config import settings
 from .database import engine
 
-# NEW: Setup the rate limiter
+# --- REMOVED THE `secure` LIBRARY IMPORT ---
+
 limiter = Limiter(key_func=get_remote_address)
 models.Base.metadata.create_all(bind=engine)
 
@@ -28,19 +28,28 @@ app = FastAPI(
 app.state.limiter = limiter
 app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
 
-# THE FIX: Allow origins now includes the correct Vite port
-app.add_middleware(SessionMiddleware, secret_key=settings.SECRET_KEY)
+
+# --- REMOVED THE `secure_headers` MIDDLEWARE FUNCTION ---
+
+
+# Add middlewares in the correct order. CORS should be one of the first.
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:5173", "http://127.0.0.1:5173", "https://lumen-priv.vercel.app/"],
+    # Use the FRONTEND_URL from your settings for the origin
+    allow_origins=[settings.FRONTEND_URL], 
     allow_credentials=True,
     allow_methods=["*"],
-    allow_headers=["*"],
+    # Be explicit about the headers your frontend is sending
+    allow_headers=["Authorization", "Content-Type"],
 )
 
-# --- Authentication Routes with Rate Limiting ---
+app.add_middleware(SessionMiddleware, secret_key=settings.SECRET_KEY)
+
+
+# --- THE REST OF YOUR FILE REMAINS THE SAME ---
+
 @app.post("/auth/register", response_model=schemas.User, status_code=status.HTTP_201_CREATED)
-@limiter.limit("5/minute") # Limit registration attempts
+@limiter.limit("5/minute")
 async def register_user(request: Request, user: schemas.UserCreate, db: Session = Depends(database.get_db)):
     db_user = crud.get_user_by_email(db, email=user.email)
     if db_user:
@@ -48,7 +57,7 @@ async def register_user(request: Request, user: schemas.UserCreate, db: Session 
     return crud.create_user(db=db, user=user)
 
 @app.post("/auth/token", response_model=schemas.Token)
-@limiter.limit("10/minute") # Limit login attempts
+@limiter.limit("10/minute")
 async def login_for_access_token(request: Request, form_data: OAuth2PasswordRequestForm = Depends(), db: Session = Depends(database.get_db)):
     user = crud.get_user_by_email(db, email=form_data.username)
     if not user or not auth.verify_password(form_data.password, user.hashed_password):
@@ -63,8 +72,6 @@ async def login_for_access_token(request: Request, form_data: OAuth2PasswordRequ
     )
     return {"access_token": access_token, "token_type": "bearer"}
 
-
-# --- OAuth Routes ---
 @app.get('/auth/login/{provider}')
 @limiter.limit("10/minute")
 async def login_via_provider(request: Request, provider: str):
@@ -90,11 +97,9 @@ async def auth_callback(request: Request, provider: str, db: Session = Depends(d
         data={"sub": str(user.id)}, expires_delta=access_token_expires
     )
     
-    # THE FIX: Use the configurable FRONTEND_URL from settings
     frontend_url = f"{settings.FRONTEND_URL}/auth/callback?token={access_token}"
     return RedirectResponse(url=frontend_url)
 
-# --- API Routes ---
 @app.get("/api/v1/users/me", response_model=schemas.User)
 async def read_users_me(current_user: models.User = Depends(auth.get_current_user)):
     return current_user
@@ -106,24 +111,23 @@ def get_my_balance(current_user: models.User = Depends(auth.get_current_user), d
         raise HTTPException(status_code=404, detail="Account not found")
     return account
 
-# REWARD LOGIC CHANGE: Background task now calls the new function
 def reward_processing_task(db: Session, user_id: int, file_size_kb: float):
     user = crud.get_user(db, user_id)
     if user:
-        time.sleep(random.randint(5, 15)) # Simulate processing
+        time.sleep(random.randint(5, 15))
         crud.update_balance_for_contribution(db, user, file_size_kb)
 
 @app.post("/api/v1/contribute", status_code=status.HTTP_202_ACCEPTED)
-@limiter.limit("5/minute") # Prevent contribution spam
+@limiter.limit("5/minute")
 async def contribute_data(
     request: Request,
     background_tasks: BackgroundTasks,
-    file: UploadFile = File(None), # Make file optional for testing
+    file: UploadFile = File(None),
     current_user: models.User = Depends(auth.get_current_user)
 ):
     db = database.SessionLocal()
     try:
-        file_size_kb = file.size / 1024 if file and file.size else 100.0 # Default size for testing
+        file_size_kb = file.size / 1024 if file and file.size else 100.0
         background_tasks.add_task(reward_processing_task, db, current_user.id, file_size_kb)
     finally:
         pass
