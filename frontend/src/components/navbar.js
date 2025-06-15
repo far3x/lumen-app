@@ -99,7 +99,7 @@ export function renderNavbar() {
     `;
 
     const userAreaHTML = authed ? `
-        <div class="relative">
+        <div class="hidden lg:block relative">
             <button id="user-menu-button" class="flex items-center gap-x-3 h-11 px-4 bg-primary/50 hover:bg-primary/80 transition-colors border border-subtle/50 rounded-full">
                 <span class="text-sm font-medium text-text-main">${user.display_name}</span>
                 <div class="w-px h-5 bg-subtle/50"></div>
@@ -111,6 +111,12 @@ export function renderNavbar() {
                 <button id="logout-button-desktop" class="w-full text-left block px-4 py-2 text-sm text-red-400 hover:bg-surface hover:text-red-300">Log Out</button>
             </div>
         </div>
+        <div class="flex lg:hidden items-center gap-x-4">
+            <span class="font-mono text-sm gradient-text">${mockBalance.toLocaleString()} $LUM</span>
+            <button id="mobile-menu-trigger" type="button" class="p-2 text-text-secondary hover:text-text-main">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path></svg>
+            </button>
+        </div>
     ` : `
         <div class="hidden lg:flex items-center h-11 p-1 bg-primary/50 border border-subtle/50 rounded-full">
             <a href="/login" class="h-full flex items-center px-6 rounded-full text-sm font-medium text-text-secondary hover:bg-subtle/50 transition-colors">
@@ -120,6 +126,9 @@ export function renderNavbar() {
                 Sign Up
             </a>
         </div>
+        <button id="mobile-menu-trigger" type="button" class="p-2 text-text-secondary hover:text-text-main lg:hidden">
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path></svg>
+        </button>
     `;
 
     setTimeout(setupNavbarEventListeners, 0);
@@ -144,9 +153,6 @@ export function renderNavbar() {
 
             <div class="flex-1 flex justify-end">
                 ${userAreaHTML}
-                <button id="mobile-menu-trigger" type="button" class="p-2 text-text-secondary hover:text-text-main lg:hidden">
-                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path></svg>
-                </button>
             </div>
         </div>
     </header>
