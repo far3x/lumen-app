@@ -6,7 +6,6 @@ export function renderLandingPage() {
     return `
     <main id="content-root" class="flex-grow">
         
-        {/* Hidden SVG definition for the icon gradient. This is referenced by all icons. */}
         <svg aria-hidden="true" style="position: absolute; width: 0; height: 0; overflow: hidden;">
           <defs>
             <linearGradient id="icon-gradient" x1="0%" y1="0%" x2="100%" y2="100%">
