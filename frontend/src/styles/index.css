@@ -2,6 +2,20 @@
 @tailwind components;
 @tailwind utilities;
 
+@layer components {
+  .gradient-border-bottom {
+    @apply relative;
+  }
+  .gradient-border-bottom::after {
+    content: '';
+    @apply absolute bottom-0 left-0 right-0 h-px bg-gradient-to-r from-accent-purple via-accent-pink to-accent-cyan opacity-50;
+  }
+
+  .gradient-divider {
+     @apply w-full h-px border-0 bg-gradient-to-r from-accent-purple via-accent-pink to-accent-cyan opacity-40;
+  }
+}
+
 @font-face {
     font-family: 'Satoshi';
     src: url('/fonts/Satoshi-Variable.woff2') format('woff2');
@@ -33,6 +47,7 @@ body {
 details > summary {
     list-style: none;
 }
+
 details > summary::-webkit-details-marker {
     display: none;
 }
@@ -57,14 +72,30 @@ details > summary::-webkit-details-marker {
 .prose-custom {
     @apply prose prose-invert max-w-none prose-h1:text-4xl prose-h1:font-bold prose-h1:tracking-tighter prose-h2:text-3xl prose-h2:font-bold prose-h2:border-b prose-h2:border-primary prose-h2:pb-3 prose-h2:mb-6 prose-h3:text-xl prose-h3:font-bold prose-a:text-accent-cyan prose-a:no-underline hover:prose-a:underline prose-strong:text-text-main prose-blockquote:border-l-accent-purple prose-blockquote:bg-surface prose-blockquote:px-4 prose-code:bg-primary prose-code:p-1 prose-code:rounded-md prose-code:font-mono prose-li:my-1 prose-table:border-primary prose-th:border-b-2 prose-th:border-primary prose-tr:border-b prose-tr:border-subtle/50;
 }
+
 .prose-custom p, 
 .prose-custom ul, 
 .prose-custom ol {
     @apply text-text-secondary text-base leading-relaxed;
 }
-.prose-custom h1, .prose-custom h2, .prose-custom h3, .prose-custom h4 {
+
+.prose-custom h1, 
+.prose-custom h2, 
+.prose-custom h3, 
+.prose-custom h4 {
     @apply text-text-main;
 }
+
+/* --- THIS IS THE FIX --- */
+.prose-custom h1,
+.prose-custom h2,
+.prose-custom h3,
+.prose-custom h4,
+.prose-custom h5,
+.prose-custom h6 {
+  scroll-margin-top: 6rem; /* This is the direct CSS equivalent and will not cause a build error. */
+}
+/* --- END OF FIX --- */
 
 .prose-custom code::before,
 .prose-custom code::after {
@@ -74,18 +105,23 @@ details > summary::-webkit-details-marker {
 .code-block {
     @apply bg-primary my-6 rounded-lg border border-subtle/50 shadow-lg overflow-hidden;
 }
+
 .code-block-header {
     @apply bg-surface px-4 py-2 text-xs text-text-secondary font-semibold border-b border-subtle/50;
 }
+
 .code-block-content {
     @apply p-4 text-sm font-mono overflow-x-auto;
 }
+
 .code-block-content .command {
     @apply text-accent-cyan;
 }
+
 .code-block-content .output {
     @apply text-text-secondary;
 }
+
 .code-block-content .comment {
     @apply text-green-400;
 }

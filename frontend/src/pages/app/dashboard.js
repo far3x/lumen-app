@@ -1,12 +1,12 @@
-import { getUser, logout } from '../../lib/auth.js';
-import { navigate } from '../../router.js';
+import { getUser } from '../../lib/auth.js';
 import Chart from 'chart.js/auto';
 
-// --- NEW HELPER: Renders the canvas for our chart ---
 function renderChartContainer() {
     return `
     <div class="bg-surface p-6 rounded-lg border border-primary h-full flex flex-col">
-        <h3 class="font-bold text-lg mb-4 text-text-main">Performance Analytics</h3>
+        <h3 class="font-bold text-lg mb-4 text-text-main">
+            Performance Analytics
+        </h3>
         <div class="relative flex-grow h-64 md:h-80">
             <canvas id="earningsChartCanvas"></canvas>
         </div>
@@ -14,20 +14,16 @@ function renderChartContainer() {
     `;
 }
 
-// --- NEW HELPER: Initializes the Chart.js instance ---
 function initializeChart() {
     const ctx = document.getElementById('earningsChartCanvas');
     if (!ctx) return;
 
-    // Simulated data for the chart
     const labels = Array.from({ length: 30 }, (_, i) => {
         const d = new Date();
         d.setDate(d.getDate() - (29 - i));
         return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
     });
-    const dataPoints = [
-        10, 12, 8, 15, 20, 25, 22, 30, 35, 40, 38, 45, 50, 60, 55, 65, 70, 75, 72, 80, 90, 95, 100, 110, 120, 115, 130, 140, 135, 150
-    ].map(v => v + Math.random() * 10);
+    const dataPoints = [10, 12, 8, 15, 20, 25, 22, 30, 35, 40, 38, 45, 50, 60, 55, 65, 70, 75, 72, 80, 90, 95, 100, 110, 120, 115, 130, 140, 135, 150].map(v => v + Math.random() * 10);
 
     const gradient = ctx.getContext('2d').createLinearGradient(0, 0, 0, 300);
     gradient.addColorStop(0, 'rgba(138, 43, 226, 0.4)');
@@ -85,8 +81,6 @@ function initializeChart() {
     });
 }
 
-// --- Other component renderers (updated for new structure) ---
-
 function renderActivityTabs() {
     const activity = [
         { id: 'a1b2', project: 'Private ML Pipeline', lang: 'Python', earnings: 128.42, time: '2h ago', status: 'Complete' },
@@ -96,10 +90,10 @@ function renderActivityTabs() {
         { id: 'i9j0', project: 'New Trading Algorithm', lang: 'Python', earnings: 0, time: 'Just now', status: 'Processing' },
     ];
     const networkFeed = [
-        { type: 'contribution', user: 'User-a4b8', project: 'Project-f91c', value: '112.9 $LUM', time: '12s ago' },
-        { type: 'join', user: 'User-c3d4', time: '45s ago' },
-        { type: 'contribution', user: 'User-e5f6', project: 'Project-b2a8', value: '34.5 $LUM', time: '1m ago' },
-        { type: 'contribution', user: 'User-g7h8', project: 'Project-d6e3', value: '205.1 $LUM', time: '3m ago' },
+         { type: 'contribution', user: 'User-a4b8', project: 'Project-f91c', value: '112.9 $LUM', time: '12s ago' },
+         { type: 'join', user: 'User-c3d4', time: '45s ago' },
+         { type: 'contribution', user: 'User-e5f6', project: 'Project-b2a8', value: '34.5 $LUM', time: '1m ago' },
+         { type: 'contribution', user: 'User-g7h8', project: 'Project-d6e3', value: '205.1 $LUM', time: '3m ago' },
     ];
     const feedIcons = {
         contribution: `<svg class="w-5 h-5 text-accent-cyan" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"></path></svg>`,
@@ -128,21 +122,23 @@ function renderActivityTabs() {
                                 </tr>
                             </thead>
                             <tbody class="divide-y divide-primary">
-                                ${activity.map(item => `
-                                    <tr>
-                                        <td class="py-3 px-4 font-medium">${item.project}</td>
-                                        <td class="py-3 px-4 text-text-secondary">${item.lang}</td>
-                                        <td class="py-3 px-4"><span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${item.status === 'Complete' ? 'bg-green-900/50 text-green-300' : 'bg-yellow-900/50 text-yellow-300 animate-pulse'}">${item.status}</span></td>
-                                        <td class="py-3 px-4 text-right font-mono ${item.earnings > 0 ? 'text-green-400' : 'text-text-secondary'}">${item.earnings > 0 ? `+${item.earnings.toFixed(2)}` : '...'}</td>
-                                        <td class="py-3 px-4 text-right text-text-secondary">${item.time}</td>
-                                    </tr>
-                                `).join('')}
+                            ${activity.map(item => `
+                                <tr>
+                                    <td class="py-3 px-4 font-medium">${item.project}</td>
+                                    <td class="py-3 px-4 text-text-secondary">${item.lang}</td>
+                                    <td class="py-3 px-4"><span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${item.status === 'Complete' ? 'bg-green-900/50 text-green-300' : 'bg-yellow-900/50 text-yellow-300 animate-pulse'}">${item.status}</span></td>
+                                    <td class="py-3 px-4 text-right font-mono ${item.earnings > 0 ? 'text-green-400' : 'text-text-secondary'}">${item.earnings > 0 ? `+${item.earnings.toFixed(2)}` : '...'}</td>
+                                    <td class="py-3 px-4 text-right text-text-secondary">${item.time}</td>
+                                </tr>
+                            `).join('')}
                             </tbody>
                         </table>
                     </div>
                 </div>
                 <div id="panel-network-feed" class="tab-panel hidden">
-                    <ul class="space-y-4">${networkFeed.map(item => `<li class="flex items-center space-x-4"><div class="p-2 bg-primary rounded-full">${feedIcons[item.type]}</div><div class="flex-grow text-sm"><p class="text-text-main">${item.type === 'contribution' ? `<strong>${item.user}</strong> contributed to <strong>${item.project}</strong>` : `<strong>${item.user}</strong> joined the network`}</p><p class="text-text-secondary">${item.type === 'contribution' ? `and earned ${item.value}` : 'Welcome!'}</p></div><span class="text-xs text-subtle font-mono">${item.time}</span></li>`).join('')}</ul>
+                    <ul class="space-y-4">
+                        ${networkFeed.map(item => `<li class="flex items-center space-x-4"><div class="p-2 bg-primary rounded-full">${feedIcons[item.type]}</div><div class="flex-grow text-sm"><p class="text-text-main">${item.type === 'contribution' ? `<strong>${item.user}</strong> contributed to <strong>${item.project}</strong>` : `<strong>${item.user}</strong> joined the network`}</p><p class="text-text-secondary">${item.type === 'contribution' ? `and earned ${item.value}` : 'Welcome!'}</p></div><span class="text-xs text-subtle font-mono">${item.time}</span></li>`).join('')}
+                    </ul>
                 </div>
             </div>
         </div>
@@ -159,7 +155,9 @@ function renderCommunityAndGrowth() {
         <div class="space-y-8">
             <div class="bg-surface p-6 rounded-lg border border-primary">
                 <h3 class="font-bold text-lg mb-4">Top Earners</h3>
-                <div class="space-y-4">${topContributors.map(user => `<div class="flex items-center space-x-4"><span class="font-mono text-sm text-subtle w-6">#${user.rank}</span><img src="${user.avatar}" class="w-10 h-10 rounded-full" alt="${user.name}"><div class="flex-grow"><p class="font-bold text-text-main">${user.name}</p></div><p class="font-bold text-sm text-accent-cyan">${user.earnings.toLocaleString()} $LUM</p></div>`).join('')}</div>
+                <div class="space-y-4">
+                    ${topContributors.map(user => `<div class="flex items-center space-x-4"><span class="font-mono text-sm text-subtle w-6">#${user.rank}</span><img src="${user.avatar}" class="w-10 h-10 rounded-full" alt="${user.name}"><div class="flex-grow"><p class="font-bold text-text-main">${user.name}</p></div><p class="font-bold text-sm text-accent-cyan">${user.earnings.toLocaleString()} $LUM</p></div>`).join('')}
+                </div>
             </div>
             <div class="bg-surface p-6 rounded-lg border border-primary">
                 <h3 class="font-bold text-lg mb-4">Maximize Your Earnings</h3>
@@ -172,14 +170,7 @@ function renderCommunityAndGrowth() {
     `;
 }
 
-// --- Event Listeners and Main Render Function ---
-
 function setupDashboardEventListeners() {
-    document.getElementById('logout-button')?.addEventListener('click', () => {
-        logout();
-        navigate('/login');
-    });
-
     const tabButtons = document.querySelectorAll('.tab-button');
     const tabPanels = document.querySelectorAll('.tab-panel');
     tabButtons.forEach(button => {
@@ -191,7 +182,6 @@ function setupDashboardEventListeners() {
         });
     });
 
-    // Initialize the chart after the DOM is rendered
     initializeChart();
 }
 
@@ -200,28 +190,23 @@ export async function renderDashboard() {
     const stats = { balance: 5432.12, rank: 1337 };
 
     const content = `
-    <main class="flex-grow bg-abyss-dark">
-        <div class="container mx-auto px-6 py-10 space-y-12">
+    <main class="flex-grow bg-abyss-dark pt-28">
+        <div class="container mx-auto px-6 pb-10 space-y-12">
             
-            <!-- Header -->
-            <header class="flex flex-col sm:flex-row justify-between sm:items-center gap-4 animate-fade-in-up">
-                <div>
-                    <h1 class="text-3xl font-bold">Dashboard</h1>
-                    <p class="text-text-secondary">Welcome back, ${user?.display_name || 'Contributor'}.</p>
-                </div>
-                <button id="logout-button" class="text-sm bg-surface hover:bg-primary border border-primary text-text-secondary font-bold py-2 px-4 rounded-md transition-colors self-start sm:self-center">
-                    Log Out
-                </button>
+            <header class="animate-fade-in-up">
+                <h1 class="text-3xl font-bold">Dashboard</h1>
+                <p class="text-text-secondary">An overview of your contributions and network status.</p>
             </header>
 
-            <!-- Hero Section -->
             <section class="grid grid-cols-1 lg:grid-cols-3 gap-6 animate-fade-in-up" style="animation-delay: 100ms;">
                 <div class="lg:col-span-2 bg-surface p-6 rounded-lg border border-primary flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
                     <div>
-                        <p class="text-sm font-medium text-text-secondary">Your Balance</p>
+                        <p class="text-sm font-medium text-text-secondary">Your Total Balance</p>
                         <p class="text-5xl font-bold mt-2 gradient-text">${stats.balance.toLocaleString()} $LUM</p>
                     </div>
-                    <a href="/docs/contributing" class="px-6 py-3 font-bold bg-primary text-text-main rounded-lg transition-all duration-300 hover:bg-subtle/80 hover:-translate-y-1 self-start sm:self-center">Contribute Now</a>
+                    <a href="/docs/contributing" class="px-6 py-3 font-bold bg-primary text-text-main rounded-lg transition-all duration-300 hover:bg-subtle/80 hover:-translate-y-1 self-start sm:self-center">
+                        Contribute Now
+                    </a>
                 </div>
                 <div class="bg-surface p-6 rounded-lg border border-primary">
                     <p class="text-sm font-medium text-text-secondary">Global Rank</p>
@@ -229,9 +214,10 @@ export async function renderDashboard() {
                 </div>
             </section>
 
-            <!-- Main Content Grid -->
+            <div class="gradient-divider"></div>
+
             <div class="grid grid-cols-1 xl:grid-cols-3 gap-8">
-                <section class="xl:col-span-2 space-y-8 animate-fade-in-up" style="animation-delay: 200ms;">
+                <section class="xl:col-span-2 flex flex-col space-y-8 animate-fade-in-up" style="animation-delay: 200ms;">
                     <h2 class="text-2xl font-bold">Performance Analytics</h2>
                     ${renderChartContainer()}
                 </section>
@@ -242,6 +228,8 @@ export async function renderDashboard() {
                 </section>
             </div>
             
+            <div class="gradient-divider"></div>
+
              <section class="animate-fade-in-up" style="animation-delay: 400ms;">
                 <h2 class="text-2xl font-bold mb-4">Activity Hub</h2>
                 ${renderActivityTabs()}

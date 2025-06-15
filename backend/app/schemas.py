@@ -21,7 +21,7 @@ class Token(BaseModel):
 
 class TokenData(BaseModel):
     id: Optional[str] = None
-    
+
 # Account Schema
 class Account(BaseModel):
     lum_balance: float

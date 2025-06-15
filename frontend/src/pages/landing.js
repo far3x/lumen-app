@@ -1,7 +1,8 @@
 export function renderLandingPage() {
     return `
     <main id="content-root" class="flex-grow">
-        <section class="relative flex flex-col justify-center min-h-screen text-center overflow-hidden isolate">
+        
+        <section class="relative flex flex-col justify-center min-h-screen text-center overflow-hidden isolate gradient-border-bottom">
             <video
                 autoplay
                 loop
@@ -18,9 +19,11 @@ export function renderLandingPage() {
                     <br>
                     <span class="pulse-text block">Power the Future of AI.</span>
                 </h1>
+                
                 <p class="max-w-3xl mx-auto mt-6 text-lg md:text-xl text-text-secondary animate-fade-in-up" style="animation-delay: 100ms;">
                     Your code is the most valuable dataset on the planet. Anonymously contribute to the future of AI and get rewarded for its true worth.
                 </p>
+                
                 <div class="mt-10 flex justify-center items-center gap-4 animate-fade-in-up" style="animation-delay: 200ms;">
                     <a href="/login" class="px-8 py-3 font-bold bg-gradient-to-r from-accent-purple to-accent-pink text-white rounded-lg transition-all duration-300 hover:scale-105 hover:shadow-lg hover:shadow-accent-purple/30 hover:brightness-110">Start Earning Now</a>
                     <a href="/docs/introduction" class="px-8 py-3 font-bold bg-primary text-text-main rounded-lg transition-all duration-300 hover:bg-subtle/80 hover:-translate-y-1">Read the Docs</a>
@@ -28,16 +31,16 @@ export function renderLandingPage() {
             </div>
         </section>
 
-        <!-- How It Works Section -->
-        <section class="relative py-20 md:py-32 bg-abyss-dark bg-grid-pattern bg-grid-size animate-grid-pan overflow-hidden border-t border-primary">
+        <section class="relative py-20 md:py-32 bg-abyss-dark bg-grid-pattern bg-grid-size animate-grid-pan overflow-hidden">
             <div class="absolute inset-0 bg-[radial-gradient(ellipse_at_center,transparent_20%,#08080A)]"></div>
             <div class="container mx-auto px-6 max-w-7xl relative z-10">
+                
                 <div class="text-center max-w-2xl mx-auto animate-fade-in-up">
                     <h2 class="text-3xl md:text-4xl font-bold">A Frictionless Contributor Experience</h2>
                     <p class="mt-4 text-text-secondary">Go from code to crypto in minutes. Our open-source CLI is designed to integrate seamlessly into your workflow without compromising your privacy.</p>
                 </div>
+
                 <div class="mt-16 grid md:grid-cols-3 gap-8">
-                    <!-- Step 1 -->
                     <div class="border border-subtle/50 p-8 rounded-xl bg-surface/80 flex flex-col animate-fade-in-up transition-all duration-300 hover:scale-105 hover:-translate-y-2 hover:shadow-xl hover:shadow-accent-purple/20 hover:border-accent-purple/50" style="animation-delay: 200ms;">
                         <div class="mx-auto w-16 h-16 rounded-lg bg-primary flex items-center justify-center text-accent-purple shadow-lg shadow-accent-purple/10">
                             <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path></svg>
@@ -49,7 +52,7 @@ export function renderLandingPage() {
 lum login</code></pre>
                         </div>
                     </div>
-                    <!-- Step 2 -->
+                    
                     <div class="border border-subtle/50 p-8 rounded-xl bg-surface/80 flex flex-col animate-fade-in-up transition-all duration-300 hover:scale-105 hover:-translate-y-2 hover:shadow-xl hover:shadow-accent-pink/20 hover:border-accent-pink/50" style="animation-delay: 300ms;">
                          <div class="mx-auto w-16 h-16 rounded-lg bg-primary flex items-center justify-center text-accent-pink shadow-lg shadow-accent-pink/10">
                             <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"></path></svg>
@@ -61,7 +64,7 @@ lum login</code></pre>
 lum</code></pre>
                         </div>
                     </div>
-                    <!-- Step 3 -->
+                    
                     <div class="border border-subtle/50 p-8 rounded-xl bg-surface/80 flex flex-col animate-fade-in-up transition-all duration-300 hover:scale-105 hover:-translate-y-2 hover:shadow-xl hover:shadow-accent-cyan/20 hover:border-accent-cyan/50" style="animation-delay: 400ms;">
                         <div class="mx-auto w-16 h-16 rounded-lg bg-primary flex items-center justify-center text-accent-cyan shadow-lg shadow-accent-cyan/10">
                            <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"></path></svg>
@@ -76,7 +79,7 @@ lum</code></pre>
                         </div>
                     </div>
                 </div>
-                 <!-- NEW: CTA for Docs/GitHub -->
+
                 <div class="mt-16 text-center animate-fade-in-up" style="animation-delay: 500ms;">
                     <p class="text-text-secondary">Ready to get started? Dive into the documentation or explore the code.</p>
                     <div class="mt-6 flex flex-col sm:flex-row justify-center items-center gap-4">
@@ -87,7 +90,6 @@ lum</code></pre>
             </div>
         </section>
         
-        <!-- The Protocol Section -->
         <section class="py-20 md:py-32 bg-background">
             <div class="container mx-auto px-6 max-w-7xl grid md:grid-cols-2 gap-16 items-center">
                 <div class="animate-fade-in-up">
@@ -125,7 +127,6 @@ lum</code></pre>
             </div>
         </section>
 
-        <!-- Tokenomics Section -->
         <section class="py-20 md:py-32 bg-abyss-dark bg-starfield-pattern bg-starfield-size">
             <div class="container mx-auto px-6">
                 <div class="text-center max-w-3xl mx-auto animate-fade-in-up">
@@ -173,7 +174,6 @@ lum</code></pre>
             </div>
         </section>
 
-        <!-- FAQ Section -->
         <section class="py-20 md:py-32 bg-background">
             <div class="container mx-auto px-6 max-w-4xl animate-fade-in-up">
                  <div class="text-center mb-16">
