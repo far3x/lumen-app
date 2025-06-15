@@ -51,9 +51,12 @@ export function renderNavbar() {
     const authed = isAuthenticated();
     const user = authed ? getUser() : null;
     const mockBalance = 5432.12;
+    const externalLinkIcon = `<svg xmlns="http://www.w3.org/2000/svg" class="inline-block h-4 w-4 ml-1.5 opacity-60 group-hover:opacity-100" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+    </svg>`;
 
-    const navLinkClasses = `px-4 py-2 text-text-secondary hover:text-text-main transition-colors duration-200`;
-    const mobileNavLinkClasses = `block w-full text-left py-3 px-4 rounded-md text-text-secondary hover:bg-primary hover:text-text-main transition-colors`;
+    const navLinkClasses = `group px-4 py-2 text-text-secondary hover:text-text-main transition-colors duration-200 flex items-center`;
+    const mobileNavLinkClasses = `group block w-full text-left py-3 px-4 rounded-md text-text-secondary hover:bg-primary hover:text-text-main transition-colors flex items-center`;
 
     const mobileNavHTML = `
         <div id="mobile-menu-overlay" class="fixed inset-0 bg-black/60 z-40 hidden lg:hidden" aria-hidden="true"></div>
@@ -70,7 +73,7 @@ export function renderNavbar() {
                     <a href="/docs/introduction" class="${mobileNavLinkClasses}">Docs</a>
                     <a href="/docs/tokenomics" class="${mobileNavLinkClasses}">Tokenomics</a>
                     <a href="/docs/roadmap" class="${mobileNavLinkClasses}">Roadmap</a>
-                    <a href="https://github.com/Far3000-YT/lumen" target="_blank" rel="noopener" data-external="true" class="${mobileNavLinkClasses}">GitHub</a>
+                    <a href="https://github.com/Far3000-YT/lumen" target="_blank" rel="noopener" data-external="true" class="${mobileNavLinkClasses}">GitHub ${externalLinkIcon}</a>
                 </nav>
 
                 <div class="mt-auto">
@@ -148,7 +151,7 @@ export function renderNavbar() {
                 <a href="/docs/introduction" class="${navLinkClasses}">Docs</a>
                 <a href="/docs/tokenomics" class="${navLinkClasses}">Tokenomics</a>
                 <a href="/docs/roadmap" class="${navLinkClasses}">Roadmap</a>
-                <a href="https://github.com/Far3000-YT/lumen" target="_blank" rel="noopener noreferrer" data-external="true" class="${navLinkClasses}">GitHub</a>
+                <a href="https://github.com/Far3000-YT/lumen" target="_blank" rel="noopener noreferrer" data-external="true" class="${navLinkClasses}">GitHub ${externalLinkIcon}</a>
             </nav>
 
             <div class="flex-1 flex justify-end">

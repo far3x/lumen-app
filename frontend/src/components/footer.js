@@ -1,6 +1,9 @@
 export function renderFooter() {
     const year = new Date().getFullYear();
     const socialIconClasses = "w-6 h-6 text-text-secondary hover:text-text-main transition-colors";
+    const externalLinkIcon = `<svg xmlns="http://www.w3.org/2000/svg" class="inline-block h-4 w-4 ml-1 opacity-70 group-hover:opacity-100 transition-opacity" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+    </svg>`;
     
     return `
     <footer class="relative bg-abyss-dark border-t border-primary footer-gradient-border">
@@ -42,9 +45,9 @@ export function renderFooter() {
                 <div>
                     <h3 class="font-bold text-text-main tracking-wider uppercase">Community</h3>
                     <ul class="mt-4 space-y-3">
-                       <li><a href="https://github.com/Far3000-YT/lumen" target="_blank" rel="noopener" data-external="true" class="text-text-secondary hover:text-text-main transition-colors">GitHub</a></li>
-                       <li><a href="https://twitter.com/0xFar3000" target="_blank" rel="noopener" data-external="true" class="text-text-secondary hover:text-text-main transition-colors">X / Twitter</a></li>
-                       <li><a href="#" target="_blank" rel="noopener" data-external="true" class="text-text-secondary hover:text-text-main transition-colors">Discord</a></li>
+                       <li><a href="https://github.com/Far3000-YT/lumen" target="_blank" rel="noopener" data-external="true" class="group flex items-center text-text-secondary hover:text-text-main transition-colors">GitHub ${externalLinkIcon}</a></li>
+                       <li><a href="https://twitter.com/0xFar3000" target="_blank" rel="noopener" data-external="true" class="group flex items-center text-text-secondary hover:text-text-main transition-colors">X / Twitter ${externalLinkIcon}</a></li>
+                       <li><a href="#" target="_blank" rel="noopener" data-external="true" class="group flex items-center text-text-secondary hover:text-text-main transition-colors">Discord ${externalLinkIcon}</a></li>
                     </ul>
                 </div>
             </div>

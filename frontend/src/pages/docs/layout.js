@@ -13,7 +13,7 @@ const docPages = {
     'contributing': { title: 'Contributing Data', content: renderContributing, toc: [ { id: 'contributing-data', title: 'Contributing Data' }, { id: 'the-main-command', title: 'The Main Command' }, { id: 'what-is-ignored', title: 'What is Ignored' }, { id: 'maximizing-rewards', title: 'Maximizing Rewards' } ]},
     'configuration': { title: 'Configuration', content: renderConfiguration, toc: [ { id: 'configuration', title: 'Configuration' }, { id: 'config-file-structure', title: 'File Structure' }, { id: 'key-settings', title: 'Key Settings' } ]},
     'security': { title: 'Security', content: renderSecurity, toc: [ { id: 'security', title: 'Security' }, { id: 'security-by-design', title: 'Security by Design' }, { id: 'transparency', title: 'Transparency' } ]},
-    'tokenomics': { title: 'Tokenomics', content: renderTokenomics, toc: [ { id: 'tokenomics', title: 'Tokenomics' }, { id: 'core-utility', title: 'Core Utility' }, { id: 'supply-distribution', title: 'Supply & Distribution' }, { id: 'emission-schedule', title: 'Emission Schedule' } ]},
+    'tokenomics': { title: 'Tokenomics', content: renderTokenomics, toc: [ { id: 'tokenomics', title: 'Tokenomics' }, { id: 'core-utility', title: 'Core Utility' }, { id: 'supply-distribution', 'title': 'Supply & Distribution' }, { id: 'emission-schedule', title: 'Emission Schedule' } ]},
     'roadmap': { title: 'Roadmap', content: renderRoadmap, toc: [ { id: 'roadmap', title: 'Roadmap' } ]},
     'governance': { title: 'Governance', content: renderGovernance, toc: [ { id: 'governance', title: 'Governance' }, { id: 'lumen-improvement-proposals', title: 'LIPs' }, { id: 'progressive-decentralization', title: 'Decentralization' } ]},
     'faq': { title: 'FAQ', content: renderFaq, toc: [ { id: 'faq', title: 'FAQ' }, { id: 'faq-security', title: 'Security & Privacy' }, { id: 'faq-rewards', title: 'Rewards & Value' } ]},
@@ -121,8 +121,8 @@ export function renderDocsLayout(pageId) {
         <main class="flex-grow bg-background pt-28">
             <div class="container mx-auto px-6">
                 <div class="relative flex lg:gap-8">
-                    <aside class="hidden lg:block w-64 flex-shrink-0 py-10 pr-8">
-                        <div class="sticky top-28 h-[calc(100vh-7rem)] overflow-y-auto">
+                    <aside class="hidden lg:block w-64 flex-shrink-0 pr-8">
+                        <div class="sticky top-20 h-[calc(100vh-5rem)] overflow-y-auto py-10">
                             ${renderSidebarContent(pageKey)}
                         </div>
                     </aside>
@@ -131,8 +131,8 @@ export function renderDocsLayout(pageId) {
                         ${page.content()}
                     </article>
 
-                    <aside class="hidden xl:block w-64 flex-shrink-0 py-10 pl-8">
-                        <div class="sticky top-28 h-[calc(100vh-7rem)] overflow-y-auto">
+                    <aside class="hidden xl:block w-64 flex-shrink-0 pl-8">
+                        <div class="sticky top-20 h-[calc(100vh-5rem)] overflow-y-auto py-10">
                             ${renderOnPageNavContent(pageKey)}
                         </div>
                     </aside>

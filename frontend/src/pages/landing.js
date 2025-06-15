@@ -1,4 +1,8 @@
 export function renderLandingPage() {
+    const externalLinkIcon = `<svg xmlns="http://www.w3.org/2000/svg" class="inline-block h-5 w-5 ml-2" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+    </svg>`;
+
     return `
     <main id="content-root" class="flex-grow">
         
@@ -14,7 +18,7 @@ export function renderLandingPage() {
             <div class="absolute top-0 left-0 w-full h-full bg-black/60 -z-10"></div>
 
             <div class="container mx-auto px-6 relative z-10">
-                <h1 class="text-5xl md:text-7xl lg:text-8xl font-bold tracking-tighter animate-fade-in-up" style="--i:1;">
+                <h1 class="text-4xl md:text-6xl lg:text-7xl font-bold tracking-tighter animate-fade-in-up" style="--i:1;">
                     Monetize Your Code.
                     <br>
                     <span class="pulse-text block">Power the Future of AI.</span>
@@ -41,9 +45,11 @@ export function renderLandingPage() {
                 </div>
 
                 <div class="mt-16 grid md:grid-cols-3 gap-8">
-                    <div class="border border-subtle/50 p-8 rounded-xl bg-surface/80 flex flex-col animate-fade-in-up transition-all duration-300 hover:scale-105 hover:-translate-y-2 hover:shadow-xl hover:shadow-accent-purple/20 hover:border-accent-purple/50" style="animation-delay: 200ms;">
-                        <div class="mx-auto w-16 h-16 rounded-lg bg-primary flex items-center justify-center text-accent-purple shadow-lg shadow-accent-purple/10">
-                            <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path></svg>
+                    <div class="border border-subtle/50 p-8 rounded-xl bg-surface/80 flex flex-col animate-fade-in-up transition-all duration-300" style="animation-delay: 200ms;">
+                        <div class="mx-auto w-16 h-16 p-[1.5px] rounded-lg bg-gradient-to-br from-accent-purple to-accent-purple/40">
+                            <div class="w-full h-full bg-primary rounded-[7px] flex items-center justify-center text-accent-purple">
+                                <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path></svg>
+                            </div>
                         </div>
                         <h3 class="text-xl font-bold mt-6">Install & Authenticate</h3>
                         <p class="text-text-secondary mt-2 flex-grow">Install the <code>pylumen</code> CLI and link it to your account with a single command.</p>
@@ -53,9 +59,11 @@ lum login</code></pre>
                         </div>
                     </div>
                     
-                    <div class="border border-subtle/50 p-8 rounded-xl bg-surface/80 flex flex-col animate-fade-in-up transition-all duration-300 hover:scale-105 hover:-translate-y-2 hover:shadow-xl hover:shadow-accent-pink/20 hover:border-accent-pink/50" style="animation-delay: 300ms;">
-                         <div class="mx-auto w-16 h-16 rounded-lg bg-primary flex items-center justify-center text-accent-pink shadow-lg shadow-accent-pink/10">
-                            <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"></path></svg>
+                    <div class="border border-subtle/50 p-8 rounded-xl bg-surface/80 flex flex-col animate-fade-in-up transition-all duration-300" style="animation-delay: 300ms;">
+                         <div class="mx-auto w-16 h-16 p-[1.5px] rounded-lg bg-gradient-to-br from-accent-pink to-accent-pink/40">
+                            <div class="w-full h-full bg-primary rounded-[7px] flex items-center justify-center text-accent-pink">
+                                <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"></path></svg>
+                            </div>
                          </div>
                         <h3 class="text-xl font-bold mt-6">Contribute Your Project</h3>
                         <p class="text-text-secondary mt-2 flex-grow">Run <code>lum</code> in your project's root. The CLI analyzes, anonymizes, and packages your code locally.</p>
@@ -65,9 +73,11 @@ lum</code></pre>
                         </div>
                     </div>
                     
-                    <div class="border border-subtle/50 p-8 rounded-xl bg-surface/80 flex flex-col animate-fade-in-up transition-all duration-300 hover:scale-105 hover:-translate-y-2 hover:shadow-xl hover:shadow-accent-cyan/20 hover:border-accent-cyan/50" style="animation-delay: 400ms;">
-                        <div class="mx-auto w-16 h-16 rounded-lg bg-primary flex items-center justify-center text-accent-cyan shadow-lg shadow-accent-cyan/10">
-                           <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"></path></svg>
+                    <div class="border border-subtle/50 p-8 rounded-xl bg-surface/80 flex flex-col animate-fade-in-up transition-all duration-300" style="animation-delay: 400ms;">
+                        <div class="mx-auto w-16 h-16 p-[1.5px] rounded-lg bg-gradient-to-br from-accent-cyan to-accent-cyan/40">
+                            <div class="w-full h-full bg-primary rounded-[7px] flex items-center justify-center text-accent-cyan">
+                               <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"></path></svg>
+                            </div>
                         </div>
                         <h3 class="text-xl font-bold mt-6">Get Rewarded</h3>
                         <p class="text-text-secondary mt-2 flex-grow">The protocol values your contribution based on uniqueness and complexity, rewarding you with $LUM tokens.</p>
@@ -84,7 +94,9 @@ lum</code></pre>
                     <p class="text-text-secondary">Ready to get started? Dive into the documentation or explore the code.</p>
                     <div class="mt-6 flex flex-col sm:flex-row justify-center items-center gap-4">
                         <a href="/docs/installation" class="w-full sm:w-auto px-6 py-3 font-bold bg-primary text-text-main rounded-lg transition-all duration-300 hover:bg-subtle/80 hover:-translate-y-1">Installation Guide</a>
-                        <a href="https://github.com/Far3000-YT/lumen" target="_blank" rel="noopener" data-external="true" class="w-full sm:w-auto px-6 py-3 font-bold bg-transparent border border-subtle text-text-secondary rounded-lg transition-all duration-300 hover:bg-subtle/40 hover:text-text-main">View on GitHub</a>
+                        <a href="https://github.com/Far3000-YT/lumen" target="_blank" rel="noopener" data-external="true" class="group w-full sm:w-auto px-6 py-3 font-bold bg-transparent border border-subtle text-text-secondary rounded-lg flex items-center justify-center transition-all duration-300 hover:bg-subtle/40 hover:text-text-main hover:-translate-y-1">
+                            View on GitHub ${externalLinkIcon}
+                        </a>
                     </div>
                 </div>
             </div>
@@ -103,21 +115,27 @@ lum</code></pre>
                 </div>
                 <div class="space-y-8">
                     <div class="flex items-start space-x-4 animate-fade-in-up" style="animation-delay: 200ms;">
-                        <div class="p-3 bg-primary rounded-lg"> <svg class="w-6 h-6 text-accent-purple" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 9l3 3-3 3m5 0h3M5 20h14a2 2 0 002-2V6a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg> </div>
+                        <div class="p-[1.5px] rounded-lg bg-gradient-to-br from-accent-purple to-accent-purple/40">
+                            <div class="p-3 bg-primary rounded-[7px]"> <svg class="w-6 h-6 text-accent-purple" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 9l3 3-3 3m5 0h3M5 20h14a2 2 0 002-2V6a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg> </div>
+                        </div>
                         <div>
                             <h4 class="font-bold">Developer Contribution</h4>
                             <p class="text-text-secondary text-sm">Developers submit anonymized code via the secure Lumen CLI.</p>
                         </div>
                     </div>
                     <div class="flex items-start space-x-4 animate-fade-in-up" style="animation-delay: 300ms;">
-                        <div class="p-3 bg-primary rounded-lg"> <svg class="w-6 h-6 text-accent-pink" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 20V10M18 20V4M6 20V16"></path></svg> </div>
+                         <div class="p-[1.5px] rounded-lg bg-gradient-to-br from-accent-pink to-accent-pink/40">
+                            <div class="p-3 bg-primary rounded-[7px]"> <svg class="w-6 h-6 text-accent-pink" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 20V10M18 20V4M6 20V16"></path></svg> </div>
+                        </div>
                         <div>
                             <h4 class="font-bold">Protocol Valuation & Processing</h4>
                             <p class="text-text-secondary text-sm">The protocol analyzes, values, and adds the data to specialized training sets, rewarding the developer with $LUM.</p>
                         </div>
                     </div>
                     <div class="flex items-start space-x-4 animate-fade-in-up" style="animation-delay: 400ms;">
-                        <div class="p-3 bg-primary rounded-lg"> <svg class="w-6 h-6 text-accent-cyan" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h12a2 2 0 012 2v8H4V6zm-2 8h20v2H2v-2z"></path></svg> </div>
+                        <div class="p-[1.5px] rounded-lg bg-gradient-to-br from-accent-cyan to-accent-cyan/40">
+                            <div class="p-3 bg-primary rounded-[7px]"> <svg class="w-6 h-6 text-accent-cyan" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h12a2 2 0 012 2v8H4V6zm-2 8h20v2H2v-2z"></path></svg> </div>
+                        </div>
                         <div>
                             <h4 class="font-bold">AI Company Access</h4>
                             <p class="text-text-secondary text-sm">AI companies purchase access to these high-quality, ethically-sourced datasets using $LUM tokens.</p>
@@ -160,14 +178,18 @@ lum</code></pre>
                         </div>
                     </div>
                     <div class="lg:col-span-2 space-y-8 animate-fade-in-up" style="animation-delay: 300ms;">
-                        <div class="p-8 bg-surface rounded-xl border border-subtle/50">
-                            <h4 class="font-bold text-lg">Total Supply</h4>
-                            <p class="text-3xl font-mono gradient-text mt-2">1,000,000,000 $LUM</p>
-                            <p class="text-sm text-text-secondary mt-1">Fixed, non-inflationary supply.</p>
+                        <div class="p-[1px] rounded-xl bg-gradient-to-br from-accent-purple via-accent-pink to-accent-cyan">
+                            <div class="bg-surface rounded-xl p-8">
+                                <h4 class="font-bold text-lg">Total Supply</h4>
+                                <p class="text-3xl font-mono gradient-text mt-2">1,000,000,000 $LUM</p>
+                                <p class="text-sm text-text-secondary mt-1">Fixed, non-inflationary supply.</p>
+                            </div>
                         </div>
-                        <div class="p-8 bg-surface rounded-xl border border-subtle/50">
-                            <h4 class="font-bold text-lg">Core Utility</h4>
-                            <p class="text-base text-text-secondary mt-2">Used for contribution rewards, data access payments, and governance voting. <a href="/docs/tokenomics" class="text-accent-cyan hover:underline">Read more</a>.</p>
+                         <div class="p-[1px] rounded-xl bg-gradient-to-br from-accent-purple via-accent-pink to-accent-cyan">
+                            <div class="bg-surface rounded-xl p-8 h-full">
+                                <h4 class="font-bold text-lg">Core Utility</h4>
+                                <p class="text-base text-text-secondary mt-2">Used for contribution rewards, data access payments, and governance voting. <a href="/docs/tokenomics" class="text-accent-cyan hover:underline">Read more</a>.</p>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -180,45 +202,51 @@ lum</code></pre>
                     <h2 class="text-3xl md:text-4xl font-bold">Frequently Asked Questions</h2>
                 </div>
                 <div class="space-y-4">
-                    <details class="group bg-surface border border-subtle/50 rounded-lg cursor-pointer transition-all duration-300 hover:border-accent-purple/50 open:bg-primary open:border-accent-purple/50">
-                        <summary class="flex items-center justify-between font-bold p-6">
-                            Is contributing my code safe?
-                            <svg class="w-5 h-5 text-text-secondary transform transition-transform duration-300 group-open:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" /></svg>
-                        </summary>
-                        <div class="grid grid-rows-[0fr] group-open:grid-rows-[1fr] transition-[grid-template-rows] duration-500 ease-in-out">
-                            <div class="overflow-hidden">
-                                <p class="text-text-secondary px-6 pb-6">
-                                    Yes. Security is our paramount concern. The entire anonymization process runs locally on your machine via our open-source CLI. Sensitive data like secrets, PII, and API keys are scrubbed *before* anything is ever uploaded. You can audit the code yourself for full transparency.
-                                </p>
+                    <div class="faq-item group">
+                        <details class="group">
+                            <summary class="flex items-center justify-between font-bold p-6 list-none cursor-pointer">
+                                Is contributing my code safe?
+                                <svg class="w-5 h-5 text-text-secondary transform transition-transform duration-300 group-open:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" /></svg>
+                            </summary>
+                            <div class="grid grid-rows-[0fr] group-open:grid-rows-[1fr] transition-[grid-template-rows] duration-500 ease-in-out">
+                                <div class="overflow-hidden">
+                                    <p class="text-text-secondary px-6 pb-6">
+                                        Yes. Security is our paramount concern. The entire anonymization process runs locally on your machine via our open-source CLI. Sensitive data like secrets, PII, and API keys are scrubbed *before* anything is ever uploaded. You can audit the code yourself for full transparency.
+                                    </p>
+                                </div>
                             </div>
-                        </div>
-                    </details>
-                    <details class="group bg-surface border border-subtle/50 rounded-lg cursor-pointer transition-all duration-300 hover:border-accent-purple/50 open:bg-primary open:border-accent-purple/50">
-                        <summary class="flex items-center justify-between font-bold p-6">
-                            What kind of code is most valuable?
-                             <svg class="w-5 h-5 text-text-secondary transform transition-transform duration-300 group-open:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" /></svg>
-                        </summary>
-                        <div class="grid grid-rows-[0fr] group-open:grid-rows-[1fr] transition-[grid-template-rows] duration-500 ease-in-out">
-                            <div class="overflow-hidden">
-                                <p class="text-text-secondary px-6 pb-6">
-                                   Value is determined by uniqueness, complexity, and market demand for the language. Novel algorithms, well-structured proprietary code, and projects in modern languages like Rust, Go, and TypeScript tend to earn higher rewards. The protocol values quality over sheer quantity.
-                                </p>
+                        </details>
+                    </div>
+                    <div class="faq-item group">
+                        <details class="group">
+                            <summary class="flex items-center justify-between font-bold p-6 list-none cursor-pointer">
+                                What kind of code is most valuable?
+                                 <svg class="w-5 h-5 text-text-secondary transform transition-transform duration-300 group-open:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" /></svg>
+                            </summary>
+                            <div class="grid grid-rows-[0fr] group-open:grid-rows-[1fr] transition-[grid-template-rows] duration-500 ease-in-out">
+                                <div class="overflow-hidden">
+                                    <p class="text-text-secondary px-6 pb-6">
+                                       Value is determined by uniqueness, complexity, and market demand for the language. Novel algorithms, well-structured proprietary code, and projects in modern languages like Rust, Go, and TypeScript tend to earn higher rewards. The protocol values quality over sheer quantity.
+                                    </p>
+                                </div>
                             </div>
-                        </div>
-                    </details>
-                     <details class="group bg-surface border border-subtle/50 rounded-lg cursor-pointer transition-all duration-300 hover:border-accent-purple/50 open:bg-primary open:border-accent-purple/50">
-                        <summary class="flex items-center justify-between font-bold p-6">
-                            Do I lose ownership of my code?
-                             <svg class="w-5 h-5 text-text-secondary transform transition-transform duration-300 group-open:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" /></svg>
-                        </summary>
-                        <div class="grid grid-rows-[0fr] group-open:grid-rows-[1fr] transition-[grid-template-rows] duration-500 ease-in-out">
-                            <div class="overflow-hidden">
-                                <p class="text-text-secondary px-6 pb-6">
-                                   Absolutely not. You retain 100% ownership and all rights to your original work. By contributing, you grant a license for the *anonymized version* of your code to be used in Lumen's datasets. You are free to develop, license, or sell your original project as you see fit.
-                                </p>
+                        </details>
+                    </div>
+                     <div class="faq-item group">
+                         <details class="group">
+                            <summary class="flex items-center justify-between font-bold p-6 list-none cursor-pointer">
+                                Do I lose ownership of my code?
+                                 <svg class="w-5 h-5 text-text-secondary transform transition-transform duration-300 group-open:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" /></svg>
+                            </summary>
+                            <div class="grid grid-rows-[0fr] group-open:grid-rows-[1fr] transition-[grid-template-rows] duration-500 ease-in-out">
+                                <div class="overflow-hidden">
+                                    <p class="text-text-secondary px-6 pb-6">
+                                       Absolutely not. You retain 100% ownership and all rights to your original work. By contributing, you grant a license for the *anonymized version* of your code to be used in Lumen's datasets. You are free to develop, license, or sell your original project as you see fit.
+                                    </p>
+                                </div>
                             </div>
-                        </div>
-                    </details>
+                        </details>
+                    </div>
                 </div>
                 <div class="text-center mt-12">
                      <a href="/docs/faq" class="text-accent-cyan hover:underline">See all FAQs →</a>
