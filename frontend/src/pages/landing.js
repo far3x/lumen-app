@@ -6,6 +6,16 @@ export function renderLandingPage() {
     return `
     <main id="content-root" class="flex-grow">
         
+        <svg aria-hidden="true" style="position: absolute; width: 0; height: 0; overflow: hidden;">
+          <defs>
+            <linearGradient id="icon-gradient" x1="0%" y1="0%" x2="100%" y2="100%">
+              <stop offset="0%" style="stop-color: #8A2BE2;" />
+              <stop offset="50%" style="stop-color: #FF69B4;" />
+              <stop offset="100%" style="stop-color: #00D9D9;" />
+            </linearGradient>
+          </defs>
+        </svg>
+
         <section class="relative flex flex-col justify-center min-h-screen text-center overflow-hidden isolate gradient-border-bottom">
             <video
                 autoplay
@@ -46,9 +56,9 @@ export function renderLandingPage() {
 
                 <div class="mt-16 grid md:grid-cols-3 gap-8">
                     <div class="border border-subtle/50 p-8 rounded-xl bg-surface/80 flex flex-col animate-fade-in-up transition-all duration-300" style="animation-delay: 200ms;">
-                        <div class="mx-auto w-16 h-16 p-[1.5px] rounded-lg bg-gradient-to-br from-accent-purple to-accent-purple/40">
-                            <div class="w-full h-full bg-primary rounded-[7px] flex items-center justify-center text-accent-purple">
-                                <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path></svg>
+                        <div class="mx-auto w-16 h-16 p-[1px] rounded-lg bg-hero-gradient">
+                            <div class="w-full h-full bg-primary rounded-[7px] flex items-center justify-center">
+                                <svg class="w-8 h-8" fill="none" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" stroke="url(#icon-gradient)" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path></svg>
                             </div>
                         </div>
                         <h3 class="text-xl font-bold mt-6">Install & Authenticate</h3>
@@ -60,9 +70,9 @@ lum login</code></pre>
                     </div>
                     
                     <div class="border border-subtle/50 p-8 rounded-xl bg-surface/80 flex flex-col animate-fade-in-up transition-all duration-300" style="animation-delay: 300ms;">
-                         <div class="mx-auto w-16 h-16 p-[1.5px] rounded-lg bg-gradient-to-br from-accent-pink to-accent-pink/40">
-                            <div class="w-full h-full bg-primary rounded-[7px] flex items-center justify-center text-accent-pink">
-                                <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"></path></svg>
+                         <div class="mx-auto w-16 h-16 p-[1px] rounded-lg bg-hero-gradient">
+                            <div class="w-full h-full bg-primary rounded-[7px] flex items-center justify-center">
+                                <svg class="w-8 h-8" fill="none" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" stroke="url(#icon-gradient)" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"></path></svg>
                             </div>
                          </div>
                         <h3 class="text-xl font-bold mt-6">Contribute Your Project</h3>
@@ -74,9 +84,9 @@ lum</code></pre>
                     </div>
                     
                     <div class="border border-subtle/50 p-8 rounded-xl bg-surface/80 flex flex-col animate-fade-in-up transition-all duration-300" style="animation-delay: 400ms;">
-                        <div class="mx-auto w-16 h-16 p-[1.5px] rounded-lg bg-gradient-to-br from-accent-cyan to-accent-cyan/40">
-                            <div class="w-full h-full bg-primary rounded-[7px] flex items-center justify-center text-accent-cyan">
-                               <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"></path></svg>
+                        <div class="mx-auto w-16 h-16 p-[1px] rounded-lg bg-hero-gradient">
+                            <div class="w-full h-full bg-primary rounded-[7px] flex items-center justify-center">
+                               <svg class="w-8 h-8" fill="none" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" stroke="url(#icon-gradient)" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"></path></svg>
                             </div>
                         </div>
                         <h3 class="text-xl font-bold mt-6">Get Rewarded</h3>
@@ -115,8 +125,8 @@ lum</code></pre>
                 </div>
                 <div class="space-y-8">
                     <div class="flex items-start space-x-4 animate-fade-in-up" style="animation-delay: 200ms;">
-                        <div class="p-[1.5px] rounded-lg bg-gradient-to-br from-accent-purple to-accent-purple/40">
-                            <div class="p-3 bg-primary rounded-[7px]"> <svg class="w-6 h-6 text-accent-purple" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 9l3 3-3 3m5 0h3M5 20h14a2 2 0 002-2V6a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg> </div>
+                        <div class="p-[1px] rounded-lg bg-hero-gradient">
+                            <div class="p-3 bg-primary rounded-[7px]"> <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" stroke="url(#icon-gradient)" d="M8 9l3 3-3 3m5 0h3M5 20h14a2 2 0 002-2V6a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg> </div>
                         </div>
                         <div>
                             <h4 class="font-bold">Developer Contribution</h4>
@@ -124,8 +134,8 @@ lum</code></pre>
                         </div>
                     </div>
                     <div class="flex items-start space-x-4 animate-fade-in-up" style="animation-delay: 300ms;">
-                         <div class="p-[1.5px] rounded-lg bg-gradient-to-br from-accent-pink to-accent-pink/40">
-                            <div class="p-3 bg-primary rounded-[7px]"> <svg class="w-6 h-6 text-accent-pink" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 20V10M18 20V4M6 20V16"></path></svg> </div>
+                         <div class="p-[1px] rounded-lg bg-hero-gradient">
+                            <div class="p-3 bg-primary rounded-[7px]"> <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" stroke="url(#icon-gradient)" d="M12 20V10M18 20V4M6 20V16"></path></svg> </div>
                         </div>
                         <div>
                             <h4 class="font-bold">Protocol Valuation & Processing</h4>
@@ -133,8 +143,8 @@ lum</code></pre>
                         </div>
                     </div>
                     <div class="flex items-start space-x-4 animate-fade-in-up" style="animation-delay: 400ms;">
-                        <div class="p-[1.5px] rounded-lg bg-gradient-to-br from-accent-cyan to-accent-cyan/40">
-                            <div class="p-3 bg-primary rounded-[7px]"> <svg class="w-6 h-6 text-accent-cyan" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h12a2 2 0 012 2v8H4V6zm-2 8h20v2H2v-2z"></path></svg> </div>
+                        <div class="p-[1px] rounded-lg bg-hero-gradient">
+                            <div class="p-3 bg-primary rounded-[7px]"> <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" stroke="url(#icon-gradient)" d="M4 6a2 2 0 012-2h12a2 2 0 012 2v8H4V6zm-2 8h20v2H2v-2z"></path></svg> </div>
                         </div>
                         <div>
                             <h4 class="font-bold">AI Company Access</h4>
@@ -202,51 +212,45 @@ lum</code></pre>
                     <h2 class="text-3xl md:text-4xl font-bold">Frequently Asked Questions</h2>
                 </div>
                 <div class="space-y-4">
-                    <div class="faq-item group">
-                        <details class="group">
-                            <summary class="flex items-center justify-between font-bold p-6 list-none cursor-pointer">
-                                Is contributing my code safe?
-                                <svg class="w-5 h-5 text-text-secondary transform transition-transform duration-300 group-open:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" /></svg>
-                            </summary>
-                            <div class="grid grid-rows-[0fr] group-open:grid-rows-[1fr] transition-[grid-template-rows] duration-500 ease-in-out">
-                                <div class="overflow-hidden">
-                                    <p class="text-text-secondary px-6 pb-6">
-                                        Yes. Security is our paramount concern. The entire anonymization process runs locally on your machine via our open-source CLI. Sensitive data like secrets, PII, and API keys are scrubbed *before* anything is ever uploaded. You can audit the code yourself for full transparency.
-                                    </p>
-                                </div>
+                    <details class="faq-item group">
+                        <summary class="flex items-center justify-between font-bold p-6 list-none cursor-pointer">
+                            Is contributing my code safe?
+                            <svg class="w-5 h-5 text-text-secondary transform transition-transform duration-300 group-open:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" /></svg>
+                        </summary>
+                        <div class="grid grid-rows-[0fr] group-open:grid-rows-[1fr] transition-[grid-template-rows] duration-500 ease-in-out">
+                            <div class="overflow-hidden">
+                                <p class="text-text-secondary px-6 pb-6">
+                                    Yes. Security is our paramount concern. The entire anonymization process runs locally on your machine via our open-source CLI. Sensitive data like secrets, PII, and API keys are scrubbed *before* anything is ever uploaded. You can audit the code yourself for full transparency.
+                                </p>
                             </div>
-                        </details>
-                    </div>
-                    <div class="faq-item group">
-                        <details class="group">
-                            <summary class="flex items-center justify-between font-bold p-6 list-none cursor-pointer">
-                                What kind of code is most valuable?
-                                 <svg class="w-5 h-5 text-text-secondary transform transition-transform duration-300 group-open:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" /></svg>
-                            </summary>
-                            <div class="grid grid-rows-[0fr] group-open:grid-rows-[1fr] transition-[grid-template-rows] duration-500 ease-in-out">
-                                <div class="overflow-hidden">
-                                    <p class="text-text-secondary px-6 pb-6">
-                                       Value is determined by uniqueness, complexity, and market demand for the language. Novel algorithms, well-structured proprietary code, and projects in modern languages like Rust, Go, and TypeScript tend to earn higher rewards. The protocol values quality over sheer quantity.
-                                    </p>
-                                </div>
+                        </div>
+                    </details>
+                    <details class="faq-item group">
+                        <summary class="flex items-center justify-between font-bold p-6 list-none cursor-pointer">
+                            What kind of code is most valuable?
+                             <svg class="w-5 h-5 text-text-secondary transform transition-transform duration-300 group-open:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" /></svg>
+                        </summary>
+                        <div class="grid grid-rows-[0fr] group-open:grid-rows-[1fr] transition-[grid-template-rows] duration-500 ease-in-out">
+                            <div class="overflow-hidden">
+                                <p class="text-text-secondary px-6 pb-6">
+                                   Value is determined by uniqueness, complexity, and market demand for the language. Novel algorithms, well-structured proprietary code, and projects in modern languages like Rust, Go, and TypeScript tend to earn higher rewards. The protocol values quality over sheer quantity.
+                                </p>
                             </div>
-                        </details>
-                    </div>
-                     <div class="faq-item group">
-                         <details class="group">
-                            <summary class="flex items-center justify-between font-bold p-6 list-none cursor-pointer">
-                                Do I lose ownership of my code?
-                                 <svg class="w-5 h-5 text-text-secondary transform transition-transform duration-300 group-open:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" /></svg>
-                            </summary>
-                            <div class="grid grid-rows-[0fr] group-open:grid-rows-[1fr] transition-[grid-template-rows] duration-500 ease-in-out">
-                                <div class="overflow-hidden">
-                                    <p class="text-text-secondary px-6 pb-6">
-                                       Absolutely not. You retain 100% ownership and all rights to your original work. By contributing, you grant a license for the *anonymized version* of your code to be used in Lumen's datasets. You are free to develop, license, or sell your original project as you see fit.
-                                    </p>
-                                </div>
+                        </div>
+                    </details>
+                     <details class="faq-item group">
+                        <summary class="flex items-center justify-between font-bold p-6 list-none cursor-pointer">
+                            Do I lose ownership of my code?
+                             <svg class="w-5 h-5 text-text-secondary transform transition-transform duration-300 group-open:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" /></svg>
+                        </summary>
+                        <div class="grid grid-rows-[0fr] group-open:grid-rows-[1fr] transition-[grid-template-rows] duration-500 ease-in-out">
+                            <div class="overflow-hidden">
+                                <p class="text-text-secondary px-6 pb-6">
+                                   Absolutely not. You retain 100% ownership and all rights to your original work. By contributing, you grant a license for the *anonymized version* of your code to be used in Lumen's datasets. You are free to develop, license, or sell your original project as you see fit.
+                                </p>
                             </div>
-                        </details>
-                    </div>
+                        </div>
+                    </details>
                 </div>
                 <div class="text-center mt-12">
                      <a href="/docs/faq" class="text-accent-cyan hover:underline">See all FAQs →</a>
