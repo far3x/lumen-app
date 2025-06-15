@@ -6,6 +6,7 @@ export function renderLandingPage() {
     return `
     <main id="content-root" class="flex-grow">
         
+        {/* Hidden SVG definition for the icon gradient. This is referenced by all icons. */}
         <svg aria-hidden="true" style="position: absolute; width: 0; height: 0; overflow: hidden;">
           <defs>
             <linearGradient id="icon-gradient" x1="0%" y1="0%" x2="100%" y2="100%">
@@ -188,15 +189,15 @@ lum</code></pre>
                         </div>
                     </div>
                     <div class="lg:col-span-2 space-y-8 animate-fade-in-up" style="animation-delay: 300ms;">
-                        <div class="p-[1px] rounded-xl bg-gradient-to-br from-accent-purple via-accent-pink to-accent-cyan">
-                            <div class="bg-surface rounded-xl p-8">
+                        <div class="p-[1px] bg-gradient-to-r from-accent-purple via-accent-pink to-accent-cyan rounded-xl">
+                            <div class="bg-surface rounded-[11px] p-8">
                                 <h4 class="font-bold text-lg">Total Supply</h4>
                                 <p class="text-3xl font-mono gradient-text mt-2">1,000,000,000 $LUM</p>
                                 <p class="text-sm text-text-secondary mt-1">Fixed, non-inflationary supply.</p>
                             </div>
                         </div>
-                         <div class="p-[1px] rounded-xl bg-gradient-to-br from-accent-purple via-accent-pink to-accent-cyan">
-                            <div class="bg-surface rounded-xl p-8 h-full">
+                         <div class="p-[1px] bg-gradient-to-r from-accent-purple via-accent-pink to-accent-cyan rounded-xl h-full">
+                            <div class="bg-surface rounded-[11px] p-8 h-full">
                                 <h4 class="font-bold text-lg">Core Utility</h4>
                                 <p class="text-base text-text-secondary mt-2">Used for contribution rewards, data access payments, and governance voting. <a href="/docs/tokenomics" class="text-accent-cyan hover:underline">Read more</a>.</p>
                             </div>
