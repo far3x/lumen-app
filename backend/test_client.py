@@ -98,26 +98,14 @@ if __name__ == "__main__":
     client = LumenClient()
     
     if client.login():
-        test_project_codebase = """
---- file: main.py
-def calculate_sum(a, b):
-    # This is a simple function
-    if a is None or b is None:
-        return 0
-    return a + b
-
-class MyClass:
-    def __init__(self, name):
-        self.name = name
-
-    def greet(self):
-        print(f"Hello, {self.name}")
-        for i in range(5000000):
-            print("xd lets lose time")
-
---- file: utils/helpers.js
-function formatData(data) {
-    return data.trim().toLowerCase();
-}
-"""
-        client.contribute(codebase=test_project_codebase)
+        try:
+            with open("backend/file_to_read.txt", "r", encoding="utf-8") as f:
+                raw_code = f.read()
+            
+            filename = os.path.basename("backend/file_to_read.txt")
+            formatted_codebase = f"---lum--new--file--{filename}\n{raw_code}"
+            
+            print(f"Read {len(raw_code)} characters from {filename}. Sending to Lumen...")
+            client.contribute(codebase=formatted_codebase)
+        except FileNotFoundError:
+            print("Error: 'backend/file_to_read.txt' not found. Please create this file with some code to test.")
