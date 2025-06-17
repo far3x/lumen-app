@@ -7,32 +7,27 @@ class Settings:
     PROJECT_NAME: str = "Lumen Exchange"
     PROJECT_VERSION: str = "1.0.0"
 
-    # Database
     DATABASE_URL: str = os.getenv("DATABASE_URL", "sqlite:///./lumen_exchange.db")
 
-    # Frontend
     FRONTEND_URL: str = os.getenv("FRONTEND_URL", "http://localhost:5173")
 
-    # JWT Settings (for web app sessions)
     SECRET_KEY: str = os.getenv("SECRET_KEY")
     ALGORITHM: str = "HS256"
-    ACCESS_TOKEN_EXPIRE_MINUTES: int = 60 * 24  # 24 hours
+    ACCESS_TOKEN_EXPIRE_MINUTES: int = 60 * 24
 
-    # NEW: CLI Client Secret (for HMAC signing)
     LUMEN_CLIENT_SECRET: str = os.getenv("LUMEN_CLIENT_SECRET")
 
-    # OAuth Settings
     GOOGLE_CLIENT_ID: str = os.getenv("GOOGLE_CLIENT_ID")
     GOOGLE_CLIENT_SECRET: str = os.getenv("GOOGLE_CLIENT_SECRET")
     GITHUB_CLIENT_ID: str = os.getenv("GITHUB_CLIENT_ID")
     GITHUB_CLIENT_SECRET: str = os.getenv("GITHUB_CLIENT_SECRET")
 
-    # NEW: Redis for caching challenges, device codes etc.
     REDIS_URL: str = os.getenv("REDIS_URL", "redis://localhost:6379/0")
 
-    # Celery (for background tasks)
     CELERY_BROKER_URL: str = os.getenv("CELERY_BROKER_URL", "redis://localhost:6379/0")
     CELERY_RESULT_BACKEND: str = os.getenv("CELERY_RESULT_BACKEND", "redis://localhost:6379/0")
+
+    VALUATION_MODE: str = os.getenv("VALUATION_MODE", "MANUAL")
 
 
 settings = Settings()
