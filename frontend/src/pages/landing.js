@@ -25,7 +25,7 @@ export function renderLandingPage() {
                 class="absolute top-0 left-0 w-full h-full object-cover -z-20"
                 src="/plexus-bg.mp4"
             ></video>
-            <div class="absolute top-0 left-0 w-full h-full bg-black/60 -z-10"></div>
+            <div class="absolute top-0 left-0 w-full h-full bg-black/50 -z-10"></div>
 
             <div class="container mx-auto px-6 relative z-10">
                 <h1 class="text-4xl md:text-6xl lg:text-7xl font-bold tracking-tighter animate-fade-in-up" style="--i:1;">
