@@ -1,9 +1,9 @@
-import hashlib, json
+import hashlib
+import json
 from sqlalchemy.orm import Session
 from app.core import security
 from app import schemas
 from . import models
-import random
 
 def get_user(db: Session, user_id: int):
     return db.query(models.User).filter(models.User.id == user_id).first()
@@ -94,12 +94,24 @@ def apply_reward_to_user(db: Session, user: models.User, reward_amount: float):
     db.add(user); db.add(account); db.commit()
     return total_reward
 
-def create_contribution_record(db: Session, user: models.User, codebase: str, valuation_results: dict, reward: float):
+def get_all_contribution_embeddings(db: Session) -> list[tuple[int, int, str]]:
+    return db.query(
+        models.Contribution.id,
+        models.Contribution.user_id,
+        models.Contribution.content_embedding
+    ).filter(models.Contribution.content_embedding.isnot(None)).all()
+
+def get_contribution_by_id(db: Session, contribution_id: int) -> models.Contribution | None:
+    return db.query(models.Contribution).filter(models.Contribution.id == contribution_id).first()
+
+def create_contribution_record(db: Session, user: models.User, codebase: str, valuation_results: dict, reward: float, embedding: list[float] | None):
+    embedding_str = json.dumps(embedding.tolist()) if embedding is not None else None
     db_contribution = models.Contribution(
         user_id=user.id,
         raw_content=codebase,
         valuation_results=json.dumps(valuation_results),
-        reward_amount=reward
+        reward_amount=reward,
+        content_embedding=embedding_str
     )
     db.add(db_contribution)
     db.commit()
