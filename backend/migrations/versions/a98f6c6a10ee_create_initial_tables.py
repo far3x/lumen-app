@@ -9,10 +9,11 @@ from typing import Sequence, Union
 
 from alembic import op
 import sqlalchemy as sa
+from sqlalchemy.engine.reflection import Inspector
 
 
 # revision identifiers, used by Alembic.
-revision: str = 'a98f6c6a10ee' # This ID must match your file name for Alembic to track it
+revision: str = 'a98f6c6a10ee'
 down_revision: Union[str, None] = None
 branch_labels: Union[str, Sequence[str], None] = None
 depends_on: Union[str, Sequence[str], None] = None
@@ -20,16 +21,16 @@ depends_on: Union[str, Sequence[str], None] = None
 
 def upgrade() -> None:
     """
-    Upgrade schema.
-    This version includes checks to see if tables already exist, making it
-    safe to run on a database that was created before Alembic was introduced.
+    Creates all initial tables, but only if they don't already exist.
+    This consolidated migration includes the final correct schema to prevent dependency issues.
     """
-    # Get the underlying database connection from Alembic
     bind = op.get_bind()
+    inspector = Inspector.from_engine(bind)
+    existing_tables = inspector.get_table_names()
 
-    # Define all tables and their creation logic
-    tables = {
-        'users': [
+    # --- Users Table ---
+    if 'users' not in existing_tables:
+        op.create_table('users',
             sa.Column('id', sa.Integer(), nullable=False),
             sa.Column('email', sa.String(), nullable=True),
             sa.Column('hashed_password', sa.String(), nullable=True),
@@ -37,7 +38,8 @@ def upgrade() -> None:
             sa.Column('google_id', sa.String(), nullable=True),
             sa.Column('display_name', sa.String(), nullable=True),
             sa.Column('is_genesis_reward_claimed', sa.Boolean(), nullable=False, server_default=sa.text('0')),
-            sa.Column('is_in_leaderboard', sa.Boolean(), nullable=False, server_default=sa.text('1')),
+            # FINAL CORRECT DEFAULT: is_in_leaderboard now defaults to False ('0')
+            sa.Column('is_in_leaderboard', sa.Boolean(), nullable=False, server_default=sa.text('0')),
             sa.Column('is_verified', sa.Boolean(), nullable=False, server_default=sa.text('0')),
             sa.Column('verification_token', sa.String(), nullable=True),
             sa.Column('password_reset_token', sa.String(), nullable=True),
@@ -49,15 +51,29 @@ def upgrade() -> None:
             sa.PrimaryKeyConstraint('id'),
             sa.UniqueConstraint('github_id'),
             sa.UniqueConstraint('google_id')
-        ],
-        'accounts': [
+        )
+        op.create_index(op.f('ix_users_email'), 'users', ['email'], unique=True)
+        op.create_index(op.f('ix_users_id'), 'users', ['id'], unique=False)
+    else:
+        # If the table exists, it might be an old version. Check for and add missing columns.
+        user_columns = [c['name'] for c in inspector.get_columns('users')]
+        if 'is_in_leaderboard' not in user_columns:
+            op.add_column('users', sa.Column('is_in_leaderboard', sa.Boolean(), nullable=False, server_default=sa.text('0')))
+
+
+    # --- Other Tables (with the same safety check) ---
+    if 'accounts' not in existing_tables:
+        op.create_table('accounts',
             sa.Column('id', sa.Integer(), nullable=False),
             sa.Column('user_id', sa.Integer(), nullable=True),
             sa.Column('lum_balance', sa.Float(), nullable=True),
             sa.ForeignKeyConstraint(['user_id'], ['users.id'], ),
             sa.PrimaryKeyConstraint('id')
-        ],
-        'network_stats': [
+        )
+        op.create_index(op.f('ix_accounts_id'), 'accounts', ['id'], unique=False)
+
+    if 'network_stats' not in existing_tables:
+        op.create_table('network_stats',
             sa.Column('id', sa.Integer(), nullable=False),
             sa.Column('total_lum_distributed', sa.Float(), nullable=False, server_default='0.0'),
             sa.Column('total_contributions', sa.BigInteger(), nullable=False, server_default='0'),
@@ -66,8 +82,10 @@ def upgrade() -> None:
             sa.Column('variance_complexity', sa.Float(), nullable=False, server_default='4.0'),
             sa.Column('std_dev_complexity', sa.Float(), nullable=False, server_default='2.0'),
             sa.PrimaryKeyConstraint('id')
-        ],
-        'personal_access_tokens': [
+        )
+
+    if 'personal_access_tokens' not in existing_tables:
+        op.create_table('personal_access_tokens',
             sa.Column('id', sa.Integer(), nullable=False),
             sa.Column('token_hash', sa.String(), nullable=False),
             sa.Column('user_id', sa.Integer(), nullable=False),
@@ -76,8 +94,12 @@ def upgrade() -> None:
             sa.Column('last_used_at', sa.DateTime(timezone=True), nullable=True),
             sa.ForeignKeyConstraint(['user_id'], ['users.id'], ),
             sa.PrimaryKeyConstraint('id')
-        ],
-        'contributions': [
+        )
+        op.create_index(op.f('ix_personal_access_tokens_id'), 'personal_access_tokens', ['id'], unique=False)
+        op.create_index(op.f('ix_personal_access_tokens_token_hash'), 'personal_access_tokens', ['token_hash'], unique=True)
+    
+    if 'contributions' not in existing_tables:
+        op.create_table('contributions',
             sa.Column('id', sa.Integer(), nullable=False),
             sa.Column('user_id', sa.Integer(), nullable=False),
             sa.Column('created_at', sa.DateTime(timezone=True), server_default=sa.text('(CURRENT_TIMESTAMP)'), nullable=True),
@@ -88,29 +110,12 @@ def upgrade() -> None:
             sa.Column('status', sa.String(), nullable=False, server_default='PENDING'),
             sa.ForeignKeyConstraint(['user_id'], ['users.id'], ),
             sa.PrimaryKeyConstraint('id')
-        ]
-    }
-    
-    # Iterate over our table definitions
-    for table_name, columns in tables.items():
-        # Check if the table does NOT exist before trying to create it
-        if not bind.dialect.has_table(bind, table_name):
-            op.create_table(table_name, *columns)
-            if table_name == 'users':
-                op.create_index(op.f('ix_users_email'), 'users', ['email'], unique=True)
-                op.create_index(op.f('ix_users_id'), 'users', ['id'], unique=False)
-            elif table_name == 'accounts':
-                op.create_index(op.f('ix_accounts_id'), 'accounts', ['id'], unique=False)
-            elif table_name == 'personal_access_tokens':
-                op.create_index(op.f('ix_personal_access_tokens_id'), 'personal_access_tokens', ['id'], unique=False)
-                op.create_index(op.f('ix_personal_access_tokens_token_hash'), 'personal_access_tokens', ['token_hash'], unique=True)
-            elif table_name == 'contributions':
-                 op.create_index(op.f('ix_contributions_id'), 'contributions', ['id'], unique=False)
+        )
+        op.create_index(op.f('ix_contributions_id'), 'contributions', ['id'], unique=False)
 
 
 def downgrade() -> None:
     """Downgrade schema."""
-    # The order of dropping tables should be the reverse of creation due to foreign keys
     op.drop_table('contributions')
     op.drop_table('personal_access_tokens')
     op.drop_table('network_stats')
