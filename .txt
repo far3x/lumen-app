@@ -1,9 +1,0 @@
-backend\venv\Scripts\Activate
-cd backend/
-uvicorn app.main:app --reload
-
-OR
-pip install -r requirements.txt
-
-cd frontend/
-npm run dev

@@ -1,14 +1,24 @@
+import { isAuthenticated } from '../lib/auth.js';
+
 export function renderFooter() {
     const year = new Date().getFullYear();
+    const authed = isAuthenticated();
     const socialIconClasses = "w-6 h-6 text-text-secondary hover:text-text-main transition-colors";
     const externalLinkIcon = `<svg xmlns="http://www.w3.org/2000/svg" class="inline-block h-4 w-4 ml-1 opacity-70 group-hover:opacity-100 transition-opacity" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
         <path stroke-linecap="round" stroke-linejoin="round" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
     </svg>`;
     
-    return `
-    <footer class="relative bg-abyss-dark border-t border-primary footer-gradient-border">
-        <div class="container mx-auto px-6 py-20">
-            <!-- CTA Section -->
+    const ctaSection = authed
+        ? `
+            <div class="text-center mb-20">
+                <h2 class="text-3xl md:text-4xl font-bold">Ready to Contribute More?</h2>
+                <p class="text-text-secondary mt-4 max-w-xl mx-auto">Head back to your dashboard to view your progress and see the latest network activity.</p>
+                <a href="/app/dashboard" class="mt-8 inline-block px-8 py-3 font-bold bg-gradient-to-r from-accent-purple to-accent-pink text-white rounded-lg transition-all duration-300 hover:scale-105 hover:shadow-lg hover:shadow-accent-purple/30 hover:brightness-110">
+                    Go to Dashboard
+                </a>
+            </div>
+        `
+        : `
             <div class="text-center mb-20">
                 <h2 class="text-3xl md:text-4xl font-bold">Ready to Join the Data Economy?</h2>
                 <p class="text-text-secondary mt-4 max-w-xl mx-auto">Start contributing your anonymized code in minutes and get rewarded with $LUM tokens.</p>
@@ -16,6 +26,13 @@ export function renderFooter() {
                     Get Started Now
                 </a>
             </div>
+        `;
+
+    return `
+    <footer class="relative bg-abyss-dark border-t border-primary footer-gradient-border">
+        <div class="container mx-auto px-6 py-20">
+            <!-- CTA Section -->
+            ${ctaSection}
 
             <!-- Links Grid -->
             <div class="grid grid-cols-1 md:grid-cols-4 lg:grid-cols-5 gap-8">
@@ -47,7 +64,6 @@ export function renderFooter() {
                     <ul class="mt-4 space-y-3">
                        <li><a href="https://github.com/Far3000-YT/lumen" target="_blank" rel="noopener" data-external="true" class="group flex items-center text-text-secondary hover:text-text-main transition-colors">GitHub ${externalLinkIcon}</a></li>
                        <li><a href="https://twitter.com/0xFar3000" target="_blank" rel="noopener" data-external="true" class="group flex items-center text-text-secondary hover:text-text-main transition-colors">X / Twitter ${externalLinkIcon}</a></li>
-                       <li><a href="#" target="_blank" rel="noopener" data-external="true" class="group flex items-center text-text-secondary hover:text-text-main transition-colors">Discord ${externalLinkIcon}</a></li>
                     </ul>
                 </div>
             </div>

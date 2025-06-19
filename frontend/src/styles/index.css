@@ -17,27 +17,21 @@
 
   .faq-item {
     @apply relative bg-surface rounded-xl transition-colors duration-300;
-    /* We don't use a real border on the item itself. */
   }
 
-  /* This pseudo-element IS the gradient border. It lives behind the main element. */
   .faq-item::before {
     content: '';
-    /* The -inset-px makes it 1px larger on all sides than the parent. */
-    /* The rounded-xl makes its corners match the parent. */
     @apply absolute -inset-px rounded-xl bg-gradient-to-r from-accent-purple via-accent-pink to-accent-cyan;
-    /* It starts invisible and sits behind everything. */
     @apply opacity-0 transition-opacity duration-300 -z-10;
   }
 
-  /* On hover OR when the details element is [open]... */
   .faq-item:hover,
   .faq-item[open] {
-    @apply bg-primary; /* Change the main background color */
+    @apply bg-primary;
   }
   .faq-item:hover::before,
   .faq-item[open]::before {
-    @apply opacity-100; /* ...and reveal the gradient behind it. */
+    @apply opacity-100;
   }
 }
 
@@ -117,7 +111,7 @@ details > summary::-webkit-details-marker {
 .prose-custom h4,
 .prose-custom h5,
 .prose-custom h6 {
-  scroll-margin-top: 6rem; /* This is the direct CSS equivalent and will not cause a build error. */
+  scroll-margin-top: 6rem;
 }
 
 .prose-custom code::before,

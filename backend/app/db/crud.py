@@ -1,6 +1,7 @@
 import hashlib
 import json
 from sqlalchemy.orm import Session
+from sqlalchemy import func
 from app.core import security
 from app import schemas
 from . import models
@@ -27,6 +28,16 @@ def create_user(db: Session, user: schemas.UserCreate):
     db.add(db_user); db.commit(); db.refresh(db_user)
     create_account_for_user(db, db_user)
     return db_user
+
+def update_user_profile(db: Session, user: models.User, user_update: schemas.UserUpdate):
+    if user_update.display_name is not None:
+        user.display_name = user_update.display_name
+    if user_update.is_in_leaderboard is not None:
+        user.is_in_leaderboard = user_update.is_in_leaderboard
+    db.add(user)
+    db.commit()
+    db.refresh(user)
+    return user
 
 def create_oauth_user(db: Session, provider: str, user_info: dict):
     email = user_info.get("email")
@@ -104,14 +115,49 @@ def get_all_contribution_embeddings(db: Session) -> list[tuple[int, int, str]]:
 def get_contribution_by_id(db: Session, contribution_id: int) -> models.Contribution | None:
     return db.query(models.Contribution).filter(models.Contribution.id == contribution_id).first()
 
-def create_contribution_record(db: Session, user: models.User, codebase: str, valuation_results: dict, reward: float, embedding: list[float] | None):
+def update_contribution_status(db: Session, contribution_id: int, status: str):
+    contribution = db.query(models.Contribution).filter(models.Contribution.id == contribution_id).first()
+    if contribution:
+        contribution.status = status
+        db.add(contribution)
+        db.commit()
+        db.refresh(contribution)
+    return contribution
+
+def create_contribution_record(db: Session, user: models.User, codebase: str, valuation_results: dict, reward: float, embedding: list[float] | None, initial_status: str = "PENDING"):
     embedding_str = json.dumps(embedding.tolist()) if embedding is not None else None
     db_contribution = models.Contribution(
         user_id=user.id,
         raw_content=codebase,
         valuation_results=json.dumps(valuation_results),
         reward_amount=reward,
-        content_embedding=embedding_str
+        content_embedding=embedding_str,
+        status=initial_status
     )
     db.add(db_contribution)
     db.commit()
+    db.refresh(db_contribution)
+    return db_contribution
+
+def get_user_contributions(db: Session, user_id: int, skip: int = 0, limit: int = 100):
+    return db.query(models.Contribution).filter(models.Contribution.user_id == user_id).order_by(models.Contribution.created_at.desc()).offset(skip).limit(limit).all()
+
+def get_leaderboard(db: Session, skip: int = 0, limit: int = 100):
+    return db.query(models.User, models.Account.lum_balance)\
+             .join(models.Account)\
+             .filter(models.User.is_in_leaderboard == True)\
+             .order_by(models.Account.lum_balance.desc())\
+             .offset(skip).limit(limit).all()
+
+def get_recent_processed_contributions(db: Session, limit: int = 10):
+    return db.query(models.Contribution, models.User.display_name)\
+             .join(models.User)\
+             .filter(models.Contribution.status == "PROCESSED", models.User.is_in_leaderboard == True)\
+             .order_by(models.Contribution.created_at.desc())\
+             .limit(limit).all()
+
+def get_user_contributions_paginated(db: Session, user_id: int, skip: int = 0, limit: int = 100):
+    query = db.query(models.Contribution).filter(models.Contribution.user_id == user_id)
+    total_count = query.count()
+    items = query.order_by(models.Contribution.created_at.desc()).offset(skip).limit(limit).all()
+    return items, total_count
