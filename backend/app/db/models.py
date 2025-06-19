@@ -3,6 +3,7 @@ from sqlalchemy import Column, Integer, String, Float, ForeignKey, DateTime, Boo
 from sqlalchemy.orm import relationship
 from sqlalchemy.sql import func
 from sqlalchemy.dialects.postgresql import JSONB
+from sqlalchemy.ext.hybrid import hybrid_property
 
 from .database import Base
 from app.core.config import settings
@@ -15,12 +16,23 @@ class User(Base):
     github_id = Column(String, unique=True, nullable=True)
     google_id = Column(String, unique=True, nullable=True)
     display_name = Column(String)
-    has_contributed = Column(Boolean, default=False, nullable=False)
-    is_in_leaderboard = Column(Boolean, default=True, nullable=False)
+    is_genesis_reward_claimed = Column(Boolean, default=False, nullable=False)
+    is_in_leaderboard = Column(Boolean, default=False, nullable=False)
+    is_verified = Column(Boolean, default=False, nullable=False)
+    verification_token = Column(String, nullable=True)
+    password_reset_token = Column(String, nullable=True)
+    password_reset_expires = Column(Float, nullable=True)
+    is_two_factor_enabled = Column(Boolean, default=False, nullable=False)
+    two_factor_secret = Column(String, nullable=True)
+    two_factor_backup_codes = Column(Text, nullable=True)
     created_at = Column(DateTime(timezone=True), server_default=func.now())
     account = relationship("Account", back_populates="user", uselist=False, cascade="all, delete-orphan")
     personal_access_tokens = relationship("PersonalAccessToken", back_populates="user", cascade="all, delete-orphan")
     contributions = relationship("Contribution", back_populates="user", cascade="all, delete-orphan")
+    
+    @hybrid_property
+    def has_password(self):
+        return self.hashed_password is not None
 
 class Account(Base):
     __tablename__ = "accounts"

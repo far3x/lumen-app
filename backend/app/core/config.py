@@ -1,16 +1,18 @@
 import os
+from pydantic import EmailStr
 from dotenv import load_dotenv
+from pydantic_settings import BaseSettings
 
 load_dotenv()
 
-class Settings:
+class AppSettings(BaseSettings):
     PROJECT_NAME: str = "Lumen Exchange"
     PROJECT_VERSION: str = "1.0.0"
 
     DATABASE_URL: str = os.getenv("DATABASE_URL", "sqlite:///./lumen_exchange.db")
-
     FRONTEND_URL: str = os.getenv("FRONTEND_URL", "http://localhost:5173")
 
+    ENCRYPTION_KEY: str = os.getenv("ENCRYPTION_KEY")
     SECRET_KEY: str = os.getenv("SECRET_KEY")
     ALGORITHM: str = "HS256"
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 60 * 24
@@ -29,8 +31,19 @@ class Settings:
 
     VALUATION_MODE: str = os.getenv("VALUATION_MODE", "MANUAL")
     GEMINI_API_KEY: str = os.getenv("GEMINI_API_KEY")
-    GEMINI_MODEL_NAME: str = os.getenv("GEMINI_MODEL_NAME", "gemini-1.5-flash-latest")
+    GEMINI_MODEL_NAME: str = os.getenv("GEMINI_MODEL_NAME", "gemini-2.5-flash")
     GEMINI_TEMPERATURE: float = float(os.getenv("GEMINI_TEMPERATURE", "0.2"))
+    
+    GOOGLE_RECAPTCHA_SITE_KEY: str = os.getenv("GOOGLE_RECAPTCHA_SITE_KEY")
+    GOOGLE_RECAPTCHA_SECRET_KEY: str = os.getenv("GOOGLE_RECAPTCHA_SECRET_KEY")
 
+    MAIL_USERNAME: str = os.getenv("MAIL_USERNAME")
+    MAIL_PASSWORD: str = os.getenv("MAIL_PASSWORD")
+    MAIL_FROM: EmailStr = os.getenv("MAIL_FROM")
+    MAIL_PORT: int = int(os.getenv("MAIL_PORT", 587))
+    MAIL_SERVER: str = os.getenv("MAIL_SERVER")
+    MAIL_FROM_NAME: str = os.getenv("MAIL_FROM_NAME")
+    MAIL_STARTTLS: bool = os.getenv("MAIL_STARTTLS", "True").lower() in ("true", "1", "t")
+    MAIL_SSL_TLS: bool = os.getenv("MAIL_SSL_TLS", "False").lower() in ("true", "1", "t")
 
-settings = Settings()
+settings = AppSettings()

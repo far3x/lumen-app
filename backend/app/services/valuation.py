@@ -18,6 +18,7 @@ from app.core.config import settings
 class HybridValuationService:
     HALVING_THRESHOLD = 125_000_000
     GARBAGE_COMPRESSION_THRESHOLD = 0.1
+    TOKEN_LIMIT = 700_000
 
     def __init__(self):
         if settings.GEMINI_API_KEY:
@@ -171,6 +172,11 @@ class HybridValuationService:
             print("[VALUATION_GATE] Code failed quality gate: compression ratio too low. Likely garbage.")
             manual_metrics["final_reward"] = 0.0
             manual_metrics["analysis_summary"] = "Contribution rejected due to extremely low entropy (highly repetitive content)."
+            return {"final_reward": 0.0, "valuation_details": manual_metrics}
+
+        if manual_metrics['total_tokens'] > self.TOKEN_LIMIT:
+            print(f"[VALUATION_GATE] Code failed quality gate: token count ({manual_metrics['total_tokens']}) exceeds limit of {self.TOKEN_LIMIT}.")
+            manual_metrics["analysis_summary"] = f"Contribution rejected: Codebase is too large ({manual_metrics['total_tokens']} tokens). The current limit is {self.TOKEN_LIMIT} tokens. Please optimize or reduce the size of your submission."
             return {"final_reward": 0.0, "valuation_details": manual_metrics}
 
         if manual_metrics['total_tokens'] == 0:
