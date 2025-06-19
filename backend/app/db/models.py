@@ -16,6 +16,7 @@ class User(Base):
     google_id = Column(String, unique=True, nullable=True)
     display_name = Column(String)
     has_contributed = Column(Boolean, default=False, nullable=False)
+    is_in_leaderboard = Column(Boolean, default=True, nullable=False)
     created_at = Column(DateTime(timezone=True), server_default=func.now())
     account = relationship("Account", back_populates="user", uselist=False, cascade="all, delete-orphan")
     personal_access_tokens = relationship("PersonalAccessToken", back_populates="user", cascade="all, delete-orphan")
@@ -57,4 +58,5 @@ class Contribution(Base):
     valuation_results = Column(JSONB if "postgresql" in settings.DATABASE_URL else Text, nullable=False)
     reward_amount = Column(Float, nullable=False)
     content_embedding = Column(Text, nullable=True)
+    status = Column(String, default="PENDING", nullable=False)
     user = relationship("User", back_populates="contributions")

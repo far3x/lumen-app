@@ -1,5 +1,6 @@
 from pydantic import BaseModel, EmailStr, constr
-from typing import Optional
+from typing import Optional, List, Dict, Any
+from datetime import datetime
 
 class UserCreate(BaseModel):
     email: EmailStr
@@ -9,9 +10,14 @@ class User(BaseModel):
     id: int
     email: Optional[EmailStr] = None
     display_name: str
+    is_in_leaderboard: bool
     
     class Config:
         from_attributes = True
+
+class UserUpdate(BaseModel):
+    display_name: Optional[str] = None
+    is_in_leaderboard: Optional[bool] = None
 
 class Token(BaseModel):
     access_token: str
@@ -43,3 +49,45 @@ class Account(BaseModel):
 
 class ContributionCreate(BaseModel):
     codebase: constr(max_length=5000000)
+
+class ValuationMetrics(BaseModel):
+    total_lloc: int = 0
+    total_tokens: int = 0
+    avg_complexity: float = 0.0
+    compression_ratio: float = 0.0
+    language_breakdown: Dict[str, int] = {}
+    
+class AiAnalysis(BaseModel):
+    project_clarity_score: float = 0.0
+    architectural_quality_score: float = 0.0
+    code_quality_score: float = 0.0
+    analysis_summary: Optional[str] = None
+
+class ContributionResponse(BaseModel):
+    id: int
+    created_at: datetime
+    reward_amount: float
+    status: str
+    valuation_details: Optional[Dict[str, Any]] = None
+    manual_metrics: Optional[ValuationMetrics] = None
+    ai_analysis: Optional[AiAnalysis] = None
+    user_display_name: Optional[str] = None
+
+    class Config:
+        from_attributes = True
+        json_encoders = {
+            datetime: lambda v: v.isoformat(),
+        }
+
+class ContributionStatus(BaseModel):
+    status: str
+    contribution_id: int
+    message: Optional[str] = None
+
+class LeaderboardEntry(BaseModel):
+    rank: int
+    display_name: str
+    lum_balance: float
+
+    class Config:
+        from_attributes = True

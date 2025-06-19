@@ -9,7 +9,6 @@ from passlib.context import CryptContext
 
 from .config import settings
 
-# Password Hashing
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
 def verify_password(plain_password: str, hashed_password: str) -> bool:
@@ -18,7 +17,6 @@ def verify_password(plain_password: str, hashed_password: str) -> bool:
 def get_password_hash(password: str) -> str:
     return pwd_context.hash(password)
 
-# JWT for Web App Sessions
 def create_access_token(data: dict, expires_delta: Optional[timedelta] = None) -> str:
     to_encode = data.copy()
     if expires_delta:
@@ -29,14 +27,12 @@ def create_access_token(data: dict, expires_delta: Optional[timedelta] = None) -
     encoded_jwt = jwt.encode(to_encode, settings.SECRET_KEY, algorithm=settings.ALGORITHM)
     return encoded_jwt
 
-# Personal Access Token (PAT) for CLI
 def create_pat() -> tuple[str, str]:
     """Generates a new PAT and its hash. Returns (raw_token, hashed_token)."""
     raw_token = f"lum_pat_{secrets.token_urlsafe(32)}"
     hashed_token = hashlib.sha256(raw_token.encode()).hexdigest()
     return raw_token, hashed_token
 
-# HMAC Signature for Securing CLI Requests
 def create_hmac_signature(challenge: str, timestamp: str, body: bytes) -> str:
     """Creates an HMAC signature for a request."""
     body_hash = hashlib.sha256(body).hexdigest()
