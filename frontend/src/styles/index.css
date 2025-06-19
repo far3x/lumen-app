@@ -103,7 +103,7 @@ details > summary::-webkit-details-marker {
 .prose-custom h3, 
 .prose-custom h4 {
     @apply text-text-main;
-}
+} 
 
 .prose-custom h1,
 .prose-custom h2,
