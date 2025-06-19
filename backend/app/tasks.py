@@ -104,25 +104,34 @@ def process_contribution(self, user_id: int, codebase: str, contribution_db_id: 
         
         print(f"Valuation results (on {'diff' if is_update else 'full codebase'}): {valuation_details}")
 
+        contribution_record = crud.get_contribution_by_id(db, contribution_db_id)
+        if not contribution_record:
+            print(f"Error: Contribution record {contribution_db_id} not found after valuation.")
+            return
+
+        contribution_record.valuation_results = json.dumps(valuation_details)
+        
         if base_reward > 0:
             total_reward_given = crud.apply_reward_to_user(db, user, base_reward)
             avg_complexity = valuation_details.get("avg_complexity", 0.0)
             crud.update_network_stats(db, avg_complexity, total_reward_given)
             
-            contribution_record = crud.get_contribution_by_id(db, contribution_db_id)
-            if contribution_record:
-                contribution_record.valuation_results = json.dumps(valuation_details)
-                contribution_record.reward_amount = total_reward_given
-                contribution_record.content_embedding = json.dumps(new_embedding.tolist()) if new_embedding is not None else None
-                contribution_record.status = "PROCESSED"
-                db.add(contribution_record)
-                db.commit()
+            contribution_record.reward_amount = total_reward_given
+            contribution_record.content_embedding = json.dumps(new_embedding.tolist()) if new_embedding is not None else None
+            contribution_record.status = "PROCESSED"
+            
+            db.add(contribution_record)
+            db.commit()
             
             print(f"Successfully processed and rewarded {total_reward_given:.4f} LUM for user {user_id} (Contribution {contribution_db_id}).")
             redis_service.set_with_ttl(f"task_status:{self.request.id}", "PROCESSED", 3600)
         else:
-            print(f"Contribution {contribution_db_id} from user {user_id} yielded no reward.")
-            crud.update_contribution_status(db, contribution_db_id, "REJECTED_NO_REWARD")
+            contribution_record.reward_amount = 0.0
+            contribution_record.status = "REJECTED_NO_REWARD"
+            db.add(contribution_record)
+            db.commit()
+
+            print(f"Contribution {contribution_db_id} from user {user_id} yielded no reward. Reason stored in valuation details.")
             redis_service.set_with_ttl(f"task_status:{self.request.id}", "REJECTED", 3600)
 
     except Exception as e:

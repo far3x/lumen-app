@@ -1,4 +1,4 @@
-import { fetchLeaderboard, isAuthenticated, getUser } from '../lib/auth.js';
+import { fetchLeaderboard, isAuthenticated } from '../lib/auth.js';
 
 function getRankBadge(rank) {
     const baseClass = "w-8 h-8 flex items-center justify-center rounded-md text-sm font-bold shrink-0";
@@ -40,7 +40,7 @@ function renderEmptyRow(rank) {
 }
 
 function renderLeaderboard(leaderboard, userRank) {
-    const yourRankCard = userRank ? `
+    const yourRankCard = (isAuthenticated() && userRank) ? `
         <div class="bg-surface rounded-lg p-4 flex items-center justify-between gap-4 animate-fade-in-up" style="animation-delay: 200ms;">
             <div class="flex items-center gap-4">
                 <span class="text-lg font-bold">Your Rank</span>
@@ -97,17 +97,13 @@ function renderLeaderboard(leaderboard, userRank) {
 }
 
 export async function renderPublicDashboard() {
-    const authed = isAuthenticated();
-    const currentUser = authed ? getUser() : null;
     let leaderboardData = [];
     let userRank = null;
 
     try {
-        const fullLeaderboard = await fetchLeaderboard(500); 
-        if (authed && currentUser) {
-            userRank = fullLeaderboard.find(entry => entry.display_name === currentUser.display_name);
-        }
-        leaderboardData = fullLeaderboard.slice(0, 100);
+        const leaderboardResponse = await fetchLeaderboard();
+        leaderboardData = leaderboardResponse.top_users || [];
+        userRank = leaderboardResponse.current_user_rank || null;
     } catch (error) {
         console.error("Could not load leaderboard data:", error);
         leaderboardData = [];

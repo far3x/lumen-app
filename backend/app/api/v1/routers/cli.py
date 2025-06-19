@@ -1,15 +1,40 @@
 import secrets
-import time
-from fastapi import APIRouter, Depends, HTTPException, BackgroundTasks, status
+import hashlib
+from fastapi import APIRouter, Depends, HTTPException, BackgroundTasks, status, Request
 from sqlalchemy.orm import Session
 from app.core import config
 from app.db import database, crud, models
+from app.db.database import SessionLocal
 from app.schemas import DeviceAuthResponse, Token, ContributionCreate, ContributionStatus
 from app.services.redis_service import redis_service
 from app.api.v1 import dependencies
 from app.tasks import process_contribution
+from app.core.limiter import limiter
 
 router = APIRouter(prefix="/cli", tags=["CLI"])
+
+def get_user_id_from_pat_for_rate_limit(request: Request) -> str:
+    auth_header = request.headers.get("authorization")
+    
+    if not auth_header or not auth_header.lower().startswith("bearer "):
+        return request.client.host
+
+    pat = auth_header.split(" ")[1]
+    if not pat.startswith("lum_pat_"):
+        return request.client.host
+
+    hashed_token = hashlib.sha256(pat.encode()).hexdigest()
+
+    db = SessionLocal()
+    try:
+        token_obj = db.query(models.PersonalAccessToken).filter(models.PersonalAccessToken.token_hash == hashed_token).first()
+        if token_obj and token_obj.user:
+            return str(token_obj.user.id)
+    finally:
+        db.close()
+    
+    return request.client.host
+
 
 @router.post("/device-auth", response_model=DeviceAuthResponse)
 async def cli_device_auth():
@@ -58,7 +83,9 @@ async def cli_handshake(
     "/contribute",
     status_code=status.HTTP_202_ACCEPTED
 )
+@limiter.limit("5/day", key_func=get_user_id_from_pat_for_rate_limit)
 async def contribute_data(
+    request: Request,
     payload: ContributionCreate,
     current_user: models.User = Depends(dependencies.get_current_user_from_pat),
     signature_check: None = Depends(dependencies.verify_contribution_signature),

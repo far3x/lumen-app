@@ -1,4 +1,4 @@
-import { getUser, getAccount, fetchLeaderboard, fetchContributions, fetchRecentContributions, logout } from '../../../lib/auth.js';
+import { getUser, getAccount, fetchLeaderboard, fetchContributions, fetchRecentContributions, logout, fetchAndStoreUser, fetchAndStoreAccount, isAuthenticated } from '../../../lib/auth.js';
 import { navigate } from '../../../router.js';
 import { renderDashboardOverview } from './overview.js';
 import { renderMyContributionsPage, attachContributionPageListeners, contributionsState, resetContributionsState } from './my-contributions.js';
@@ -10,7 +10,7 @@ import { icons } from './utils.js';
 let dashboardState = {
     user: null,
     account: null,
-    leaderboard: [],
+    userRank: null,
     allContributions: [],
     recentContributions: [],
 };
@@ -52,40 +52,74 @@ async function setupDashboard() {
 
     const urlParams = new URLSearchParams(window.location.search);
     let currentTab = urlParams.get('tab') || 'overview';
+    
+    // Force a page reload on successful account link to ensure all state is fresh.
+    if (urlParams.get('status') === 'link_complete') {
+        window.history.replaceState({}, document.title, "/app/dashboard?tab=settings&status=link_success");
+        window.location.reload();
+        return;
+    }
 
     try {
-        dashboardState.user = getUser();
-        dashboardState.account = getAccount();
-        const [leaderboard, contributionsResult, recentContributions] = await Promise.all([
-            fetchLeaderboard(100),
+        let user = getUser();
+        let account = getAccount();
+
+        // If auth cookie exists but local data is missing, fetch it.
+        // This is the crucial fix for the first login after an OAuth redirect.
+        if (isAuthenticated() && (!user || !account)) {
+            console.log("Auth cookie found, but no local user/account data. Fetching from API...");
+            [user, account] = await Promise.all([
+                fetchAndStoreUser(),
+                fetchAndStoreAccount()
+            ]);
+        }
+
+        // If after all attempts we still don't have a user, the auth is invalid.
+        if (!user) {
+            console.error("Failed to retrieve valid user data. Logging out.");
+            logout();
+            navigate('/login');
+            return;
+        }
+
+        dashboardState.user = user;
+        dashboardState.account = account;
+
+        const [leaderboardResponse, contributionsResult, recentContributions] = await Promise.all([
+            fetchLeaderboard(),
             fetchContributions(1, 10),
             fetchRecentContributions()
         ]);
-        dashboardState.leaderboard = leaderboard;
+        
+        dashboardState.userRank = leaderboardResponse.current_user_rank;
         dashboardState.allContributions = contributionsResult.items;
         contributionsState.totalContributions = contributionsResult.total;
         contributionsState.isLastPage = (1 * 10) >= contributionsResult.total;
-
         dashboardState.recentContributions = recentContributions;
+
     } catch (error) {
         console.error("Failed to fetch initial dashboard data:", error);
         if (error.response && error.response.status === 401) {
             logout();
             navigate('/login');
-            return;
+        } else {
+            dashboardContentArea.innerHTML = `<div class="text-center p-8 text-text-secondary">Could not load dashboard data. Please try refreshing.</div>`;
         }
+        return;
     }
-    
-    const userRankEntry = dashboardState.leaderboard.find(entry => dashboardState.user && entry.display_name === dashboardState.user.display_name);
-    const userRank = userRankEntry ? userRankEntry.rank : null;
 
     const loadContent = (tabId) => {
         resetContributionsState();
 
         let contentHTML = '';
+        if (!dashboardState.user) {
+            dashboardContentArea.innerHTML = `<div class="text-center p-8 text-text-secondary">Could not load user data. Please try refreshing.</div>`;
+            return;
+        }
+        
         switch (tabId) {
             case 'overview':
-                contentHTML = renderDashboardOverview(dashboardState.user, dashboardState.account, userRank, dashboardState.allContributions);
+                contentHTML = renderDashboardOverview(dashboardState.user, dashboardState.account, dashboardState.userRank?.rank, dashboardState.allContributions);
                 break;
             case 'my-contributions':
                 contentHTML = renderMyContributionsPage(dashboardState.allContributions);
@@ -101,7 +135,7 @@ async function setupDashboard() {
                 break;
             default:
                 currentTab = 'overview';
-                contentHTML = renderDashboardOverview(dashboardState.user, dashboardState.account, userRank, dashboardState.allContributions);
+                contentHTML = renderDashboardOverview(dashboardState.user, dashboardState.account, dashboardState.userRank?.rank, dashboardState.allContributions);
         }
         dashboardContentArea.innerHTML = contentHTML;
         

@@ -1,8 +1,8 @@
-"""add contribution table
+"""Set is_in_leaderboard default to False for new users
 
-Revision ID: 0719565160e7
-Revises: 3fd936211c2c
-Create Date: 2025-06-17 16:00:40.832588
+Revision ID: fecc86b1dc31
+Revises: <your_new_revision_id>
+Create Date: 2025-06-19 22:29:42.533221
 
 """
 from typing import Sequence, Union
@@ -12,8 +12,8 @@ import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-revision: str = '0719565160e7'
-down_revision: Union[str, None] = '3fd936211c2c'
+revision: str = 'fecc86b1dc31'
+down_revision: Union[str, None] = '<your_new_revision_id>'
 branch_labels: Union[str, Sequence[str], None] = None
 depends_on: Union[str, Sequence[str], None] = None
 
