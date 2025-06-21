@@ -1,16 +1,20 @@
-import { fetchContributions } from '../../../lib/auth.js';
-import { getStatusClasses, getStatusText, renderModal, escapeHtml, icons } from './utils.js';
+import { fetchContributions, checkContributionStatus, fetchAndStoreAccount } from '../../../lib/auth.js';
+import { getStatusClasses, getStatusText, renderModal, escapeHtml, icons, updateBalancesInUI } from './utils.js';
 
 export let contributionsState = {
     currentPage: 1,
     isLoading: false,
     isLastPage: false,
     totalContributions: 0,
+    pollerId: null,
 };
 
 export function resetContributionsState() {
+    if (contributionsState.pollerId) {
+        clearInterval(contributionsState.pollerId);
+    }
     const total = contributionsState.totalContributions;
-    contributionsState = { currentPage: 1, isLoading: false, isLastPage: false, totalContributions: total };
+    contributionsState = { currentPage: 1, isLoading: false, isLastPage: false, totalContributions: total, pollerId: null };
 }
 
 function renderProTipsSection() {
@@ -125,7 +129,7 @@ function renderContributionHistory(contributions) {
                         <td class="py-4 px-4 text-right font-mono ${item.reward_amount > 0 ? 'text-green-400' : 'text-text-secondary'}">${item.reward_amount > 0 ? `+${item.reward_amount.toFixed(4)}` : '...'}</td>
                         <td class="py-4 px-4 text-center">
                             <button class="details-btn text-text-secondary hover:text-text-main transition-colors disabled:opacity-50 disabled:cursor-not-allowed" data-id="${item.id}" ${item.status !== 'PROCESSED' ? 'disabled' : ''}>
-                                <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" /></svg>
+                                <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542 7z" /></svg>
                             </button>
                         </td>
                     </tr>
@@ -176,6 +180,7 @@ async function changeContributionsPage(direction, allContributions) {
 
         document.getElementById('contributions-table-container').innerHTML = renderContributionHistory(result.items);
         attachDetailModalListeners(allContributions);
+        startContributionStatusPoller(allContributions);
     } catch (error) {
         console.error("Failed to fetch new page of contributions:", error);
     } finally {
@@ -206,11 +211,51 @@ function attachDetailModalListeners(allContributions) {
     });
 }
 
+function startContributionStatusPoller(allContributions) {
+    const processingContributions = allContributions.filter(c => ['PENDING', 'PROCESSING'].includes(c.status));
+
+    if (processingContributions.length === 0) {
+        if (contributionsState.pollerId) {
+            clearInterval(contributionsState.pollerId);
+            contributionsState.pollerId = null;
+        }
+        return;
+    }
+
+    if (contributionsState.pollerId) return;
+
+    contributionsState.pollerId = setInterval(async () => {
+        let needsRefresh = false;
+        for (const contrib of processingContributions) {
+            try {
+                const response = await checkContributionStatus(contrib.id);
+                if (response.data && !['PENDING', 'PROCESSING'].includes(response.data.status)) {
+                    needsRefresh = true;
+                    break;
+                }
+            } catch (error) {
+                console.error(`Failed to check status for contribution ${contrib.id}`, error);
+                needsRefresh = true; 
+                break;
+            }
+        }
+
+        if (needsRefresh) {
+            clearInterval(contributionsState.pollerId);
+            contributionsState.pollerId = null;
+            await fetchAndStoreAccount();
+            updateBalancesInUI();
+            await changeContributionsPage(0, allContributions);
+        }
+    }, 5000); 
+}
+
 export function attachContributionPageListeners(allContributions) {
     attachDetailModalListeners(allContributions);
     document.getElementById('prev-page-btn')?.addEventListener('click', () => changeContributionsPage(-1, allContributions));
     document.getElementById('next-page-btn')?.addEventListener('click', () => changeContributionsPage(1, allContributions));
     updatePaginationButtons();
+    startContributionStatusPoller(allContributions);
 }
 
 export function renderMyContributionsPage(initialContributions) {

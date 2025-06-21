@@ -5,11 +5,12 @@ from sqlalchemy.orm import Session
 from app.core import config
 from app.db import database, crud, models
 from app.db.database import SessionLocal
-from app.schemas import DeviceAuthResponse, Token, ContributionCreate, ContributionStatus
+from app.schemas import DeviceAuthResponse, Token, ContributionCreate, ContributionStatus, ContributionCliResponse
 from app.services.redis_service import redis_service
 from app.api.v1 import dependencies
 from app.tasks import process_contribution
 from app.core.limiter import limiter
+from typing import List
 
 router = APIRouter(prefix="/cli", tags=["CLI"])
 
@@ -83,7 +84,7 @@ async def cli_handshake(
     "/contribute",
     status_code=status.HTTP_202_ACCEPTED
 )
-@limiter.limit("5/day", key_func=get_user_id_from_pat_for_rate_limit)
+@limiter.limit("100/day", key_func=get_user_id_from_pat_for_rate_limit)
 async def contribute_data(
     request: Request,
     payload: ContributionCreate,
@@ -134,3 +135,13 @@ async def get_contribution_status(
         contribution_id=contribution_id,
         message=f"Current database status: {contribution.status}"
     )
+
+@router.get("/contributions/history", response_model=List[ContributionCliResponse])
+@limiter.limit("20/minute", key_func=get_user_id_from_pat_for_rate_limit)
+async def get_contribution_history(
+    request: Request,
+    current_user: models.User = Depends(dependencies.get_current_user_from_pat),
+    db: Session = Depends(database.get_db)
+):
+    contributions, _ = crud.get_user_contributions_paginated(db, user_id=current_user.id, skip=0, limit=10)
+    return contributions

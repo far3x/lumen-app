@@ -46,15 +46,8 @@ export function setupNavbarEventListeners() {
     document.removeEventListener('click', closeUserMenuOnClickOutside);
     document.addEventListener('click', closeUserMenuOnClickOutside);
 
-    document.getElementById('logout-button-desktop')?.addEventListener('click', async () => {
-        await logout();
-        navigate('/login');
-    });
-
-    document.getElementById('logout-button-mobile')?.addEventListener('click', async () => {
-        await logout();
-        navigate('/login');
-    });
+    document.getElementById('logout-button-desktop')?.addEventListener('click', logout);
+    document.getElementById('logout-button-mobile')?.addEventListener('click', logout);
 }
 
 export function renderNavbar(currentPath) {
