@@ -24,7 +24,6 @@ function displayUrlErrors() {
     if (error === 'oauth_email_exists' && errorMessageElement) {
         errorMessageElement.innerHTML = `An account with this email already exists with a password. Please sign in with your password, or <a href="/forgot-password" class="font-medium text-accent-cyan hover:underline">reset it</a> to link your account.`;
         errorMessageElement.classList.remove('hidden');
-        // Clean the URL to prevent the message from showing on refresh
         window.history.replaceState({}, document.title, "/login");
     }
 }
@@ -35,7 +34,9 @@ function setupEventListeners() {
             const provider = e.currentTarget.dataset.provider;
             const redirectPath = localStorage.getItem('post_login_redirect') || '/app/dashboard';
             const state = btoa(JSON.stringify({ redirect_path: redirectPath }));
-            window.location.href = `${import.meta.env.VITE_API_URL || 'http://localhost:8000'}/api/v1/auth/login/${provider}?state=${state}`;
+            // Use the environment variable for the base URL
+            const baseUrl = import.meta.env.VITE_API_URL || 'http://localhost:8000';
+            window.location.href = `${baseUrl}/api/v1/auth/login/${provider}?state=${state}`;
         });
     });
 
