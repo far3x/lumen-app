@@ -1,0 +1,1495 @@
+Here is a coding project I am working on.
+It starts with the full structure of the project, then you will have each file title and file content.
+
+Respond with 'OK' and for now, just understand the project completely.
+I will ask for help in the next prompt so you can assist me with this project.
+
+
+
+--- PROJECT STRUCTURE ---
+
+
+{
+    "LUMEN/": {
+        ".gitignore": {},
+        "CONTRIBUTING.md": {},
+        "LICENSE": {},
+        "README.md": {},
+        "requirements.txt": {},
+        "setup.py": {},
+        ".git/": {},
+        ".github/": {
+            "ISSUE_TEMPLATE/": {
+                "bug_report.md": {},
+                "feature_request.md": {}
+            },
+            "workflows/": {
+                "release.yaml": {}
+            }
+        },
+        ".vscode/": {},
+        "build/": {},
+        "lum/": {
+            "assembly.py": {},
+            "config.py": {},
+            "data.py": {},
+            "github.py": {},
+            "gitignore.py": {},
+            "main.py": {},
+            "smart_read.py": {},
+            "visualizer.py": {},
+            "__init__.py": {}
+        },
+        "pylumen.egg-info/": {},
+        "tests/": {
+            "file_to_read.py": {},
+            "test_github.py": {},
+            "test_gitignore.py": {},
+            "test_ipynb.ipynb": {},
+            "test_read.py": {},
+            "test_visualizer.py": {}
+        },
+        "venv/": {}
+    }
+}
+
+
+---lum--new--file--CONTRIBUTING.md
+
+
+If you want to contribute, there is no specific rule, it just has to be accurate with the project.
+
+For example, it can be :
+- code optimizations
+- adding functionalities
+- adding tests
+
+Thanks if you contribute ! :)
+
+
+
+---lum--new--file--README.md
+
+
+Lumen - Supercharge Your AI with Perfect Code Context
+====================================================
+
+[![PyPI version](https://badge.fury.io/py/pylumen.svg)](https://badge.fury.io/py/pylumen)
+[![Downloads](https://static.pepy.tech/badge/pylumen)](https://pepy.tech/project/pylumen)
+[![Python Version](https://img.shields.io/pypi/pyversions/pylumen.svg)](https://pypi.org/project/pylumen/)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![GitHub stars](https://img.shields.io/github/stars/Far3000-YT/lumen.svg?style=social&label=Star&maxAge=14400)](https://github.com/Far3000-YT/lumen/stargazers/)
+
+---
+
+**Unlock Your AI's Full Potential with Flawless Code Understanding.**
+
+Large Language Models (LLMs) are revolutionizing software development. However, their efficacy is often limited by the quality and completeness of the provided **context**. Manually feeding your AI with relevant information from your codebase can be a tedious, error-prone process, especially for large projects constrained by context window limitations.
+
+**Lumen is engineered to address this challenge.**
+
+Lumen is an intelligent Command Line Interface (CLI) tool that automatically scans, structures, and formats your entire codebase into a meticulously crafted prompt suitable for *any* LLM. Eliminate the friction of manual copy-pasting and context constraints. With Lumen, you provide your AI with the deep, structured understanding necessary to generate truly insightful and accurate results.
+
+**Elevate your AI interactions from challenging to highly effective. Power up with Lumen.**
+
+---
+
+## Why Lumen?
+
+*   **Effortless Context Generation:** Automatically gathers and structures your entire project, removing manual drudgery.
+*   **Optimized Performance:** Experience significantly faster context generation. Internal optimizations, especially in configuration handling, deliver substantial speed improvements, particularly noticeable on large-scale projects.
+*   **Intelligent File Handling:**
+    *   Reads a wide variety of file types, including `.ipynb` notebooks.
+    *   Employs a smart encoding strategy: defaults to UTF-8 for speed and reliability, with an intelligent fallback to detect encoding only if an initial read encounters issues. This ensures correct rendering of special characters and improves overall reading performance.
+*   **Optimized for AI:** Delivers a standardized, AI-friendly output format, including consistent file separators and an introductory message, ensuring maximum LLM comprehension.
+*   **GitHub Repository Analysis:** Seamlessly analyze public GitHub repositories with a single command. Lumen handles the cloning and subsequent cleanup.
+*   **100% Private & Secure:** Processes everything locally. For local projects, your code never leaves your machine during context generation.
+*   **Token Insights:** Utilize the `-l` or `--leaderboard` option to identify the most token-heavy files in your project (top 20 by default), aiding in the optimization of large contexts.
+*   **Reliable & Tested:** Backed by a comprehensive test suite to ensure stability and correctness.
+
+---
+
+## Prerequisites
+
+Before installing Lumen, ensure you have the following installed and correctly configured on your system. Lumen is a Python tool and relies on standard development environments.
+
+1.  **Python (3.7 or higher):**
+    *   **How to Check:** Open your terminal or command prompt and type `python --version` or `python3 --version`.
+    *   **Installation & Environment Setup:**
+        *   **Windows:** Download the installer from [python.org](https://www.python.org/downloads/windows/). **Crucially, during installation, ensure you check the box that says "Add Python to PATH"**.
+        *   **macOS:** Python 3 is often pre-installed or easily available via Homebrew (`brew install python`).
+        *   **Linux (Debian/Ubuntu):** `sudo apt update && sudo apt install python3 python3-pip`
+        *   **Linux (Fedora/CentOS/RHEL):** `sudo dnf install python3 python3-pip` (or `yum`)
+    *   **Pip:** Python's package installer, usually installed with Python 3.7+.
+        *   **How to Check:** `pip --version` or `pip3 --version`.
+        *   **Upgrade (Recommended):** `python -m pip install --upgrade pip`.
+
+2.  **Git:** (Required *only* if you plan to use the GitHub repository feature (`-g` flag)).
+    *   **How to Check:** `git --version`.
+    *   **Installation:** Download from [git-scm.com](https://git-scm.com/downloads) or use your system's package manager (e.g., `brew install git`, `sudo apt install git`).
+
+---
+
+## Installation
+
+Install Lumen easily using pip:
+
+`pip install pylumen`
+
+To upgrade to the latest version:
+
+`pip install pylumen --upgrade`
+
+---
+
+## Quick Start & Usage
+
+Lumen is designed for ease of use from your command line (`lum`).
+
+**1. Generate Full Context (Clipboard):**
+   Navigate to your project's root and run:
+   `lum`
+   *(The complete, structured prompt is copied to your clipboard. For very large codebases, consider the `-t` option for better performance.)*
+
+**2. Analyze a Specific Path:**
+   `lum /path/to/your/project`
+
+**3. Save to File:**
+   `lum -t my_project_context`
+   *(Creates `my_project_context.txt` in the project's root.)*
+
+**4. Analyze a Public GitHub Repository:**
+   *(Requires Git installed!)*
+   `lum -g https://github.com/user/repo-name`
+
+**5. Identify Token-Heavy Files:**
+   See the top 20 (default) most token-consuming files:
+   `lum -l`
+   Or specify a different number (e.g., top 10):
+   `lum -l 10`
+   *(This also generates and copies/saves the full context as per other commands.)*
+
+**6. Manage Configuration:**
+   *   Edit your settings: `lum -c`
+       *(Opens `~/.lum/config.json` in your default editor.)*
+   *   Reset to defaults: `lum -r`
+
+*For a full list of commands and options, Lumen features a clear and consistent help section:*
+`lum --help`
+
+---
+
+## Configuration (`~/.lum/config.json`)
+
+Tailor Lumen to your exact needs by editing its configuration file (`~/.lum/config.json`). Use `lum -c` to open it.
+
+Key settings include:
+*   `intro_text`: Customize the introductory message for your prompts.
+*   `title_text`: Define the format for file titles (e.g., `--- FILE : {file} ---`).
+*   `skipped_folders`: A comprehensive list of folder names to ignore. This supports two types of matching:
+    *   **Exact Match:** A string like `"build"` will only skip folders named exactly `build`.
+    *   **Ends-With Match:** A string prefixed with `*`, like `"*.log"` or `".cache"`, will skip any folder whose name *ends with* `.log` (e.g., `app.log`, `server.log`) or `.cache` (e.g., `.pytest_cache`, `.mypy_cache`).
+*   `skipped_files`: A list of specific file names to exclude from context (e.g., `package-lock.json`, `.DS_Store`).
+*   `allowed_file_types`: Specify which file extensions Lumen should process.
+
+**Automatic Updates:** Lumen's configuration is designed to be future-proof. If new configuration options are added in an update, your `config.json` will be intelligently updated to include them with their default values, preserving your existing customizations. You can always reset to the latest defaults with `lum -r`.
+
+---
+
+## What's Next? The Lumen Roadmap
+
+Lumen is actively evolving! Here's a glimpse of planned features and directions:
+
+*   **IDE Integration:** Development of a VS Code extension is underway to allow "Lumen: Copy Context" functionality directly from your editor.
+*   **Web Interface (Exploratory):** We are exploring the potential for a web-based interface to further enhance usability and accessibility.
+*   **Lumen v1.0:** The next major milestone will be Lumen v1.0, focusing on delivering a highly stable, polished, and production-ready experience with further refinements and potential feature enhancements.
+
+Stay tuned for these and more improvements!
+
+---
+
+## Love Lumen? Give us a Star!
+
+If Lumen helps you supercharge your AI workflows, please consider starring the project on GitHub! It's a great way to show your support and helps others discover Lumen.
+
+[![GitHub stars](https://img.shields.io/github/stars/Far3000-YT/lumen.svg?style=social&label=Star&maxAge=2592000)](https://github.com/Far3000-YT/lumen/stargazers/)
+
+---
+
+## Contributing
+
+We welcome contributions, issues, and feature requests! Check out the [issues page](https://github.com/Far3000-YT/lumen/issues) or submit a pull request. See `CONTRIBUTING.md` for more details. Let's make Lumen even better, together!
+
+---
+
+## License
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+
+---
+
+## Author
+
+Developed by **Far3k**
+
+*   **GitHub:** [Far3000-YT](https://github.com/Far3000-YT)
+*   **Email:** far3000yt@gmail.com
+*   **Discord:** @far3000
+*   **X (Twitter):** [@0xFar3000](https://twitter.com/0xFar3000)
+
+
+---lum--new--file--requirements.txt
+
+
+requests
+pyperclip
+chardet
+tiktoken
+
+
+---lum--new--file--setup.py
+
+
+from setuptools import setup, find_packages
+import os
+
+setup(
+    name = "pylumen",
+    version = "v0.4", #will remove "v" soon, in official release -> 1.0
+    packages = find_packages(include = ["lum", "lum.*"]),
+    install_requires = [
+        "requests",
+        "pyperclip",
+        "chardet",
+        "tiktoken"
+    ],
+    entry_points = {
+        "console_scripts": [
+            "lum=lum.main:main",
+        ],
+    },
+    author = "Far3k",
+    author_email = "far3000yt@gmail.com",
+    description = "Lumen: Intelligently prepares your codebase context for any LLM, solving context window limits with smart retrieval and providing deep project understanding.",
+    long_description = open("README.md", encoding="utf-8").read() if os.path.exists("README.md") else "",    long_description_content_type = "text/markdown",
+    url = "https://github.com/Far3000-YT/lumen",
+    classifiers = [
+        "Programming Language :: Python :: 3",
+        "Programming Language :: Python :: 3.7",
+        "Programming Language :: Python :: 3.8",
+        "Programming Language :: Python :: 3.9",
+        "Programming Language :: Python :: 3.10",
+        "Programming Language :: Python :: 3.11",
+        "Programming Language :: Python :: 3.12",
+        "Programming Language :: Python :: 3.13",
+        "License :: OSI Approved :: MIT License",
+        "Operating System :: OS Independent",
+    ],
+    python_requires = ">=3.7",
+    license = "MIT",
+)
+
+
+---lum--new--file--.github/ISSUE_TEMPLATE/bug_report.md
+
+
+---
+name: Bug report
+about: Create a report to help us improve
+title: ''
+labels: ''
+assignees: ''
+
+---
+
+**Describe the bug**
+A clear and concise description of what the bug is.
+
+Please precise your OS and Python Version !
+
+**Error code ?**
+If there is any error happening, please give it here !
+
+**Expected behavior**
+A clear and concise description of what you expected to happen.
+
+**Screenshots**
+If applicable, add screenshots to help explain your problem.
+
+**Additional context**
+Add any other context about the problem here.
+
+
+
+---lum--new--file--.github/ISSUE_TEMPLATE/feature_request.md
+
+
+---
+name: Feature request
+about: Suggest an idea for this project
+title: ''
+labels: ''
+assignees: ''
+
+---
+
+**Is your feature request related to a problem? Please describe.**
+A clear and concise description of what the problem is. Ex. I'm always frustrated when [...]
+
+**Describe the solution you'd like**
+A clear and concise description of what you want to happen.
+
+**Describe alternatives you've considered**
+A clear and concise description of any alternative solutions or features you've considered.
+
+**Additional context**
+Add any other context or screenshots about the feature request here.
+
+
+
+---lum--new--file--.github/workflows/release.yaml
+
+
+name: Publish to PyPI
+
+on:
+  release:
+    types: [published]
+
+jobs:
+  build-and-publish:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+    - name: Set up Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.x'
+
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        python -m pip install setuptools wheel twine
+
+    - name: Build package
+      run: python setup.py sdist bdist_wheel
+
+    - name: Publish package to PyPI
+      uses: pypa/gh-action-pypi-publish@release/v1
+      with:
+        password: ${{ secrets.PYPI_API_TOKEN }}
+
+
+---lum--new--file--lum/assembly.py
+
+
+from lum.smart_read import read_file
+from lum.gitignore import *
+from typing import List
+import os
+
+
+PROMPT_SEPERATOR = "\n\n\n"
+
+def get_files_root(main_root: str, skipped_folders: List, allowed: List = None):
+    if allowed is None:
+        from lum.smart_read import get_files_parameters
+        allowed = get_files_parameters()["allowed_files"]
+    
+    #if gitignore, add skipped folders to existing skipped folder file
+    if gitignore_exists(""):
+        _, skipped_folders = gitignore_skipping()
+
+    files_list = {}
+    min_level = 0
+    for root, _, files in os.walk(main_root):
+        should_skip = False
+        for folder_name in skipped_folders:
+            #in skipped_folders, if starts wiht "*" -> will skip anything that ENDS with the skipped folder name, otherwise will take the folder name directly, and ONLY this
+            if folder_name.startswith("*"):
+                if root.endswith(folder_name[1::]): #remove the * and set condition
+                    _[:] = []
+                    should_skip = True
+                    break
+
+            else:
+                element = root.split(os.sep)[-1]
+                if element == folder_name:
+                    _[:] = []
+                    should_skip = True
+                    break
+
+        if should_skip:
+            continue
+
+        if min_level == 0:
+            min_level = len(main_root.split(os.sep))
+
+        if files:
+            for file in files:
+                if any(file.endswith(allowed_file) for allowed_file in allowed):
+                    file_root = f"{root}{os.sep}{file}"
+                    file_list_index = "/".join(file_root.split(os.sep)[min_level::])
+                    files_list[file_list_index] = file_root
+
+    return files_list
+
+
+def add_intro(prompt: str, intro: str):
+    prompt += intro + PROMPT_SEPERATOR
+    return prompt
+
+
+def add_structure(prompt: str, json_structure: str):
+    prompt += "--- PROJECT STRUCTURE ---" + PROMPT_SEPERATOR
+    prompt += json_structure + PROMPT_SEPERATOR
+    return prompt
+
+
+def add_files_content(prompt: str, files_root: dict, title_text: str = None, allowed_files: List = None, skipped_files: List = None):
+    #file title then file content added in the prompt
+    for file_name, file_path in files_root.items():
+        #specify in the prompt the path and which file we're reading
+        prompt += title_text.format(file = file_name) + PROMPT_SEPERATOR
+        #specify in the prompt the content of that file
+        prompt += read_file(file_path, allowed_files = allowed_files, skipped_files = skipped_files) + PROMPT_SEPERATOR
+
+    return prompt
+
+
+---lum--new--file--lum/config.py
+
+
+#Generating a json file in appdata or where the pip module is stocked.
+#1 backup version, for when the user wants to reset
+#1 base version, so the one the user will use, with customized title, prompt or anything
+
+#all the project SHOULD BE os proof, if you notice something is not OS proof, please create an issue :)
+
+import os, json, sys
+
+
+EXPECTED_CONFIG_KEYS = [
+    "intro_text",
+    "title_text",
+    "skipped_folders",
+    "skipped_files",
+    "allowed_file_types"
+]
+
+BASE_CONFIG = {
+    "intro_text":
+
+"""Here is a coding project I am working on.
+It starts with the full structure of the project, then you will have each file title and file content.
+
+Respond with 'OK' and for now, just understand the project completely.
+I will ask for help in the next prompt so you can assist me with this project.
+""",
+
+    "title_text": "--- FILE : {file} ---", #{file} will be replaced by the file name, KEEP IT PLEASE
+
+    "skipped_folders": [
+        ".git", ".svn", ".hg", "node_modules", "*.cache", ".*cache", ".*_cache", "_site",
+        "__pycache__", "venv", ".venv", "env", "*.egg-info", "*.dist-info", "mkdocs_build",
+        ".idea", ".vscode", "nbproject", ".settings", "DerivedData", "coverage", "~*",
+        "build", "dist", "out", "output", "target", "bin", "obj", "site", "docs/_build",
+        ".angular", ".next/cache", ".nuxt", ".parcel-cache", ".pytest_cache", "log",
+        ".mypy_cache", ".ruff_cache", ".tox", "temp", "tmp", "logs", "android/app/build",
+        "vendor", "deps", "Pods", "bower_components", "jspm_packages", "web_modules",
+        ".svelte-kit", "storage", "bootstrap/cache", "public/build", "public/hot",
+        "var", ".serverless", ".terraform", "storybook-static", "ios/Pods", "dump"
+    ],
+
+    "skipped_files": [
+        "package-lock.json", "yarn.lock", "pnpm-lock.yaml", "Pipfile.lock", "npm-debug.log*",
+        "poetry.lock", "composer.lock", "Gemfile.lock", "Cargo.lock", "Podfile.lock", "go.sum"
+        ".DS_Store", "Thumbs.db", ".Rhistory", ".node_repl_history", "yarn-debug.log", ".tfstate",
+        ".sublime-workspace", ".sublime-project", ".env", ".tfstate.backup", "yarn-error.log",
+        "a.out", "main.exe", "celerybeat-schedule", "npm-debug.log", ".eslintcache"
+    ],
+
+    "allowed_file_types": [
+        ".R", ".ada", ".adb", ".adoc", ".ads", ".asciidoc", ".asm", ".asp", ".aspx", ".ascx"
+        ".au3", ".avdl", ".avsc", ".babelrc", ".bash", ".bazel", ".bib", ".browserslistrc", ".c"
+        ".cc", ".cfg", ".cg", ".cjs", ".clj", ".cljc", ".cljs", ".cls", ".cmake", ".cmd", ".comp"
+        ".conf", ".cpp", ".cs", ".csproj", ".cshtml", ".css", ".dart", ".diff"
+        ".editorconfig", ".edn", ".ejs", ".elm", ".env", ".env.example", ".env.local", ".erl"
+        ".eslintrc", ".eslintrc.js", ".eslintrc.json", ".eslintrc.yaml", ".ex", ".exs", ".f"
+        ".f90", ".fish", ".for", ".frag", ".fx", ".gd", ".gdshader", ".geom", ".gitattributes"
+        ".gitignore", ".gitmodules", ".gitlab-ci.yml", ".glsl", ".gql", ".go", ".graphql"
+        ".groovy", ".h", ".haml", ".hbs", ".hh", ".hjson", ".hlsl", ".hpp", ".hrl", ".hs"
+        ".htaccess", ".htm", ".html", ".htpasswd", ".inc", ".ini", ".ipynb"
+        ".j2", ".java", ".jinja", ".js", ".json", ".json5", ".jsx", ".kt", ".kts", ".less", ".lhs"
+        ".liquid", ".lisp", ".log", ".lsp", ".ltx", ".lua", ".m", ".mailmap", ".markdown"
+        ".marko", ".md", ".metal", ".mjs", ".mm", ".mustache", ".netlify.toml", ".npmrc"
+        ".nvmrc", ".pas", ".patch", ".php", ".pl", ".plist", ".pm", ".pp"
+        ".prettierrc", ".prettierrc.js", ".prettierrc.json", ".prettierrc.yaml", ".properties"
+        ".proto", ".ps1", ".psd1", ".psm1", ".pug", ".py", ".pyi", ".pylintrc", ".r", ".rb"
+        ".rbw", ".rs", ".rst", ".s", ".sass", ".scala", ".scm", ".scss", ".sh"
+        ".sln", ".slim", ".soy", ".sql", ".styl", ".sty", ".sv", ".svelte"
+        ".swift", ".tcl", ".tesc", ".tese", ".tex", ".textile", ".tf", ".tfvars", ".thrift"
+        ".toml", ".ts", ".tsx", ".txt", ".twig", ".v", ".vb", ".vbhtml", ".vbproj"
+        ".vert", ".vbs", ".vhdl", ".vue", ".vtt", ".wgsl", ".xhtml", ".xml", ".yaml", ".yarnrc"
+        ".yml", ".zsh", "BUILD", "CMakeLists.txt", "Cargo.toml", "Dockerfile", "Gemfile"
+        "Jenkinsfile", "Makefile", "Pipfile", "Vagrantfile", "WORKSPACE", "bower.json"
+        "browserslist", "build.gradle", "build.xml", "composer.json", "docker-compose.yml"
+        "now.json", "package.json", "pom.xml", "pyproject.toml", "requirements.txt"
+        "rollup.config.js", "setup.py", "tsconfig.json", "vercel.json", "webpack.config.js"
+    ]
+}
+
+
+config_folder = ".lum"
+config_file = "config.json"
+
+#check if config exists, if not it creates it, otherwise will never change the parameters in case of pip update
+#folder check then file check, need to run this on main on every command start
+
+
+#config files management
+#if config folder or file doesnt exist, create it, same if config file is outdated, auto reset
+def check_config():
+    config_dir, config_path = get_config_directory(), get_config_file()
+    config_needs_creation_or_reset, config_data = False, {}
+
+    if not os.path.exists(config_dir):
+        os.makedirs(config_dir)
+
+    if os.path.exists(config_path):
+        try:
+            with open(config_path, "r", encoding="utf-8") as f:
+                config_data = json.load(f)
+
+            #check if any expected key is missing
+            if not all(key in config_data for key in EXPECTED_CONFIG_KEYS):
+                config_needs_creation_or_reset = True
+
+        except Exception as e:
+            config_needs_creation_or_reset = True
+
+    else:
+        config_needs_creation_or_reset = True
+
+    if config_needs_creation_or_reset:
+        try:
+            with open(config_path, "w", encoding="utf-8") as config_file:
+                json.dump(
+                    BASE_CONFIG,
+                    fp = config_file,
+                    indent = 4
+                )
+            if not os.path.exists(config_path) or (os.path.exists(config_path) and not config_data):
+                print("Configuration files initialized.")
+
+        except Exception as error:
+            print(f"Config file not found or could not be modified - error : {error}")
+            sys.exit(1)
+
+
+def reset_config():
+    try:
+        with open(get_config_file(), "w+") as config_file:
+            json.dump(
+                BASE_CONFIG,
+                fp = config_file,
+                indent = 4
+            )
+            print("Json config file reset")
+        config_file.close()
+    
+    except Exception as error:
+        print(f"Config file not found or could not be modified - error : {error}")
+        sys.exit(1)
+
+
+#get directories and files for config initialization or reading
+def get_config_directory():
+    return str(os.path.join(os.path.expanduser("~"), config_folder))
+
+def get_config_file():
+    return str(os.path.join(get_config_directory(), config_file))
+
+
+def get_intro():
+    with open(get_config_file(), "r") as data:
+        d = json.load(data)
+        d = d["intro_text"]
+    data.close()
+    return d
+
+def get_title():
+    with open(get_config_file(), "r") as data:
+        d = json.load(data)
+        d = d["title_text"]
+    data.close()
+    return d
+
+def get_skipped_folders():
+    with open(get_config_file(), "r") as data:
+        d = json.load(data)
+        d = d["skipped_folders"]
+    data.close()
+    return d
+
+def get_skipped_files():
+    with open(get_config_file(), "r") as data:
+        d = json.load(data)
+        d = d["skipped_files"]
+    data.close()
+    return d
+
+def get_allowed_file_types():
+    with open(get_config_file(), "r") as data:
+        d = json.load(data)
+        d = d["allowed_file_types"]
+    data.close()
+    return d
+
+
+---lum--new--file--lum/data.py
+
+
+#if you want let lumen use your data vs coins, this is where everything happens !
+
+
+
+
+
+---lum--new--file--lum/github.py
+
+
+import os, shutil, sys, requests, subprocess, stat
+from lum.config import *
+
+
+def make_github_api_link(repo_link: str = None):
+    #we need to make link a https in case the user inputs a bad link
+    #case 2 : github.com/... -> https://githu...
+    #case 3 : https:// = good
+    #also for the git clone, need .git at the end
+
+    if repo_link is None:
+        return False, False
+    
+    if repo_link.startswith("http://"):
+        print("Use a secured link please (https:// and not http://)")
+        return False, False
+
+    clone_link = repo_link if repo_link.endswith(".git") else repo_link + ".git"
+    api_proc_link = repo_link[:-4] if repo_link.endswith(".git") else repo_link
+
+    for link_prefix in ["https://github.com/", "https://www.github.com/", "github.com/", "www.github.com/"]:
+        if api_proc_link.startswith(link_prefix):
+            rest = api_proc_link.split(link_prefix, 1)[-1]
+
+            if '/' in rest and not rest.startswith('/') and not rest.endswith('/'):
+                 return "https://api.github.com/repos/" + rest, clone_link
+
+    print("Link does not appear to be a standard GitHub repository link.")
+    return False, False
+
+
+def check_repo(repo_link: str = None):
+    api_link, _ = make_github_api_link(repo_link=repo_link)
+    if api_link:
+        try:
+            headers = {
+                'User-Agent': 'LUM-Python-Script'
+            }
+            response = requests.get(url=api_link, timeout=10, headers=headers)
+            return response.status_code == 200 #true if exists otherwise false !
+        
+        except requests.exceptions.RequestException as e:
+            print(f"ERROR checking repository API: {e}")
+
+    return False #false if link can't be secured or doesn't exist or isnt github link
+
+
+def check_git():
+    if shutil.which('git') is None:
+        print("Git is not installed. Please install it manually.")
+
+        if sys.platform.startswith('win'):
+            print("On Windows: https://git-scm.com/download/win")
+        elif sys.platform.startswith('linux'):
+            print("On Linux: Use package manager (e.g., 'sudo apt install git' or 'sudo yum install git').")
+        elif sys.platform.startswith('darwin'):
+            print("On macOS: https://git-scm.com/download/mac or 'brew install git'.")
+
+        return False
+    return True
+
+
+#function fixed with ai :skull:
+def remove_readonly(func, path, excinfo):
+    exc_value = excinfo[1]
+    if isinstance(exc_value, PermissionError) or (hasattr(exc_value, 'winerror') and exc_value.winerror == 5):
+        try:
+            os.chmod(path, stat.S_IWRITE | stat.S_IREAD)
+            func(path)
+        except Exception as e:
+            raise exc_value from e
+    else:
+        raise exc_value
+
+
+def download_repo(repo_link: str = None):
+    if not repo_link:
+        print("Repository link is required.")
+        sys.exit(1)
+
+    _, clone_link = make_github_api_link(repo_link=repo_link)
+    if not clone_link:
+        print("Invalid or unsupported GitHub repository link format.")
+        sys.exit(1)
+
+    #go to lum config file
+    lum_repo = get_config_directory()
+    repo_name = clone_link.split("/")[-1].replace(".git", "")
+
+    if not repo_name:
+        repo_name = clone_link.split("/")[-2] #trailing slash case
+    lum_repo_name = os.path.join(lum_repo, repo_name)
+
+    #removing existing folder if already exists
+    if os.path.exists(lum_repo_name):
+        print(f"Removing existing directory: {lum_repo_name}")
+        remove_repo(lum_repo_name)
+
+    #download with git clone using the parameter
+    command = ["git", "clone", clone_link, lum_repo_name]
+
+    try:
+        subprocess.run(command, check=True, capture_output=True, text=True)
+        #return the path of the folder to analyze
+        return lum_repo_name
+
+    except subprocess.CalledProcessError as e:
+        print(f"Git clone failed. Error: {e.stderr}")
+
+        if os.path.exists(lum_repo_name):
+            print("Attempting cleanup of partially cloned folder...")
+            remove_repo(lum_repo_name)
+
+        raise
+
+
+def remove_repo(repo_root: str = None):
+    if not repo_root or not isinstance(repo_root, str) or not os.path.isdir(repo_root):
+        print(f"Path not found or not a directory: {repo_root}")
+        return
+
+    try:
+        shutil.rmtree(repo_root, onerror=remove_readonly) #if permissions error we remove the readonly to be able to delete the folder we cloned
+
+    except Exception as e:
+        print(f"ERROR deleting folder {repo_root}: {e}")
+
+
+---lum--new--file--lum/gitignore.py
+
+
+#objective here is to ignore files mentionned in gitignore
+#need to check if the gitignore is well formatted first
+#take existing configuration, then add gitignore files / folders
+#all have a different formatting tho, need to work on that
+
+import os
+from typing import List
+from lum.config import * #to get config (to skip folders and files)
+
+
+def gitignore_exists(root: str):
+    path = os.path.join(root, ".gitignore")
+    return os.path.exists(path = path)
+
+
+def gitignore_read(root: str):
+    path = os.path.join(root, ".gitignore")
+    skipped_files, skipped_folders = [], []
+
+    #in case exception here, even tho this exception should NEVER trigger since the function only triggers when a gitignore is found
+    try:
+        with open(path, "r") as d:
+            lines = d.readlines()
+
+    except Exception as e:
+        print(f"Error : {e}.")
+        return skipped_files, skipped_folders
+    
+    for line_raw in lines:
+        #remove "\n" from line on each line's end
+        line = line_raw.strip()
+
+        #non readable / useless lines
+        if not line: continue
+        if line.startswith("#"): continue
+        if line.startswith("!"): continue
+
+        if line.endswith("/") or line.endswith("\\"):
+            normalized_path_for_basename = line.rstrip('/\\')
+
+            if not normalized_path_for_basename: continue
+            folder_name = os.path.basename(os.path.normpath(normalized_path_for_basename))
+            
+            if folder_name and folder_name != "." and folder_name != "..":
+                skipped_folders.append(folder_name)
+
+        else:
+            if line != "." and line != "..":
+                 skipped_files.append(line)
+    
+    return skipped_files, skipped_folders
+
+
+def gitignore_skipping():
+    #get skipped file and folders
+    skipped_files, skipped_folders = get_skipped_files(), get_skipped_folders()
+    #seperate gitignore into 2 ways -> files / folders
+    skipped_files_git, skipped_folders_git = gitignore_read("")
+
+    #merging between existing config + gitignore
+    skipped_files = list(set(skipped_files + skipped_files_git))
+    skipped_folders = list(set(skipped_folders + skipped_folders_git))
+
+    #return list of skipped files + gitignore ones / skipped folders + gitignore ones
+    return skipped_files, skipped_folders
+
+
+---lum--new--file--lum/main.py
+
+
+from lum.visualizer import *
+from lum.assembly import *
+from lum.config import *
+from lum.github import *
+from lum.smart_read import *
+
+from typing import List
+import json, os, sys, platform, subprocess, argparse, pyperclip
+
+#get parameters initially from file
+def get_parameters():
+    base_parameters = {
+        "intro_text": get_intro(),
+        "title_text": get_title(),
+        "skipped_folders": get_skipped_folders(),
+    }
+    return base_parameters
+
+
+#all changing parameters
+def change_parameters():
+    if platform.system() == "Windows":
+        os.startfile(get_config_file())
+    elif platform.system() == "Darwin":
+        subprocess.Popen(["open", get_config_file()])
+    else:
+        subprocess.Popen(["xdg-open", get_config_file()])
+
+
+def make_structure(path: str, skipped: List):
+    #when user types a path, we use this function with an argument, otherwise no argument and get automatically the path
+    data = json.dumps(
+        get_project_structure(
+            root_path = path,
+            skipped_folders = skipped
+        ),
+        indent = 4,
+    )
+    return data
+
+
+def lum_command(args, isGitHub: bool = False, GitHubRoot: str = None):
+    print("Launching...")
+    root_path = args.path
+
+    if isGitHub:
+        if GitHubRoot:
+            root_path = GitHubRoot
+
+        else:
+            print("The path to the GitHub repo was not found!")
+            sys.exit(1)
+
+    if args.txt: output_file = args.txt
+    else: output_file = None
+
+    check_config() #in case of first run, will automatically add config files etc
+    base_parameters = get_parameters()
+
+    #used parameters, read ONCE each parameter, no more -> output should be :
+    #x2 skipped folders, x2 skipped files, x1 intro, x1 title, x1 allowed file types ---- OBJECTIVE NOT MET BUT ALMOST
+    #before : was this but, the higher the folders = more iterations for reading files
+    #this is the best time optimization, and was the most consuming process
+    #this + not forcing encoding detection = best possible performances (if we dont count python compilers ahah)
+    
+    #went from reading parameters once every file read, to once BEFORE, now reading files "only" 18 times total
+    #this is optimized and stable, wont change unless i really want that ms difference
+    #(it won't rly change anything to read 3.5 times more basically !)
+    intro_text = base_parameters["intro_text"]
+
+    if gitignore_exists(""): skipped_files, _ = gitignore_skipping() #skipped_folders never used here, maybe can optimize later that
+    else: skipped_files = get_files_parameters()["non_allowed_read"]
+
+    allowed_files = get_files_parameters()["allowed_files"]
+
+    skipped_folders = base_parameters["skipped_folders"]
+
+    files_root = get_files_root(root_path, skipped_folders)
+    title_text = base_parameters["title_text"]
+
+    #if ranking enabled, use the ranking in backend to show top 20 most consuming files in term of token by default
+    if args.leaderboard is not None:
+        rank_tokens(files_root, args.leaderboard, allowed_files = allowed_files, skipped_files = skipped_files)
+
+
+    #STRUCTURE, MOST IMPORTANT FOR PROMPT
+    structure = ""
+    structure = add_intro(structure, intro_text)
+    structure = add_structure(structure, make_structure(root_path, skipped_folders))
+    structure = add_files_content(structure, files_root, title_text = title_text, allowed_files = allowed_files, skipped_files = skipped_files)
+
+
+    if output_file is None:
+        try:
+            pyperclip.copy(structure)
+            print("Prompt copied to clipboard.\nIf you encounter a very big codebase, try to get a '.txt' output for better performances (clipboard won't make your pc lag).")
+        #non-windows case, where the clipboard won't work on all containers because of some limitations. will try to find a LIGHT advanced fix asap (tkinter is a possibility but too large for a single module where we just need clipboard support)
+        except pyperclip.PyperclipException as e:
+            try:
+                with open("prompt.txt", "w+", encoding="utf-8") as file:
+                    file.write(structure)
+                print("Copy to clipboard failed. Output is done in the root, as 'prompt.txt', to fix this please look at the README documentation (2 commands to fix this for most linux cases, install xsel or xclip).")
+            except Exception as e:
+                print(f"Error saving prompt to file {output_path}: {e}")
+
+    elif output_file is not None:
+        output_path = os.path.join(root_path, f"{output_file}.txt")
+        try:
+            with open(output_path, "w+", encoding="utf-8") as file:
+                file.write(structure)
+            print(f"Prompt saved to {output_path}")
+        except Exception as e:
+            print(f"Error saving prompt to file {output_path}: {e}")
+
+
+def lum_github(args):
+    git_exists = check_git()
+    if git_exists == False:
+        sys.exit(1)
+
+    github_link = args.github
+    check_repo(github_link)
+
+    if github_link:
+        try:
+            git_root = download_repo(github_link)
+            lum_command(args = args, isGitHub = True, GitHubRoot = git_root)
+
+        finally:
+            git_root_to_remove = os.path.join(get_config_directory(), github_link.split("/")[-1].replace(".git", ""))
+            if not git_root_to_remove:
+                git_root_to_remove = os.path.join(get_config_directory(), github_link.split("/")[-2])
+            remove_repo(git_root_to_remove)
+    else:
+        print("GitHub repo doesn't exist, please try again with a correct link (check that the repository is NOT private, and that you are connected to internet !)")
+        sys.exit(1)
+
+
+def main():
+    parser = argparse.ArgumentParser(
+        description = "The best tool to generate AI prompts from code projects, in a single command !"
+    )
+
+    parser.add_argument(
+        "path",
+        nargs = "?", #0 or 1 argument #HOW GOOD IS ARGPARSE LET THEM COOK, WHOEVER MADE THIS IS A GENIUS
+        default = os.getcwd(),
+        help = "Path to the root to process. If not specified, will use the main root.",
+    )
+
+    parser.add_argument(
+        "-c",
+        "--configure",
+        action = "store_true", #basically will trigger true when parameter is used, no args in this case
+        help = "Opens and allows changing the configuration file."
+    )
+
+    parser.add_argument(
+        "-r",
+        "--reset",
+        action = "store_true", #same as -c
+        help = "Resets all configurations to default values."
+    )
+
+    parser.add_argument( #no more hide, hiding prompt parts is useless
+        "-l",
+        "--leaderboard",
+        nargs = "?",
+        const = 20,
+        default = None,
+        type = int,
+        metavar = "NUM", #will show top 20 most consuming files in term of tokens by default, can put any number tho and will show the leaderboard
+        help = "Leaderboard of the most token consuming files (default: 20)."
+    )
+
+    parser.add_argument(
+        "-t",
+        "--txt",
+        metavar = "FILENAME",
+        help = "Outputs the file name as FILENAME.txt in the root."
+    )
+
+    parser.add_argument(
+        "-g",
+        "--github",
+        metavar = "REPO",
+        help = "Runs the main command into a GitHub repository."
+    )
+
+    args = parser.parse_args()
+
+    if args.configure:
+        print("Config file opened. Check your code editor.")
+        check_config()
+        change_parameters()
+
+    elif args.reset:
+        check_config()
+        reset_config()
+    
+    elif args.github: #if github link we go to the repo, parse the link to make it usable for the api call, then take all the files and make an analysis
+        lum_github(args = args)
+
+    else: #if not reset or config, main purpose of the script
+        lum_command(args = args)
+        
+
+if __name__ == "__main__":
+    main()
+
+
+---lum--new--file--lum/smart_read.py
+
+
+from typing import List
+from lum.config import *
+from lum.gitignore import *
+import json, chardet, tiktoken
+
+
+def get_files_parameters():
+    base_parameters = {
+        "allowed_files": get_allowed_file_types(),
+        "non_allowed_read": get_skipped_files()
+    }
+    return base_parameters
+
+
+def chunk_read(file_path: str, chunk_size: int = 1024):
+    while True:
+        data = file_path.read(chunk_size)
+        if not data:
+            break
+        yield data
+
+
+def read_ipynb(file_path: str, cell_seperator: str = None) -> str:
+    output_lines = []
+    with open(file_path, 'r', encoding='utf-8') as f: #ipynb = utf-8
+        data = json.load(f)
+    
+    for cell in data.get('cells', []):
+        cell_type = cell.get('cell_type')
+        if cell_type in ['markdown', 'code']:
+            output_lines.append("--- CELL ---\n" if not cell_seperator else cell_seperator)
+            source_content = cell.get('source', [])
+            output_lines.append("".join(source_content) + "\n")
+            
+    return "\n".join(output_lines)
+
+
+#auto encoding detection
+#can be used as a seperate package (import pylumen / pylumen.detect_encoding(file_path))
+#if fails to read as utf-8, force the encoding detection (better to avoid wrong encoding detection + will improve performances by alot)
+def detect_encoding(file_path: str) -> str:
+    with open(file_path, 'rb') as f:
+        sample = f.read(1 * 1024)
+        #first kb, the less we read the faster
+    
+    result = chardet.detect(sample)
+    encoding = result['encoding']
+        
+    return 'utf-8' if encoding is None or encoding.lower() == 'ascii' else encoding
+
+
+def rank_tokens(files_root: dict, top: int, allowed_files: List = None, skipped_files: List = None):
+    #function used when calling -l or --leaderboard parameter -> will show by default
+    #the top 20 most token consuming files, tokens calculated via the tiktoken module
+    encoding = tiktoken.get_encoding("cl100k_base")
+    token_counts = []
+
+    print("\nCalculating token counts...")
+
+    for file_name, file_path in files_root.items():
+        content = read_file(file_path, allowed_files = allowed_files, skipped_files = skipped_files)
+
+        try:
+            tokens = encoding.encode(content)
+            token_count = len(tokens)
+            token_counts.append((token_count, file_name))
+        except Exception as e:
+            print(f"Error encoding file {file_name}: {e}")
+
+    token_counts.sort(key=lambda item: item[0], reverse=True)
+
+    print(f"\nTop {min(top, len(token_counts))} Most Token-Consuming Files :")
+
+    if not token_counts:
+        print("No readable files found to rank.")
+    else:
+        for i, (count, name) in enumerate(token_counts[:top]):
+            print(f"{i + 1}. {name}: {count} tokens")
+
+
+def read_file(file_path: str, allowed_files: List = None, skipped_files: List = None):
+    #cant define allowed files in the function, cuz if u have an old version will crash (parameters out of date = crash) :(
+    #if allowed_files is None:
+    #    allowed_files = get_files_parameters()["allowed_files"]
+
+    if not any(file_path.endswith(allowed_file) for allowed_file in allowed_files):
+        return "--- NON READABLE FILE ---"
+    
+    content = ""
+    LARGE_OUTPUT = "--- FILE TOO LARGE / NO NEED TO READ ---"
+    ERROR_OUTPUT = "--- ERROR READING FILE ---"
+    EMPNR_OUTPUT = "--- EMPTY / NON READABLE FILE ---"
+
+    #ipynb
+    if file_path.endswith(".ipynb"):
+        try:
+            content += read_ipynb(file_path = file_path)
+            return content if content else EMPNR_OUTPUT
+
+        except Exception as e:
+            print(f"Error while reading the ipynb file : {file_path}. Skipping file. Error: {e}")
+            return ERROR_OUTPUT
+
+    #skipped files (large files, module files... etc that are not needed)
+    
+
+    if any(file_path.endswith(dont_read) for dont_read in skipped_files):
+        return LARGE_OUTPUT
+    
+    #rest, any allowed file
+    try:
+        with open(file_path, "r", encoding = 'utf-8') as file: #force utf-8 read, more optimized in general
+            for chunk in chunk_read(file):
+                content += chunk
+
+    except UnicodeDecodeError: #if fail, will try to find encoding, rare case should happen once every 100 files or even lower
+        try:
+            with open(file_path, "r", encoding = detect_encoding(file_path = file_path)) as file:
+                for chunk in chunk_read(file):
+                    content += chunk
+
+        except Exception as e:
+            print(f"Error: An unexpected error occurred while reading {file_path} with encoding detection. If this happens, please try making an Issue on GitHub. Skipping file. Error: {e}")
+            return ERROR_OUTPUT
+        
+    except Exception as e:
+        print(f"Error: An unexpected error occurred while reading {file_path}. Skipping file. Error: {e}")
+        return ERROR_OUTPUT
+    
+    return content if content else EMPNR_OUTPUT
+
+
+---lum--new--file--lum/visualizer.py
+
+
+import os
+from lum.gitignore import *
+from typing import List
+
+def get_project_structure(root_path: str, skipped_folders: List):
+    #this function looks abit hard, basically will take the root path, format it correctly
+    #to show it in the prompt (with a /... etc), will check first folders, level by level
+    #then files, when adding folders, little format change -> "/" added
+    root_path_name = "".join(root_path.split(os.sep)[-1]) + "/"
+    structure = {root_path_name: {}}
+
+    if gitignore_exists(""):
+        _, skipped_folders = gitignore_skipping()
+    
+    for root, _, files in os.walk(root_path, topdown = True):
+        should_skip = False
+        for folder_name in skipped_folders:
+            #in skipped_folders, if starts wiht "*" -> will skip anything that ENDS with the skipped folder name, otherwise will take the folder name directly, and ONLY this
+            if folder_name.startswith("*"):
+                if root.endswith(folder_name[1::]): #remove the * and set condition
+                    _[:] = []
+                    structure[root_path_name][f"{''.join(root.split(os.sep)[-1])}/"] = {}
+                    should_skip = True
+                    break
+
+            else:
+                element = root.split(os.sep)[-1]
+                if element == folder_name:
+                    _[:] = []
+                    structure[root_path_name][f"{''.join(root.split(os.sep)[-1])}/"] = {}
+                    should_skip = True
+                    break
+
+        if should_skip:
+            continue
+
+
+        base = structure[root_path_name]
+        level = len(root.split(os.sep)) - len(root_path.split(os.sep)) #starts at 1, ends at highest level
+
+        if level == 0:
+            if files:
+                for file in files:
+                    base[file] = {}
+
+        else:
+            for x in range(level, 0, -1):
+                folder_subname = root.split(os.sep)[-x]
+                if x == 1:
+                    base[f"{folder_subname}/"] = {}
+                    if files:
+                        for file in files:
+                            base[f"{folder_subname}/"][file] = {}
+                            
+                else:
+                    base = base[folder_subname + "/"]
+
+    return structure
+
+
+---lum--new--file--lum/__init__.py
+
+
+from .visualizer import *
+from .smart_read import *
+from .assembly import *
+from .main import *
+from .config import *
+from .github import *
+
+
+---lum--new--file--tests/file_to_read.py
+
+
+#LINE 1
+#line2
+#
+
+
+#tsting spaces, utf or anything that could not be put in a string èèéé^^
+
+""";;::
+12test
+()()((()(())))
+%%
+$$**//\\ will the double slash show as a single slash or as a double when read
+"""
+
+#<>²²<([])>
+
+
+#i think thats enough to read, now we test
+
+#😃😃🥲🥲🥲🥲🥲😭😭
+
+
+---lum--new--file--tests/test_github.py
+
+
+from lum import assembly
+
+
+#lets test all possible links, non github links, non secured etc
+
+test_list = [
+    "https://github.com/Far3000-YT/lumen", #normal link
+    "http://github.com/Far3000-YT/lumen", #non secured (http)
+    "github.com/Far3000-YT/lumen", #no https no www
+    "www.github.com/Far3000-YT/lumen", #www only
+    "https://www.github.com/Far3000-YT/lumen", #https and www
+    "https://youtube.com", #non github link
+    "https://github.com/Far3000-YT/lumen.git" #ends with .git
+]
+
+for test in test_list: #see if we can make link
+    result = assembly.make_github_api_link(test)
+    print(result)
+
+print("\n\n")
+
+for test in test_list: #see if we can send a request well
+    result = assembly.check_repo(test)
+    print(result)
+
+
+---lum--new--file--tests/test_gitignore.py
+
+
+from lum import gitignore
+
+print(gitignore.gitignore_exists(root = "")) #true
+#running this from the project path, so there is a gitignore
+
+print(gitignore.gitignore_exists(root = "tests")) #false
+#here adding some folder like, going into tests and checking if there is a gitignore (tested by adding / removing gitignore from both root + folder path, works fine)
+
+#gitignore.gitignore_read(root = "")
+#testing line.strip if it works well (no more "\n")
+
+
+---lum--new--file--tests/test_read.py
+
+
+from lum import smart_read
+
+actual_content = """#LINE 1
+#line2
+#
+
+
+#tsting spaces, utf or anything that could not be put in a string èèéé^^
+
+\""";;::
+12test
+()()((()(())))
+%%
+$$**//\\\ will the double slash show as a single slash or as a double when read
+\"""
+
+#<>²²<([])>
+
+
+#i think thats enough to read, now we test
+
+#😃😃🥲🥲🥲🥲🥲😭😭"""
+
+
+
+
+content = smart_read.read_file("tests/file_to_read.py")
+print("Test 1 - no output = good")
+assert content == actual_content, f"Content different ! Content : {content}"
+#if no output, then the read file was working well !
+
+ipynb = smart_read.read_file("tests/test_ipynb.ipynb")
+print("Test 2 - output below (ipynb file showcase)")
+print(ipynb)
+#make sure the ipynb file clearly shows the python cells + markdowns, and nothing else (no graphs or wtv)
+#used matplotlib in the .ipynb file to validate the fact it won't read graphs
+
+
+---lum--new--file--tests/test_visualizer.py
+
+
+from lum import visualizer
+import os, json
+
+#we test the json structure of the existing project here
+
+#structure ALWAYS starts with files and its in alphabetical order since the algo I made was a bit different
+#can't rly test the structure here since I'm updating the project way too much, so I just print the output and it should look like this in any os :
+#this is the output when we ignore ".git", "lum.egg-info" and "__pycache__" folders
+
+"""
+{
+    "lumen/": {
+        "LICENSE": {},
+        "README.md": {},
+        "requirements.txt": {},
+        "setup.py": {},
+        ".git/": {},
+        "lum/": {
+            "assembly.py": {},
+            "file_reader.py": {},
+            "main.py": {},
+            "visualizer.py": {},
+            "__init__.py": {}
+        },
+        "__pycache__/": {},
+        "lum.egg-info/": {},
+        "tests/": {
+            "assembly_test.py": {},
+            "reader_test.py": {},
+            "visualizer_test.py": {}
+        }
+    }
+}
+"""
+
+#data print above
+data = json.dumps( 
+    visualizer.get_project_structure(
+        root_path = os.getcwd(), 
+        skipped_folders = [ #no need to specify the "/" element, and will show the directory but not the content
+            ".git", 
+            "__pycache__",
+            "lum.egg-info"
+        ]
+    ),
+    indent = 4,
+)
+
+#print(data)
+
+#output when nothing is ignored :
+
+"""{
+    "LUMEN/": {
+        "LICENSE": {},
+        "README.md": {},
+        "requirements.txt": {},
+        "setup.py": {},
+        "lum/": {
+            "assembly.py": {},
+            "file_reader.py": {},
+            "main.py": {},
+            "visualizer.py": {},
+            "__init__.py": {},
+            "__pycache__/": {
+                "assembly.cpython-310.pyc": {},
+                "file_reader.cpython-310.pyc": {},
+                "visualizer.cpython-310.pyc": {},
+                "__init__.cpython-310.pyc": {}
+            }
+        },
+        "lum.egg-info/": {
+            "dependency_links.txt": {},
+            "entry_points.txt": {},
+            "PKG-INFO": {},
+            "SOURCES.txt": {},
+            "top_level.txt": {}
+        },
+        "tests/": {
+            "assembly_test.py": {},
+            "reader_test.py": {},
+            "visualizer_test.py": {}
+        }
+    }
+}"""
+
+#data print above
+data = json.dumps(
+    visualizer.get_project_structure(
+        root_path = os.getcwd(), 
+        skipped_folders = [ 
+            #no need to specify the "/" element, and will show the directory but not the content
+        ]
+    ),
+    indent = 4,
+)
+
+#print(data)
+
+
