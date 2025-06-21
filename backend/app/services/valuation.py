@@ -21,14 +21,25 @@ class HybridValuationService:
     TOKEN_LIMIT = 700_000
 
     def __init__(self):
-        if settings.GEMINI_API_KEY:
-            genai.configure(api_key=settings.GEMINI_API_KEY)
-            self.model = genai.GenerativeModel(settings.GEMINI_MODEL_NAME)
-            self.generation_config = genai.types.GenerationConfig(
-                temperature=settings.GEMINI_TEMPERATURE
-            )
+        self.model = None
+        # --- THIS IS THE FIX ---
+        # Initialize the model if the mode is 'AI', regardless of API key.
+        # The Google library will automatically find the Service Account credentials.
+        if settings.VALUATION_MODE == "AI":
+            try:
+                # The library implicitly uses GOOGLE_APPLICATION_CREDENTIALS if no api_key is passed
+                genai.configure() 
+                self.model = genai.GenerativeModel(settings.GEMINI_MODEL_NAME)
+                self.generation_config = genai.types.GenerationConfig(
+                    temperature=settings.GEMINI_TEMPERATURE
+                )
+                print("[VALUATION_INIT] AI Valuation mode is ON. Model configured successfully using service account.")
+            except Exception as e:
+                print(f"[VALUATION_INIT_ERROR] Failed to configure Gemini with service account: {e}")
+                self.model = None
         else:
-            self.model = None
+            print("[VALUATION_INIT] AI Valuation mode is OFF. Using manual valuation only.")
+        # ------------------------
         
         try:
             self.tokenizer = tiktoken.get_encoding("cl100k_base")
