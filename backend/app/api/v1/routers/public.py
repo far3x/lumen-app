@@ -12,12 +12,6 @@ def get_leaderboard(
     db: Session = Depends(database.get_db),
     current_user: models.User | None = Depends(dependencies.get_current_user_optional)
 ):
-    """
-    Gets the public leaderboard.
-    - Always returns the top 10 users.
-    - If the user is authenticated, it also includes their specific rank.
-    """
-    # 1. Always fetch the top 10 users for the public list
     top_users_data = crud.get_leaderboard(db, skip=0, limit=10)
     
     top_10_entries = []
@@ -28,7 +22,6 @@ def get_leaderboard(
             lum_balance=balance
         ))
 
-    # 2. If a user is logged in, get their specific rank
     current_user_rank_entry = None
     if current_user:
         user_rank_data = crud.get_user_rank(db, user_id=current_user.id)
@@ -53,7 +46,14 @@ def get_recent_contributions(
     recent_contributions_data = crud.get_recent_processed_contributions(db, limit=limit)
     response_list = []
     for contrib, display_name in recent_contributions_data:
-        valuation_details_data = json.loads(contrib.valuation_results) if contrib.valuation_results else {}
+        valuation_details_data = {}
+        if contrib.valuation_results:
+            try:
+                valuation_details_data = json.loads(contrib.valuation_results) if isinstance(contrib.valuation_results, str) else contrib.valuation_results
+                if not isinstance(valuation_details_data, dict):
+                    valuation_details_data = {}
+            except (json.JSONDecodeError, TypeError):
+                valuation_details_data = {}
         
         manual_metrics = ValuationMetrics(
             total_lloc=valuation_details_data.get('total_lloc', 0),

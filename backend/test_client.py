@@ -5,7 +5,6 @@ import hmac
 import hashlib
 import os
 
-LUMEN_CLIENT_SECRET = os.getenv("LUMEN_CLIENT_SECRET", "1970356f3958cf95f6cd96b67293d8d21edc55e0bcaefbf24e47585e2f08dd4b")
 BASE_URL = "http://127.0.0.1:8000/api/v1"
 
 class LumenClient:
@@ -71,7 +70,11 @@ class LumenClient:
             
             body_hash = hashlib.sha256(body).hexdigest()
             string_to_sign = f"{challenge}:{timestamp}:{body_hash}".encode()
-            secret = LUMEN_CLIENT_SECRET.encode()
+            
+            # --- FIX ---
+            # Use the user's Personal Access Token (PAT) as the secret for the HMAC signature.
+            # This matches the new security implementation on the server.
+            secret = self.pat.encode()
             signature = hmac.new(secret, string_to_sign, hashlib.sha256).hexdigest()
             print("2. Request signed successfully.")
 
