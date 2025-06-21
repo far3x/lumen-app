@@ -1,5 +1,5 @@
 import hashlib
-from sqlalchemy import Column, Integer, String, Float, ForeignKey, DateTime, Boolean 
+from sqlalchemy import Column, Integer, String, Float, ForeignKey, DateTime, Boolean, BigInteger
 from sqlalchemy.orm import relationship
 from sqlalchemy.sql import func
 from .database import Base
@@ -31,8 +31,18 @@ class PersonalAccessToken(Base):
     id = Column(Integer, primary_key=True, index=True)
     token_hash = Column(String, unique=True, index=True, nullable=False)
     user_id = Column(Integer, ForeignKey("users.id"), nullable=False)
-    name = Column(String, nullable=False) # e.g., "My Dev Laptop"
+    name = Column(String, nullable=False)
     created_at = Column(DateTime(timezone=True), server_default=func.now())
     last_used_at = Column(DateTime(timezone=True), nullable=True)
     
     user = relationship("User", back_populates="personal_access_tokens")
+
+class NetworkStats(Base):
+    __tablename__ = "network_stats"
+    id = Column(Integer, primary_key=True)
+    total_lum_distributed = Column(Float, default=0.0, nullable=False)
+    total_contributions = Column(BigInteger, default=0, nullable=False)
+    mean_complexity = Column(Float, default=5.0, nullable=False)
+    m2_complexity = Column(Float, default=0.0, nullable=False)
+    variance_complexity = Column(Float, default=4.0, nullable=False)
+    std_dev_complexity = Column(Float, default=2.0, nullable=False)

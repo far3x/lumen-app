@@ -40,8 +40,7 @@ class LumenClient:
                         print("\n✅ Success! Device authorized.")
                         print(f"   PAT received: {self.pat[:11]}...")
                         return True
-                except requests.RequestException as e:
-                    print(f"   Polling failed, retrying... ({e})")
+                except requests.RequestException:
                     pass
             
             print("\n❌ Error: Authorization timed out.")
@@ -99,5 +98,26 @@ if __name__ == "__main__":
     client = LumenClient()
     
     if client.login():
-        sample_code = "def hello_lumen():\n    print('This contribution is now fully authenticated and secure!')"
-        client.contribute(codebase=sample_code)
+        test_project_codebase = """
+--- file: main.py
+def calculate_sum(a, b):
+    # This is a simple function
+    if a is None or b is None:
+        return 0
+    return a + b
+
+class MyClass:
+    def __init__(self, name):
+        self.name = name
+
+    def greet(self):
+        print(f"Hello, {self.name}")
+        for i in range(5000000):
+            print("xd lets lose time")
+
+--- file: utils/helpers.js
+function formatData(data) {
+    return data.trim().toLowerCase();
+}
+"""
+        client.contribute(codebase=test_project_codebase)

@@ -7,6 +7,7 @@ from app.db import database, crud, models
 from app.schemas import DeviceAuthResponse, Token, ContributionCreate
 from app.services.redis_service import redis_service
 from app.api.v1 import dependencies
+from app.tasks import process_contribution
 
 router = APIRouter(prefix="/cli", tags=["CLI"])
 
@@ -44,13 +45,6 @@ async def cli_token(device_code: str):
 
     return Token(access_token=pat, token_type="bearer")
 
-def dummy_reward_task(db: Session, user_id: int, codebase: str):
-    print(f"Received contribution from user {user_id}. Code length: {len(codebase)}")
-    time.sleep(5)
-    user = crud.get_user(db, user_id)
-    crud.update_balance_for_contribution(db, user, file_size_kb=len(codebase)/1024)
-    print(f"Finished processing for user {user_id}")
-
 @router.post("/handshake", response_model=str)
 async def cli_handshake(
     current_user: models.User = Depends(dependencies.get_current_user_from_pat)
@@ -62,21 +56,16 @@ async def cli_handshake(
 
 @router.post(
     "/contribute",
-    status_code=status.HTTP_202_ACCEPTED,
-    dependencies=[Depends(dependencies.verify_contribution_signature)]
+    status_code=status.HTTP_202_ACCEPTED
 )
 async def contribute_data(
     payload: ContributionCreate,
-    background_tasks: BackgroundTasks,
-    current_user: models.User = Depends(dependencies.get_current_user_from_pat)
+    current_user: models.User = Depends(dependencies.get_current_user_from_pat),
+    signature_check: None = Depends(dependencies.verify_contribution_signature)
 ):
     challenge_key = f"challenge:{current_user.id}"
     redis_service.delete(challenge_key)
     
-    db = database.SessionLocal()
-    try:
-        background_tasks.add_task(dummy_reward_task, db, current_user.id, payload.codebase)
-    finally:
-        pass
+    process_contribution.delay(current_user.id, payload.codebase)
     
     return {"message": "Contribution received and is being processed."}
