@@ -12,6 +12,8 @@ class AppSettings(BaseSettings):
     DATABASE_URL: str = os.getenv("DATABASE_URL", "sqlite:///./lumen_exchange.db")
     FRONTEND_URL: str = os.getenv("FRONTEND_URL", "http://localhost:5173")
 
+    API_URL: str = os.getenv("API_URL", "http://localhost:8000") 
+
     ENCRYPTION_KEY: str = os.getenv("ENCRYPTION_KEY")
     SECRET_KEY: str = os.getenv("SECRET_KEY")
     ALGORITHM: str = "HS256"
