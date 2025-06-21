@@ -57,6 +57,7 @@ function renderScoreBar(label, score) {
 }
 
 function renderContributionDetailModal(item) {
+    const details = item.valuation_details || {};
     const content = `
         <div class="space-y-6">
             <div>
@@ -64,19 +65,19 @@ function renderContributionDetailModal(item) {
                 <div class="grid grid-cols-2 md:grid-cols-4 gap-4 text-center">
                     <div class="bg-primary p-3 rounded-lg">
                         <p class="text-xs text-subtle">Tokens</p>
-                        <p class="text-lg font-bold font-mono text-text-main">${item.manual_metrics?.total_tokens?.toLocaleString() ?? 'N/A'}</p>
+                        <p class="text-lg font-bold font-mono text-text-main">${details.total_tokens?.toLocaleString() ?? 'N/A'}</p>
                     </div>
                     <div class="bg-primary p-3 rounded-lg">
                         <p class="text-xs text-subtle">Complexity</p>
-                        <p class="text-lg font-bold font-mono text-text-main">${item.manual_metrics?.avg_complexity?.toFixed(2) ?? 'N/A'}</p>
+                        <p class="text-lg font-bold font-mono text-text-main">${details.avg_complexity?.toFixed(2) ?? 'N/A'}</p>
                     </div>
                     <div class="bg-primary p-3 rounded-lg">
                         <p class="text-xs text-subtle">Uniqueness</p>
-                        <p class="text-lg font-bold font-mono text-text-main">${item.valuation_details?.rarity_multiplier?.toFixed(2) ?? 'N/A'}x</p>
+                        <p class="text-lg font-bold font-mono text-text-main">${details.rarity_multiplier?.toFixed(2) ?? 'N/A'}x</p>
                     </div>
                     <div class="bg-primary p-3 rounded-lg">
                         <p class="text-xs text-subtle">Halving</p>
-                        <p class="text-lg font-bold font-mono text-text-main">${item.valuation_details?.halving_multiplier?.toFixed(2) ?? 'N/A'}x</p>
+                        <p class="text-lg font-bold font-mono text-text-main">${details.halving_multiplier?.toFixed(2) ?? 'N/A'}x</p>
                     </div>
                 </div>
             </div>
@@ -84,12 +85,12 @@ function renderContributionDetailModal(item) {
             <div>
                 <h3 class="font-bold text-text-main mb-3">AI Analysis</h3>
                 <div class="bg-primary p-4 rounded-lg space-y-4">
-                    ${renderScoreBar('Project Clarity', item.ai_analysis?.project_clarity_score)}
-                    ${renderScoreBar('Architectural Quality', item.ai_analysis?.architectural_quality_score)}
-                    ${renderScoreBar('Code Quality', item.ai_analysis?.code_quality_score)}
-                    ${item.ai_analysis?.analysis_summary ? `
+                    ${renderScoreBar('Project Clarity', details.project_clarity_score)}
+                    ${renderScoreBar('Architectural Quality', details.architectural_quality_score)}
+                    ${renderScoreBar('Code Quality', details.code_quality_score)}
+                    ${details.analysis_summary ? `
                         <div class="pt-4 border-t border-subtle/50">
-                            <p class="text-sm text-text-secondary leading-relaxed">${escapeHtml(item.ai_analysis.analysis_summary)}</p>
+                            <p class="text-sm text-text-secondary leading-relaxed">${escapeHtml(details.analysis_summary)}</p>
                         </div>
                     ` : '<p class="text-sm text-text-secondary">No AI summary available for this contribution.</p>'}
                 </div>
