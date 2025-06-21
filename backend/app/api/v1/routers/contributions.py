@@ -21,9 +21,9 @@ def get_single_contribution(
     valuation_data = {}
     if contrib.valuation_results:
         try:
-            loaded_json = json.loads(contrib.valuation_results)
-            if isinstance(loaded_json, dict):
-                valuation_data = loaded_json
+            valuation_data = json.loads(contrib.valuation_results) if isinstance(contrib.valuation_results, str) else contrib.valuation_results
+            if not isinstance(valuation_data, dict):
+                valuation_data = {}
         except (json.JSONDecodeError, TypeError):
             valuation_data = {}
 
