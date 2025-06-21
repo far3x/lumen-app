@@ -84,7 +84,6 @@ async def register_user(request: Request, user: UserCreate, background_tasks: Ba
     fm = FastMail(mail_conf)
 
     if db_user:
-        # User exists. Send a notification email instead of an error.
         login_link = f"{config.settings.FRONTEND_URL}/login"
         reset_password_link = f"{config.settings.FRONTEND_URL}/forgot-password"
         
@@ -102,7 +101,6 @@ async def register_user(request: Request, user: UserCreate, background_tasks: Ba
         background_tasks.add_task(fm.send_message, message, template_name="existing_account_signup_attempt.html")
     
     else:
-        # User does not exist, proceed with creation.
         new_user = crud.create_user(db=db, user=user)
         verification_link = f"{config.settings.FRONTEND_URL}/verify?token={new_user.verification_token}"
         
@@ -118,7 +116,6 @@ async def register_user(request: Request, user: UserCreate, background_tasks: Ba
         )
         background_tasks.add_task(fm.send_message, message, template_name="verification_email.html")
     
-    # Return a generic message in both cases to prevent email enumeration
     return {"message": "If an account with this email doesn't already exist, a verification link has been sent. Otherwise, we've sent instructions to the existing account's email address."}
 
 
@@ -304,7 +301,8 @@ async def login_2fa_backup_code(response: Response, request: TwoFactorBackupCode
 
 @router.get('/login/{provider}')
 async def login_via_provider(request: Request, provider: str, state: str | None = Query(None)):
-    redirect_uri = f"{request.base_url}api/v1/auth/callback/{provider}"
+    # Construct the redirect URI using the public-facing API_URL from settings
+    redirect_uri = f"{config.settings.API_URL}/api/v1/auth/callback/{provider}"
     
     if state:
         request.session['oauth_state_data'] = state
@@ -323,26 +321,22 @@ async def auth_callback(request: Request, provider: str, db: Session = Depends(d
     oauth_id = str(user_info.get("sub") or user_info.get("id"))
     oauth_email = user_info.get("email")
     
-    # Check if this is an account linking flow
     linking_user_id = request.session.pop('oauth_link_user_id', None)
     if linking_user_id:
         user_to_link = crud.get_user(db, user_id=linking_user_id)
         if not user_to_link:
             return RedirectResponse(url=f"{config.settings.FRONTEND_URL}/app/dashboard?tab=settings&error=link_failed")
 
-        # Validation 1: Is this social account already claimed by another user?
         existing_oauth_user = crud.get_user_by_oauth_id(db, provider, oauth_id)
         if existing_oauth_user and existing_oauth_user.id != user_to_link.id:
             return RedirectResponse(url=f"{config.settings.FRONTEND_URL}/app/dashboard?tab=settings&error=oauth_in_use")
 
-        # Validation 2: If the current user has an email, does it match the social account's email?
         if user_to_link.email and oauth_email and user_to_link.email.lower() != oauth_email.lower():
             return RedirectResponse(url=f"{config.settings.FRONTEND_URL}/app/dashboard?tab=settings&error=email_mismatch")
 
         if provider == "google": user_to_link.google_id = oauth_id
         elif provider == "github": user_to_link.github_id = oauth_id
         
-        # If the user didn't have an email before, but the social provider does, add it.
         if not user_to_link.email and oauth_email:
             user_to_link.email = oauth_email
 
@@ -350,23 +344,17 @@ async def auth_callback(request: Request, provider: str, db: Session = Depends(d
         db.refresh(user_to_link)
         return RedirectResponse(url=f"{config.settings.FRONTEND_URL}/app/dashboard?tab=settings&success=link_complete")
 
-    # Regular login/signup flow
     user = crud.get_user_by_oauth_id(db, provider, oauth_id)
 
     if not user and oauth_email:
-        # User not found by OAuth ID, try finding by email
         existing_user_by_email = crud.get_user_by_email(db, email=oauth_email)
         if existing_user_by_email:
-            # If user exists by email but has a password, it's a conflict
             if existing_user_by_email.has_password:
                 return RedirectResponse(url=f"{config.settings.FRONTEND_URL}/login?error=oauth_email_exists")
-            # If user exists but no password (e.g. from another OAuth), this is an unhandled edge case.
-            # Safest to reject and ask them to log in with their other method.
             else:
                  return RedirectResponse(url=f"{config.settings.FRONTEND_URL}/login?error=oauth_email_exists")
     
     if not user:
-        # If we are here, no user was found by oauth_id or by conflicting email, so create a new one.
         user = crud.create_oauth_user(db, provider, user_info)
     
     access_token_expires = timedelta(minutes=config.settings.ACCESS_TOKEN_EXPIRE_MINUTES)

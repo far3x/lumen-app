@@ -123,7 +123,8 @@ function setupEventListeners() {
             const provider = e.currentTarget.dataset.provider;
             const redirectPath = localStorage.getItem('post_login_redirect') || '/app/dashboard';
             const state = btoa(JSON.stringify({ redirect_path: redirectPath }));
-            window.location.href = `${import.meta.env.VITE_API_URL || 'http://localhost:8000'}/api/v1/auth/login/${provider}?state=${state}`;
+            const baseUrl = import.meta.env.VITE_API_URL || 'http://localhost:8000';
+            window.location.href = `${baseUrl}/api/v1/auth/login/${provider}?state=${state}`;
         });
     });
 }

@@ -9,6 +9,7 @@ from app.api.v1.routers import auth, cli, users, public, security
 from app.core.celery_app import celery_app
 import logging
 from slowapi.middleware import SlowAPIMiddleware
+from uvicorn.middleware.proxy_headers import ProxyHeadersMiddleware
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -17,6 +18,9 @@ app = FastAPI(
     title=settings.PROJECT_NAME,
     version=settings.PROJECT_VERSION
 )
+
+# Trust the proxy headers from Nginx (X-Forwarded-For, X-Forwarded-Proto)
+app.add_middleware(ProxyHeadersMiddleware, trusted_hosts="*")
 
 app.state.limiter = limiter
 app.add_middleware(SlowAPIMiddleware)
@@ -34,7 +38,6 @@ app.add_middleware(SessionMiddleware, secret_key=settings.SECRET_KEY)
 async def startup_event():
     logger.info("Application startup: Initializing database...")
     try:
-        #Base.metadata.create_all(bind=engine)
         logger.info("Database tables created/checked successfully.")
         
         from app.db import crud
