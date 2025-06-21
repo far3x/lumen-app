@@ -103,7 +103,7 @@ details > summary::-webkit-details-marker {
 .prose-custom h3, 
 .prose-custom h4 {
     @apply text-text-main;
-}
+} 
 
 .prose-custom h1,
 .prose-custom h2,
@@ -152,4 +152,20 @@ details > summary::-webkit-details-marker {
     height: 1px;
     background: linear-gradient(90deg, theme('colors.accent-purple') 0%, theme('colors.accent-pink') 50%, theme('colors.accent-cyan') 100%);
     opacity: 0.5;
+}
+
+.input-error {
+    @apply border-red-500/50 ring-2 ring-red-900/50;
+}
+
+.error-text {
+    @apply text-red-400 text-xs mt-1.5;
+}
+
+.strength-bar {
+    @apply w-full bg-primary rounded-full h-1.5 mt-2;
+}
+
+.strength-bar-fill {
+    @apply h-1.5 rounded-full transition-all duration-300;
 }

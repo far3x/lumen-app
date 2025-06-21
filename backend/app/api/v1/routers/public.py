@@ -1,27 +1,49 @@
 from fastapi import APIRouter, Depends, Query
 from sqlalchemy.orm import Session
-
-from app.db import crud, database
-from app.schemas import LeaderboardEntry, ContributionResponse, ValuationMetrics, AiAnalysis
+from app.db import crud, database, models
+from app.schemas import LeaderboardEntry, ContributionResponse, ValuationMetrics, AiAnalysis, LeaderboardResponse
+from app.api.v1 import dependencies
 import json
 
 router = APIRouter(tags=["Public"])
 
-@router.get("/leaderboard", response_model=list[LeaderboardEntry])
+@router.get("/leaderboard", response_model=LeaderboardResponse)
 def get_leaderboard(
     db: Session = Depends(database.get_db),
-    skip: int = Query(0, ge=0),
-    limit: int = Query(100, le=1000)
+    current_user: models.User | None = Depends(dependencies.get_current_user_optional)
 ):
-    top_users_data = crud.get_leaderboard(db, skip=skip, limit=limit)
-    leaderboard_entries = []
-    for rank, (user, balance) in enumerate(top_users_data, start=skip + 1):
-        leaderboard_entries.append(LeaderboardEntry(
+    """
+    Gets the public leaderboard.
+    - Always returns the top 10 users.
+    - If the user is authenticated, it also includes their specific rank.
+    """
+    # 1. Always fetch the top 10 users for the public list
+    top_users_data = crud.get_leaderboard(db, skip=0, limit=10)
+    
+    top_10_entries = []
+    for rank, (user, balance) in enumerate(top_users_data, start=1):
+        top_10_entries.append(LeaderboardEntry(
             rank=rank,
             display_name=user.display_name,
             lum_balance=balance
         ))
-    return leaderboard_entries
+
+    # 2. If a user is logged in, get their specific rank
+    current_user_rank_entry = None
+    if current_user:
+        user_rank_data = crud.get_user_rank(db, user_id=current_user.id)
+        if user_rank_data:
+            current_user_rank_entry = LeaderboardEntry(
+                rank=user_rank_data.rank,
+                display_name=user_rank_data.display_name,
+                lum_balance=user_rank_data.lum_balance
+            )
+
+    return LeaderboardResponse(
+        top_users=top_10_entries,
+        current_user_rank=current_user_rank_entry
+    )
+
 
 @router.get("/recent-contributions", response_model=list[ContributionResponse])
 def get_recent_contributions(

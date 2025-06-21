@@ -1,4 +1,4 @@
-import { getAuthHeaders } from '../lib/auth.js';
+import { api } from '../lib/auth.js';
 
 function setupEventListeners() {
     const form = document.getElementById('link-form');
@@ -19,14 +19,13 @@ function setupEventListeners() {
         submitButton.innerHTML = `<span class="animate-spin inline-block w-5 h-5 border-2 border-transparent border-t-white rounded-full"></span>`;
 
         try {
-            const response = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:8000'}/api/v1/auth/cli/approve-device`, {
-                method: 'POST',
-                headers: getAuthHeaders(),
-                body: JSON.stringify({ user_code: userCode, device_name: "My Lumen CLI" })
+            const response = await api.post('/auth/cli/approve-device', {
+                user_code: userCode,
+                device_name: "My Lumen CLI"
             });
 
-            if (!response.ok) {
-                const errorData = await response.json();
+            if (response.status !== 200) {
+                const errorData = response.data;
                 throw new Error(errorData.detail || 'Failed to authorize device.');
             }
             
@@ -55,7 +54,7 @@ function setupEventListeners() {
             }, 5000);
 
         } catch (error) {
-            errorMessageElement.textContent = error.message;
+            errorMessageElement.textContent = error.response?.data?.detail || error.message;
             errorMessageElement.classList.remove('hidden');
             submitButton.disabled = false;
             submitButton.innerHTML = originalButtonHTML;

@@ -13,12 +13,17 @@ from app.services.redis_service import redis_service
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/api/v1/auth/token")
 
-async def get_current_user(token: str = Depends(oauth2_scheme), db: Session = Depends(get_db)) -> models.User:
+async def get_current_user(request: Request, db: Session = Depends(get_db)) -> models.User:
     credentials_exception = HTTPException(
         status_code=status.HTTP_401_UNAUTHORIZED,
         detail="Could not validate credentials",
         headers={"WWW-Authenticate": "Bearer"},
     )
+    
+    token = request.cookies.get("access_token")
+    if token is None:
+        raise credentials_exception
+
     try:
         payload = jwt.decode(token, config.settings.SECRET_KEY, algorithms=[config.settings.ALGORITHM])
         user_id: str = payload.get("sub")
@@ -27,9 +32,11 @@ async def get_current_user(token: str = Depends(oauth2_scheme), db: Session = De
         token_data = TokenData(id=user_id)
     except JWTError:
         raise credentials_exception
+    
     user = crud.get_user(db, user_id=int(token_data.id))
     if user is None:
         raise credentials_exception
+    
     return user
 
 async def get_current_user_from_pat(pat: str = Depends(oauth2_scheme), db: Session = Depends(get_db)) -> models.User:
@@ -74,3 +81,12 @@ async def verify_contribution_signature(
             status_code=status.HTTP_403_FORBIDDEN,
             detail="Invalid client signature.",
         )
+
+async def get_current_user_optional(request: Request, db: Session = Depends(get_db)) -> models.User | None:
+    try:
+        user = await get_current_user(request, db)
+        return user
+    except HTTPException as e:
+        if e.status_code == status.HTTP_401_UNAUTHORIZED:
+            return None
+        raise e
