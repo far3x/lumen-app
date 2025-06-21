@@ -1,5 +1,3 @@
-// SIMPLIFIED FILE: frontend/src/pages/login.js
-
 import { login } from '../lib/auth.js';
 import { navigate } from '../router.js';
 
@@ -18,7 +16,13 @@ function setupEventListeners() {
 
         try {
             await login(email, password);
-            navigate('/app/dashboard');
+            const redirectPath = localStorage.getItem('post_login_redirect');
+            if (redirectPath) {
+                localStorage.removeItem('post_login_redirect');
+                navigate(redirectPath);
+            } else {
+                navigate('/app/dashboard');
+            }
         } catch (error) {
             const errorElement = document.getElementById('error-message');
             errorElement.textContent = error.response?.data?.detail || 'Incorrect email or password.';
@@ -32,7 +36,9 @@ function setupEventListeners() {
     document.querySelectorAll('.oauth-button').forEach(button => {
         button.addEventListener('click', (e) => {
             const provider = e.currentTarget.dataset.provider;
-            window.location.href = `${import.meta.env.VITE_API_URL || 'http://localhost:8000'}/auth/login/${provider}`;
+            const redirectPath = localStorage.getItem('post_login_redirect') || '/app/dashboard';
+            const state = btoa(JSON.stringify({ redirect_path: redirectPath }));
+            window.location.href = `${import.meta.env.VITE_API_URL || 'http://localhost:8000'}/api/v1/auth/login/${provider}?state=${state}`;
         });
     });
 }
@@ -127,7 +133,7 @@ export function renderLoginPage() {
             class="absolute top-0 left-0 w-full h-full object-cover -z-20"
             src="/plexus-bg.mp4"
         ></video>
-        <div class="absolute top-0 left-0 w-full h-full bg-black/70 -z-10"></div>
+        <div class="absolute top-0 left-0 w-full h-full bg-black/50 -z-10"></div>
         <div id="login-container" class="w-full"></div>
     </main>`;
     
