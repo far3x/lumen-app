@@ -46,14 +46,19 @@ def get_recent_contributions(
     recent_contributions_data = crud.get_recent_processed_contributions(db, limit=limit)
     response_list = []
     for contrib, display_name in recent_contributions_data:
+        # --- START OF THE FIX ---
         valuation_data = {}
         if contrib.valuation_results:
-            try:
-                valuation_data = json.loads(contrib.valuation_results) if isinstance(contrib.valuation_results, str) else contrib.valuation_results
-                if not isinstance(valuation_data, dict):
-                    valuation_data = {}
-            except (json.JSONDecodeError, TypeError):
-                valuation_data = {}
+            data = contrib.valuation_results
+            if isinstance(data, str):
+                try: data = json.loads(data)
+                except (json.JSONDecodeError, TypeError): data = {}
+            if isinstance(data, str):
+                try: data = json.loads(data)
+                except (json.JSONDecodeError, TypeError): data = {}
+            if isinstance(data, dict):
+                valuation_data = data
+        # --- END OF THE FIX ---
         
         manual_metrics = ValuationMetrics(
             total_lloc=valuation_data.get('total_lloc', 0),

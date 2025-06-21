@@ -18,14 +18,25 @@ def get_single_contribution(
     if not contrib or contrib.user_id != current_user.id:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Contribution not found")
 
+    # --- START OF THE FIX ---
     valuation_data = {}
     if contrib.valuation_results:
-        try:
-            valuation_data = json.loads(contrib.valuation_results) if isinstance(contrib.valuation_results, str) else contrib.valuation_results
-            if not isinstance(valuation_data, dict):
-                valuation_data = {}
-        except (json.JSONDecodeError, TypeError):
-            valuation_data = {}
+        # This robustly handles dicts, single-encoded strings, and double-encoded strings
+        data = contrib.valuation_results
+        if isinstance(data, str):
+            try:
+                data = json.loads(data)
+            except (json.JSONDecodeError, TypeError):
+                data = {}
+        if isinstance(data, str): # Handle double-encoding
+            try:
+                data = json.loads(data)
+            except (json.JSONDecodeError, TypeError):
+                data = {}
+        
+        if isinstance(data, dict):
+            valuation_data = data
+    # --- END OF THE FIX ---
 
     manual_metrics = ValuationMetrics(
         total_lloc=valuation_data.get('total_lloc', 0),
