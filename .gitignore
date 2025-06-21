@@ -6,6 +6,8 @@ local_settings.py
 .env.*
 *.db
 *.sqlite3
+prod.env
+lumen-opensource-client/
 
 # --- Python / FastAPI Backend ---
 /backend/venv/

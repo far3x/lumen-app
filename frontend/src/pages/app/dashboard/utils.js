@@ -54,11 +54,14 @@ export function updateBalancesInUI() {
     const account = getAccount();
     if (!account) return;
 
-    const balanceFormatted = (account.lum_balance ?? 0).toLocaleString(undefined, { minimumFractionDigits: 4, maximumFractionDigits: 4 });
     const balanceDisplay = `${(account.lum_balance ?? 0).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 4 })} $LUM`;
 
     document.querySelectorAll('.navbar-user-balance').forEach(el => el.textContent = balanceDisplay);
-    document.querySelectorAll('.dashboard-total-balance').forEach(el => el.textContent = balanceDisplay);
+    
+    const overviewBalanceEl = document.getElementById('overview-total-balance');
+    if (overviewBalanceEl) {
+        overviewBalanceEl.textContent = balanceDisplay;
+    }
 }
 
 export function renderModal(title, content) {

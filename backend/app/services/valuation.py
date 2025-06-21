@@ -220,9 +220,6 @@ class HybridValuationService:
             "halving_multiplier": round(halving_multiplier, 4),
             "final_reward": round(final_reward, 4),
         }
-        
-        if settings.VALUATION_MODE == "AI":
-            valuation_details["ai_summary"] = ai_scores.get("analysis_summary", "N/A")
 
         return {"final_reward": final_reward, "valuation_details": valuation_details}
 
