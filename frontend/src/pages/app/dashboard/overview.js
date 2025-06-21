@@ -188,7 +188,7 @@ export function renderDashboardOverview(user, account, rank, allContributions) {
             
             <div class="col-span-2 bg-gradient-to-br from-accent-purple/80 to-accent-pink/80 p-6 rounded-xl text-white shadow-lg shadow-accent-purple/20">
                 <p class="text-sm font-medium text-purple-200">Total Balance</p>
-                <p class="text-5xl font-bold mt-2">${account?.lum_balance?.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 4 }) ?? '0.00'} $LUM</p>
+                <p id="overview-total-balance" class="text-5xl font-bold mt-2">${account?.lum_balance?.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 4 }) ?? '0.00'} $LUM</p>
             </div>
 
             ${renderStatCard('Global Rank', rank ? rank.toLocaleString() : 'N/A')}
