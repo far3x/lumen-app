@@ -1,11 +1,12 @@
-import { renderNavbar } from './components/navbar.js';
+import { renderNavbar, setupNavbarEventListeners } from './components/navbar.js';
 import { renderFooter } from './components/footer.js';
 import { renderLandingPage } from './pages/landing.js';
 import { renderLoginPage } from './pages/login.js';
 import { renderSignupPage } from './pages/signup.js';
 import { renderDocsLayout } from './pages/docs/layout.js';
-import { renderDashboard } from './pages/app/dashboard.js';
+import { renderDashboardLayout } from './pages/app/dashboard/layout.js';
 import { renderLinkPage } from './pages/link.js';
+import { renderPublicDashboard } from './pages/public_dashboard.js';
 import { isAuthenticated, fetchAndStoreUser } from './lib/auth.js';
 
 const app = document.getElementById('app');
@@ -16,6 +17,7 @@ const routes = {
     '/login': renderLoginPage,
     '/signup': renderSignupPage,
     '/link': renderLinkPage,
+    '/leaderboard': renderPublicDashboard,
     '/docs/introduction': () => renderDocsLayout('introduction'),
     '/docs/why-lumen': () => renderDocsLayout('why-lumen'),
     '/docs/installation': () => renderDocsLayout('installation'),
@@ -28,7 +30,7 @@ const routes = {
     '/docs/governance': () => renderDocsLayout('governance'),
     '/docs/roadmap': () => renderDocsLayout('roadmap'),
     '/docs/faq': () => renderDocsLayout('faq'),
-    '/app/dashboard': renderDashboard,
+    '/app/dashboard': renderDashboardLayout, 
 };
 
 export const navigate = (path) => {
@@ -62,6 +64,7 @@ const handleLocation = async () => {
     }
 
     if (path.startsWith('/app') && !isAuthenticated()) {
+        localStorage.setItem('post_login_redirect', path);
         navigate('/login');
         return;
     }
@@ -78,15 +81,19 @@ const handleLocation = async () => {
     }
     
     const renderFunc = routes[path] || routes['/'];
+    
     if (path === '/link') {
         app.innerHTML = await renderFunc();
     } else {
-        app.innerHTML = renderNavbar() + await renderFunc() + renderFooter();
+        app.innerHTML = renderNavbar(path) + await renderFunc() + renderFooter();
     }
     
     window.scrollTo(0, 0);
     
-    attachNavEventListeners();
+    requestAnimationFrame(() => {
+        attachNavEventListeners();
+        setupNavbarEventListeners();
+    });
 };
 
 const attachNavEventListeners = () => {
@@ -94,11 +101,11 @@ const attachNavEventListeners = () => {
         if (link.hostname === window.location.hostname && !link.hasAttribute('data-external')) {
             link.addEventListener('click', e => {
                 if (link.hash) {
-                    return;
+                    return; 
                 }
                 e.preventDefault();
-                if (window.location.pathname !== link.pathname) {
-                    navigate(link.pathname);
+                if (window.location.pathname !== link.pathname || window.location.search !== link.search) {
+                    navigate(link.pathname + link.search);
                 }
             });
         }
@@ -133,5 +140,11 @@ const attachNavEventListeners = () => {
 
 export const initializeRouter = () => {
     window.addEventListener('popstate', handleLocation);
+    document.body.addEventListener('click', (e) => {
+        if (e.target.matches('[data-link]')) {
+            e.preventDefault();
+            navigate(e.target.getAttribute('href'));
+        }
+    });
     handleLocation();
 }
