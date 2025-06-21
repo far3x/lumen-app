@@ -68,20 +68,20 @@ class HybridValuationService:
         }
         
         all_content_str = ""
-        total_complexity_score = 0
+        total_complexity = 0
         total_files_with_complexity = 0
 
         with tempfile.TemporaryDirectory() as temp_dir:
             for file_data in parsed_files:
                 try:
-                    full_path = os.path.join(temp_dir, file_data["path"])
+                    full_path = os.path.join(temp_dir, os.path.normpath(file_data["path"]))
                     os.makedirs(os.path.dirname(full_path), exist_ok=True)
                     
                     with open(full_path, 'w', encoding='utf-8') as f:
                         f.write(file_data["content"])
                     
                     all_content_str += file_data["content"] + "\n"
-                except Exception as e:
+                except (OSError, TypeError) as e:
                     print(f"[VALUATION_ERROR] Could not write temporary file {file_data.get('path', 'unknown')}: {e}")
                     continue
 
@@ -108,7 +108,7 @@ class HybridValuationService:
                         
                         complexity = lang_summary.get("Complexity", 0)
                         if complexity > 0 and file_count > 0:
-                            total_complexity_score += complexity
+                            total_complexity += complexity
                             total_files_with_complexity += file_count
 
             except (subprocess.CalledProcessError, FileNotFoundError, json.JSONDecodeError) as e:
@@ -118,7 +118,7 @@ class HybridValuationService:
                     analysis_data["total_tokens"] = len(self.tokenizer.encode(all_content_str))
 
         if total_files_with_complexity > 0:
-            analysis_data["avg_complexity"] = total_complexity_score / total_files_with_complexity
+            analysis_data["avg_complexity"] = total_complexity / total_files_with_complexity
         
         if all_content_str:
             original_size = len(all_content_str.encode('utf-8'))
