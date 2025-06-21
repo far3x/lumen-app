@@ -1,7 +1,6 @@
-from pydantic import BaseModel, EmailStr
+from pydantic import BaseModel, EmailStr, constr
 from typing import Optional
 
-# --- User Schemas ---
 class UserCreate(BaseModel):
     email: EmailStr
     password: str
@@ -14,7 +13,6 @@ class User(BaseModel):
     class Config:
         from_attributes = True
 
-# --- Token Schemas ---
 class Token(BaseModel):
     access_token: str
     token_type: str
@@ -26,7 +24,6 @@ class PersonalAccessToken(BaseModel):
     name: str
     token: str
 
-# --- CLI Auth Schemas ---
 class DeviceAuthResponse(BaseModel):
     device_code: str
     user_code: str
@@ -38,13 +35,11 @@ class ApproveDeviceRequest(BaseModel):
     user_code: str
     device_name: Optional[str] = "Lumen CLI"
 
-# --- Account Schema ---
 class Account(BaseModel):
     lum_balance: float
 
     class Config:
         from_attributes = True
 
-# --- NEW: Contribution Schema ---
 class ContributionCreate(BaseModel):
-    codebase: str
+    codebase: constr(max_length=5000000)
