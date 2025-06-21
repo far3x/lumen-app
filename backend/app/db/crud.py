@@ -29,7 +29,6 @@ def get_user_by_oauth_id(db: Session, provider: str, oauth_id: str):
 
 def create_user(db: Session, user: schemas.UserCreate):
     hashed_password = security.get_password_hash(user.password)
-    # Sanitize display name on creation
     display_name = re.sub(r'[^\w\s-]', '', user.email.split('@')[0]).strip()
     if not display_name:
         display_name = f"user-{secrets.token_hex(4)}"
@@ -48,14 +47,12 @@ def create_user(db: Session, user: schemas.UserCreate):
 
 def update_user_profile(db: Session, user: models.User, user_update: schemas.UserUpdate):
     if user_update.display_name is not None:
-        # Sanitize and validate display name
         clean_name = re.sub(r'[^\w\s-]', '', user_update.display_name).strip()
         if len(clean_name) < 3:
             raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Display name must be at least 3 characters long.")
         if len(clean_name) > 25:
              raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Display name cannot exceed 25 characters.")
 
-        # Check for uniqueness
         existing_user = db.query(models.User).filter(models.User.display_name == clean_name, models.User.id != user.id).first()
         if existing_user:
             raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="Display name is already taken.")
@@ -73,7 +70,6 @@ def update_user_profile(db: Session, user: models.User, user_update: schemas.Use
 def create_oauth_user(db: Session, provider: str, user_info: dict):
     email = user_info.get("email")
     display_name = user_info.get("name") or user_info.get("login")
-    # Sanitize and ensure uniqueness for new OAuth user display names
     clean_name = re.sub(r'[^\w\s-]', '', display_name).strip()
     if not clean_name: clean_name = f"user-{secrets.token_hex(4)}"
     
@@ -84,8 +80,6 @@ def create_oauth_user(db: Session, provider: str, user_info: dict):
     if email:
         db_user = get_user_by_email(db, email=email)
         if db_user:
-            # This case is handled in the auth router now to reject login
-            # Here we just update the record if linking were to happen this way
             if provider == "google" and not db_user.google_id: db_user.google_id = user_info["sub"]
             elif provider == "github" and not db_user.github_id: db_user.github_id = str(user_info["id"])
             if not db_user.display_name:
@@ -129,6 +123,12 @@ def update_network_stats(db: Session, complexity_score: float, reward_amount: fl
     stats = get_network_stats(db)
     if not stats:
         stats = models.NetworkStats(); db.add(stats)
+
+    if stats.total_lum_distributed is None:
+        stats.total_lum_distributed = 0.0
+    if stats.total_contributions is None:
+        stats.total_contributions = 0
+
     stats.total_lum_distributed += reward_amount
     n = stats.total_contributions; stats.total_contributions += 1
     delta = complexity_score - stats.mean_complexity
@@ -215,12 +215,6 @@ def get_user_contributions_paginated(db: Session, user_id: int, skip: int = 0, l
     return items, total_count
 
 def get_user_rank(db: Session, user_id: int):
-    """
-    Gets a specific user's rank and balance.
-    Returns a tuple (rank, display_name, lum_balance) or None.
-    """
-    # Using a raw SQL query with a window function is most efficient for ranking.
-    # This avoids loading all users into memory.
     query = text("""
         SELECT rank, display_name, lum_balance
         FROM (

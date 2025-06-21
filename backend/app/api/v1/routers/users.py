@@ -77,7 +77,14 @@ def get_my_contributions(
     
     response_list = []
     for contrib in contributions:
-        valuation_details_data = json.loads(contrib.valuation_results) if contrib.valuation_results else {}
+        valuation_details_data = {}
+        if contrib.valuation_results:
+            try:
+                valuation_details_data = json.loads(contrib.valuation_results) if isinstance(contrib.valuation_results, str) else contrib.valuation_results
+                if not isinstance(valuation_details_data, dict):
+                    valuation_details_data = {}
+            except (json.JSONDecodeError, TypeError):
+                valuation_details_data = {}
         
         manual_metrics = ValuationMetrics(
             total_lloc=valuation_details_data.get('total_lloc', 0),
@@ -115,7 +122,6 @@ async def link_oauth_account(
     if provider not in ['google', 'github']:
         raise HTTPException(status_code=404, detail="Provider not found")
 
-    # Set a session key to indicate we are in a linking flow
     request.session['oauth_link_user_id'] = current_user.id
     
     redirect_uri = request.url_for('auth_callback', provider=provider)

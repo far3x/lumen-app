@@ -120,6 +120,15 @@ class ContributionStatus(BaseModel):
     contribution_id: int
     message: Optional[str] = None
 
+class ContributionCliResponse(BaseModel):
+    id: int
+    created_at: datetime
+    status: str
+    reward_amount: float
+
+    class Config:
+        from_attributes = True
+
 class LeaderboardEntry(BaseModel):
     rank: int
     display_name: str

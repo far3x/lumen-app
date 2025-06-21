@@ -34,7 +34,7 @@ app.add_middleware(SessionMiddleware, secret_key=settings.SECRET_KEY)
 async def startup_event():
     logger.info("Application startup: Initializing database...")
     try:
-        Base.metadata.create_all(bind=engine)
+        #Base.metadata.create_all(bind=engine)
         logger.info("Database tables created/checked successfully.")
         
         from app.db import crud
