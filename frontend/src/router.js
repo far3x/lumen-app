@@ -8,9 +8,12 @@ import { renderDashboardLayout } from './pages/app/dashboard/layout.js';
 import { renderLinkPage } from './pages/link.js';
 import { renderPublicDashboard } from './pages/public_dashboard.js';
 import { isAuthenticated, fetchAndStoreUser } from './lib/auth.js';
+import { renderCheckEmailPage } from './pages/check-email.js';
+import { renderVerifyPage } from './pages/verify.js';
+import { renderForgotPasswordPage } from './pages/forgot-password.js';
+import { renderResetPasswordPage } from './pages/reset-password.js';
 
 const app = document.getElementById('app');
-const TOKEN_KEY = 'lumen_token'; 
 
 const routes = {
     '/': renderLandingPage,
@@ -18,6 +21,10 @@ const routes = {
     '/signup': renderSignupPage,
     '/link': renderLinkPage,
     '/leaderboard': renderPublicDashboard,
+    '/check-email': renderCheckEmailPage,
+    '/verify': renderVerifyPage,
+    '/forgot-password': renderForgotPasswordPage,
+    '/reset-password': renderResetPasswordPage,
     '/docs/introduction': () => renderDocsLayout('introduction'),
     '/docs/why-lumen': () => renderDocsLayout('why-lumen'),
     '/docs/installation': () => renderDocsLayout('installation'),
@@ -42,17 +49,8 @@ const handleLocation = async () => {
     const path = window.location.pathname;
     const params = new URLSearchParams(window.location.search);
 
-    if (path === '/link' && !isAuthenticated()) {
-        localStorage.setItem('post_login_redirect', '/link');
-        navigate('/login');
-        return;
-    }
-
-    if (path === '/auth/callback' && params.has('token')) {
-        const token = params.get('token');
-        localStorage.setItem(TOKEN_KEY, token);
-        await fetchAndStoreUser();
-        
+    if (path === '/auth/callback') {
+        await fetchAndStoreUser(); 
         const redirectPath = params.get('redirect_to') || localStorage.getItem('post_login_redirect');
         if (redirectPath) {
             localStorage.removeItem('post_login_redirect');
@@ -62,6 +60,12 @@ const handleLocation = async () => {
         }
         return;
     }
+    
+    if (path === '/link' && !isAuthenticated()) {
+        localStorage.setItem('post_login_redirect', '/link');
+        navigate('/login');
+        return;
+    }
 
     if (path.startsWith('/app') && !isAuthenticated()) {
         localStorage.setItem('post_login_redirect', path);
@@ -69,7 +73,7 @@ const handleLocation = async () => {
         return;
     }
 
-    if ((path === '/login' || path === '/signup') && isAuthenticated()) {
+    if ((path === '/login' || path === '/signup' || path === '/forgot-password' || path === '/reset-password') && isAuthenticated()) {
         const redirectPath = localStorage.getItem('post_login_redirect');
          if (redirectPath === '/link') {
             localStorage.removeItem('post_login_redirect');
@@ -80,9 +84,10 @@ const handleLocation = async () => {
         return;
     }
     
-    const renderFunc = routes[path] || routes['/'];
+    let renderFunc = routes[path] || routes['/'];
     
-    if (path === '/link') {
+    const fullScreenPages = ['/link', '/check-email', '/verify', '/forgot-password', '/reset-password'];
+    if (fullScreenPages.includes(path)) {
         app.innerHTML = await renderFunc();
     } else {
         app.innerHTML = renderNavbar(path) + await renderFunc() + renderFooter();

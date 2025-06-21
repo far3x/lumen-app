@@ -1,10 +1,15 @@
 import hashlib
 import json
+import re
+import secrets
 from sqlalchemy.orm import Session
-from sqlalchemy import func
+from sqlalchemy import func, text
+from fastapi import HTTPException, status
+
 from app.core import security
 from app import schemas
 from . import models
+from datetime import timedelta
 
 def get_user(db: Session, user_id: int):
     return db.query(models.User).filter(models.User.id == user_id).first()
@@ -24,16 +29,42 @@ def get_user_by_oauth_id(db: Session, provider: str, oauth_id: str):
 
 def create_user(db: Session, user: schemas.UserCreate):
     hashed_password = security.get_password_hash(user.password)
-    db_user = models.User(email=user.email, hashed_password=hashed_password, display_name=user.email.split('@')[0])
-    db.add(db_user); db.commit(); db.refresh(db_user)
+    # Sanitize display name on creation
+    display_name = re.sub(r'[^\w\s-]', '', user.email.split('@')[0]).strip()
+    if not display_name:
+        display_name = f"user-{secrets.token_hex(4)}"
+
+    db_user = models.User(email=user.email, hashed_password=hashed_password, display_name=display_name)
+    
+    expires = timedelta(hours=24)
+    verification_token = security.create_access_token(data={"sub": f"verify:{db_user.email}"}, expires_delta=expires)
+    db_user.verification_token = verification_token
+
+    db.add(db_user)
+    db.commit()
+    db.refresh(db_user)
     create_account_for_user(db, db_user)
     return db_user
 
 def update_user_profile(db: Session, user: models.User, user_update: schemas.UserUpdate):
     if user_update.display_name is not None:
-        user.display_name = user_update.display_name
+        # Sanitize and validate display name
+        clean_name = re.sub(r'[^\w\s-]', '', user_update.display_name).strip()
+        if len(clean_name) < 3:
+            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Display name must be at least 3 characters long.")
+        if len(clean_name) > 25:
+             raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Display name cannot exceed 25 characters.")
+
+        # Check for uniqueness
+        existing_user = db.query(models.User).filter(models.User.display_name == clean_name, models.User.id != user.id).first()
+        if existing_user:
+            raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="Display name is already taken.")
+        
+        user.display_name = clean_name
+
     if user_update.is_in_leaderboard is not None:
         user.is_in_leaderboard = user_update.is_in_leaderboard
+        
     db.add(user)
     db.commit()
     db.refresh(user)
@@ -41,20 +72,36 @@ def update_user_profile(db: Session, user: models.User, user_update: schemas.Use
 
 def create_oauth_user(db: Session, provider: str, user_info: dict):
     email = user_info.get("email")
+    display_name = user_info.get("name") or user_info.get("login")
+    # Sanitize and ensure uniqueness for new OAuth user display names
+    clean_name = re.sub(r'[^\w\s-]', '', display_name).strip()
+    if not clean_name: clean_name = f"user-{secrets.token_hex(4)}"
+    
+    existing_user_with_name = db.query(models.User).filter(models.User.display_name == clean_name).first()
+    if existing_user_with_name:
+        clean_name = f"{clean_name}-{secrets.token_hex(2)}"
+
     if email:
         db_user = get_user_by_email(db, email=email)
         if db_user:
+            # This case is handled in the auth router now to reject login
+            # Here we just update the record if linking were to happen this way
             if provider == "google" and not db_user.google_id: db_user.google_id = user_info["sub"]
             elif provider == "github" and not db_user.github_id: db_user.github_id = str(user_info["id"])
-            if not db_user.display_name and (user_info.get("name") or user_info.get("login")):
-                 db_user.display_name = user_info.get("name") or user_info.get("login")
-            db.commit(); db.refresh(db_user)
+            if not db_user.display_name:
+                 db_user.display_name = clean_name
+            db_user.is_verified = True
+            db.commit()
+            db.refresh(db_user)
             return db_user
-    user_data = {"display_name": user_info.get("name") or user_info.get("login"), "email": email}
+
+    user_data = {"display_name": clean_name, "email": email, "is_verified": True}
     if provider == "google": user_data["google_id"] = user_info["sub"]
     elif provider == "github": user_data["github_id"] = str(user_info["id"])
     db_user = models.User(**user_data)
-    db.add(db_user); db.commit(); db.refresh(db_user)
+    db.add(db_user)
+    db.commit()
+    db.refresh(db_user)
     create_account_for_user(db, db_user)
     return db_user
 
@@ -96,13 +143,18 @@ def update_network_stats(db: Session, complexity_score: float, reward_amount: fl
 def apply_reward_to_user(db: Session, user: models.User, reward_amount: float):
     account = get_account(db, user_id=user.id)
     if not account: return 0.0
+    
     total_reward = reward_amount
     user_count = get_total_user_count(db)
-    if user_count <= 500 and not user.has_contributed:
+
+    if user_count <= 500 and not user.is_genesis_reward_claimed:
         total_reward += 500.0
-        user.has_contributed = True
+        user.is_genesis_reward_claimed = True
+        
     account.lum_balance += total_reward
-    db.add(user); db.add(account); db.commit()
+    db.add(user)
+    db.add(account)
+    db.commit()
     return total_reward
 
 def get_all_contribution_embeddings(db: Session) -> list[tuple[int, int, str]]:
@@ -161,3 +213,28 @@ def get_user_contributions_paginated(db: Session, user_id: int, skip: int = 0, l
     total_count = query.count()
     items = query.order_by(models.Contribution.created_at.desc()).offset(skip).limit(limit).all()
     return items, total_count
+
+def get_user_rank(db: Session, user_id: int):
+    """
+    Gets a specific user's rank and balance.
+    Returns a tuple (rank, display_name, lum_balance) or None.
+    """
+    # Using a raw SQL query with a window function is most efficient for ranking.
+    # This avoids loading all users into memory.
+    query = text("""
+        SELECT rank, display_name, lum_balance
+        FROM (
+            SELECT 
+                u.id, 
+                u.display_name, 
+                a.lum_balance,
+                ROW_NUMBER() OVER (ORDER BY a.lum_balance DESC) as rank
+            FROM users u
+            JOIN accounts a ON u.id = a.user_id
+            WHERE u.is_in_leaderboard = :is_in_leaderboard
+        ) as ranked_users
+        WHERE ranked_users.id = :user_id
+    """)
+
+    result = db.execute(query, {"is_in_leaderboard": True, "user_id": user_id}).first()
+    return result
