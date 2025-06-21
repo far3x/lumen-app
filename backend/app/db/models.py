@@ -56,5 +56,5 @@ class Contribution(Base):
     raw_content = Column(Text, nullable=False)
     valuation_results = Column(JSONB if "postgresql" in settings.DATABASE_URL else Text, nullable=False)
     reward_amount = Column(Float, nullable=False)
-    content_hash = Column(String, nullable=True, index=True)
+    content_embedding = Column(Text, nullable=True)
     user = relationship("User", back_populates="contributions")
