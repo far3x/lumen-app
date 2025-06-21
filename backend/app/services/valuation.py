@@ -58,7 +58,7 @@ class HybridValuationService:
         return parsed_files
 
     def _perform_manual_analysis(self, parsed_files: list[dict]) -> dict:
-        print("[VALUATION_STEP] Starting language-agnostic analysis with scc...")
+        print("[VALUATION_STEP] Starting language-agnostic analysis...")
         analysis_data = {
             "total_lloc": 0,
             "total_tokens": 0,
@@ -104,7 +104,6 @@ class HybridValuationService:
                         file_count = lang_summary.get("Count", 0)
                         analysis_data["language_breakdown"][lang_name] = analysis_data["language_breakdown"].get(lang_name, 0) + file_count
                         analysis_data["total_lloc"] += lang_summary.get("Code", 0)
-                        analysis_data["total_tokens"] += lang_summary.get("Tokens", 0)
                         
                         complexity = lang_summary.get("Complexity", 0)
                         if complexity > 0 and file_count > 0:
@@ -113,9 +112,9 @@ class HybridValuationService:
 
             except (subprocess.CalledProcessError, FileNotFoundError, json.JSONDecodeError) as e:
                 print(f"[VALUATION_ERROR] Could not run or parse 'scc' tool: {e}")
-                print("[VALUATION_FALLBACK] Falling back to tiktoken for token count.")
-                if self.tokenizer and not analysis_data["total_tokens"]:
-                    analysis_data["total_tokens"] = len(self.tokenizer.encode(all_content_str))
+
+        if self.tokenizer:
+            analysis_data["total_tokens"] = len(self.tokenizer.encode(all_content_str))
 
         if total_files_with_complexity > 0:
             analysis_data["avg_complexity"] = total_complexity / total_files_with_complexity
