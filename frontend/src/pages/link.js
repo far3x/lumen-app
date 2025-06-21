@@ -1,0 +1,120 @@
+import { getAuthHeaders } from '../lib/auth.js';
+
+function setupEventListeners() {
+    const form = document.getElementById('link-form');
+    if (!form) return;
+
+    form.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const userCode = e.target.user_code.value.toUpperCase();
+        const submitButton = form.querySelector('button[type="submit"]');
+        const originalButtonHTML = submitButton.innerHTML;
+        const errorMessageElement = document.getElementById('error-message');
+        const successMessageElement = document.getElementById('success-message');
+        const formContainer = document.getElementById('form-container');
+
+        errorMessageElement.classList.add('hidden');
+        successMessageElement.classList.add('hidden');
+        submitButton.disabled = true;
+        submitButton.innerHTML = `<span class="animate-spin inline-block w-5 h-5 border-2 border-transparent border-t-white rounded-full"></span>`;
+
+        try {
+            const response = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:8000'}/api/v1/auth/cli/approve-device`, {
+                method: 'POST',
+                headers: getAuthHeaders(),
+                body: JSON.stringify({ user_code: userCode, device_name: "My Lumen CLI" })
+            });
+
+            if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(errorData.detail || 'Failed to authorize device.');
+            }
+            
+            formContainer.classList.add('hidden');
+            successMessageElement.classList.remove('hidden');
+
+            const countdownElement = document.getElementById('countdown-message');
+            let secondsLeft = 5;
+
+            const updateCountdown = () => {
+                countdownElement.textContent = `This window will close in ${secondsLeft} seconds...`;
+            };
+            
+            updateCountdown();
+
+            const countdownInterval = setInterval(() => {
+                secondsLeft--;
+                updateCountdown();
+                if (secondsLeft <= 0) {
+                    clearInterval(countdownInterval);
+                }
+            }, 1000);
+
+            setTimeout(() => {
+                window.close();
+            }, 5000);
+
+        } catch (error) {
+            errorMessageElement.textContent = error.message;
+            errorMessageElement.classList.remove('hidden');
+            submitButton.disabled = false;
+            submitButton.innerHTML = originalButtonHTML;
+        }
+    });
+}
+
+export function renderLinkPage() {
+    const content = `
+    <main class="flex-grow flex items-center justify-center p-6 isolate min-h-screen">
+        <video
+            autoplay
+            loop
+            muted
+            playsinline
+            class="absolute top-0 left-0 w-full h-full object-cover -z-20"
+            src="/plexus-bg.mp4"
+        ></video>
+        <div class="absolute top-0 left-0 w-full h-full bg-black/50 -z-10"></div>
+        
+        <div class="w-full max-w-md mx-auto">
+            <div class="bg-surface/80 backdrop-blur-md p-8 rounded-xl border border-primary shadow-2xl shadow-black/20 text-center">
+                <a href="/" class="inline-flex items-center space-x-3 mb-6">
+                    <img src="/logo.svg" alt="Lumen Logo" class="h-10 w-10">
+                    <span class="text-2xl font-bold text-text-main">Lumen Protocol</span>
+                </a>
+                
+                <div id="form-container">
+                    <h1 class="text-2xl font-bold text-white">Authorize New Device</h1>
+                    <p class="text-text-secondary mt-2 text-sm">Enter the code displayed in your terminal to link your Lumen CLI.</p>
+                    
+                    <div id="error-message" class="hidden text-red-400 bg-red-900/50 p-3 rounded-md my-4 text-sm text-left"></div>
+
+                    <form id="link-form" class="space-y-4 mt-6">
+                        <div>
+                            <label for="user_code" class="sr-only">User Code</label>
+                            <input id="user_code" name="user_code" type="text" required
+                                   class="block w-full bg-primary border border-subtle rounded-md px-3 py-3 text-text-main text-center text-lg tracking-widest font-mono uppercase focus:ring-2 focus:ring-accent-purple focus:outline-none"
+                                   placeholder="XXXX-XXXX">
+                        </div>
+                        <button type="submit" class="w-full flex justify-center py-3 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-gradient-to-r from-accent-purple to-accent-pink hover:opacity-90 transition-opacity">
+                            Authorize CLI
+                        </button>
+                    </form>
+                </div>
+
+                <div id="success-message" class="hidden">
+                    <svg class="w-16 h-16 mx-auto text-green-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                    <h1 class="text-2xl font-bold text-white mt-4">Device Authorized!</h1>
+                    <p class="text-text-secondary mt-2">You can now safely close this tab and return to your terminal.</p>
+                    <p id="countdown-message" class="text-sm text-text-secondary mt-2"></p>
+                </div>
+            </div>
+        </div>
+    </main>
+    `;
+    
+    setTimeout(setupEventListeners, 0);
+    return content;
+}

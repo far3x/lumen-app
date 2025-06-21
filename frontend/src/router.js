@@ -2,9 +2,10 @@ import { renderNavbar } from './components/navbar.js';
 import { renderFooter } from './components/footer.js';
 import { renderLandingPage } from './pages/landing.js';
 import { renderLoginPage } from './pages/login.js';
-import { renderSignupPage } from './pages/signup.js'; // THE FIX: Import the new signup page
+import { renderSignupPage } from './pages/signup.js';
 import { renderDocsLayout } from './pages/docs/layout.js';
 import { renderDashboard } from './pages/app/dashboard.js';
+import { renderLinkPage } from './pages/link.js';
 import { isAuthenticated, fetchAndStoreUser } from './lib/auth.js';
 
 const app = document.getElementById('app');
@@ -13,7 +14,8 @@ const TOKEN_KEY = 'lumen_token';
 const routes = {
     '/': renderLandingPage,
     '/login': renderLoginPage,
-    '/signup': renderSignupPage, // THE FIX: Add the new signup route
+    '/signup': renderSignupPage,
+    '/link': renderLinkPage,
     '/docs/introduction': () => renderDocsLayout('introduction'),
     '/docs/why-lumen': () => renderDocsLayout('why-lumen'),
     '/docs/installation': () => renderDocsLayout('installation'),
@@ -38,11 +40,24 @@ const handleLocation = async () => {
     const path = window.location.pathname;
     const params = new URLSearchParams(window.location.search);
 
+    if (path === '/link' && !isAuthenticated()) {
+        localStorage.setItem('post_login_redirect', '/link');
+        navigate('/login');
+        return;
+    }
+
     if (path === '/auth/callback' && params.has('token')) {
         const token = params.get('token');
         localStorage.setItem(TOKEN_KEY, token);
         await fetchAndStoreUser();
-        navigate('/app/dashboard');
+        
+        const redirectPath = params.get('redirect_to') || localStorage.getItem('post_login_redirect');
+        if (redirectPath) {
+            localStorage.removeItem('post_login_redirect');
+            navigate(redirectPath);
+        } else {
+            navigate('/app/dashboard');
+        }
         return;
     }
 
@@ -51,15 +66,23 @@ const handleLocation = async () => {
         return;
     }
 
-    // Redirect logged-in users away from login/signup pages
     if ((path === '/login' || path === '/signup') && isAuthenticated()) {
+        const redirectPath = localStorage.getItem('post_login_redirect');
+         if (redirectPath === '/link') {
+            localStorage.removeItem('post_login_redirect');
+            navigate(redirectPath);
+            return;
+        }
         navigate('/app/dashboard');
         return;
     }
     
     const renderFunc = routes[path] || routes['/'];
-    const contentHTML = await renderFunc();
-    app.innerHTML = renderNavbar() + contentHTML + renderFooter();
+    if (path === '/link') {
+        app.innerHTML = await renderFunc();
+    } else {
+        app.innerHTML = renderNavbar() + await renderFunc() + renderFooter();
+    }
     
     window.scrollTo(0, 0);
     

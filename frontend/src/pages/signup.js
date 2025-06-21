@@ -1,6 +1,4 @@
-// NEW FILE: frontend/src/pages/signup.js
-
-import { register } from '../lib/auth.js';
+import { register, login } from '../lib/auth.js';
 import { navigate } from '../router.js';
 
 function setupEventListeners() {
@@ -13,11 +11,13 @@ function setupEventListeners() {
         const confirmPassword = e.target.confirmPassword.value;
         const submitButton = form.querySelector('button[type="submit"]');
         const originalButtonHTML = submitButton.innerHTML;
+        const errorMessageElement = document.getElementById('error-message');
         
+        errorMessageElement.classList.add('hidden');
+
         if (password !== confirmPassword) {
-            const errorElement = document.getElementById('error-message');
-            errorElement.textContent = "Passwords do not match.";
-            errorElement.classList.remove('hidden');
+            errorMessageElement.textContent = "Passwords do not match.";
+            errorMessageElement.classList.remove('hidden');
             return;
         }
 
@@ -26,12 +26,18 @@ function setupEventListeners() {
 
         try {
             await register(email, password);
-            // On success, redirect to login page with a success indicator
-            navigate('/login?registered=true');
+            await login(email, password);
+            
+            const redirectPath = localStorage.getItem('post_login_redirect');
+            if (redirectPath) {
+                localStorage.removeItem('post_login_redirect');
+                navigate(redirectPath);
+            } else {
+                navigate('/app/dashboard');
+            }
         } catch (error) {
-            const errorElement = document.getElementById('error-message');
-            errorElement.textContent = error.response?.data?.detail || 'An unknown error occurred.';
-            errorElement.classList.remove('hidden');
+            errorMessageElement.textContent = error.response?.data?.detail || 'An unknown error occurred.';
+            errorMessageElement.classList.remove('hidden');
         } finally {
             submitButton.disabled = false;
             submitButton.innerHTML = originalButtonHTML;
@@ -41,7 +47,9 @@ function setupEventListeners() {
     document.querySelectorAll('.oauth-button').forEach(button => {
         button.addEventListener('click', (e) => {
             const provider = e.currentTarget.dataset.provider;
-            window.location.href = `${import.meta.env.VITE_API_URL || 'http://localhost:8000'}/auth/login/${provider}`;
+            const redirectPath = localStorage.getItem('post_login_redirect') || '/app/dashboard';
+            const state = btoa(JSON.stringify({ redirect_path: redirectPath }));
+            window.location.href = `${import.meta.env.VITE_API_URL || 'http://localhost:8000'}/api/v1/auth/login/${provider}?state=${state}`;
         });
     });
 }
@@ -130,7 +138,7 @@ export function renderSignupPage() {
             class="absolute top-0 left-0 w-full h-full object-cover -z-20"
             src="/plexus-bg.mp4"
         ></video>
-        <div class="absolute top-0 left-0 w-full h-full bg-black/70 -z-10"></div>
+        <div class="absolute top-0 left-0 w-full h-full bg-black/50 -z-10"></div>
         <div id="signup-container" class="w-full"></div>
     </main>`;
     
