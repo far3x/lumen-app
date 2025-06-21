@@ -1,12 +1,10 @@
-ARG SCC_VERSION=3.5.0
-
 FROM python:3.11-slim as builder
 
 WORKDIR /usr/src/app
 
 RUN apt-get update && apt-get install -y curl tar gzip
 
-RUN curl -L "https://github.com/boyter/scc/releases/download/v${SCC_VERSION}/scc_Linux_x86_64.tar.gz" -o scc.tar.gz && \
+RUN curl -L "https://github.com/boyter/scc/releases/download/v3.5.0/scc_Linux_x86_64.tar.gz" -o scc.tar.gz && \
     tar -xzf scc.tar.gz && \
     mv scc /usr/local/bin/scc && \
     rm scc.tar.gz
