@@ -1,4 +1,4 @@
-import { getUser, getAccount, fetchLeaderboard, fetchContributions, fetchRecentContributions, logout, fetchAndStoreUser, fetchAndStoreAccount, isAuthenticated } from '../../../lib/auth.js';
+import { getUser, getAccount, fetchLeaderboard, fetchContributions, fetchRecentContributions, logout, fetchAndStoreUser, fetchAndStoreAccount, isAuthenticated, updateBalancesInUI } from '../../../lib/auth.js';
 import { navigate } from '../../../router.js';
 import { renderDashboardOverview } from './overview.js';
 import { renderMyContributionsPage, attachContributionPageListeners, contributionsState, resetContributionsState } from './my-contributions.js';
@@ -6,6 +6,8 @@ import { renderRecentActivityPage } from './network-feed.js';
 import { renderReferralPage } from './referral.js';
 import { renderSettingsPage, attachSettingsPageListeners } from './settings.js';
 import { icons } from './utils.js';
+
+let balancePoller = null;
 
 let dashboardState = {
     user: null,
@@ -64,7 +66,6 @@ async function setupDashboard() {
         let account = getAccount();
 
         if (isAuthenticated() && (!user || !account)) {
-            console.log("Auth cookie found, but no local user/account data. Fetching from API...");
             [user, account] = await Promise.all([
                 fetchAndStoreUser(),
                 fetchAndStoreAccount()
@@ -72,7 +73,6 @@ async function setupDashboard() {
         }
 
         if (!user) {
-            console.error("Failed to retrieve valid user data. Logging out.");
             logout();
             navigate('/login');
             return;
@@ -105,8 +105,24 @@ async function setupDashboard() {
         contributionsState.isLastPage = (1 * 10) >= contributionsResult.total;
         dashboardState.recentContributions = recentContributions;
 
+        if (balancePoller) clearInterval(balancePoller);
+    
+        balancePoller = setInterval(async () => {
+            try {
+                const currentAccount = getAccount();
+                const newAccount = await fetchAndStoreAccount();
+                
+                if (currentAccount && newAccount && currentAccount.lum_balance !== newAccount.lum_balance) {
+                    updateBalancesInUI();
+                }
+            } catch (error) {
+                if (error.response && error.response.status === 401) {
+                    clearInterval(balancePoller);
+                }
+            }
+        }, 15000);
+
     } catch (error) {
-        console.error("Failed to fetch initial dashboard data:", error);
         if (error.response && error.response.status === 401) {
             logout();
             navigate('/login');

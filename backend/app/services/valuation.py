@@ -213,13 +213,16 @@ class HybridValuationService:
         
         final_reward = base_value * rarity_multiplier * halving_multiplier * ai_weighted_multiplier
         
-        valuation_details = {
-            **manual_metrics,
-            **ai_scores,
+        valuation_details = manual_metrics.copy()
+        valuation_details.update({
+            "project_clarity_score": clarity,
+            "architectural_quality_score": architecture,
+            "code_quality_score": code_quality,
+            "analysis_summary": ai_scores.get("analysis_summary"),
             "rarity_multiplier": round(rarity_multiplier, 4),
             "halving_multiplier": round(halving_multiplier, 4),
-            "final_reward": round(final_reward, 4),
-        }
+            "final_reward": round(final_reward, 4)
+        })
 
         return {"final_reward": final_reward, "valuation_details": valuation_details}
 
