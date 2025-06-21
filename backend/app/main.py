@@ -5,7 +5,7 @@ from slowapi.errors import RateLimitExceeded
 from app.core.limiter import limiter
 from app.core.config import settings
 from app.db.database import Base, engine, SessionLocal
-from app.api.v1.routers import auth, cli, users, public, security
+from app.api.v1.routers import auth, cli, users, public, security, contributions
 from app.core.celery_app import celery_app
 import logging
 from slowapi.middleware import SlowAPIMiddleware
@@ -19,7 +19,6 @@ app = FastAPI(
     version=settings.PROJECT_VERSION
 )
 
-# Trust the proxy headers from Nginx (X-Forwarded-For, X-Forwarded-Proto)
 app.add_middleware(ProxyHeadersMiddleware, trusted_hosts="*")
 
 app.state.limiter = limiter
@@ -73,6 +72,7 @@ app.include_router(cli.router, prefix="/api/v1")
 app.include_router(users.router, prefix="/api/v1")
 app.include_router(public.router, prefix="/api/v1")
 app.include_router(security.router, prefix="/api/v1")
+app.include_router(contributions.router, prefix="/api/v1")
 
 @app.get("/", tags=["Root"])
 async def read_root():
