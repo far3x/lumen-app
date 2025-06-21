@@ -53,7 +53,6 @@ async function setupDashboard() {
     const urlParams = new URLSearchParams(window.location.search);
     let currentTab = urlParams.get('tab') || 'overview';
     
-    // Force a page reload on successful account link to ensure all state is fresh.
     if (urlParams.get('status') === 'link_complete') {
         window.history.replaceState({}, document.title, "/app/dashboard?tab=settings&status=link_success");
         window.location.reload();
@@ -64,8 +63,6 @@ async function setupDashboard() {
         let user = getUser();
         let account = getAccount();
 
-        // If auth cookie exists but local data is missing, fetch it.
-        // This is the crucial fix for the first login after an OAuth redirect.
         if (isAuthenticated() && (!user || !account)) {
             console.log("Auth cookie found, but no local user/account data. Fetching from API...");
             [user, account] = await Promise.all([
@@ -74,12 +71,23 @@ async function setupDashboard() {
             ]);
         }
 
-        // If after all attempts we still don't have a user, the auth is invalid.
         if (!user) {
             console.error("Failed to retrieve valid user data. Logging out.");
             logout();
             navigate('/login');
             return;
+        }
+
+        if (user) {
+            document.querySelectorAll('.navbar-user-display-name').forEach(el => {
+                el.textContent = user.display_name ?? 'User';
+            });
+        }
+        if (account) {
+            const balanceFormatted = (account.lum_balance ?? 0).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+            document.querySelectorAll('.navbar-user-balance').forEach(el => {
+                 el.textContent = `${balanceFormatted} $LUM`;
+            });
         }
 
         dashboardState.user = user;

@@ -1,7 +1,7 @@
 import secrets
 import hashlib
 import hmac
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from typing import Optional
 
 from jose import jwt, JWTError
@@ -20,9 +20,9 @@ def get_password_hash(password: str) -> str:
 def create_access_token(data: dict, expires_delta: Optional[timedelta] = None) -> str:
     to_encode = data.copy()
     if expires_delta:
-        expire = datetime.utcnow() + expires_delta
+        expire = datetime.now(timezone.utc) + expires_delta
     else:
-        expire = datetime.utcnow() + timedelta(minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES)
+        expire = datetime.now(timezone.utc) + timedelta(minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES)
     to_encode.update({"exp": expire})
     encoded_jwt = jwt.encode(to_encode, settings.SECRET_KEY, algorithm=settings.ALGORITHM)
     return encoded_jwt
@@ -33,15 +33,20 @@ def create_pat() -> tuple[str, str]:
     hashed_token = hashlib.sha256(raw_token.encode()).hexdigest()
     return raw_token, hashed_token
 
-def create_hmac_signature(challenge: str, timestamp: str, body: bytes) -> str:
-    """Creates an HMAC signature for a request."""
+def create_hmac_signature(challenge: str, timestamp: str, body: bytes, secret: str) -> str:
+    """
+    Creates an HMAC signature for a request using a provided secret (the user's PAT).
+    """
     body_hash = hashlib.sha256(body).hexdigest()
     string_to_sign = f"{challenge}:{timestamp}:{body_hash}".encode()
-    secret = settings.LUMEN_CLIENT_SECRET.encode()
-    signature = hmac.new(secret, string_to_sign, hashlib.sha256).hexdigest()
+    # Use the provided secret (the user's PAT)
+    secret_bytes = secret.encode()
+    signature = hmac.new(secret_bytes, string_to_sign, hashlib.sha256).hexdigest()
     return signature
 
-def verify_hmac_signature(signature: str, challenge: str, timestamp: str, body: bytes) -> bool:
-    """Verifies an incoming HMAC signature."""
-    expected_signature = create_hmac_signature(challenge, timestamp, body)
+def verify_hmac_signature(signature: str, challenge: str, timestamp: str, body: bytes, secret: str) -> bool:
+    """
+    Verifies an incoming HMAC signature against a provided secret (the user's PAT).
+    """
+    expected_signature = create_hmac_signature(challenge, timestamp, body, secret)
     return hmac.compare_digest(expected_signature, signature)

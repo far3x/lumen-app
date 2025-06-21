@@ -55,6 +55,7 @@ async def get_current_user_from_pat(pat: str = Depends(oauth2_scheme), db: Sessi
 
 async def verify_contribution_signature(
     request: Request,
+    authorization: str = Header(..., description="The user's Personal Access Token, e.g., 'Bearer lum_pat_...'"),
     x_lumen_challenge: str = Header(...),
     x_lumen_signature: str = Header(...),
     x_lumen_timestamp: str = Header(...)
@@ -62,24 +63,33 @@ async def verify_contribution_signature(
     try:
         request_time = int(x_lumen_timestamp)
         current_time = int(time.time())
-        if abs(current_time - request_time) > 300:
+        if abs(current_time - request_time) > 300: # 5 minute window
             raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Request timestamp is too old.")
     except ValueError:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Invalid timestamp format.")
 
+    # Extract the PAT from the 'Bearer <token>' header
+    if not authorization.startswith("Bearer "):
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid authorization scheme. Must be 'Bearer'.")
+    
+    pat = authorization.split(" ")[1]
+
     body = await request.body()
     
+    # THIS IS THE CRITICAL SECURITY FIX:
+    # Pass the user's actual PAT as the secret for verification.
     is_valid = security.verify_hmac_signature(
         signature=x_lumen_signature,
         challenge=x_lumen_challenge,
         timestamp=x_lumen_timestamp,
-        body=body
+        body=body,
+        secret=pat # Use the user's PAT as the secret
     )
     
     if not is_valid:
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
-            detail="Invalid client signature.",
+            detail="Invalid client signature. The request could not be authenticated.",
         )
 
 async def get_current_user_optional(request: Request, db: Session = Depends(get_db)) -> models.User | None:

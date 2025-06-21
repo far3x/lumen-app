@@ -1,0 +1,23 @@
+# Ignore the local Python virtual environment
+venv
+.venv
+
+# Ignore Python cache files
+__pycache__
+*.pyc
+
+# Ignore local database files
+*.db
+*.db-journal
+
+# Ignore IDE and editor-specific folders
+.vscode
+.idea
+
+# Ignore test reports and coverage
+.pytest_cache
+.coverage
+htmlcov
+
+# Ignore any local environment files that shouldn't be in the image
+.env

@@ -2,6 +2,7 @@ import Chart from 'chart.js/auto';
 import { icons } from './utils.js';
 
 let chartInstance = null;
+let activeTimeRange = 'all';
 
 function renderWalletSection(account) {
     const claimableBalance = account?.lum_balance || 0;
@@ -53,60 +54,6 @@ function renderProTipsSection() {
     `;
 }
 
-function initializeChart(contributions) {
-    const ctx = document.getElementById('earningsChartCanvas');
-    if (!ctx) return;
-    if (chartInstance) chartInstance.destroy();
-
-    const dailyEarnings = {};
-    const thirtyDaysAgo = new Date();
-    thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 29);
-
-    for (let i = 0; i < 30; i++) {
-        const d = new Date(thirtyDaysAgo);
-        d.setDate(thirtyDaysAgo.getDate() + i);
-        dailyEarnings[d.toISOString().split('T')[0]] = 0;
-    }
-
-    if (contributions && contributions.length > 0) {
-        contributions.forEach(contrib => {
-            if (contrib.status === 'PROCESSED' && contrib.reward_amount > 0) {
-                const dateString = new Date(contrib.created_at).toISOString().split('T')[0];
-                if (dailyEarnings.hasOwnProperty(dateString)) {
-                    dailyEarnings[dateString] += contrib.reward_amount;
-                }
-            }
-        });
-    }
-
-    const labels = Object.keys(dailyEarnings).sort().map(d => new Date(d).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }));
-    const dataPoints = Object.keys(dailyEarnings).sort().map(d => dailyEarnings[d]);
-
-    const gradient = ctx.getContext('2d').createLinearGradient(0, 0, 0, 300);
-    gradient.addColorStop(0, 'rgba(138, 43, 226, 0.5)');
-    gradient.addColorStop(1, 'rgba(138, 43, 226, 0)');
-
-    chartInstance = new Chart(ctx, {
-        type: 'line', data: { labels, datasets: [{
-            label: '$LUM Earned', data: dataPoints, borderColor: '#8A2BE2', backgroundColor: gradient,
-            fill: true, tension: 0.4, pointBackgroundColor: '#8A2BE2', pointBorderColor: '#fff',
-            pointHoverRadius: 6, pointHoverBorderWidth: 2,
-        }]},
-        options: {
-            responsive: true, maintainAspectRatio: false,
-            plugins: { legend: { display: false }, tooltip: {
-                backgroundColor: '#13131A', titleColor: '#E5E5E5', bodyColor: '#A3A3B2',
-                padding: 10, borderColor: '#3F3F4D', borderWidth: 1, boxPadding: 4,
-                callbacks: { label: (c) => `+ ${c.parsed.y.toFixed(4)} $LUM` }
-            }},
-            scales: {
-                x: { grid: { color: 'rgba(63, 63, 77, 0.2)' }, ticks: { color: '#A3A3B2', font: { family: 'Satoshi' } } },
-                y: { grid: { color: 'rgba(63, 63, 77, 0.2)' }, ticks: { color: '#A3A3B2', font: { family: 'Satoshi' } }, beginAtZero: true }
-            }
-        }
-    });
-}
-
 function renderStatCard(label, value) {
     const displayValue = label === 'Global Rank' && value !== 'N/A' ? `#${value}` : value;
     
@@ -118,10 +65,118 @@ function renderStatCard(label, value) {
     `;
 }
 
+function initializeChart(contributions, timeRange) {
+    const canvas = document.getElementById('earningsChartCanvas');
+    const chartContainer = canvas.parentElement;
+    const messageEl = document.getElementById('chart-message');
+    if (!canvas || !chartContainer || !messageEl) return;
+
+    if (chartInstance) chartInstance.destroy();
+    
+    const processedContributions = (contributions || []).filter(c => c.status === 'PROCESSED' && c.reward_amount > 0);
+
+    const aggregatedData = new Map();
+    processedContributions.forEach(c => {
+        const dateKey = c.created_at.split('T')[0];
+        aggregatedData.set(dateKey, (aggregatedData.get(dateKey) || 0) + c.reward_amount);
+    });
+
+    const today = new Date();
+    today.setUTCHours(0, 0, 0, 0);
+    
+    let startDate = new Date(today);
+    if (timeRange === '7d') {
+        startDate.setUTCDate(today.getUTCDate() - 6);
+    } else if (timeRange === '30d') {
+        startDate.setUTCDate(today.getUTCDate() - 29);
+    } else { // 'all'
+        if (processedContributions.length > 0) {
+            startDate = new Date(processedContributions.reduce((min, c) => new Date(c.created_at) < min ? new Date(c.created_at) : min, new Date()));
+            startDate.setUTCHours(0, 0, 0, 0);
+            startDate.setUTCDate(startDate.getUTCDate() - 1);
+        } else {
+            startDate.setUTCDate(today.getUTCDate() - 6);
+        }
+    }
+
+    const labels = [];
+    const dataPoints = [];
+    for (let d = new Date(startDate); d <= today; d.setUTCDate(d.getUTCDate() + 1)) {
+        const dateKey = d.toISOString().split('T')[0];
+        labels.push(d.toLocaleDateString('en-US', { timeZone: 'UTC', month: 'short', day: 'numeric' }));
+        dataPoints.push(aggregatedData.get(dateKey) || 0);
+    }
+    
+    const hasData = dataPoints.some(v => v > 0);
+    if (!hasData) {
+        messageEl.textContent = 'No earnings data for this period.';
+        messageEl.classList.remove('hidden');
+        canvas.classList.add('hidden');
+        return;
+    }
+
+    messageEl.classList.add('hidden');
+    canvas.classList.remove('hidden');
+
+    const gradient = canvas.getContext('2d').createLinearGradient(0, 0, 0, chartContainer.clientHeight);
+    gradient.addColorStop(0, 'rgba(138, 43, 226, 0.5)');
+    gradient.addColorStop(1, 'rgba(138, 43, 226, 0)');
+
+    chartInstance = new Chart(canvas, {
+        type: 'line', data: { labels, datasets: [{
+            label: '$LUM Earned', data: dataPoints, borderColor: '#8A2BE2', backgroundColor: gradient,
+            fill: true, tension: 0.4, pointBackgroundColor: '#E5E5E5', pointBorderColor: '#8A2BE2',
+            pointRadius: 4, pointBorderWidth: 2, pointHoverRadius: 7, pointHoverBorderWidth: 2, pointHoverBackgroundColor: '#fff',
+        }]},
+        options: {
+            responsive: true, maintainAspectRatio: false,
+            plugins: { legend: { display: false }, tooltip: {
+                enabled: true, backgroundColor: '#13131A', titleColor: '#E5E5E5', bodyColor: '#A3A3B2',
+                padding: 12, cornerRadius: 8, borderColor: '#3F3F4D', borderWidth: 1, boxPadding: 6,
+                titleFont: { family: 'Satoshi', weight: 'bold' }, bodyFont: { family: 'Satoshi' },
+                displayColors: false,
+                callbacks: { label: (c) => `+ ${c.parsed.y.toFixed(4)} $LUM` }
+            }},
+            scales: {
+                x: { grid: { color: 'rgba(63, 63, 77, 0.2)' }, ticks: { color: '#A3A3B2', font: { family: 'Satoshi' } } },
+                y: { grid: { color: 'rgba(63, 63, 77, 0.2)' }, ticks: { color: '#A3A3B2', font: { family: 'Satoshi' }, padding: 10 }, beginAtZero: true }
+            }
+        }
+    });
+}
+
+function attachChartButtonListeners(contributions) {
+    const buttonGroup = document.getElementById('chart-time-buttons');
+    if (!buttonGroup) return;
+
+    buttonGroup.addEventListener('click', (e) => {
+        const button = e.target.closest('button');
+        if (!button) return;
+
+        const newRange = button.dataset.range;
+        if (newRange === activeTimeRange) return;
+
+        activeTimeRange = newRange;
+
+        buttonGroup.querySelectorAll('button').forEach(btn => {
+            btn.classList.remove('bg-primary', 'text-text-main');
+            btn.classList.add('text-text-secondary');
+        });
+
+        button.classList.add('bg-primary', 'text-text-main');
+        button.classList.remove('text-text-secondary');
+
+        initializeChart(contributions, newRange);
+    });
+}
+
 export function renderDashboardOverview(user, account, rank, allContributions) {
     const totalContributions = allContributions?.length || 0; 
     
-    setTimeout(() => initializeChart(allContributions), 50);
+    setTimeout(() => {
+        initializeChart(allContributions, activeTimeRange);
+        attachChartButtonListeners(allContributions);
+    }, 50);
 
     return `
         <header class="animate-fade-in-up">
@@ -140,10 +195,18 @@ export function renderDashboardOverview(user, account, rank, allContributions) {
             ${renderStatCard('Contributions', totalContributions.toLocaleString())}
         </div>
 
-        <div class="grid grid-cols-1 xl:grid-cols-3 gap-6 mt-6 items-start">
-            <div class="xl:col-span-3 animate-fade-in-up bg-surface p-6 rounded-xl border border-primary h-full flex flex-col" style="animation-delay: 200ms;">
-                <h3 class="font-bold text-lg mb-4 text-text-main">Earnings (Last 30 Days)</h3>
-                <div class="relative flex-grow h-64 md:h-80"><canvas id="earningsChartCanvas"></canvas></div>
+        <div class="animate-fade-in-up bg-surface p-6 rounded-xl border border-primary mt-6" style="animation-delay: 200ms;">
+            <div class="flex flex-col sm:flex-row justify-between sm:items-center gap-4 mb-6">
+                <h3 class="font-bold text-lg text-text-main">Earnings History</h3>
+                <div id="chart-time-buttons" class="flex items-center bg-abyss-dark p-1 rounded-lg border border-primary">
+                    <button data-range="7d" class="time-range-btn px-3 py-1 text-sm font-medium rounded-md transition-colors text-text-secondary">7D</button>
+                    <button data-range="30d" class="time-range-btn px-3 py-1 text-sm font-medium rounded-md transition-colors text-text-secondary">30D</button>
+                    <button data-range="all" class="time-range-btn px-3 py-1 text-sm font-medium rounded-md transition-colors bg-primary text-text-main">All</button>
+                </div>
+            </div>
+            <div class="relative h-64 md:h-80">
+                <canvas id="earningsChartCanvas"></canvas>
+                <div id="chart-message" class="hidden absolute inset-0 flex items-center justify-center text-text-secondary"></div>
             </div>
         </div>
 

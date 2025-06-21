@@ -7,7 +7,7 @@ import { renderDocsLayout } from './pages/docs/layout.js';
 import { renderDashboardLayout } from './pages/app/dashboard/layout.js';
 import { renderLinkPage } from './pages/link.js';
 import { renderPublicDashboard } from './pages/public_dashboard.js';
-import { isAuthenticated, fetchAndStoreUser } from './lib/auth.js';
+import { isAuthenticated, fetchAndStoreUser, getUser, logout } from './lib/auth.js';
 import { renderCheckEmailPage } from './pages/check-email.js';
 import { renderVerifyPage } from './pages/verify.js';
 import { renderForgotPasswordPage } from './pages/forgot-password.js';
@@ -47,11 +47,9 @@ export const navigate = (path) => {
 
 const handleLocation = async () => {
     const path = window.location.pathname;
-    const params = new URLSearchParams(window.location.search);
 
-    if (path === '/auth/callback') {
-        await fetchAndStoreUser(); 
-        const redirectPath = params.get('redirect_to') || localStorage.getItem('post_login_redirect');
+    const redirectPath = localStorage.getItem('post_login_redirect');
+    if (isAuthenticated() && (path === '/login' || path === '/signup')) {
         if (redirectPath) {
             localStorage.removeItem('post_login_redirect');
             navigate(redirectPath);
@@ -60,37 +58,25 @@ const handleLocation = async () => {
         }
         return;
     }
-    
-    if (path === '/link' && !isAuthenticated()) {
-        localStorage.setItem('post_login_redirect', '/link');
-        navigate('/login');
-        return;
-    }
 
-    if (path.startsWith('/app') && !isAuthenticated()) {
+    if (!isAuthenticated() && (path.startsWith('/app') || path.startsWith('/link'))) {
         localStorage.setItem('post_login_redirect', path);
         navigate('/login');
         return;
     }
 
-    if ((path === '/login' || path === '/signup' || path === '/forgot-password' || path === '/reset-password') && isAuthenticated()) {
-        const redirectPath = localStorage.getItem('post_login_redirect');
-         if (redirectPath === '/link') {
-            localStorage.removeItem('post_login_redirect');
-            navigate(redirectPath);
-            return;
-        }
-        navigate('/app/dashboard');
-        return;
-    }
-    
     let renderFunc = routes[path] || routes['/'];
+    if (path.startsWith('/docs/')) {
+        const pageId = path.split('/docs/')[1];
+        renderFunc = () => renderDocsLayout(pageId);
+    }
     
     const fullScreenPages = ['/link', '/check-email', '/verify', '/forgot-password', '/reset-password'];
     if (fullScreenPages.includes(path)) {
         app.innerHTML = await renderFunc();
     } else {
-        app.innerHTML = renderNavbar(path) + await renderFunc() + renderFooter();
+        const pageContent = await renderFunc();
+        app.innerHTML = renderNavbar(path) + pageContent + renderFooter();
     }
     
     window.scrollTo(0, 0);
@@ -143,13 +129,27 @@ const attachNavEventListeners = () => {
     }
 }
 
-export const initializeRouter = () => {
+export const initializeRouter = async () => {
+    if (isAuthenticated() && !getUser()) {
+        try {
+            await fetchAndStoreUser();
+        } catch (error) {
+            console.error("Session invalid, clearing state.", error);
+            logout();
+        }
+    }
+
     window.addEventListener('popstate', handleLocation);
     document.body.addEventListener('click', (e) => {
-        if (e.target.matches('[data-link]')) {
-            e.preventDefault();
-            navigate(e.target.getAttribute('href'));
+        const link = e.target.closest('a[href]');
+        if (link && !link.hasAttribute('data-external') && link.hostname === window.location.hostname) {
+             if (link.hash) return;
+             e.preventDefault();
+             if (window.location.pathname !== link.pathname || window.location.search !== link.search) {
+                navigate(link.pathname + link.search);
+             }
         }
     });
+    
     handleLocation();
 }
