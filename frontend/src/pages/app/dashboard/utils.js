@@ -1,0 +1,91 @@
+export function escapeHtml(unsafe) {
+    if (!unsafe) return '';
+    return unsafe
+         .replace(/&/g, "&")
+         .replace(/</g, "<")
+         .replace(/>/g, ">")
+         .replace(/"/g, "\"")
+         .replace(/'/g, "'");
+}
+
+// Reusable gradient definition for dashboard icons
+const iconDefs = `<defs><linearGradient id="icon-gradient-dashboard" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" style="stop-color: #8A2BE2;" /><stop offset="50%" style="stop-color: #FF69B4;" /><stop offset="100%" style="stop-color: #00D9D9;" /></linearGradient></defs>`;
+
+export const icons = {
+    dashboard: `<svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M3 14h18m-9-4v8m-7 0h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" /></svg>`,
+    contributions: `<svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 9l3 3-3 3m5 0h3M5 20h14a2 2 0 002-2V6a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>`,
+    feed: `<svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" /></svg>`,
+    referral: `<svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2.25-4.125a3.375 3.375 0 11-6.75 0 3.375 3.375 0 016.75 0zM4 19.235v-.11a6.375 6.375 0 0112.75 0v.109A12.318 12.318 0 0110.374 21c-2.331 0-4.512-.645-6.374-1.766z" /></svg>`,
+    settings: `<svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" /><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /></svg>`,
+    // MODIFIED: Rank and Total icons now have the gradient definition
+    rank: `<svg class="w-6 h-6" fill="none" viewBox="0 0 24 24">${iconDefs}<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.196-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.783-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z" stroke="url(#icon-gradient-dashboard)" /></svg>`,
+    total: `<svg class="w-6 h-6" fill="none" viewBox="0 0 24 24">${iconDefs}<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" stroke="url(#icon-gradient-dashboard)" /></svg>`,
+};
+
+export function getStatusClasses(status) {
+    const statuses = {
+        PROCESSED: 'bg-green-900/50 text-green-300',
+        PENDING: 'bg-yellow-900/50 text-yellow-300 animate-pulse',
+        PROCESSING: 'bg-blue-900/50 text-blue-300 animate-pulse',
+        REJECTED_EMPTY: 'bg-red-900/50 text-red-300',
+        REJECTED_NO_REWARD: 'bg-orange-900/50 text-orange-300',
+        DUPLICATE_HIGH_SIMILARITY: 'bg-red-900/50 text-red-300',
+        DUPLICATE_CROSS_USER: 'bg-red-900/50 text-red-300',
+        REJECTED_NO_NEW_CODE: 'bg-orange-900/50 text-orange-300',
+        FAILED: 'bg-red-900/50 text-red-300',
+        FAILED_EMBEDDING: 'bg-red-900/50 text-red-300',
+        FAILED_DIFF_PROCESSING: 'bg-red-900/50 text-red-300',
+    };
+    return statuses[status] || 'bg-gray-700/50 text-gray-300';
+}
+
+export function getStatusText(status) {
+    const statusTexts = {
+        PROCESSED: 'Complete', PENDING: 'Pending', PROCESSING: 'Processing',
+        REJECTED_EMPTY: 'Rejected: Empty', REJECTED_NO_REWARD: 'Rejected: No Reward',
+        DUPLICATE_HIGH_SIMILARITY: 'Rejected: Duplicate', DUPLICATE_CROSS_USER: 'Rejected: Plagiarism',
+        REJECTED_NO_NEW_CODE: 'Rejected: No Changes', FAILED: 'Failed',
+        FAILED_EMBEDDING: 'Failed: Embedding', FAILED_DIFF_PROCESSING: 'Failed: Diff',
+    };
+    return statusTexts[status] || status;
+}
+
+export function renderModal(title, content) {
+    const modalId = `modal-${Date.now()}`;
+    const modalHtml = `
+        <div id="${modalId}" class="modal-overlay fixed inset-0 bg-black/70 backdrop-blur-sm z-50 flex items-center justify-center p-4 animate-fade-in-up" style="animation-duration: 0.2s;">
+            <div class="modal-content bg-surface w-full max-w-md rounded-xl border border-primary shadow-2xl shadow-black/50 overflow-hidden">
+                <header class="p-4 border-b border-primary flex justify-between items-center">
+                    <h2 class="text-lg font-bold">${title}</h2>
+                    <button class="modal-close-btn p-2 text-text-secondary hover:text-text-main rounded-full hover:bg-primary">
+                        <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                    </button>
+                </header>
+                <div id="modal-body-${modalId}" class="p-6 max-h-[70vh] overflow-y-auto">
+                    ${content}
+                </div>
+            </div>
+        </div>
+    `;
+
+    document.body.insertAdjacentHTML('beforeend', modalHtml);
+
+    const modal = document.getElementById(modalId);
+    
+    const closeModal = () => {
+        if (modal) {
+            modal.classList.remove('animate-fade-in-up');
+            modal.classList.add('animate-fade-out-down');
+            setTimeout(() => modal.remove(), 200);
+        }
+    };
+
+    modal.querySelector('.modal-close-btn').addEventListener('click', closeModal);
+    modal.addEventListener('click', (e) => {
+        if (e.target.classList.contains('modal-overlay')) {
+            closeModal();
+        }
+    });
+
+    return { modalId, closeModal };
+}

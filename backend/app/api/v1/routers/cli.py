@@ -4,7 +4,7 @@ from fastapi import APIRouter, Depends, HTTPException, BackgroundTasks, status
 from sqlalchemy.orm import Session
 from app.core import config
 from app.db import database, crud, models
-from app.schemas import DeviceAuthResponse, Token, ContributionCreate
+from app.schemas import DeviceAuthResponse, Token, ContributionCreate, ContributionStatus
 from app.services.redis_service import redis_service
 from app.api.v1 import dependencies
 from app.tasks import process_contribution
@@ -61,11 +61,49 @@ async def cli_handshake(
 async def contribute_data(
     payload: ContributionCreate,
     current_user: models.User = Depends(dependencies.get_current_user_from_pat),
-    signature_check: None = Depends(dependencies.verify_contribution_signature)
+    signature_check: None = Depends(dependencies.verify_contribution_signature),
+    db: Session = Depends(database.get_db)
 ):
     challenge_key = f"challenge:{current_user.id}"
     redis_service.delete(challenge_key)
     
-    process_contribution.delay(current_user.id, payload.codebase)
+    new_contribution = crud.create_contribution_record(
+        db, 
+        user=current_user, 
+        codebase=payload.codebase, 
+        valuation_results={},
+        reward=0.0,
+        embedding=None,
+        initial_status="PENDING"
+    )
     
-    return {"message": "Contribution received and is being processed."}
+    task = process_contribution.delay(current_user.id, payload.codebase, new_contribution.id)
+    redis_service.set_with_ttl(f"task_status:{task.id}", "PENDING", 3600)
+    redis_service.set_with_ttl(f"contribution_task_map:{new_contribution.id}", task.id, 3600)
+
+    return {"message": "Contribution received and is being processed.", "contribution_id": new_contribution.id, "task_id": task.id}
+
+@router.get("/contributions/{contribution_id}/status", response_model=ContributionStatus)
+async def get_contribution_status(
+    contribution_id: int,
+    db: Session = Depends(database.get_db)
+):
+    contribution = crud.get_contribution_by_id(db, contribution_id)
+    if not contribution:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Contribution not found.")
+    
+    task_id = redis_service.get(f"contribution_task_map:{contribution_id}")
+    if task_id:
+        celery_task_status = redis_service.get(f"task_status:{task_id}")
+        if celery_task_status:
+            return ContributionStatus(
+                status=celery_task_status,
+                contribution_id=contribution_id,
+                message=f"Processing status: {celery_task_status}"
+            )
+
+    return ContributionStatus(
+        status=contribution.status,
+        contribution_id=contribution_id,
+        message=f"Current database status: {contribution.status}"
+    )

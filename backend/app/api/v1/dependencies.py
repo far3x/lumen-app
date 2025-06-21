@@ -13,7 +13,6 @@ from app.services.redis_service import redis_service
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/api/v1/auth/token")
 
-# Dependency for standard web app JWT authentication
 async def get_current_user(token: str = Depends(oauth2_scheme), db: Session = Depends(get_db)) -> models.User:
     credentials_exception = HTTPException(
         status_code=status.HTTP_401_UNAUTHORIZED,
@@ -33,7 +32,6 @@ async def get_current_user(token: str = Depends(oauth2_scheme), db: Session = De
         raise credentials_exception
     return user
 
-# Dependency for CLI Personal Access Token authentication
 async def get_current_user_from_pat(pat: str = Depends(oauth2_scheme), db: Session = Depends(get_db)) -> models.User:
     credentials_exception = HTTPException(
         status_code=status.HTTP_401_UNAUTHORIZED,
@@ -48,26 +46,22 @@ async def get_current_user_from_pat(pat: str = Depends(oauth2_scheme), db: Sessi
         raise credentials_exception
     return user
 
-# Dependency to verify the HMAC signature for CLI contribution requests
 async def verify_contribution_signature(
     request: Request,
     x_lumen_challenge: str = Header(...),
     x_lumen_signature: str = Header(...),
     x_lumen_timestamp: str = Header(...)
 ):
-    # Check if timestamp is recent (e.g., within 5 minutes)
     try:
         request_time = int(x_lumen_timestamp)
         current_time = int(time.time())
-        if abs(current_time - request_time) > 300: # 5 minutes
+        if abs(current_time - request_time) > 300:
             raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Request timestamp is too old.")
     except ValueError:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Invalid timestamp format.")
 
-    # Get request body
     body = await request.body()
     
-    # Verify signature
     is_valid = security.verify_hmac_signature(
         signature=x_lumen_signature,
         challenge=x_lumen_challenge,

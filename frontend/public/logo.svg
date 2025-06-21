@@ -1,21 +1,13 @@
 <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
     <defs>
-        <linearGradient id="lumen-gradient" x1="0" y1="0" x2="1" y2="1">
-            <stop offset="0%" stop-color="#8A2BE2"/>
-            <stop offset="50%" stop-color="#FF69B4"/>
-            <stop offset="100%" stop-color="#00D9D9"/>
+        <linearGradient id="heartstone-grad-refined" x1="0.5" y1="0" x2="0.5" y2="1">
+            <stop offset="0%" stop-color="#FF69B4" />
+            <stop offset="100%" stop-color="#00D9D9" />
         </linearGradient>
     </defs>
-
-    <!-- Right Facet (Darker purple for shadow and depth) -->
-    <path d="M17 5L19 14L12 21L12 7L17 5Z" fill="#8A2BE2" fill-opacity="0.5"/>
-
-    <!-- Left Facet (Main gradient for vibrant color) -->
-    <path d="M7 5L5 14L12 21L12 7L7 5Z" fill="url(#lumen-gradient)" />
-
-    <!-- Top Facet (Brightest part, appears as the surface) -->
-    <path d="M12 3L7 5L12 7L17 5L12 3Z" fill="#FF69B4" />
-    
-    <!-- Clean, Visible Outline -->
-    <path d="M7 5L5 14L12 21L19 14L17 5L12 3L7 5Z" stroke="#E5E5E5" stroke-width="1.0" stroke-linecap="round" stroke-linejoin="round"/>
+    <g transform="translate(0 1)">
+      <path d="M12 4L6 10L12 20L18 10L12 4Z" fill="#8A2BE2" stroke="rgba(255, 255, 255, 0.5)" stroke-width="0.75"/>
+      <path d="M12 5L7.5 10.5L12 18L16.5 10.5L12 5Z" fill="url(#heartstone-grad-refined)"/>
+      <path d="M12 6.5L9 10.5L12 13L15 10.5L12 6.5Z" fill="white" fill-opacity="0.8"/>
+    </g>
 </svg>
