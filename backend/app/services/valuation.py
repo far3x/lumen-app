@@ -6,12 +6,9 @@ import re
 import tiktoken
 import google.generativeai as genai
 from sqlalchemy.orm import Session
-from radon.complexity import cc_visit
-from radon.raw import analyze as raw_analyze
-from pygments import lex
-from pygments.token import Comment
-from pygments.lexers import get_lexer_for_filename, guess_lexer
-from pygments.util import ClassNotFound
+import subprocess
+import tempfile
+
 from app.db import crud
 from app.core.config import settings
 
@@ -61,7 +58,7 @@ class HybridValuationService:
         return parsed_files
 
     def _perform_manual_analysis(self, parsed_files: list[dict]) -> dict:
-        print("[VALUATION_STEP] Starting intelligent manual analysis...")
+        print("[VALUATION_STEP] Starting language-agnostic analysis with scc...")
         analysis_data = {
             "total_lloc": 0,
             "total_tokens": 0,
@@ -70,43 +67,65 @@ class HybridValuationService:
             "language_breakdown": {}
         }
         
-        python_files_complexity = []
         all_content_str = ""
+        total_complexity_score = 0
+        total_files_with_complexity = 0
 
-        for file_data in parsed_files:
-            content = file_data["content"]
-            all_content_str += content + "\n"
-            
-            try:
-                lexer = get_lexer_for_filename(file_data["path"], code=content)
-            except ClassNotFound:
-                try: lexer = guess_lexer(content)
-                except ClassNotFound: continue
-            
-            lang_name = lexer.name
-            analysis_data["language_breakdown"][lang_name] = analysis_data["language_breakdown"].get(lang_name, 0) + 1
-            
-            if lang_name == "Python":
+        with tempfile.TemporaryDirectory() as temp_dir:
+            for file_data in parsed_files:
                 try:
-                    analysis_data["total_lloc"] += raw_analyze(content).lloc
-                    cc_blocks = cc_visit(content)
-                    avg_file_cc = sum(b.complexity for b in cc_blocks) / len(cc_blocks) if cc_blocks else 0
-                    if avg_file_cc > 0: python_files_complexity.append(avg_file_cc)
-                except Exception:
+                    full_path = os.path.join(temp_dir, file_data["path"])
+                    os.makedirs(os.path.dirname(full_path), exist_ok=True)
+                    
+                    with open(full_path, 'w', encoding='utf-8') as f:
+                        f.write(file_data["content"])
+                    
+                    all_content_str += file_data["content"] + "\n"
+                except Exception as e:
+                    print(f"[VALUATION_ERROR] Could not write temporary file {file_data.get('path', 'unknown')}: {e}")
                     continue
 
-        if python_files_complexity:
-            analysis_data["avg_complexity"] = sum(python_files_complexity) / len(python_files_complexity)
+            if not any(os.scandir(temp_dir)):
+                print("[VALUATION_WARNING] No files were written to temporary directory for analysis.")
+                return analysis_data
 
-        if self.tokenizer:
-            analysis_data["total_tokens"] = len(self.tokenizer.encode(all_content_str))
+            try:
+                result = subprocess.run(
+                    ['scc', '--format', 'json', temp_dir],
+                    capture_output=True,
+                    text=True,
+                    check=True
+                )
+                scc_results = json.loads(result.stdout)
+                
+                for lang_summary in scc_results:
+                    lang_name = lang_summary.get("Name")
+                    if lang_name:
+                        file_count = lang_summary.get("Count", 0)
+                        analysis_data["language_breakdown"][lang_name] = analysis_data["language_breakdown"].get(lang_name, 0) + file_count
+                        analysis_data["total_lloc"] += lang_summary.get("Code", 0)
+                        analysis_data["total_tokens"] += lang_summary.get("Tokens", 0)
+                        
+                        complexity = lang_summary.get("Complexity", 0)
+                        if complexity > 0 and file_count > 0:
+                            total_complexity_score += complexity
+                            total_files_with_complexity += file_count
 
+            except (subprocess.CalledProcessError, FileNotFoundError, json.JSONDecodeError) as e:
+                print(f"[VALUATION_ERROR] Could not run or parse 'scc' tool: {e}")
+                print("[VALUATION_FALLBACK] Falling back to tiktoken for token count.")
+                if self.tokenizer and not analysis_data["total_tokens"]:
+                    analysis_data["total_tokens"] = len(self.tokenizer.encode(all_content_str))
+
+        if total_files_with_complexity > 0:
+            analysis_data["avg_complexity"] = total_complexity_score / total_files_with_complexity
+        
         if all_content_str:
             original_size = len(all_content_str.encode('utf-8'))
             compressed_size = len(zlib.compress(all_content_str.encode('utf-8'), level=9))
             analysis_data["compression_ratio"] = compressed_size / original_size if original_size > 0 else 0
 
-        print(f"[VALUATION_STEP] Manual analysis finished: {analysis_data}")
+        print(f"[VALUATION_STEP] Universal analysis finished: {analysis_data}")
         return analysis_data
 
     def _get_ai_qualitative_scores(self, full_codebase: str, manual_metrics: dict) -> dict:
@@ -125,7 +144,7 @@ class HybridValuationService:
         {{
           "language_breakdown": {json.dumps(manual_metrics.get('language_breakdown', {}))},
           "accurate_token_count": {manual_metrics.get('total_tokens', 0)},
-          "logical_lines_of_python_code": {manual_metrics.get('total_lloc', 0)},
+          "logical_lines_of_code": {manual_metrics.get('total_lloc', 0)},
           "normalized_complexity_score": {normalized_complexity:.2f}
         }}
 
@@ -203,11 +222,13 @@ class HybridValuationService:
         base_value = (manual_metrics['total_tokens'] ** 0.6) * 0.1
         
         stats = crud.get_network_stats(db)
-        if stats:
-            rarity_multiplier = 1.0 + math.tanh((manual_metrics['avg_complexity'] - stats.mean_complexity) / stats.std_dev_complexity if stats.std_dev_complexity > 0 else 0)
-            halving_multiplier = 0.5 ** (stats.total_lum_distributed / self.HALVING_THRESHOLD)
+        
+        if manual_metrics['avg_complexity'] > 0 and stats and stats.std_dev_complexity > 0:
+            rarity_multiplier = 1.0 + math.tanh((manual_metrics['avg_complexity'] - stats.mean_complexity) / stats.std_dev_complexity)
         else:
-            rarity_multiplier, halving_multiplier = 1.0, 1.0
+            rarity_multiplier = 1.0
+        
+        halving_multiplier = 0.5 ** (stats.total_lum_distributed / self.HALVING_THRESHOLD) if stats else 1.0
 
         ai_weighted_multiplier = (clarity * 0.5) + (architecture * 0.3) + (code_quality * 0.2)
         

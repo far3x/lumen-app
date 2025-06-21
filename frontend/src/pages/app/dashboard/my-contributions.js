@@ -1,4 +1,4 @@
-import { fetchContributions, checkContributionStatus, fetchAndStoreAccount } from '../../../lib/auth.js';
+import { api, fetchContributions, checkContributionStatus, fetchAndStoreAccount } from '../../../lib/auth.js';
 import { getStatusClasses, getStatusText, renderModal, escapeHtml, icons, updateBalancesInUI } from './utils.js';
 
 export let contributionsState = {
@@ -39,7 +39,6 @@ function renderProTipsSection() {
     </div>
     `;
 }
-
 
 function renderScoreBar(label, score) {
     if (score === undefined || score === null) return '';
@@ -225,30 +224,40 @@ function startContributionStatusPoller(allContributions) {
     if (contributionsState.pollerId) return;
 
     contributionsState.pollerId = setInterval(async () => {
-        let needsRefresh = false;
-        for (const contrib of processingContributions) {
+        let needsUIRefresh = false;
+
+        for (const contrib of [...processingContributions]) {
             try {
-                const response = await checkContributionStatus(contrib.id);
-                if (response.data && !['PENDING', 'PROCESSING'].includes(response.data.status)) {
-                    needsRefresh = true;
-                    break;
+                const statusResponse = await checkContributionStatus(contrib.id);
+                if (statusResponse.data && !['PENDING', 'PROCESSING'].includes(statusResponse.data.status)) {
+                    const fullContribResponse = await api.get(`/contributions/${contrib.id}`);
+                    const updatedContrib = fullContribResponse.data;
+
+                    const index = allContributions.findIndex(c => c.id === updatedContrib.id);
+                    if (index !== -1) {
+                        allContributions[index] = updatedContrib;
+                    }
+                    
+                    needsUIRefresh = true;
                 }
             } catch (error) {
                 console.error(`Failed to check status for contribution ${contrib.id}`, error);
-                needsRefresh = true; 
+                needsUIRefresh = true;
                 break;
             }
         }
 
-        if (needsRefresh) {
+        if (needsUIRefresh) {
             clearInterval(contributionsState.pollerId);
             contributionsState.pollerId = null;
-            await fetchAndStoreAccount();
-            updateBalancesInUI();
-            await changeContributionsPage(0, allContributions);
+            
+            document.getElementById('contributions-table-container').innerHTML = renderContributionHistory(allContributions);
+            attachDetailModalListeners(allContributions);
+            startContributionStatusPoller(allContributions);
         }
-    }, 5000); 
+    }, 5000);
 }
+
 
 export function attachContributionPageListeners(allContributions) {
     attachDetailModalListeners(allContributions);
