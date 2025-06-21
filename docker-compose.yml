@@ -40,12 +40,6 @@ services:
       dockerfile: Dockerfile
     command: celery -A app.core.celery_app.celery_app worker --loglevel=info --pool=eventlet
     env_file: ./.env
-    # --- ADD THESE LINES ---
-    environment:
-      - GOOGLE_APPLICATION_CREDENTIALS=/usr/src/app/lumen-project-credentials.json
-    volumes:
-      - ./backend/lumen-project-credentials.json:/usr/src/app/lumen-project-credentials.json:ro
-    # ----------------------
     depends_on:
       - redis
       - api
