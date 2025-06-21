@@ -1,4 +1,5 @@
-import { getUser, getAccount, fetchLeaderboard, fetchContributions, fetchRecentContributions, logout, fetchAndStoreUser, fetchAndStoreAccount, isAuthenticated, updateBalancesInUI } from '../../../lib/auth.js';
+import { getUser, getAccount, fetchLeaderboard, fetchContributions, fetchRecentContributions, logout, fetchAndStoreUser, fetchAndStoreAccount, isAuthenticated } from '../../../lib/auth.js';
+import { updateBalancesInUI } from './utils.js';
 import { navigate } from '../../../router.js';
 import { renderDashboardOverview } from './overview.js';
 import { renderMyContributionsPage, attachContributionPageListeners, contributionsState, resetContributionsState } from './my-contributions.js';
