@@ -94,17 +94,21 @@ async function setupDashboard() {
         dashboardState.user = user;
         dashboardState.account = account;
 
-        const [leaderboardResponse, contributionsResult, recentContributions] = await Promise.all([
+        const results = await Promise.allSettled([
             fetchLeaderboard(),
             fetchContributions(1, 10),
             fetchRecentContributions()
         ]);
         
-        dashboardState.userRank = leaderboardResponse.current_user_rank;
-        dashboardState.allContributions = contributionsResult.items;
-        contributionsState.totalContributions = contributionsResult.total;
-        contributionsState.isLastPage = (1 * 10) >= contributionsResult.total;
-        dashboardState.recentContributions = recentContributions;
+        dashboardState.userRank = results[0].status === 'fulfilled' ? results[0].value.current_user_rank : null;
+        if (results[1].status === 'fulfilled') {
+            dashboardState.allContributions = results[1].value.items;
+            contributionsState.totalContributions = results[1].value.total;
+            contributionsState.isLastPage = (1 * 10) >= results[1].value.total;
+        } else {
+             dashboardState.allContributions = [];
+        }
+        dashboardState.recentContributions = results[2].status === 'fulfilled' ? results[2].value : [];
 
         if (balancePoller) clearInterval(balancePoller);
     
@@ -128,6 +132,7 @@ async function setupDashboard() {
             logout();
             navigate('/login');
         } else {
+            console.error("Dashboard setup failed:", error);
             dashboardContentArea.innerHTML = `<div class="text-center p-8 text-text-secondary">Could not load dashboard data. Please try refreshing.</div>`;
         }
         return;

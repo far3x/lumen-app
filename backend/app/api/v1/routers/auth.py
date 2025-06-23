@@ -7,7 +7,6 @@ from fastapi.security import OAuth2PasswordRequestForm
 from sqlalchemy.orm import Session
 from starlette.responses import RedirectResponse
 from authlib.integrations.starlette_client import OAuth
-from starlette.config import Config as AuthlibConfig
 import httpx
 from jose import JWTError, jwt
 from fastapi_mail import FastMail, MessageSchema, ConnectionConfig
@@ -37,8 +36,7 @@ mail_conf = ConnectionConfig(
     TEMPLATE_FOLDER=Path(__file__).parent.parent.parent.parent / 'templates'
 )
 
-authlib_config = AuthlibConfig('.env')
-oauth = OAuth(authlib_config)
+oauth = OAuth()
 oauth.register(
     name='google',
     server_metadata_url='https://accounts.google.com/.well-known/openid-configuration',
@@ -301,7 +299,6 @@ async def login_2fa_backup_code(response: Response, request: TwoFactorBackupCode
 
 @router.get('/login/{provider}')
 async def login_via_provider(request: Request, provider: str, state: str | None = Query(None)):
-    # Construct the redirect URI using the public-facing API_URL from settings
     redirect_uri = f"{config.settings.API_URL}/api/v1/auth/callback/{provider}"
     
     if state:

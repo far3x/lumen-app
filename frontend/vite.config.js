@@ -2,10 +2,11 @@ import { defineConfig } from 'vite';
 
 export default defineConfig({
   server: {
+    host: '0.0.0.0',
     port: 5173,
-    // Make the server accessible from the host machine
-    host: '0.0.0.0', 
-    // Enable polling to detect file changes in a container
+    hmr: {
+      port: 5173,
+    },
     watch: {
       usePolling: true,
     },

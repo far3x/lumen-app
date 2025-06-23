@@ -14,9 +14,10 @@ class User(BaseModel):
     is_in_leaderboard: bool
     is_verified: bool
     is_two_factor_enabled: bool
-    has_password: bool # Add this line
-    google_id: Optional[str] = None # Add this line
-    github_id: Optional[str] = None # Add this line
+    has_password: bool
+    google_id: Optional[str] = None
+    github_id: Optional[str] = None
+    solana_address: Optional[str] = None
 
     class Config:
         from_attributes = True
@@ -140,3 +141,8 @@ class LeaderboardEntry(BaseModel):
 class LeaderboardResponse(BaseModel):
     top_users: List[LeaderboardEntry]
     current_user_rank: Optional[LeaderboardEntry] = None
+
+class WalletLinkRequest(BaseModel):
+    solana_address: str
+    message: str
+    signature: str

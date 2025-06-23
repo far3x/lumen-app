@@ -1,8 +1,154 @@
 import { api, updateUserProfile, fetchAndStoreUser, logout, changePassword } from '../../../lib/auth.js';
 import { navigate } from '../../../router.js';
-import { renderModal } from './utils.js';
+import { renderModal, renderWalletSelectionModal } from './utils.js';
 import QRCode from 'qrcode';
 import zxcvbn from 'zxcvbn';
+import { walletService } from '../../../lib/wallet.js';
+
+function bytesToHex(bytes) {
+    return Array.from(bytes, byte => byte.toString(16).padStart(2, '0')).join('');
+}
+
+async function handleLinkWallet(user) {
+    const messageEl = document.getElementById('wallet-management-message');
+    const button = document.getElementById('link-wallet-btn');
+
+    if (!walletService.isWalletConnected()) {
+        messageEl.textContent = 'Please connect your wallet first.';
+        messageEl.className = 'block text-sm p-3 rounded-md bg-red-900/50 text-red-300 mt-4';
+        messageEl.classList.remove('hidden');
+        return;
+    }
+
+    button.disabled = true;
+    button.innerHTML = `<span class="animate-spin inline-block w-5 h-5 border-2 border-transparent border-t-white rounded-full"></span>`;
+    messageEl.classList.add('hidden');
+
+    try {
+        const nonce = new Date().getTime();
+        const message = `Sign this message to link your wallet to your Lumen account.\n\nAddress: ${walletService.publicKey.toBase58()}\nNonce: ${nonce}`;
+        
+        const signatureBytes = await walletService.signMessage(message);
+        const signatureHex = bytesToHex(signatureBytes);
+
+        await api.post('/users/me/link-wallet', {
+            solana_address: walletService.publicKey.toBase58(),
+            message: message,
+            signature: signatureHex
+        });
+        
+        const updatedUser = await fetchAndStoreUser();
+        const container = document.getElementById('wallet-management-card');
+        container.innerHTML = renderWalletManagementCard(updatedUser);
+        attachWalletManagementListeners(updatedUser);
+
+    } catch (error) {
+        messageEl.textContent = error.response?.data?.detail || error.message || 'Failed to link wallet. Please try again.';
+        messageEl.className = 'block text-sm p-3 rounded-md bg-red-900/50 text-red-300 mt-4';
+        messageEl.classList.remove('hidden');
+        button.disabled = false;
+        button.innerHTML = 'Link Wallet to Account';
+    }
+}
+
+async function handleUnlinkWallet() {
+    const confirmationContent = `
+        <div class="text-center">
+            <p class="text-text-secondary mb-6">Are you sure you want to unlink your wallet? You will not be able to receive on-chain rewards until a new wallet is linked.</p>
+            <div class="flex justify-center gap-4">
+                <button id="unlink-cancel-btn" class="px-6 py-2 bg-primary hover:bg-subtle/80 text-text-main font-medium rounded-md transition-colors">Cancel</button>
+                <button id="unlink-confirm-btn" class="px-6 py-2 bg-red-900/80 hover:bg-red-900 text-red-300 font-medium rounded-md transition-colors">Yes, Unlink</button>
+            </div>
+        </div>
+    `;
+
+    const { modalId, closeModal } = renderModal('Confirm Unlink Wallet', confirmationContent);
+    const modalBody = document.getElementById(`modal-body-${modalId}`);
+
+    document.getElementById('unlink-cancel-btn').addEventListener('click', closeModal);
+    document.getElementById('unlink-confirm-btn').addEventListener('click', async (e) => {
+        e.currentTarget.disabled = true;
+        e.currentTarget.innerHTML = `<span class="animate-spin inline-block w-5 h-5 border-2 border-transparent border-t-white rounded-full"></span>`;
+
+        try {
+            await api.post('/users/me/unlink-wallet');
+            const updatedUser = await fetchAndStoreUser();
+            
+            modalBody.innerHTML = `
+                <div class="text-center transition-all animate-fade-in-up">
+                    <div class="w-16 h-16 mx-auto mb-4 bg-green-900/50 text-green-300 rounded-full flex items-center justify-center">
+                        <svg class="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+                    </div>
+                    <h3 class="font-bold text-lg text-text-main">Wallet Unlinked</h3>
+                    <p class="text-text-secondary mt-2">Your account is no longer linked to a wallet.</p>
+                </div>
+            `;
+
+            setTimeout(() => {
+                closeModal();
+                const container = document.getElementById('wallet-management-card');
+                container.innerHTML = renderWalletManagementCard(updatedUser);
+                attachWalletManagementListeners(updatedUser);
+            }, 2000);
+
+        } catch (error) {
+            console.error("Unlink failed:", error);
+            modalBody.innerHTML = `<p class="text-red-400 text-center">Failed to unlink wallet. Please try again.</p>`;
+            setTimeout(closeModal, 2000);
+        }
+    });
+}
+
+function renderWalletManagementCard(user) {
+    const isWalletConnected = walletService.isWalletConnected();
+    const connectedAddress = isWalletConnected ? walletService.publicKey.toBase58() : null;
+    const isLinked = user && user.solana_address;
+
+    let content;
+
+    if (isLinked) {
+        const truncatedAddress = `${user.solana_address.slice(0, 6)}...${user.solana_address.slice(-6)}`;
+        content = `
+            <p class="text-sm text-text-secondary mt-1 mb-4">Your account is linked to the following wallet for rewards:</p>
+            <div class="bg-primary p-4 rounded-lg flex items-center justify-between">
+                <div class="flex items-center gap-3">
+                    <svg class="w-6 h-6 text-green-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                    <span class="font-mono text-text-main">${truncatedAddress}</span>
+                </div>
+                <button id="unlink-wallet-btn" class="text-sm font-medium text-red-400 hover:underline">Unlink</button>
+            </div>
+        `;
+    } else if (isWalletConnected) {
+        const truncatedAddress = `${connectedAddress.slice(0, 6)}...${connectedAddress.slice(-6)}`;
+        content = `
+            <p class="text-sm text-text-secondary mt-1 mb-4">You have connected wallet <strong class="font-mono text-text-main">${truncatedAddress}</strong>. Sign a message to link it to your account and enable rewards.</p>
+            <button id="link-wallet-btn" class="w-full flex justify-center py-2 px-6 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-accent-purple hover:bg-accent-purple/80 transition-colors">
+                Link Wallet to Account
+            </button>
+        `;
+    } else {
+        content = `
+            <p class="text-sm text-text-secondary mt-1 mb-4">Connect your Solana wallet to link it to your account for rewards.</p>
+             <button id="settings-connect-wallet-btn" class="w-full flex justify-center py-2 px-6 border border-subtle rounded-md shadow-sm text-sm font-medium text-text-main bg-primary hover:bg-subtle transition-colors">
+                Connect Wallet
+            </button>
+        `;
+    }
+
+    return `
+        <div class="p-6">
+            <h3 class="font-bold text-lg">Wallet Management</h3>
+            <div id="wallet-management-message" class="hidden mt-4"></div>
+            ${content}
+        </div>
+    `;
+}
+
+function attachWalletManagementListeners(user) {
+    document.getElementById('settings-connect-wallet-btn')?.addEventListener('click', renderWalletSelectionModal);
+    document.getElementById('link-wallet-btn')?.addEventListener('click', () => handleLinkWallet(user));
+    document.getElementById('unlink-wallet-btn')?.addEventListener('click', handleUnlinkWallet);
+}
 
 async function handleProfileSettingsSubmit(e, dashboardState) {
     e.preventDefault();
@@ -205,7 +351,7 @@ async function show2FASetupModal(dashboardState) {
         const canvas = document.getElementById('qr-code-canvas');
         QRCode.toCanvas(canvas, provisioning_uri);
         
-        document.getElementById('enable-2fa-form').addEventListener('submit', (e) => handleEnable2FASubmit(e, setup_key, dashboardState));
+        document.getElementById('enable-2fa-form').addEventListener('submit', (e) => handleEnable2FASubmit(e, setupKey, dashboardState));
 
     } catch (error) {
         alert('Could not start 2FA setup process. Please try again.');
@@ -243,7 +389,6 @@ export function attachSettingsPageListeners(dashboardState) {
         });
     }
 
-    // Handle success/error messages from URL
     const params = new URLSearchParams(window.location.search);
     const linkMessageEl = document.getElementById('link-accounts-message');
     const status = params.get('status') || params.get('error');
@@ -252,7 +397,7 @@ export function attachSettingsPageListeners(dashboardState) {
         let message = "An unknown error occurred.";
         let isSuccess = false;
         
-        if (status === 'link_complete') {
+        if (status === 'link_complete' || status === 'link_success') {
             message = "Account linked successfully!";
             isSuccess = true;
         } else if (status === 'email_mismatch') {
@@ -265,12 +410,23 @@ export function attachSettingsPageListeners(dashboardState) {
         linkMessageEl.className = `block text-sm p-3 rounded-md mb-4 ${isSuccess ? 'bg-green-900/50 text-green-300' : 'bg-red-900/50 text-red-300'}`;
         linkMessageEl.classList.remove('hidden');
         
-        // Clean URL after displaying the message
         const newUrl = new URL(window.location);
         newUrl.searchParams.delete('status');
         newUrl.searchParams.delete('error');
         newUrl.searchParams.delete('success');
         window.history.replaceState({}, '', newUrl);
+    }
+    
+    const walletCard = document.getElementById('wallet-management-card');
+    if (walletCard) {
+        walletCard.innerHTML = renderWalletManagementCard(dashboardState.user);
+        attachWalletManagementListeners(dashboardState.user);
+        
+        document.addEventListener('walletUpdate', () => {
+            const user = dashboardState.user;
+            walletCard.innerHTML = renderWalletManagementCard(user);
+            attachWalletManagementListeners(user);
+        });
     }
 }
 
@@ -389,6 +545,10 @@ export function renderSettingsPage(user) {
             </div>
 
             <div class="lg:col-span-3 space-y-8">
+                <div id="wallet-management-card" class="bg-surface border border-primary rounded-xl overflow-hidden">
+                    ${renderWalletManagementCard(user)}
+                </div>
+                
                 <div id="2fa-card" class="bg-surface border border-primary rounded-xl overflow-hidden">
                     ${render2FACardContent(user)}
                 </div>
