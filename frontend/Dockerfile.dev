@@ -1,13 +1,18 @@
-FROM node:18-alpine
+# frontend/Dockerfile.dev
 
+FROM node:18-alpine
 WORKDIR /app
 
 COPY package*.json ./
 
+# Install dependencies
 RUN npm install
 
+# Copy the rest of the app's source code
 COPY . .
 
+# Expose the Vite port
 EXPOSE 5173
 
-CMD ["npm", "run", "dev", "--", "--host"]
+# The command to run the dev server
+CMD ["npm", "run", "dev"]

@@ -1,15 +1,10 @@
-# docker-compose.yml (THIS IS NOW YOUR DEV FILE)
-
 services:
-  # Database service remains the same, but we expose the port
   db:
     image: postgres:13-alpine
     container_name: lumen_db
-    ports:
-      - "5433:5432" # Expose port for local tools like DBeaver
     volumes:
       - postgres_data:/var/lib/postgresql/data/
-    env_file: ./.env
+    env_file: ./.env # Ensure this points to prod.env in your actual setup or manage envs differently
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
       interval: 5s
@@ -17,13 +12,11 @@ services:
       retries: 5
     restart: unless-stopped
 
-  # Redis service remains the same
   redis:
     image: redis:alpine
     container_name: lumen_redis
     restart: unless-stopped
 
-  # API service with hot-reloading
   api:
     container_name: lumen_api
     build:
@@ -31,12 +24,8 @@ services:
       dockerfile: Dockerfile
     command: >
       sh -c "alembic upgrade head &&
-             uvicorn app.main:app --reload --reload-method poll --host 0.0.0.0 --port 8000"
-    volumes:
-      - ./backend:/usr/src/app # Mount local code for hot-reloading
-    env_file: ./.env
-    ports:
-      - "8000:8000" # Expose API port to host
+             uvicorn app.main:app --host 0.0.0.0 --port 8000"
+    env_file: ./.env # Ensure this points to prod.env
     depends_on:
       db:
         condition: service_healthy
@@ -44,32 +33,42 @@ services:
         condition: service_started
     restart: unless-stopped
 
-  # Worker service with code mounting to see changes
   worker:
     container_name: lumen_worker
     build:
       context: ./backend
       dockerfile: Dockerfile
     command: celery -A app.core.celery_app.celery_app worker --loglevel=info --pool=eventlet
-    volumes:
-      - ./backend:/usr/src/app # Mount local code
-    env_file: ./.env
+    env_file: ./.env # Ensure this points to prod.env
     depends_on:
       - redis
       - api
     restart: unless-stopped
 
-  # Frontend service running the Vite dev server
   frontend:
     container_name: lumen_frontend
     build:
       context: ./frontend
-      dockerfile: Dockerfile.dev # Use the dev Dockerfile
-    volumes:
-      - ./frontend:/app # Mount local code for hot-reloading
-      - /app/node_modules # Isolate node_modules inside the container
+      dockerfile: Dockerfile
+      args:
+        # Passes .env variables into the frontend build
+        VITE_API_URL: ${API_URL}
+        VITE_GOOGLE_RECAPTCHA_SITE_KEY: ${GOOGLE_RECAPTCHA_SITE_KEY}
+    restart: unless-stopped
+
+  nginx:
+    image: nginx:stable-alpine
+    container_name: lumen_nginx
     ports:
-      - "5173:5173" # Expose Vite dev server port
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx/lumen.conf:/etc/nginx/conf.d/default.conf
+      - ./certbot/conf:/etc/letsencrypt
+      - ./certbot/www:/var/www/certbot
+    depends_on:
+      - api
+      - frontend
     restart: unless-stopped
 
 volumes:
