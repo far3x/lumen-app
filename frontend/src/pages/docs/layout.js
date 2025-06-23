@@ -1,30 +1,16 @@
-// Import from the new individual files
-import { renderIntroduction } from './content/introduction.js';
-import { renderWhyLumen } from './content/why-lumen.js';
-import { renderInstallation } from './content/installation.js';
-import { renderAuthentication } from './content/authentication.js';
-import { renderCoreCommands } from './content/core-commands.js';
-import { renderContributing } from './content/contributing.js';
-import { renderConfiguration } from './content/configuration.js';
-import { renderSecurity } from './content/security.js';
-import { renderTokenomics } from './content/tokenomics.js';
-import { renderRoadmap } from './content/roadmap.js';
-import { renderGovernance } from './content/governance.js';
-import { renderFaq } from './content/faq.js';
-
 const docPages = {
-    'introduction': { title: 'Introduction', content: renderIntroduction, toc: [ { id: 'introduction', title: 'Introduction' }, { id: 'the-problem', title: 'The Problem' }, { id: 'the-solution', title: 'The Solution' } ]},
-    'why-lumen': { title: 'Why Lumen?', content: renderWhyLumen, toc: [ { id: 'why-lumen', title: 'Why Lumen?' }, { id: 'for-developers', title: 'For Developers' }, { id: 'for-ai-companies', title: 'For AI Companies' } ]},
-    'installation': { title: 'Installation', content: renderInstallation, toc: [ { id: 'installation', title: 'Installation' }, { id: 'prerequisites', title: 'Prerequisites' }, { id: 'install-with-pip', title: 'Standard Installation' }, { id: 'verifying', title: 'Verifying' }, { id: 'troubleshooting', title: 'Troubleshooting' } ]},
-    'authentication': { title: 'Authentication', content: renderAuthentication, toc: [ { id: 'authentication', title: 'Authentication' }, { id: 'the-process', title: 'The Process' }, { id: 'token-security', title: 'Token Security' } ]},
-    'core-commands': { title: 'Core Commands', content: renderCoreCommands, toc: [ { id: 'core-commands', title: 'Core Commands' }, { id: 'primary-commands', title: 'Primary Commands' }, { id: 'utility-commands', title: 'Utility Commands' } ]},
-    'contributing': { title: 'Contributing Data', content: renderContributing, toc: [ { id: 'contributing-data', title: 'Contributing Data' }, { id: 'how-rewards-are-calculated', title: 'How Rewards Are Calculated' }, { id: 'contributing-updates-rewards-for-innovation', title: 'Contributing Updates' } ]},
-    'configuration': { title: 'Configuration', content: renderConfiguration, toc: [ { id: 'configuration', title: 'Customizing the CLI' }, { id: 'default-configuration', title: 'Default Configuration' }, { id: 'key-settings', title: 'Customization Options' } ]},
-    'security': { title: 'Security', content: renderSecurity, toc: [ { id: 'security', title: 'Security' }, { id: 'the-cardinal-rule', title: 'The Cardinal Rule' }, { id: 'radical-transparency-and-trust', title: 'Transparency and Trust' } ]},
-    'tokenomics': { title: 'Tokenomics', content: renderTokenomics, toc: [ { id: 'tokenomics', title: 'Tokenomics' }, { id: 'core-token-utility', title: 'Core Utility' }, { id: 'supply-and-allocation', 'title': 'Supply & Allocation' }, { id: 'emission-schedule', title: 'Emission Schedule' } ]},
-    'roadmap': { title: 'Roadmap', content: renderRoadmap, toc: [ { id: 'roadmap', title: 'Roadmap' } ]},
-    'governance': { title: 'Governance', content: renderGovernance, toc: [ { id: 'governance', title: 'Governance' }, { id: 'lumen-improvement-proposals', title: 'LIPs' }, { id: 'progressive-decentralization', title: 'Decentralization' } ]},
-    'faq': { title: 'FAQ', content: renderFaq, toc: [ { id: 'faq', title: 'FAQ' }, { id: 'faq-security', title: 'Security & Privacy' }, { id: 'faq-rewards', title: 'Rewards & Value' } ]},
+    'introduction': { title: 'Introduction', content: () => import('./content/introduction.js').then(m => m.renderIntroduction()), toc: [ { id: 'introduction', title: 'Introduction' }, { id: 'the-problem', title: 'The Problem' }, { id: 'the-solution', title: 'The Solution' } ]},
+    'why-lumen': { title: 'Why Lumen?', content: () => import('./content/why-lumen.js').then(m => m.renderWhyLumen()), toc: [ { id: 'why-lumen', title: 'Why Lumen?' }, { id: 'for-developers', title: 'For Developers' }, { id: 'for-ai-companies', title: 'For AI Companies' } ]},
+    'installation': { title: 'Installation', content: () => import('./content/installation.js').then(m => m.renderInstallation()), toc: [ { id: 'installation', title: 'Installation' }, { id: 'prerequisites', title: 'Prerequisites' }, { id: 'install-with-pip', title: 'Standard Installation' }, { id: 'verifying', title: 'Verifying' }, { id: 'troubleshooting', title: 'Troubleshooting' } ]},
+    'authentication': { title: 'Authentication', content: () => import('./content/authentication.js').then(m => m.renderAuthentication()), toc: [ { id: 'authentication', title: 'Authentication' }, { id: 'the-process', title: 'The Process' }, { id: 'token-security', title: 'Token Security' } ]},
+    'core-commands': { title: 'Core Commands', content: () => import('./content/core-commands.js').then(m => m.renderCoreCommands()), toc: [ { id: 'core-commands', title: 'Core Commands' }, { id: 'primary-commands', title: 'Primary Commands' }, { id: 'utility-commands', title: 'Utility Commands' } ]},
+    'contributing': { title: 'Contributing Data', content: () => import('./content/contributing.js').then(m => m.renderContributing()), toc: [ { id: 'contributing-data', title: 'Contributing Data' }, { id: 'how-rewards-are-calculated', title: 'How Rewards Are Calculated' }, { id: 'contributing-updates-rewards-for-innovation', title: 'Contributing Updates' } ]},
+    'configuration': { title: 'Configuration', content: () => import('./content/configuration.js').then(m => m.renderConfiguration()), toc: [ { id: 'configuration', title: 'Customizing the CLI' }, { id: 'default-configuration', title: 'Default Configuration' }, { id: 'key-settings', title: 'Customization Options' } ]},
+    'security': { title: 'Security', content: () => import('./content/security.js').then(m => m.renderSecurity()), toc: [ { id: 'security', title: 'Security' }, { id: 'the-cardinal-rule', title: 'The Cardinal Rule' }, { id: 'radical-transparency-and-trust', title: 'Transparency and Trust' } ]},
+    'tokenomics': { title: 'Tokenomics', content: () => import('./content/tokenomics.js').then(m => m.renderTokenomics()), toc: [ { id: 'tokenomics', title: 'Tokenomics' }, { id: 'core-token-utility', title: 'Core Utility' }, { id: 'supply-and-allocation', 'title': 'Supply & Allocation' }, { id: 'emission-schedule', title: 'Emission Schedule' } ]},
+    'roadmap': { title: 'Roadmap', content: () => import('./content/roadmap.js').then(m => m.renderRoadmap()), toc: [ { id: 'roadmap', title: 'Roadmap' } ]},
+    'governance': { title: 'Governance', content: () => import('./content/governance.js').then(m => m.renderGovernance()), toc: [ { id: 'governance', title: 'Governance' }, { id: 'lumen-improvement-proposals', title: 'LIPs' }, { id: 'progressive-decentralization', title: 'Decentralization' } ]},
+    'faq': { title: 'FAQ', content: () => import('./content/faq.js').then(m => m.renderFaq()), toc: [ { id: 'faq', title: 'FAQ' }, { id: 'faq-security', title: 'Security & Privacy' }, { id: 'faq-rewards', title: 'Rewards & Value' } ]},
 };
 
 function renderSidebarContent(activePage) {
@@ -121,10 +107,12 @@ function renderMobileDocsNav(pageId, activePage) {
     `;
 }
 
-export function renderDocsLayout(pageId) {
+export async function renderDocsLayout(pageId) {
     const pageKey = docPages[pageId] ? pageId : 'introduction';
     const page = docPages[pageKey];
     
+    const contentHtml = await page.content();
+
     return `
         <main class="flex-grow bg-background pt-28">
             <div class="container mx-auto px-6">
@@ -136,7 +124,7 @@ export function renderDocsLayout(pageId) {
                     </aside>
 
                     <article class="flex-1 min-w-0 prose-custom py-10">
-                        ${page.content()}
+                        ${contentHtml}
                     </article>
 
                     <aside class="hidden xl:block w-64 flex-shrink-0 pl-8">

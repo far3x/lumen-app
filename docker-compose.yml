@@ -1,7 +1,7 @@
 # docker-compose.yml (THIS IS NOW YOUR DEV FILE)
 
 services:
-  # Database service remains the same, but we expose the port
+  # Database service remains the same
   db:
     image: postgres:13-alpine
     container_name: lumen_db
@@ -23,7 +23,7 @@ services:
     container_name: lumen_redis
     restart: unless-stopped
 
-  # API service with hot-reloading
+  # API service with the corrected hot-reloading
   api:
     container_name: lumen_api
     build:
@@ -31,7 +31,7 @@ services:
       dockerfile: Dockerfile
     command: >
       sh -c "alembic upgrade head &&
-             uvicorn app.main:app --reload --reload-method poll --host 0.0.0.0 --port 8000"
+             uvicorn app.main:app --reload --reload-dir /usr/src/app/app --host 0.0.0.0 --port 8000"
     volumes:
       - ./backend:/usr/src/app # Mount local code for hot-reloading
     env_file: ./.env
@@ -44,7 +44,7 @@ services:
         condition: service_started
     restart: unless-stopped
 
-  # Worker service with code mounting to see changes
+  # Worker service remains the same
   worker:
     container_name: lumen_worker
     build:
@@ -52,25 +52,29 @@ services:
       dockerfile: Dockerfile
     command: celery -A app.core.celery_app.celery_app worker --loglevel=info --pool=eventlet
     volumes:
-      - ./backend:/usr/src/app # Mount local code
+      - ./backend:/usr/src/app
     env_file: ./.env
     depends_on:
       - redis
       - api
     restart: unless-stopped
 
-  # Frontend service running the Vite dev server
+  # --- MODIFIED FRONTEND SERVICE ---
   frontend:
     container_name: lumen_frontend
     build:
       context: ./frontend
-      dockerfile: Dockerfile.dev # Use the dev Dockerfile
+      dockerfile: Dockerfile.dev
     volumes:
-      - ./frontend:/app # Mount local code for hot-reloading
-      - /app/node_modules # Isolate node_modules inside the container
+      # Mount your local code for hot-reloading, excluding node_modules
+      - ./frontend:/app
+      # Use a named volume to persist node_modules and the Vite cache
+      - frontend_modules:/app/node_modules
     ports:
-      - "5173:5173" # Expose Vite dev server port
+      - "5173:5173"
     restart: unless-stopped
 
+# --- DEFINE THE NAMED VOLUMES AT THE END ---
 volumes:
   postgres_data:
+  frontend_modules: # This creates a persistent volume for the frontend

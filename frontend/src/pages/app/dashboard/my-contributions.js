@@ -276,12 +276,12 @@ export function renderMyContributionsPage(initialContributions) {
             <h1 class="text-3xl font-bold">My Contributions</h1>
             <p class="text-text-secondary mt-1">A detailed history of your code submissions and their valuation.</p>
         </header>
+        ${renderProTipsSection()}
         <div class="bg-surface p-2 sm:p-6 rounded-lg border border-primary mt-8">
             <div id="contributions-table-container">
                 ${renderContributionHistory(initialContributions)}
             </div>
             ${showPagination ? renderContributionsPagination() : ''}
         </div>
-        ${renderProTipsSection()}
     `;
 }

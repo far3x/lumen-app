@@ -2,11 +2,13 @@ from fastapi import APIRouter, Depends, HTTPException, Query, status, Request, R
 from sqlalchemy.orm import Session
 import json
 from authlib.integrations.starlette_client import OAuth
-from starlette.config import Config as AuthlibConfig
+from solders.pubkey import Pubkey
+from solders.message import Message
+from nacl.signing import VerifyKey
 
 from app.db import crud, models, database
 from app.api.v1 import dependencies
-from app.schemas import User as UserSchema, Account as AccountSchema, ContributionResponse, UserUpdate, ValuationMetrics, AiAnalysis, ChangePasswordRequest
+from app.schemas import User as UserSchema, Account as AccountSchema, ContributionResponse, UserUpdate, ValuationMetrics, AiAnalysis, ChangePasswordRequest, WalletLinkRequest
 from pydantic import BaseModel
 from typing import List
 from app.core import security, config
@@ -18,8 +20,7 @@ class PaginatedContributions(BaseModel):
 
 router = APIRouter(prefix="/users", tags=["Users"])
 
-authlib_config = AuthlibConfig('.env')
-oauth = OAuth(authlib_config)
+oauth = OAuth()
 oauth.register( name='google', client_id=config.settings.GOOGLE_CLIENT_ID, client_secret=config.settings.GOOGLE_CLIENT_SECRET, server_metadata_url='https://accounts.google.com/.well-known/openid-configuration', client_kwargs={'scope': 'openid email profile'} )
 oauth.register( name='github', client_id=config.settings.GITHUB_CLIENT_ID, client_secret=config.settings.GITHUB_CLIENT_SECRET, access_token_url='https://github.com/login/oauth/access_token', authorize_url='https://github.com/login/oauth/authorize', api_base_url='https://api.github.com/', client_kwargs={'scope': 'user:email'} )
 
@@ -56,6 +57,55 @@ async def change_password(
     db.commit()
     return {"message": "Password updated successfully. Please log in again."}
 
+@router.post("/me/link-wallet", response_model=UserSchema)
+@limiter.limit("10/minute")
+async def link_wallet(
+    request: Request,
+    payload: WalletLinkRequest,
+    current_user: models.User = Depends(dependencies.get_current_user),
+    db: Session = Depends(database.get_db)
+):
+    try:
+        pubkey = Pubkey.from_string(payload.solana_address)
+        signature_bytes = bytes.fromhex(payload.signature)
+        message_bytes = payload.message.encode('utf-8')
+
+        verify_key = VerifyKey(bytes(pubkey))
+        verify_key.verify(message_bytes, signature_bytes)
+
+    except Exception as e:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=f"Signature verification failed: {e}",
+        )
+    
+    existing_user = db.query(models.User).filter(models.User.solana_address == payload.solana_address).first()
+    if existing_user and existing_user.id != current_user.id:
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail="This wallet is already linked to another account.",
+        )
+        
+    current_user.solana_address = payload.solana_address
+    db.add(current_user)
+    db.commit()
+    db.refresh(current_user)
+    
+    return current_user
+
+@router.post("/me/unlink-wallet", response_model=UserSchema)
+@limiter.limit("10/minute")
+async def unlink_wallet(
+    request: Request,
+    current_user: models.User = Depends(dependencies.get_current_user),
+    db: Session = Depends(database.get_db)
+):
+    current_user.solana_address = None
+    db.add(current_user)
+    db.commit()
+    db.refresh(current_user)
+    return current_user
+
 @router.get("/me/balance", response_model=AccountSchema)
 def get_my_balance(
     current_user: models.User = Depends(dependencies.get_current_user), 
@@ -77,7 +127,6 @@ def get_my_contributions(
     
     response_list = []
     for contrib in contributions:
-        # --- START OF THE FIX ---
         valuation_data = {}
         if contrib.valuation_results:
             data = contrib.valuation_results
@@ -89,7 +138,6 @@ def get_my_contributions(
                 except (json.JSONDecodeError, TypeError): data = {}
             if isinstance(data, dict):
                 valuation_data = data
-        # --- END OF THE FIX ---
         
         manual_metrics = ValuationMetrics(
             total_lloc=valuation_data.get('total_lloc', 0),

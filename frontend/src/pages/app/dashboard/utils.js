@@ -1,4 +1,60 @@
 import { getAccount } from "../../../lib/auth.js";
+import { walletService } from "../../../lib/wallet.js";
+
+export function renderWalletSelectionModal() {
+    const modalExists = document.getElementById('wallet-selection-modal');
+    if (modalExists) return;
+
+    const wallets = [
+        { name: 'Phantom', icon: 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjU2IiBoZWlnaHQ9IjI1NiIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cGF0aCBkPSJNMjUwIDExMS44NDNjMC01MS44NDctNDQuODU1LTkzLjg1OS0xMDAtOTMuODU5UzUwIDE3Ljk5NiA1MCA2MC4xNTNjMC0yMy4xMzYgMjEuMzc2LTQxLjk3MSA0Ny43NS00MS45NzFTMTQ1LjUgMzcuMDE3IDE0NS41IDYwLjE1M2MwIDIwLjE4NC0xNS44ODQgMzYuNTg4LTM1LjUgMzYuNTg4Yy0xOS4zMyAwLTM1LjAxLTE2LjE5Mi0zNS4wMS0zNi4wNzMgMC0xMS4zNDggNC43NzUtMjEuNTQ3IDEyLjQ2OS0yOC4zNzQgMS41MjgtMS4zNzIgMy42OTYtMS4xNjggNS4wNjQgLjM2MSAxLjM3IDEuNTI5IDEuMTY3IDMuNzAxLS4zNiA1LjA2NC01LjYxMyA1LjAzLTkuMTcxIDEyLjI4My05LjE3MSAyMC4yOSAwIDE0LjM0OCAxMi40MzMgMjYuMDIzIDI3LjczMiAyNi4wMjNzMjcuNzMyLTExLjY3NSAyNy43MzItMjYuMDIzYzAtMTMuNDY0LTExLjI0NS0yNC42MjMtMjUuNDY4LTI1Ljg3IFY2MC4xNTNjMCAxMS4yMTItMTAuMTM4IDIwLjMwMi0yMi42NSA4LjE3NmwtMTUuNjY3LTguMjAxYy0zLjQ4Ny0xLjgyMy03LjU5My0xLjgyMy0xMS4wOCAwTDUuODQzIDU4LjE1Yy0zLjQ4OCAxLjgyMy0zLjQ4OCA2LjA5NSAwIDcuOTE4bDE1LjY2OCA4LjIwMWMxMi41MTIgNi41NTggMjIuNjUgMi43MjMgMjIuNjUtOC4xNzZWNTIuNTY4YzEzLjE4MyAxLjI3IDEzLjQ5IDIuODEgMTMuNDkgMi44MSAxNC4yMjMgMS4yNDYgMjUuNDY3IDEyLjQwOCAyNS40NjcgMjUuODcgMCAxNC4zNDctMTIuNDMzIDI2LjAyMi0yNy43MzIgMjYuMDIycy0yNy43MzItMTEuNjczLTI3LjczMi0yNi4wMjJjMC0xMS4yNyAxMC4wNjItMjAuNDYgMjIuNDI1LTIwLjQ2aC4yMjVjMS45ODggMCAzLjYtMS42MTIgMy42LTMuNnMtMS42MTItMy42LTMuNi0zLjZoLS4yMjVDNzMuMzggNDguNTMyIDUwIDcyLjM5NyA1MCAxMTEuODQzYzAgMjUuODIgMjIuOTYgNDYuNzYgNTEuMjUgNDYuNzZoMTAwYy4zMyAwIC42Ni0uMDEyLjk5LS4wMjZDOTguNTk3IDE1Ny40NjIgNTAgMTYyLjI0MiA1MCAxNzQuNzdjMCA5LjcxMiA2LjU0MiAxNy44MzcgMTUuNTE1IDIwLjk0NCAxLjcyMy41ODYgMy42My4xNSA0LjgwMy0xLjA3MSAxLjE3Mi0xLjIyNiAxLjM2My0zLjEyNC40NzItNC41NTgtNi4yNjUtMTAuMDc3LTUuNjQtMjIuOTkgMS41OTQtMzEuNzg3IDguMTEzLTkuOTkyIDIxLjgxMy0xMS4xMjcgMzEuMzgtMy41MmwxMi4yNzYgOS44NjRjMy4zOTIgMi43MjUgOC4yMyAyLjcyNSAxMS42MjEgMGwxMi4yNzYtOS44NjRjOS41NjctNy42MDcgMjMuMjY3LTYuNDY5IDMxLjM4MSAzLjUyIDcuMjMzIDguNzk3IDcuODU4IDIxLjcxMiAxLjU5MyAzMS43ODctLjg5IDEuNDM0LS43IDIuMzMyLjQ3MiA0LjU1OCAxLjE3MiAxLjIyNiAzLjA4IDEuNjU2IDQuODAzIDEuMDcxQzE5My40NTggMTkyLjYwOCAyMDAgMTgzLjQ4MiAyMDAgMTc0Ljc3YzAtMTIuODMtNTAuNzY0LTE3LjY1LTk4Ljc2LTMyLjI5NyAxLjM0Mi4wMTIgMi42ODguMDI3IDQuMDEuMDI3aDEwMGMyNy42MTQgMCA1MC0yMS40NjQgNTAtNDguMTE4Wm0tOTIuNTE0Ljc0OGMtMi41MS45NS0zLjcxNSAyLjEyNC0zLjcxNSAzLjM3MiAwIDEuNzM4IDEuOTIzIDIuNzM2IDQuMzY1IDEuOTU0bDIxLjY1My03LjEyNGMyLjQ0Mi0uOCAyLjQ0Mi0zLjM4IDAtNC4xOGwtMjEuNjUzLTcuMTI0Yy0yLjQ0Mi0uNzgyLTQuMzY1LjIxNi00LjM2NSAxLjk1NHY2LjEyNFoiIGZpbGw9IiNmZmYiLz48L3N2Zz4=' },
+        { name: 'Solflare', icon: 'https://solflare.com/favicon.ico' }
+    ];
+
+    const modalHTML = `
+        <div id="wallet-selection-modal" class="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 flex items-center justify-center p-4 animate-fade-in-up" style="animation-duration: 0.2s;">
+            <div id="modal-content" class="bg-surface w-full max-w-xs rounded-xl border border-primary shadow-2xl shadow-black/50">
+                <header class="p-4 border-b border-primary flex justify-between items-center">
+                    <h2 class="text-lg font-bold">Connect a Wallet</h2>
+                    <button id="modal-close-btn" class="p-2 text-text-secondary hover:text-text-main rounded-full hover:bg-primary">
+                        <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                    </button>
+                </header>
+                <div class="p-4 space-y-3">
+                    ${wallets.map(wallet => `
+                        <button data-wallet-name="${wallet.name}" class="wallet-option-btn w-full flex items-center gap-4 p-3 rounded-lg bg-primary hover:bg-subtle transition-colors">
+                            <img src="${wallet.icon}" alt="${wallet.name} logo" class="w-8 h-8 rounded-full">
+                            <span class="font-bold text-text-main">${wallet.name}</span>
+                        </button>
+                    `).join('')}
+                </div>
+            </div>
+        </div>
+    `;
+    document.body.insertAdjacentHTML('beforeend', modalHTML);
+
+    const closeModal = () => {
+        const modal = document.getElementById('wallet-selection-modal');
+        if (modal) modal.remove();
+    };
+
+    document.getElementById('modal-close-btn').addEventListener('click', closeModal);
+    document.getElementById('wallet-selection-modal').addEventListener('click', (e) => {
+        if (e.target.id === 'wallet-selection-modal') closeModal();
+    });
+
+    document.querySelectorAll('.wallet-option-btn').forEach(button => {
+        button.addEventListener('click', async () => {
+            const walletName = button.dataset.walletName;
+            try {
+                await walletService.connect(walletName);
+                closeModal();
+            } catch (error) {
+                console.error(error);
+                alert(`Failed to connect to ${walletName}. Make sure it's installed and unlocked.`);
+            }
+        });
+    });
+}
 
 export function escapeHtml(unsafe) {
     if (!unsafe) return '';

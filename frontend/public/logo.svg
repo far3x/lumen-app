@@ -1,13 +1,14 @@
-<svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-    <defs>
-        <linearGradient id="heartstone-grad-refined" x1="0.5" y1="0" x2="0.5" y2="1">
-            <stop offset="0%" stop-color="#FF69B4" />
-            <stop offset="100%" stop-color="#00D9D9" />
-        </linearGradient>
-    </defs>
-    <g transform="translate(0 1)">
-      <path d="M12 4L6 10L12 20L18 10L12 4Z" fill="#8A2BE2" stroke="rgba(255, 255, 255, 0.5)" stroke-width="0.75"/>
-      <path d="M12 5L7.5 10.5L12 18L16.5 10.5L12 5Z" fill="url(#heartstone-grad-refined)"/>
-      <path d="M12 6.5L9 10.5L12 13L15 10.5L12 6.5Z" fill="white" fill-opacity="0.8"/>
+<svg width="256" height="256" viewBox="0 0 256 256" fill="none" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="lumenLogoTitle">
+    <title id="lumenLogoTitle">Lumen Protocol Logo</title>
+    <g transform="rotate(25 128 128)">
+        <!-- The Bell (Head) of the Jellyfish -->
+        <path d="M216 130.333C216 73.8778 177.046 28 128 28C78.9543 28 40 73.8778 40 130.333" fill="white"/>
+        
+        <!-- The Flowing Tentacles -->
+        <g stroke="white" stroke-width="14" stroke-linecap="round" fill="none">
+            <path d="M128 128C114 176 142 196 128 238"/>
+            <path d="M98 128C74 172 98 198 84 228"/>
+            <path d="M158 128C182 172 158 198 172 228"/>
+        </g>
     </g>
 </svg>

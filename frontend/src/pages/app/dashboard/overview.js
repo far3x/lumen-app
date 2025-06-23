@@ -31,29 +31,6 @@ function renderWalletSection(account) {
     `;
 }
 
-function renderProTipsSection() {
-    const tips = [
-        { icon: '💡', title: 'Uniqueness is King', text: 'Code from private, proprietary projects is far more valuable than public, open-source code.' },
-        { icon: '💎', title: 'Complexity is Rewarded', text: 'Projects with intricate logic and novel algorithms are valued more highly than simple scripts.' },
-        { icon: '🎯', title: 'Code with Intent', text: 'Well-structured, documented, and high-signal code provides the best data for training next-gen AI.' },
-    ];
-
-    return `
-    <div class="mt-8">
-        <h3 class="font-bold text-lg text-text-main mb-4">Pro Tips for Maximizing Rewards</h3>
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-        ${tips.map(tip => `
-            <div class="bg-surface p-5 rounded-xl border border-primary hover:border-accent-purple/50 transition-colors">
-                <p class="text-xl mb-2">${tip.icon}</p>
-                <h4 class="font-bold text-text-main">${tip.title}</h4>
-                <p class="text-sm text-text-secondary mt-1">${tip.text}</p>
-            </div>
-        `).join('')}
-        </div>
-    </div>
-    `;
-}
-
 function renderStatCard(label, value) {
     const displayValue = label === 'Global Rank' && value !== 'N/A' ? `#${value}` : value;
     
@@ -195,6 +172,10 @@ export function renderDashboardOverview(user, account, rank, allContributions) {
             ${renderStatCard('Contributions', totalContributions.toLocaleString())}
         </div>
 
+        <div class="animate-fade-in-up" style="animation-delay: 300ms;">
+             ${renderWalletSection(account)}
+        </div>
+
         <div class="animate-fade-in-up bg-surface p-6 rounded-xl border border-primary mt-6" style="animation-delay: 200ms;">
             <div class="flex flex-col sm:flex-row justify-between sm:items-center gap-4 mb-6">
                 <h3 class="font-bold text-lg text-text-main">Earnings History</h3>
@@ -210,12 +191,6 @@ export function renderDashboardOverview(user, account, rank, allContributions) {
             </div>
         </div>
 
-        <div class="animate-fade-in-up" style="animation-delay: 300ms;">
-             ${renderWalletSection(account)}
-        </div>
-
-        <div class="animate-fade-in-up" style="animation-delay: 400ms;">
-            ${renderProTipsSection()}
-        </div>
+        
     `;
 }

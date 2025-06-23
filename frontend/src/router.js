@@ -1,43 +1,21 @@
-import { renderNavbar, setupNavbarEventListeners } from './components/navbar.js';
+import { renderNavbar, setupNavbarEventListeners, updateNavbarWalletState } from './components/navbar.js';
 import { renderFooter } from './components/footer.js';
-import { renderLandingPage } from './pages/landing.js';
-import { renderLoginPage } from './pages/login.js';
-import { renderSignupPage } from './pages/signup.js';
-import { renderDocsLayout } from './pages/docs/layout.js';
-import { renderDashboardLayout } from './pages/app/dashboard/layout.js';
-import { renderLinkPage } from './pages/link.js';
-import { renderPublicDashboard } from './pages/public_dashboard.js';
 import { isAuthenticated, fetchAndStoreUser, getUser, logout } from './lib/auth.js';
-import { renderCheckEmailPage } from './pages/check-email.js';
-import { renderVerifyPage } from './pages/verify.js';
-import { renderForgotPasswordPage } from './pages/forgot-password.js';
-import { renderResetPasswordPage } from './pages/reset-password.js';
+import { walletService } from './lib/wallet.js';
 
 const app = document.getElementById('app');
 
 const routes = {
-    '/': renderLandingPage,
-    '/login': renderLoginPage,
-    '/signup': renderSignupPage,
-    '/link': renderLinkPage,
-    '/leaderboard': renderPublicDashboard,
-    '/check-email': renderCheckEmailPage,
-    '/verify': renderVerifyPage,
-    '/forgot-password': renderForgotPasswordPage,
-    '/reset-password': renderResetPasswordPage,
-    '/docs/introduction': () => renderDocsLayout('introduction'),
-    '/docs/why-lumen': () => renderDocsLayout('why-lumen'),
-    '/docs/installation': () => renderDocsLayout('installation'),
-    '/docs/authentication': () => renderDocsLayout('authentication'),
-    '/docs/core-commands': () => renderDocsLayout('core-commands'),
-    '/docs/contributing': () => renderDocsLayout('contributing'),
-    '/docs/configuration': () => renderDocsLayout('configuration'),
-    '/docs/security': () => renderDocsLayout('security'),
-    '/docs/tokenomics': () => renderDocsLayout('tokenomics'),
-    '/docs/governance': () => renderDocsLayout('governance'),
-    '/docs/roadmap': () => renderDocsLayout('roadmap'),
-    '/docs/faq': () => renderDocsLayout('faq'),
-    '/app/dashboard': renderDashboardLayout, 
+    '/': () => import('./pages/landing.js').then(m => m.renderLandingPage()),
+    '/login': () => import('./pages/login.js').then(m => m.renderLoginPage()),
+    '/signup': () => import('./pages/signup.js').then(m => m.renderSignupPage()),
+    '/link': () => import('./pages/link.js').then(m => m.renderLinkPage()),
+    '/leaderboard': () => import('./pages/public_dashboard.js').then(m => m.renderPublicDashboard()),
+    '/check-email': () => import('./pages/check-email.js').then(m => m.renderCheckEmailPage()),
+    '/verify': () => import('./pages/verify.js').then(m => m.renderVerifyPage()),
+    '/forgot-password': () => import('./pages/forgot-password.js').then(m => m.renderForgotPasswordPage()),
+    '/reset-password': () => import('./pages/reset-password.js').then(m => m.renderResetPasswordPage()),
+    '/app/dashboard': () => import('./pages/app/dashboard/layout.js').then(m => m.renderDashboardLayout()),
 };
 
 export const navigate = (path) => {
@@ -65,17 +43,28 @@ const handleLocation = async () => {
         return;
     }
 
-    let renderFunc = routes[path] || routes['/'];
+    let renderPromise;
     if (path.startsWith('/docs/')) {
-        const pageId = path.split('/docs/')[1];
-        renderFunc = () => renderDocsLayout(pageId);
+        const pageId = path.split('/docs/')[1] || 'introduction';
+        renderPromise = import('./pages/docs/layout.js').then(m => m.renderDocsLayout(pageId));
+    } else {
+        const routeHandler = routes[path] || routes['/'];
+        renderPromise = routeHandler();
     }
     
     const fullScreenPages = ['/link', '/check-email', '/verify', '/forgot-password', '/reset-password'];
-    if (fullScreenPages.includes(path)) {
-        app.innerHTML = await renderFunc();
+    
+    // Show a loading indicator for smoother navigation
+    if (!fullScreenPages.includes(path)) {
+        app.innerHTML = renderNavbar(path) + `<div class="flex-grow flex items-center justify-center"><span class="animate-spin inline-block w-8 h-8 border-4 border-transparent border-t-accent-purple rounded-full"></span></div>` + renderFooter();
     } else {
-        const pageContent = await renderFunc();
+        app.innerHTML = `<div class="flex-grow flex items-center justify-center min-h-screen"><span class="animate-spin inline-block w-8 h-8 border-4 border-transparent border-t-accent-purple rounded-full"></span></div>`;
+    }
+
+    if (fullScreenPages.includes(path)) {
+        app.innerHTML = await renderPromise;
+    } else {
+        const pageContent = await renderPromise;
         app.innerHTML = renderNavbar(path) + pageContent + renderFooter();
     }
     
@@ -92,7 +81,7 @@ const attachNavEventListeners = () => {
         if (link.hostname === window.location.hostname && !link.hasAttribute('data-external')) {
             link.addEventListener('click', e => {
                 if (link.hash) {
-                    return; 
+                    return;
                 }
                 e.preventDefault();
                 if (window.location.pathname !== link.pathname || window.location.search !== link.search) {
@@ -130,26 +119,40 @@ const attachNavEventListeners = () => {
 }
 
 export const initializeRouter = async () => {
-    if (isAuthenticated() && !getUser()) {
-        try {
-            await fetchAndStoreUser();
-        } catch (error) {
-            console.error("Session invalid, clearing state.", error);
-            logout();
-        }
-    }
-
-    window.addEventListener('popstate', handleLocation);
-    document.body.addEventListener('click', (e) => {
-        const link = e.target.closest('a[href]');
-        if (link && !link.hasAttribute('data-external') && link.hostname === window.location.hostname) {
-             if (link.hash) return;
-             e.preventDefault();
-             if (window.location.pathname !== link.pathname || window.location.search !== link.search) {
-                navigate(link.pathname + link.search);
-             }
-        }
+    walletService.on('connect', (publicKey) => {
+        updateNavbarWalletState();
+        const connectEvent = new CustomEvent('walletUpdate');
+        document.dispatchEvent(connectEvent);
     });
+
+    walletService.on('disconnect', () => {
+        updateNavbarWalletState();
+        const disconnectEvent = new CustomEvent('walletUpdate');
+        document.dispatchEvent(disconnectEvent);
+    });
+
+    await walletService.autoConnect();
     
-    handleLocation();
+    try {
+        if (isAuthenticated() && !getUser()) {
+            await fetchAndStoreUser();
+        }
+    } catch (error) {
+        console.error("Session invalid, clearing state.", error);
+        logout();
+    } finally {
+        window.addEventListener('popstate', handleLocation);
+        document.body.addEventListener('click', (e) => {
+            const link = e.target.closest('a[href]');
+            if (link && !link.hasAttribute('data-external') && link.hostname === window.location.hostname) {
+                 if (link.hash) return;
+                 e.preventDefault();
+                 if (window.location.pathname !== link.pathname || window.location.search !== link.search) {
+                    navigate(link.pathname + link.search);
+                 }
+            }
+        });
+        
+        handleLocation();
+    }
 }
