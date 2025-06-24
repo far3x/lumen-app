@@ -109,7 +109,7 @@ def get_total_user_count(db: Session):
     return db.query(models.User).count()
 
 def create_account_for_user(db: Session, user: models.User):
-    db_account = models.Account(user_id=user.id, lum_balance=0.0)
+    db_account = models.Account(user_id=user.id, lum_balance=0.0, total_lum_earned=0.0)
     db.add(db_account); db.commit(); db.refresh(db_account)
     return db_account
 
@@ -151,7 +151,12 @@ def apply_reward_to_user(db: Session, user: models.User, reward_amount: float):
         total_reward += 500.0
         user.is_genesis_reward_claimed = True
         
+    if account.total_lum_earned is None:
+        account.total_lum_earned = 0.0
+
     account.lum_balance += total_reward
+    account.total_lum_earned += total_reward
+
     db.add(user)
     db.add(account)
     db.commit()
@@ -195,10 +200,10 @@ def get_user_contributions(db: Session, user_id: int, skip: int = 0, limit: int 
     return db.query(models.Contribution).filter(models.Contribution.user_id == user_id).order_by(models.Contribution.created_at.desc()).offset(skip).limit(limit).all()
 
 def get_leaderboard(db: Session, skip: int = 0, limit: int = 100):
-    return db.query(models.User, models.Account.lum_balance)\
+    return db.query(models.User, models.Account.total_lum_earned)\
              .join(models.Account)\
              .filter(models.User.is_in_leaderboard == True)\
-             .order_by(models.Account.lum_balance.desc())\
+             .order_by(models.Account.total_lum_earned.desc())\
              .offset(skip).limit(limit).all()
 
 def get_recent_processed_contributions(db: Session, limit: int = 10):
@@ -216,13 +221,13 @@ def get_user_contributions_paginated(db: Session, user_id: int, skip: int = 0, l
 
 def get_user_rank(db: Session, user_id: int):
     query = text("""
-        SELECT rank, display_name, lum_balance
+        SELECT rank, display_name, total_lum_earned
         FROM (
             SELECT 
                 u.id, 
                 u.display_name, 
-                a.lum_balance,
-                ROW_NUMBER() OVER (ORDER BY a.lum_balance DESC) as rank
+                a.total_lum_earned,
+                ROW_NUMBER() OVER (ORDER BY a.total_lum_earned DESC) as rank
             FROM users u
             JOIN accounts a ON u.id = a.user_id
             WHERE u.is_in_leaderboard = :is_in_leaderboard
@@ -232,3 +237,29 @@ def get_user_rank(db: Session, user_id: int):
 
     result = db.execute(query, {"is_in_leaderboard": True, "user_id": user_id}).first()
     return result
+
+def reset_claimable_balance(db: Session, user_id: int):
+    account = db.query(models.Account).filter(models.Account.user_id == user_id).first()
+    if account:
+        account.lum_balance = 0.0
+        db.add(account)
+        db.commit()
+        db.refresh(account)
+    return account
+
+def log_claim_transaction(db: Session, user_id: int, amount: float, tx_hash: str):
+    claim = models.ClaimTransaction(
+        user_id=user_id,
+        amount_claimed=amount,
+        transaction_hash=tx_hash
+    )
+    db.add(claim)
+    db.commit()
+    db.refresh(claim)
+    return claim
+
+def get_user_claim_history(db: Session, user_id: int, skip: int = 0, limit: int = 100):
+    query = db.query(models.ClaimTransaction).filter(models.ClaimTransaction.user_id == user_id)
+    total_count = query.count()
+    items = query.order_by(models.ClaimTransaction.created_at.desc()).offset(skip).limit(limit).all()
+    return items, total_count

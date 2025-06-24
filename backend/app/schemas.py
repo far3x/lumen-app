@@ -1,6 +1,7 @@
-from pydantic import BaseModel, EmailStr, constr
+from pydantic import BaseModel, EmailStr, constr, field_validator
 from typing import Optional, List, Dict, Any
 from datetime import datetime
+from solders.pubkey import Pubkey
 
 class UserCreate(BaseModel):
     email: EmailStr
@@ -80,6 +81,7 @@ class ApproveDeviceRequest(BaseModel):
 
 class Account(BaseModel):
     lum_balance: float
+    total_lum_earned: float
 
     class Config:
         from_attributes = True
@@ -105,6 +107,7 @@ class ContributionResponse(BaseModel):
     created_at: datetime
     reward_amount: float
     status: str
+    transaction_hash: Optional[str] = None
     valuation_details: Optional[Dict[str, Any]] = None
     manual_metrics: Optional[ValuationMetrics] = None
     ai_analysis: Optional[AiAnalysis] = None
@@ -133,7 +136,7 @@ class ContributionCliResponse(BaseModel):
 class LeaderboardEntry(BaseModel):
     rank: int
     display_name: str
-    lum_balance: float
+    total_lum_earned: float
 
     class Config:
         from_attributes = True
@@ -146,3 +149,23 @@ class WalletLinkRequest(BaseModel):
     solana_address: str
     message: str
     signature: str
+
+class ClaimTransactionResponse(BaseModel):
+    id: int
+    amount_claimed: float
+    transaction_hash: str
+    created_at: datetime
+
+    class Config:
+        from_attributes = True
+
+class SetWalletAddressRequest(BaseModel):
+    solana_address: str
+
+    @field_validator('solana_address')
+    def validate_solana_address(cls, v):
+        try:
+            Pubkey.from_string(v)
+        except ValueError:
+            raise ValueError('Invalid Solana address format')
+        return v

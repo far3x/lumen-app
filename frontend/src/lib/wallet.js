@@ -1,7 +1,6 @@
 import { Connection, clusterApiUrl } from '@solana/web3.js';
-import { WalletAdapterNetwork } from '@solana/wallet-adapter-base';
+import { WalletAdapterNetwork, WalletReadyState } from '@solana/wallet-adapter-base';
 import { PhantomWalletAdapter } from '@solana/wallet-adapter-phantom';
-import { SolflareWalletAdapter } from '@solana/wallet-adapter-solflare';
 import { EventEmitter } from 'events';
 
 const LAST_USED_WALLET_KEY = 'lumen_last_wallet';
@@ -15,8 +14,8 @@ class WalletService extends EventEmitter {
         this.connection = new Connection(clusterApiUrl(this.network));
         this.supportedWallets = [
             new PhantomWalletAdapter(),
-            new SolflareWalletAdapter(),
         ];
+        this.WalletReadyState = WalletReadyState;
     }
 
     getAdapter() {
@@ -94,11 +93,10 @@ class WalletService extends EventEmitter {
     }
 
     async signMessage(message) {
-        if (!this.isWalletConnected()) {
-            throw new Error('Wallet not connected');
+        if (!this.isWalletConnected() || !this.adapter) {
+            throw new Error('Wallet not connected or adapter not available');
         }
-        const encodedMessage = new TextEncoder().encode(message);
-        return await this.adapter.signMessage(encodedMessage);
+        return await this.adapter.signMessage(message);
     }
 }
 

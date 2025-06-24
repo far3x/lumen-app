@@ -119,6 +119,7 @@ function renderContributionHistory(contributions) {
                         <th class="py-3 px-4">Status</th>
                         <th class="py-3 px-4 text-right">Reward ($LUM)</th>
                         <th class="py-3 px-4 text-center">Details</th>
+                        <th class="py-3 px-4 text-center">Proof</th>
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-primary">
@@ -128,16 +129,25 @@ function renderContributionHistory(contributions) {
                         <td class="py-4 px-4"><span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getStatusClasses(item.status)}">${getStatusText(item.status)}</span></td>
                         <td class="py-4 px-4 text-right font-mono ${item.reward_amount > 0 ? 'text-green-400' : 'text-text-secondary'}">${item.reward_amount > 0 ? `+${item.reward_amount.toFixed(4)}` : '...'}</td>
                         <td class="py-4 px-4 text-center">
-                            <button class="details-btn text-text-secondary hover:text-text-main transition-colors disabled:opacity-50 disabled:cursor-not-allowed" data-id="${item.id}" ${item.status !== 'PROCESSED' ? 'disabled' : ''}>
-                                <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /><path stroke-linecap="round" stroke-linejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" /></svg>
+                            <button class="details-btn text-text-secondary hover:brightness-150 transition-all disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:brightness-100" data-id="${item.id}" ${item.status !== 'PROCESSED' ? 'disabled' : ''}>
+                                ${icons.view}
                             </button>
                         </td>
+                        <td class="py-4 px-4 text-center">
+                            ${item.transaction_hash ? `
+                                <a href="https://solscan.io/tx/${item.transaction_hash}?cluster=devnet" target="_blank" rel="noopener noreferrer" class="inline-block text-text-secondary hover:brightness-150 transition-all" title="View on Solscan">
+                                    <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" stroke="url(#dashboard-icon-gradient)" /></svg>
+                                </a>
+                            ` : `
+                                <span class="text-subtle">-</span>
+                            `}
+                        </td>
                     </tr>
-                `).join('') : `<tr><td colspan="4" class="py-12 text-center text-text-secondary">
+                `).join('') : `<tr><td colspan="5" class="py-12 text-center text-text-secondary">
                     <div class="flex flex-col items-center">
-                        <div class="text-accent-purple mb-4">${icons.contributions}</div>
+                        <div class="w-12 h-12 text-accent-purple mb-4">${icons.contributions}</div>
                         <p>No contributions found yet.</p>
-                        <a href="/docs/contributing" class="mt-2 text-sm text-accent-cyan hover:underline">Learn how to contribute</a>
+                        <a href="/docs/contributing" class="mt-2 text-sm font-semibold gradient-text hover:brightness-125 transition">Learn how to contribute</a>
                     </div>
                 </td></tr>`}
                 </tbody>

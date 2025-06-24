@@ -23,7 +23,6 @@ lumen-opensource-client/
 /backend/downloads/
 /backend/eggs/
 /backend/.eggs/
-/backend/lib/
 /backend/lib64/
 /backend/parts/
 /backend/sdist/

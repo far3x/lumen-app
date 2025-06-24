@@ -15,11 +15,11 @@ def get_leaderboard(
     top_users_data = crud.get_leaderboard(db, skip=0, limit=10)
     
     top_10_entries = []
-    for rank, (user, balance) in enumerate(top_users_data, start=1):
+    for rank, (user, total_earned) in enumerate(top_users_data, start=1):
         top_10_entries.append(LeaderboardEntry(
             rank=rank,
             display_name=user.display_name,
-            lum_balance=balance
+            total_lum_earned=total_earned
         ))
 
     current_user_rank_entry = None
@@ -29,7 +29,7 @@ def get_leaderboard(
             current_user_rank_entry = LeaderboardEntry(
                 rank=user_rank_data.rank,
                 display_name=user_rank_data.display_name,
-                lum_balance=user_rank_data.lum_balance
+                total_lum_earned=user_rank_data.total_lum_earned
             )
 
     return LeaderboardResponse(
@@ -46,7 +46,6 @@ def get_recent_contributions(
     recent_contributions_data = crud.get_recent_processed_contributions(db, limit=limit)
     response_list = []
     for contrib, display_name in recent_contributions_data:
-        # --- START OF THE FIX ---
         valuation_data = {}
         if contrib.valuation_results:
             data = contrib.valuation_results
@@ -58,7 +57,6 @@ def get_recent_contributions(
                 except (json.JSONDecodeError, TypeError): data = {}
             if isinstance(data, dict):
                 valuation_data = data
-        # --- END OF THE FIX ---
         
         manual_metrics = ValuationMetrics(
             total_lloc=valuation_data.get('total_lloc', 0),

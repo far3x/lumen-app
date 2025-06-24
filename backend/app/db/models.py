@@ -30,6 +30,7 @@ class User(Base):
     account = relationship("Account", back_populates="user", uselist=False, cascade="all, delete-orphan")
     personal_access_tokens = relationship("PersonalAccessToken", back_populates="user", cascade="all, delete-orphan")
     contributions = relationship("Contribution", back_populates="user", cascade="all, delete-orphan")
+    claim_transactions = relationship("ClaimTransaction", back_populates="user", cascade="all, delete-orphan")
     
     @hybrid_property
     def has_password(self):
@@ -40,7 +41,17 @@ class Account(Base):
     id = Column(Integer, primary_key=True, index=True)
     user_id = Column(Integer, ForeignKey("users.id"))
     lum_balance = Column(Float, default=0.0)
+    total_lum_earned = Column(Float, default=0.0, nullable=False)
     user = relationship("User", back_populates="account")
+
+class ClaimTransaction(Base):
+    __tablename__ = "claim_transactions"
+    id = Column(Integer, primary_key=True, index=True)
+    user_id = Column(Integer, ForeignKey("users.id"), nullable=False)
+    amount_claimed = Column(Float, nullable=False)
+    transaction_hash = Column(String, nullable=False, index=True)
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
+    user = relationship("User", back_populates="claim_transactions")
 
 class PersonalAccessToken(Base):
     __tablename__ = "personal_access_tokens"
@@ -72,4 +83,5 @@ class Contribution(Base):
     reward_amount = Column(Float, nullable=False)
     content_embedding = Column(Text, nullable=True)
     status = Column(String, default="PENDING", nullable=False)
+    transaction_hash = Column(String, nullable=True, index=True)
     user = relationship("User", back_populates="contributions")

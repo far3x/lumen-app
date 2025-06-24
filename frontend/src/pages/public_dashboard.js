@@ -19,7 +19,7 @@ function renderLeaderboardRow(entry) {
             <div class="flex items-center space-x-4 p-4">
                 <div class="w-10 text-center">${getRankBadge(entry.rank)}</div>
                 <div class="flex-grow font-medium text-text-main truncate text-base">${entry.display_name}</div>
-                <p class="font-medium text-sm text-accent-cyan font-mono">${entry.lum_balance.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })} $LUM</p>
+                <p class="font-medium text-sm gradient-text font-mono">${entry.total_lum_earned.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })} $LUM</p>
             </div>
             <div class="${bottomLineClass}"></div>
         </div>
@@ -47,7 +47,7 @@ function renderLeaderboard(leaderboard, userRank) {
                 <div class="w-px h-8 bg-primary"></div>
                 <span class="text-3xl font-bold text-text-main">#${userRank.rank.toLocaleString()}</span>
             </div>
-            <span class="font-mono text-lg text-accent-cyan font-bold">${userRank.lum_balance.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })} $LUM</span>
+            <span class="font-mono text-lg gradient-text font-bold">${userRank.total_lum_earned.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })} $LUM</span>
         </div>
         <div class="h-px bg-gradient-to-r from-accent-purple to-accent-cyan my-4 animate-fade-in-up" style="animation-delay: 200ms;"></div>
     ` : '';
@@ -87,7 +87,7 @@ function renderLeaderboard(leaderboard, userRank) {
 
             <div class="text-center mt-20 animate-fade-in-up" style="animation-delay: 600ms;">
                 <h3 class="font-bold text-2xl">How to Climb the Ranks</h3>
-                <p class="text-text-secondary mt-2 max-w-xl mx-auto">Your rank is determined by your total $LUM balance. Contribute high-quality, unique code to maximize your earnings and secure your spot on the podium.</p>
+                <p class="text-text-secondary mt-2 max-w-xl mx-auto">Your rank is determined by your total lifetime $LUM earnings. Contribute high-quality, unique code to maximize your rewards and secure your spot on the podium.</p>
                 <a href="/docs/contributing" class="mt-6 inline-block px-8 py-3 font-bold bg-gradient-to-r from-accent-purple to-accent-pink text-white rounded-lg transition-all duration-300 hover:scale-105 hover:shadow-lg hover:shadow-accent-purple/30 hover:brightness-110">
                     Learn How to Contribute
                 </a>

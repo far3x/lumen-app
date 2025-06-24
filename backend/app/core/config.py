@@ -48,4 +48,8 @@ class AppSettings(BaseSettings):
     MAIL_STARTTLS: bool = os.getenv("MAIL_STARTTLS", "True").lower() in ("true", "1", "t")
     MAIL_SSL_TLS: bool = os.getenv("MAIL_SSL_TLS", "False").lower() in ("true", "1", "t")
 
+    SOLANA_RPC_URL: str = os.getenv("SOLANA_RPC_URL")
+    TREASURY_PRIVATE_KEY: str = os.getenv("TREASURY_PRIVATE_KEY")
+    LUM_TOKEN_MINT_ADDRESS: str = os.getenv("LUM_TOKEN_MINT_ADDRESS")
+
 settings = AppSettings()

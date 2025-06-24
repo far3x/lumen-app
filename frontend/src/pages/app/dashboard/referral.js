@@ -1,6 +1,7 @@
 import { renderModal } from "./utils.js";
 
-function handleNotifyClick() {
+// Export the handler directly
+export function handleReferralNotifyClick() {
     const modalContent = `
         <div class="text-center">
             <p class="text-text-secondary mb-6">Confirm that you'd like to receive an email notification when the referral program is live.</p>
@@ -30,8 +31,6 @@ function handleNotifyClick() {
         }
     });
 }
-
-renderReferralPage.handleNotifyClick = handleNotifyClick;
 
 export function renderReferralPage() {
     return `

@@ -5,17 +5,22 @@ from authlib.integrations.starlette_client import OAuth
 from solders.pubkey import Pubkey
 from solders.message import Message
 from nacl.signing import VerifyKey
+import nacl.exceptions
 
 from app.db import crud, models, database
 from app.api.v1 import dependencies
-from app.schemas import User as UserSchema, Account as AccountSchema, ContributionResponse, UserUpdate, ValuationMetrics, AiAnalysis, ChangePasswordRequest, WalletLinkRequest
-from pydantic import BaseModel
+from app.schemas import User as UserSchema, Account as AccountSchema, ContributionResponse, UserUpdate, ValuationMetrics, AiAnalysis, ChangePasswordRequest, WalletLinkRequest, ClaimTransactionResponse, SetWalletAddressRequest # Added SetWalletAddressRequest
+from pydantic import BaseModel, constr
 from typing import List
 from app.core import security, config
 from app.core.limiter import limiter
 
 class PaginatedContributions(BaseModel):
     items: List[ContributionResponse]
+    total: int
+
+class PaginatedClaims(BaseModel):
+    items: List[ClaimTransactionResponse]
     total: int
 
 router = APIRouter(prefix="/users", tags=["Users"])
@@ -73,10 +78,20 @@ async def link_wallet(
         verify_key = VerifyKey(bytes(pubkey))
         verify_key.verify(message_bytes, signature_bytes)
 
+    except nacl.exceptions.BadSignatureError:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Signature verification failed: Invalid signature for the given message and public key. Ensure the correct wallet signed the message.",
+        )
+    except ValueError as e:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=f"Invalid payload format: {e}. Check address, signature, or message encoding.",
+        )
     except Exception as e:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
-            detail=f"Signature verification failed: {e}",
+            detail=f"Signature verification failed due to an unexpected error: {str(e)}",
         )
     
     existing_user = db.query(models.User).filter(models.User.solana_address == payload.solana_address).first()
@@ -92,6 +107,33 @@ async def link_wallet(
     db.refresh(current_user)
     
     return current_user
+
+@router.post("/me/set-wallet-address", response_model=UserSchema)
+@limiter.limit("5/minute")
+async def set_wallet_address_manually(
+    request: Request,
+    payload: SetWalletAddressRequest,
+    current_user: models.User = Depends(dependencies.get_current_user),
+    db: Session = Depends(database.get_db)
+):
+    try:
+        Pubkey.from_string(payload.solana_address)
+    except ValueError:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Invalid Solana address format.")
+
+    existing_user = db.query(models.User).filter(models.User.solana_address == payload.solana_address).first()
+    if existing_user and existing_user.id != current_user.id:
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail="This wallet address is already linked to another account.",
+        )
+    
+    current_user.solana_address = payload.solana_address
+    db.add(current_user)
+    db.commit()
+    db.refresh(current_user)
+    return current_user
+
 
 @router.post("/me/unlink-wallet", response_model=UserSchema)
 @limiter.limit("10/minute")
@@ -165,6 +207,16 @@ def get_my_contributions(
         ))
     
     return PaginatedContributions(items=response_list, total=total_count)
+
+@router.get("/me/claims", response_model=PaginatedClaims)
+def get_my_claims(
+    current_user: models.User = Depends(dependencies.get_current_user),
+    db: Session = Depends(database.get_db),
+    skip: int = Query(0, ge=0),
+    limit: int = Query(10, le=100)
+):
+    claims, total_count = crud.get_user_claim_history(db, user_id=current_user.id, skip=skip, limit=limit)
+    return PaginatedClaims(items=claims, total=total_count)
 
 @router.get('/link-oauth/{provider}')
 async def link_oauth_account(
