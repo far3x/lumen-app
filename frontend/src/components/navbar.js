@@ -1,7 +1,7 @@
-import { isAuthenticated, getUser, logout, getAccount } from '../lib/auth.js';
+import { isAuthenticated, getUser, logout, getAccount, api as authApi, fetchAndStoreUser } from '../lib/auth.js';
 import { walletService } from '../lib/wallet.js';
 import { navigate } from '../router.js';
-import { renderWalletSelectionModal } from '../pages/app/dashboard/utils.js';
+import { renderWalletSelectionModal, renderModal } from '../pages/app/dashboard/utils.js';
 
 function renderWalletAreaInDropdown() {
     if (walletService.isWalletConnected()) {
@@ -12,10 +12,64 @@ function renderWalletAreaInDropdown() {
                 <p class="text-xs text-text-secondary">Connected Wallet</p>
                 <p class="text-sm font-mono text-text-main">${truncatedAddress}</p>
             </div>
-            <button id="wallet-disconnect-btn" class="w-full text-left block px-4 py-2 text-sm text-text-secondary hover:bg-surface hover:text-text-main">Disconnect Wallet</button>
+            <button id="navbar-wallet-disconnect-btn" class="w-full text-left block px-4 py-2 text-sm text-text-secondary hover:bg-surface hover:text-text-main">Disconnect Wallet</button>
         `;
     } else {
         return `<button id="wallet-connect-btn" class="w-full text-left block px-4 py-2 text-sm text-text-secondary hover:bg-surface hover:text-text-main">Connect Wallet</button>`;
+    }
+}
+
+async function handleNavbarWalletDisconnect() {
+    const user = getUser();
+
+    if (user && user.solana_address && walletService.isWalletConnected() && user.solana_address === walletService.publicKey.toBase58()) {
+        const confirmationContent = `
+            <div class="text-center">
+                <p class="text-text-secondary mb-6">This wallet is linked to your Lumen account. Do you want to unlink it from your account as well, or just disconnect from the site?</p>
+                <div class="flex flex-col sm:flex-row justify-center gap-4">
+                    <button id="navbar-disconnect-only-btn" class="px-6 py-2 bg-primary hover:bg-subtle/80 text-text-main font-medium rounded-md transition-colors">Disconnect Only</button>
+                    <button id="navbar-unlink-and-disconnect-btn" class="px-6 py-2 bg-red-900/80 hover:bg-red-900 text-red-300 font-medium rounded-md transition-colors">Unlink & Disconnect</button>
+                </div>
+                 <button id="navbar-unlink-cancel-btn" class="mt-4 text-sm text-text-secondary hover:underline">Cancel</button>
+            </div>
+        `;
+        const { modalId, closeModal } = renderModal('Confirm Wallet Action', confirmationContent);
+        
+        document.getElementById('navbar-unlink-cancel-btn')?.addEventListener('click', closeModal);
+
+        document.getElementById('navbar-disconnect-only-btn')?.addEventListener('click', () => {
+            walletService.disconnect();
+            closeModal();
+        });
+
+        document.getElementById('navbar-unlink-and-disconnect-btn')?.addEventListener('click', async (e) => {
+            const confirmBtn = e.currentTarget;
+            confirmBtn.disabled = true;
+            confirmBtn.innerHTML = `<span class="animate-spin inline-block w-5 h-5 border-2 border-transparent border-t-white rounded-full"></span> Processing...`;
+            try {
+                await authApi.post('/users/me/unlink-wallet');
+                await fetchAndStoreUser(); 
+                walletService.disconnect(); 
+                setTimeout(() => {
+                    window.location.reload();
+                }, 500);
+            } catch (error) {
+                console.error("Navbar unlink failed:", error);
+                const modalBody = document.getElementById(`modal-body-${modalId}`);
+                if (modalBody) {
+                    modalBody.innerHTML = `<p class="text-red-400 text-center">Failed to unlink wallet. Please try again later or from the settings page.</p>`;
+                }
+                setTimeout(() => {
+                    closeModal();
+                    if(confirmBtn){
+                        confirmBtn.disabled = false;
+                        confirmBtn.innerHTML = 'Unlink & Disconnect';
+                    }
+                }, 3000);
+            }
+        });
+    } else {
+        walletService.disconnect(); 
     }
 }
 
@@ -24,7 +78,12 @@ export function updateNavbarWalletState() {
     if (dropdownContainer) {
         dropdownContainer.innerHTML = renderWalletAreaInDropdown();
         document.getElementById('wallet-connect-btn')?.addEventListener('click', renderWalletSelectionModal);
-        document.getElementById('wallet-disconnect-btn')?.addEventListener('click', () => walletService.disconnect());
+        
+        const disconnectBtn = document.getElementById('navbar-wallet-disconnect-btn'); 
+        if (disconnectBtn) {
+            disconnectBtn.removeEventListener('click', handleNavbarWalletDisconnect); 
+            disconnectBtn.addEventListener('click', handleNavbarWalletDisconnect);
+        }
     }
 }
 
@@ -45,7 +104,7 @@ export function setupNavbarEventListeners() {
 
     mobileMenuPanel?.querySelectorAll('a, button').forEach(link => {
         link.addEventListener('click', () => {
-            if (!mobileMenuPanel.classList.contains('translate-x-full')) {
+            if (mobileMenuPanel && !mobileMenuPanel.classList.contains('translate-x-full')) {
                 setTimeout(toggleMenu, 100);
             }
         });
@@ -141,7 +200,7 @@ export function renderNavbar(currentPath) {
                 <span class="text-sm font-bold gradient-text navbar-user-balance">${balance.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })} $LUM</span>
                 <svg class="w-5 h-5 text-text-secondary ml-1" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" /></svg>
             </button>
-            <div id="user-menu-dropdown" class="absolute hidden top-full right-0 mt-2 w-56 bg-primary border border-subtle rounded-lg shadow-lg py-1">
+            <div id="user-menu-dropdown" class="absolute hidden top-full left-1/2 transform -translate-x-1/2 mt-2 w-56 origin-top bg-primary border border-subtle rounded-lg shadow-lg py-1 z-[60]">
                 <a href="/app/dashboard" class="w-full text-left block px-4 py-2 text-sm text-text-secondary hover:bg-surface hover:text-text-main">Dashboard</a>
                 <div class="my-1 h-px bg-subtle/50"></div>
                 <div id="wallet-dropdown-container"></div>

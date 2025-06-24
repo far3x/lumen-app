@@ -1,60 +1,141 @@
-import { api, updateUserProfile, fetchAndStoreUser, logout, changePassword } from '../../../lib/auth.js';
+import { api, updateUserProfile, fetchAndStoreUser, logout, changePassword, getUser } from '../../../lib/auth.js';
 import { navigate } from '../../../router.js';
 import { renderModal, renderWalletSelectionModal } from './utils.js';
 import QRCode from 'qrcode';
 import zxcvbn from 'zxcvbn';
 import { walletService } from '../../../lib/wallet.js';
+import { PublicKey } from '@solana/web3.js';
 
 function bytesToHex(bytes) {
     return Array.from(bytes, byte => byte.toString(16).padStart(2, '0')).join('');
 }
 
-async function handleLinkWallet(user) {
-    const messageEl = document.getElementById('wallet-management-message');
-    const button = document.getElementById('link-wallet-btn');
+function refreshWalletCard() {
+    const walletCard = document.getElementById('wallet-management-card');
+    const user = getUser();
+    if (walletCard && user) {
+        walletCard.innerHTML = renderWalletManagementCard(user);
+        attachWalletManagementListeners(user);
+    }
+}
 
-    if (!walletService.isWalletConnected()) {
-        messageEl.textContent = 'Please connect your wallet first.';
-        messageEl.className = 'block text-sm p-3 rounded-md bg-red-900/50 text-red-300 mt-4';
-        messageEl.classList.remove('hidden');
+async function handleLinkPhantomWallet(user) {
+    const messageEl = document.getElementById('wallet-management-message');
+    const button = document.getElementById('link-phantom-wallet-btn');
+
+    if (!walletService.isWalletConnected() || !walletService.getAdapter() || walletService.getAdapter().name !== 'Phantom') {
+        if (messageEl) {
+            messageEl.textContent = 'Please connect your Phantom wallet first.';
+            messageEl.className = 'block text-sm p-3 rounded-md bg-red-900/50 text-red-300 mt-4';
+            messageEl.classList.remove('hidden');
+        }
+        renderWalletSelectionModal();
         return;
     }
 
-    button.disabled = true;
-    button.innerHTML = `<span class="animate-spin inline-block w-5 h-5 border-2 border-transparent border-t-white rounded-full"></span>`;
-    messageEl.classList.add('hidden');
+    if (button) {
+        button.disabled = true;
+        button.innerHTML = `<span class="animate-spin inline-block w-5 h-5 border-2 border-transparent border-t-white rounded-full"></span> Linking...`;
+    }
+    if (messageEl) messageEl.classList.add('hidden');
 
     try {
         const nonce = new Date().getTime();
-        const message = `Sign this message to link your wallet to your Lumen account.\n\nAddress: ${walletService.publicKey.toBase58()}\nNonce: ${nonce}`;
+        const messageToSign = `Sign this message to link your wallet to your Lumen account.\n\nAddress: ${walletService.publicKey.toBase58()}\nNonce: ${nonce}`;
         
-        const signatureBytes = await walletService.signMessage(message);
+        const signatureBytes = await walletService.signMessage(new TextEncoder().encode(messageToSign));
         const signatureHex = bytesToHex(signatureBytes);
 
         await api.post('/users/me/link-wallet', {
             solana_address: walletService.publicKey.toBase58(),
-            message: message,
+            message: messageToSign,
             signature: signatureHex
         });
         
-        const updatedUser = await fetchAndStoreUser();
-        const container = document.getElementById('wallet-management-card');
-        container.innerHTML = renderWalletManagementCard(updatedUser);
-        attachWalletManagementListeners(updatedUser);
+        await fetchAndStoreUser(); 
+        
+        if (messageEl) {
+            messageEl.textContent = 'Wallet linked successfully! Reloading page to reflect changes...';
+            messageEl.className = 'block text-sm p-3 rounded-md bg-green-900/50 text-green-300 mt-4';
+            messageEl.classList.remove('hidden');
+        }
+        setTimeout(() => window.location.reload(), 2000);
 
     } catch (error) {
-        messageEl.textContent = error.response?.data?.detail || error.message || 'Failed to link wallet. Please try again.';
-        messageEl.className = 'block text-sm p-3 rounded-md bg-red-900/50 text-red-300 mt-4';
-        messageEl.classList.remove('hidden');
-        button.disabled = false;
-        button.innerHTML = 'Link Wallet to Account';
+        let detail = 'Failed to link wallet. Please try again.';
+        if (error.response?.data?.detail) {
+            detail = error.response.data.detail;
+        } else if (error.message?.includes('User rejected the request')) {
+            detail = 'Wallet link cancelled by user.';
+        }
+        if (messageEl) {
+            messageEl.textContent = detail;
+            messageEl.className = 'block text-sm p-3 rounded-md bg-red-900/50 text-red-300 mt-4';
+            messageEl.classList.remove('hidden');
+        }
+        if (button) {
+            button.disabled = false;
+            button.innerHTML = document.getElementById('link-phantom-wallet-btn').dataset.originalText || 'Link Phantom Wallet';
+        }
     }
 }
+
+async function handleSaveManualWalletAddress(e) {
+    e.preventDefault();
+    const messageEl = document.getElementById('wallet-management-message');
+    const button = document.getElementById('save-manual-wallet-btn');
+    const inputEl = document.getElementById('manual-solana-address');
+    const address = inputEl.value.trim();
+
+    if (button) {
+        button.disabled = true;
+        button.innerHTML = `<span class="animate-spin inline-block w-5 h-5 border-2 border-transparent border-t-white rounded-full"></span> Saving...`;
+    }
+    if (messageEl) messageEl.classList.add('hidden');
+
+    try {
+        new PublicKey(address); 
+    } catch (err) {
+        if (messageEl) {
+            messageEl.textContent = 'Invalid Solana address format.';
+            messageEl.className = 'block text-sm p-3 rounded-md bg-red-900/50 text-red-300 mt-4';
+            messageEl.classList.remove('hidden');
+        }
+        if (button) {
+            button.disabled = false;
+            button.innerHTML = 'Save Address';
+        }
+        return;
+    }
+
+    try {
+        await api.post('/users/me/set-wallet-address', { solana_address: address });
+        await fetchAndStoreUser();
+        if (messageEl) {
+            messageEl.textContent = 'Wallet address saved successfully! Reloading page...';
+            messageEl.className = 'block text-sm p-3 rounded-md bg-green-900/50 text-green-300 mt-4';
+            messageEl.classList.remove('hidden');
+        }
+        setTimeout(() => window.location.reload(), 2000);
+    } catch (error) {
+        const detail = error.response?.data?.detail || 'Failed to save address. Please try again.';
+        if (messageEl) {
+            messageEl.textContent = detail;
+            messageEl.className = 'block text-sm p-3 rounded-md bg-red-900/50 text-red-300 mt-4';
+            messageEl.classList.remove('hidden');
+        }
+        if (button) {
+            button.disabled = false;
+            button.innerHTML = 'Save Address';
+        }
+    }
+}
+
 
 async function handleUnlinkWallet() {
     const confirmationContent = `
         <div class="text-center">
-            <p class="text-text-secondary mb-6">Are you sure you want to unlink your wallet? You will not be able to receive on-chain rewards until a new wallet is linked.</p>
+            <p class="text-text-secondary mb-6">Are you sure you want to unlink your rewards address? You will not be able to receive on-chain rewards until a new address is set.</p>
             <div class="flex justify-center gap-4">
                 <button id="unlink-cancel-btn" class="px-6 py-2 bg-primary hover:bg-subtle/80 text-text-main font-medium rounded-md transition-colors">Cancel</button>
                 <button id="unlink-confirm-btn" class="px-6 py-2 bg-red-900/80 hover:bg-red-900 text-red-300 font-medium rounded-md transition-colors">Yes, Unlink</button>
@@ -72,93 +153,131 @@ async function handleUnlinkWallet() {
 
         try {
             await api.post('/users/me/unlink-wallet');
-            const updatedUser = await fetchAndStoreUser();
+            await fetchAndStoreUser();
             
-            modalBody.innerHTML = `
-                <div class="text-center transition-all animate-fade-in-up">
-                    <div class="w-16 h-16 mx-auto mb-4 bg-green-900/50 text-green-300 rounded-full flex items-center justify-center">
-                        <svg class="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+            if (modalBody) {
+                modalBody.innerHTML = `
+                    <div class="text-center transition-all animate-fade-in-up">
+                        <div class="w-16 h-16 mx-auto mb-4 bg-green-900/50 text-green-300 rounded-full flex items-center justify-center">
+                            <svg class="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+                        </div>
+                        <h3 class="font-bold text-lg text-text-main">Wallet Address Unlinked</h3>
+                        <p class="text-text-secondary mt-2">Your account no longer has a rewards address set.</p>
                     </div>
-                    <h3 class="font-bold text-lg text-text-main">Wallet Unlinked</h3>
-                    <p class="text-text-secondary mt-2">Your account is no longer linked to a wallet.</p>
-                </div>
-            `;
-
-            setTimeout(() => {
-                closeModal();
-                const container = document.getElementById('wallet-management-card');
-                container.innerHTML = renderWalletManagementCard(updatedUser);
-                attachWalletManagementListeners(updatedUser);
-            }, 2000);
-
+                `;
+            }
+            setTimeout(() => { closeModal(); window.location.reload(); }, 2000);
         } catch (error) {
-            console.error("Unlink failed:", error);
-            modalBody.innerHTML = `<p class="text-red-400 text-center">Failed to unlink wallet. Please try again.</p>`;
+            if (modalBody) {
+                modalBody.innerHTML = `<p class="text-red-400 text-center">Failed to unlink wallet. Please try again.</p>`;
+            }
             setTimeout(closeModal, 2000);
         }
     });
 }
 
 function renderWalletManagementCard(user) {
-    const isWalletConnected = walletService.isWalletConnected();
-    const connectedAddress = isWalletConnected ? walletService.publicKey.toBase58() : null;
-    const isLinked = user && user.solana_address;
+    const adapter = walletService.getAdapter();
+    const isPhantomSiteConnected = walletService.isWalletConnected() && adapter && adapter.name === 'Phantom';
+    const siteConnectedPhantomAddress = isPhantomSiteConnected ? walletService.publicKey.toBase58() : null;
+    const linkedRewardsAddress = user?.solana_address;
 
-    let content;
+    let content = '';
+    const primaryWalletActionClasses = "w-full flex justify-center py-2.5 px-6 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-gradient-to-r from-accent-purple to-accent-pink hover:opacity-90 transition-opacity";
+    const secondaryWalletActionClasses = "w-full flex justify-center py-2.5 px-6 border border-subtle rounded-md text-sm font-medium text-text-main bg-primary hover:bg-subtle transition-colors";
 
-    if (isLinked) {
-        const truncatedAddress = `${user.solana_address.slice(0, 6)}...${user.solana_address.slice(-6)}`;
-        content = `
-            <p class="text-sm text-text-secondary mt-1 mb-4">Your account is linked to the following wallet for rewards:</p>
+    if (linkedRewardsAddress) {
+        const truncatedRewardsAddress = `${linkedRewardsAddress.slice(0, 6)}...${linkedRewardsAddress.slice(-6)}`;
+        content += `
+            <p class="text-sm text-text-secondary mt-1 mb-2">Your rewards will be sent to:</p>
             <div class="bg-primary p-4 rounded-lg flex items-center justify-between">
                 <div class="flex items-center gap-3">
                     <svg class="w-6 h-6 text-green-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
-                    <span class="font-mono text-text-main">${truncatedAddress}</span>
+                    <span class="font-mono text-text-main">${truncatedRewardsAddress}</span>
                 </div>
-                <button id="unlink-wallet-btn" class="text-sm font-medium text-red-400 hover:underline">Unlink</button>
+                <button id="unlink-wallet-btn" class="text-sm font-medium text-red-400 hover:underline">Unlink/Change</button>
             </div>
         `;
-    } else if (isWalletConnected) {
-        const truncatedAddress = `${connectedAddress.slice(0, 6)}...${connectedAddress.slice(-6)}`;
-        content = `
-            <p class="text-sm text-text-secondary mt-1 mb-4">You have connected wallet <strong class="font-mono text-text-main">${truncatedAddress}</strong>. Sign a message to link it to your account and enable rewards.</p>
-            <button id="link-wallet-btn" class="w-full flex justify-center py-2 px-6 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-accent-purple hover:bg-accent-purple/80 transition-colors">
-                Link Wallet to Account
-            </button>
-        `;
+        if (isPhantomSiteConnected && siteConnectedPhantomAddress !== linkedRewardsAddress) {
+            const truncatedSiteAddress = `${siteConnectedPhantomAddress.slice(0,6)}...${siteConnectedPhantomAddress.slice(-6)}`;
+            content += `
+                <p class="text-sm text-text-secondary mt-4 mb-2">Phantom wallet <strong class="font-mono text-text-main">${truncatedSiteAddress}</strong> is connected to this site.</p>
+                <button id="link-phantom-wallet-btn" data-original-text="Use Phantom for Rewards" class="${primaryWalletActionClasses}">
+                    Use Phantom for Rewards
+                </button>
+            `;
+        } else if (!isPhantomSiteConnected) {
+             content += `
+                <button id="settings-connect-phantom-btn" class="mt-4 ${primaryWalletActionClasses}">
+                    Connect Phantom to Manage
+                </button>
+            `;
+        }
     } else {
-        content = `
-            <p class="text-sm text-text-secondary mt-1 mb-4">Connect your Solana wallet to link it to your account for rewards.</p>
-             <button id="settings-connect-wallet-btn" class="w-full flex justify-center py-2 px-6 border border-subtle rounded-md shadow-sm text-sm font-medium text-text-main bg-primary hover:bg-subtle transition-colors">
-                Connect Wallet
-            </button>
+        if (isPhantomSiteConnected) {
+            const truncatedSiteAddress = `${siteConnectedPhantomAddress.slice(0,6)}...${siteConnectedPhantomAddress.slice(-6)}`;
+            content += `
+                <p class="text-sm text-text-secondary mt-1 mb-4">Phantom wallet <strong class="font-mono text-text-main">${truncatedSiteAddress}</strong> is connected. Link it for rewards, or enter another address manually.</p>
+                <button id="link-phantom-wallet-btn" data-original-text="Link Connected Phantom Wallet" class="${primaryWalletActionClasses}">
+                    Link Connected Phantom Wallet
+                </button>
+            `;
+        } else {
+            content += `
+                <p class="text-sm text-text-secondary mt-1 mb-2">Connect Phantom wallet to link automatically, or enter any Solana address manually for rewards.</p>
+                <button id="settings-connect-phantom-btn" class="${primaryWalletActionClasses}">
+                    Connect Phantom Wallet
+                </button>
+            `;
+        }
+        content += `
+            <div class="my-4 flex items-center">
+                <div class="flex-grow border-t border-primary"></div>
+                <span class="flex-shrink mx-4 text-xs text-subtle uppercase">Or</span>
+                <div class="flex-grow border-t border-primary"></div>
+            </div>
+            <form id="manual-wallet-form">
+                <p class="text-sm text-text-secondary mt-1 mb-2">Enter any Solana address manually:</p>
+                <input type="text" id="manual-solana-address" placeholder="Your Solana Address" class="w-full bg-primary border border-subtle rounded-md px-3 py-2 text-text-main focus:ring-2 focus:ring-accent-purple focus:outline-none">
+                <button id="save-manual-wallet-btn" type="submit" class="mt-3 ${secondaryWalletActionClasses}">
+                    Save Manual Address
+                </button>
+            </form>
         `;
     }
 
     return `
-        <div class="p-6">
-            <h3 class="font-bold text-lg">Wallet Management</h3>
+        <div class="p-6 h-full flex flex-col">
+            <h3 class="font-bold text-lg">Rewards Wallet</h3>
             <div id="wallet-management-message" class="hidden mt-4"></div>
-            ${content}
+            <div class="mt-1 mb-6 flex-grow flex flex-col justify-center">${content}</div>
         </div>
     `;
 }
 
 function attachWalletManagementListeners(user) {
-    document.getElementById('settings-connect-wallet-btn')?.addEventListener('click', renderWalletSelectionModal);
-    document.getElementById('link-wallet-btn')?.addEventListener('click', () => handleLinkWallet(user));
+    document.getElementById('settings-connect-phantom-btn')?.addEventListener('click', renderWalletSelectionModal);
+    
+    const linkPhantomBtn = document.getElementById('link-phantom-wallet-btn');
+    if(linkPhantomBtn) {
+        linkPhantomBtn.dataset.originalText = linkPhantomBtn.textContent.trim();
+        linkPhantomBtn.addEventListener('click', () => handleLinkPhantomWallet(user));
+    }
+    
     document.getElementById('unlink-wallet-btn')?.addEventListener('click', handleUnlinkWallet);
+    document.getElementById('manual-wallet-form')?.addEventListener('submit', handleSaveManualWalletAddress);
 }
 
 async function handleProfileSettingsSubmit(e, dashboardState) {
     e.preventDefault();
     const msgEl = document.getElementById('profile-settings-message');
     const btnEl = document.getElementById('save-profile-settings-btn');
-    const originalBtnHTML = btnEl.innerHTML;
     
-    msgEl.classList.add('hidden');
-    btnEl.disabled = true;
-    btnEl.innerHTML = `<span class="animate-spin inline-block w-5 h-5 border-2 border-transparent border-t-white rounded-full"></span>`;
+    if (msgEl) msgEl.classList.add('hidden');
+    if (btnEl) {
+        btnEl.disabled = true;
+        btnEl.innerHTML = `<span class="animate-spin inline-block w-5 h-5 border-2 border-transparent border-t-white rounded-full"></span>`;
+    }
 
     const displayName = document.getElementById('display-name').value;
     const isInLeaderboard = document.getElementById('leaderboard-toggle').checked;
@@ -166,24 +285,32 @@ async function handleProfileSettingsSubmit(e, dashboardState) {
     try {
         await updateUserProfile(displayName, isInLeaderboard);
         const user = await fetchAndStoreUser();
-        dashboardState.user = user;
-        msgEl.textContent = 'Settings updated successfully!';
-        msgEl.className = 'block text-sm p-3 rounded-md bg-green-900/50 text-green-300';
-        msgEl.classList.remove('hidden');
+        if (dashboardState) dashboardState.user = user;
+        if (msgEl) {
+            msgEl.textContent = 'Settings updated successfully!';
+            msgEl.className = 'block text-sm text-center text-green-300';
+            msgEl.classList.remove('hidden');
+        }
         
         document.querySelectorAll('.navbar-user-display-name').forEach(el => {
             el.textContent = user?.display_name ?? 'User';
         });
-        document.querySelector('#dashboard-sidebar-area .font-bold.text-lg').textContent = user?.display_name ?? 'User';
+        const sidebarNameEl = document.querySelector('#dashboard-sidebar-area .font-bold.text-lg');
+        if (sidebarNameEl) sidebarNameEl.textContent = user?.display_name ?? 'User';
+
 
     } catch (error) {
-        msgEl.textContent = error.response?.data?.detail || 'Failed to update settings.';
-        msgEl.className = 'block text-sm p-3 rounded-md bg-red-900/50 text-red-300';
-        msgEl.classList.remove('hidden');
+        if (msgEl) {
+            msgEl.textContent = error.response?.data?.detail || 'Failed to update settings.';
+            msgEl.className = 'block text-sm text-center text-red-300';
+            msgEl.classList.remove('hidden');
+        }
     } finally {
-        btnEl.disabled = false;
-        btnEl.innerHTML = 'Save Changes';
-        setTimeout(() => msgEl.classList.add('hidden'), 5000);
+        if (btnEl) {
+            btnEl.disabled = false;
+            btnEl.innerHTML = 'Save Changes';
+        }
+        if (msgEl) setTimeout(() => msgEl.classList.add('hidden'), 3000);
     }
 }
 
@@ -196,25 +323,31 @@ async function handleChangePasswordSubmit(e) {
     const msgEl = document.getElementById('change-password-message');
     const btnEl = form.querySelector('button[type="submit"]');
 
-    msgEl.classList.add('hidden');
+    if (msgEl) msgEl.classList.add('hidden');
 
     if (newPassword !== confirmPassword) {
-        msgEl.textContent = "New passwords do not match.";
-        msgEl.className = 'block text-sm p-3 rounded-md bg-red-900/50 text-red-300';
-        msgEl.classList.remove('hidden');
+        if (msgEl) {
+            msgEl.textContent = "New passwords do not match.";
+            msgEl.className = 'block text-sm text-center text-red-300';
+            msgEl.classList.remove('hidden');
+        }
         return;
     }
 
     const strength = zxcvbn(newPassword);
     if (strength.score < 2) {
-        msgEl.textContent = strength.feedback.warning || "New password is too weak.";
-        msgEl.className = 'block text-sm p-3 rounded-md bg-red-900/50 text-red-300';
-        msgEl.classList.remove('hidden');
+        if (msgEl) {
+            msgEl.textContent = strength.feedback.warning || "New password is too weak.";
+            msgEl.className = 'block text-sm text-center text-red-300';
+            msgEl.classList.remove('hidden');
+        }
         return;
     }
 
-    btnEl.disabled = true;
-    btnEl.innerHTML = `<span class="animate-spin inline-block w-5 h-5 border-2 border-transparent border-t-white rounded-full"></span>`;
+    if (btnEl) {
+        btnEl.disabled = true;
+        btnEl.innerHTML = `<span class="animate-spin inline-block w-5 h-5 border-2 border-transparent border-t-white rounded-full"></span>`;
+    }
 
     try {
         await changePassword(currentPassword, newPassword);
@@ -222,43 +355,57 @@ async function handleChangePasswordSubmit(e) {
         await logout();
         navigate('/login');
     } catch (error) {
-        msgEl.textContent = error.response?.data?.detail || 'Failed to change password.';
-        msgEl.className = 'block text-sm p-3 rounded-md bg-red-900/50 text-red-300';
-        msgEl.classList.remove('hidden');
-        btnEl.disabled = false;
-        btnEl.innerHTML = 'Update Password';
+        if (msgEl) {
+            msgEl.textContent = error.response?.data?.detail || 'Failed to change password.';
+            msgEl.className = 'block text-sm text-center text-red-300';
+            msgEl.classList.remove('hidden');
+        }
+        if (btnEl) {
+            btnEl.disabled = false;
+            btnEl.innerHTML = 'Update Password';
+        }
+    } finally {
+        if (msgEl) setTimeout(() => msgEl.classList.add('hidden'), 3000);
     }
 }
 
 
 async function handleDisable2FASubmit(e, dashboardState) {
     e.preventDefault();
-    const password = document.getElementById('disable-2fa-password').value;
+    const passwordInput = document.getElementById('disable-2fa-password');
+    const password = passwordInput ? passwordInput.value : '';
     const msgEl = document.getElementById('disable-2fa-message');
     const btnEl = e.submitter;
-    const originalBtnHTML = btnEl.innerHTML;
 
-    btnEl.disabled = true;
-    btnEl.innerHTML = `<span class="animate-spin inline-block w-4 h-4 border-2 border-transparent border-t-white rounded-full"></span>`;
-    msgEl.classList.add('hidden');
+    if (btnEl) {
+        btnEl.disabled = true;
+        btnEl.innerHTML = `<span class="animate-spin inline-block w-4 h-4 border-2 border-transparent border-t-white rounded-full"></span>`;
+    }
+    if (msgEl) msgEl.classList.add('hidden');
 
     try {
         await api.post('/security/2fa/disable', { password });
         const user = await fetchAndStoreUser();
-        dashboardState.user = user;
+        if (dashboardState) dashboardState.user = user;
         
         const twoFactorCard = document.getElementById('2fa-card');
-        if (twoFactorCard) {
+        if (twoFactorCard && user) {
             twoFactorCard.innerHTML = render2FACardContent(user);
             document.getElementById('enable-2fa-btn')?.addEventListener('click', () => show2FASetupModal(dashboardState));
         }
 
     } catch (error) {
-        msgEl.textContent = error.response?.data?.detail || 'Failed to disable 2FA.';
-        msgEl.className = 'block text-sm p-2 rounded-md bg-red-900/50 text-red-300 mt-2';
-        msgEl.classList.remove('hidden');
-        btnEl.disabled = false;
-        btnEl.innerHTML = originalBtnHTML;
+        if (msgEl) {
+            msgEl.textContent = error.response?.data?.detail || 'Failed to disable 2FA.';
+            msgEl.className = 'block text-sm p-2 rounded-md bg-red-900/50 text-red-300 mt-2 text-center';
+            msgEl.classList.remove('hidden');
+        }
+        if (btnEl) {
+            btnEl.disabled = false;
+            btnEl.innerHTML = 'Disable 2FA';
+        }
+    } finally {
+         if (msgEl) setTimeout(() => msgEl.classList.add('hidden'), 3000);
     }
 }
 
@@ -276,7 +423,7 @@ function renderBackupCodesModal(backupCodes) {
             </p>
             <div class="grid grid-cols-2 gap-3 my-6">${codesHtml}</div>
             <p class="text-xs text-subtle mb-6">Each code can only be used once.</p>
-            <button id="backup-codes-close-btn" class="w-full flex justify-center py-3 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-accent-purple hover:bg-accent-purple/80 transition-colors">
+            <button id="backup-codes-close-btn" class="w-full flex justify-center py-3 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-gradient-to-r from-accent-purple to-accent-pink hover:opacity-90 transition-opacity">
                 I have saved my codes securely
             </button>
         </div>
@@ -288,36 +435,42 @@ function renderBackupCodesModal(backupCodes) {
 
 async function handleEnable2FASubmit(e, setupKey, dashboardState) {
     e.preventDefault();
-    const token = document.getElementById('2fa-verification-code').value;
+    const tokenInput = document.getElementById('2fa-verification-code');
+    const token = tokenInput ? tokenInput.value : '';
     const msgEl = document.getElementById('enable-2fa-message');
     const btnEl = e.submitter;
-    const originalBtnHTML = btnEl.innerHTML;
 
-    msgEl.classList.add('hidden');
-    btnEl.disabled = true;
-    btnEl.innerHTML = `<span class="animate-spin inline-block w-5 h-5 border-2 border-transparent border-t-white rounded-full"></span>`;
+    if (msgEl) msgEl.classList.add('hidden');
+    if (btnEl) {
+        btnEl.disabled = true;
+        btnEl.innerHTML = `<span class="animate-spin inline-block w-5 h-5 border-2 border-transparent border-t-white rounded-full"></span>`;
+    }
     
     try {
         const response = await api.post('/security/2fa/enable', { token, setup_key: setupKey });
         const user = await fetchAndStoreUser();
-        dashboardState.user = user;
+        if (dashboardState) dashboardState.user = user;
         
         const setupModal = document.querySelector('.modal-overlay');
         if (setupModal) setupModal.remove();
 
         const twoFactorCard = document.getElementById('2fa-card');
-        if(twoFactorCard) {
+        if(twoFactorCard && user) {
             twoFactorCard.innerHTML = render2FACardContent(user);
-            document.getElementById('disable-2fa-form')?.addEventListener('submit', (e) => handleDisable2FASubmit(e, dashboardState));
+            document.getElementById('disable-2fa-form')?.addEventListener('submit', (event) => handleDisable2FASubmit(event, dashboardState));
         }
         
         renderBackupCodesModal(response.data.backup_codes);
 
     } catch(error) {
-        msgEl.textContent = error.response?.data?.detail || 'Failed to enable 2FA.';
-        msgEl.classList.remove('hidden');
-        btnEl.disabled = false;
-        btnEl.innerHTML = originalBtnHTML;
+        if (msgEl) {
+            msgEl.textContent = error.response?.data?.detail || 'Failed to enable 2FA.';
+            msgEl.classList.remove('hidden');
+        }
+        if (btnEl) {
+            btnEl.disabled = false;
+            btnEl.innerHTML = 'Verify & Enable';
+        }
     }
 }
 
@@ -339,7 +492,7 @@ async function show2FASetupModal(dashboardState) {
                     <label for="2fa-verification-code" class="text-sm font-medium text-text-secondary">Enter the 6-digit code from your app to confirm:</label>
                     <input type="text" id="2fa-verification-code" required autocomplete="off"
                            class="mt-1 block w-full bg-primary border border-subtle rounded-md px-3 py-2 text-text-main text-center text-2xl tracking-widest font-mono focus:ring-2 focus:ring-accent-purple focus:outline-none">
-                    <div id="enable-2fa-message" class="hidden text-sm p-3 rounded-md bg-red-900/50 text-red-300 mt-4"></div>
+                    <div id="enable-2fa-message" class="hidden text-sm p-3 rounded-md bg-red-900/50 text-red-300 mt-4 text-center"></div>
                     <button type="submit" class="mt-4 w-full flex justify-center py-3 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-gradient-to-r from-accent-purple to-accent-pink hover:opacity-90 transition-opacity">
                         Verify & Enable
                     </button>
@@ -349,9 +502,9 @@ async function show2FASetupModal(dashboardState) {
         renderModal('Enable Two-Factor Authentication', content);
         
         const canvas = document.getElementById('qr-code-canvas');
-        QRCode.toCanvas(canvas, provisioning_uri);
+        if (canvas) QRCode.toCanvas(canvas, provisioning_uri);
         
-        document.getElementById('enable-2fa-form').addEventListener('submit', (e) => handleEnable2FASubmit(e, setupKey, dashboardState));
+        document.getElementById('enable-2fa-form')?.addEventListener('submit', (e) => handleEnable2FASubmit(e, setup_key, dashboardState));
 
     } catch (error) {
         alert('Could not start 2FA setup process. Please try again.');
@@ -379,12 +532,12 @@ export function attachSettingsPageListeners(dashboardState) {
             const strengthText = document.getElementById('new-password-strength-text');
             if (newPasswordInput.value) {
                 const result = zxcvbn(newPasswordInput.value);
-                strengthBarFill.style.width = ['0%', '25%', '50%', '75%', '100%'][result.score];
-                strengthBarFill.className = `strength-bar-fill ${['bg-red-500', 'bg-red-500', 'bg-yellow-500', 'bg-green-500', 'bg-green-500'][result.score]}`;
-                strengthText.textContent = ['', 'Weak', 'Fair', 'Good', 'Strong'][result.score];
+                if (strengthBarFill) strengthBarFill.style.width = ['0%', '25%', '50%', '75%', '100%'][result.score];
+                if (strengthBarFill) strengthBarFill.className = `strength-bar-fill ${['bg-red-500', 'bg-red-500', 'bg-yellow-500', 'bg-green-500', 'bg-green-500'][result.score]}`;
+                if (strengthText) strengthText.textContent = ['', 'Weak', 'Fair', 'Good', 'Strong'][result.score];
             } else {
-                strengthBarFill.style.width = '0%';
-                strengthText.textContent = '';
+                if (strengthBarFill) strengthBarFill.style.width = '0%';
+                if (strengthText) strengthText.textContent = '';
             }
         });
     }
@@ -418,43 +571,44 @@ export function attachSettingsPageListeners(dashboardState) {
     }
     
     const walletCard = document.getElementById('wallet-management-card');
-    if (walletCard) {
+    if (walletCard && dashboardState && dashboardState.user) {
         walletCard.innerHTML = renderWalletManagementCard(dashboardState.user);
         attachWalletManagementListeners(dashboardState.user);
-        
-        document.addEventListener('walletUpdate', () => {
-            const user = dashboardState.user;
-            walletCard.innerHTML = renderWalletManagementCard(user);
-            attachWalletManagementListeners(user);
-        });
     }
+
+    document.removeEventListener('walletUpdate', refreshWalletCard); 
+    document.addEventListener('walletUpdate', refreshWalletCard);
+    
+    refreshWalletCard();
 }
 
 function render2FACardContent(user) {
     if (!user) return '<p>Loading security settings...</p>';
     const hasPasswordAuth = user.has_password;
     return `
-        <div class="p-6">
+        <div class="p-6 h-full flex flex-col">
             <h3 class="font-bold text-lg">Two-Factor Authentication (2FA)</h3>
+            <div class="mt-2 flex-grow flex flex-col justify-center">
             ${user.is_two_factor_enabled ? `
-                <p class="text-sm text-green-400 mt-2">2FA is currently <strong>enabled</strong> on your account.</p>
+                <p class="text-sm text-green-400">2FA is currently <strong>enabled</strong> on your account.</p>
                 <form id="disable-2fa-form" class="mt-4">
                     <p class="text-xs text-text-secondary mb-2">To disable 2FA, please enter your password.</p>
                     <div class="flex items-start gap-4">
                         <div class="flex-grow">
                             <input type="password" id="disable-2fa-password" required placeholder="Current Password" class="w-full bg-primary border border-subtle rounded-md px-3 py-2 text-text-main focus:ring-2 focus:ring-accent-purple focus:outline-none ${!hasPasswordAuth ? 'opacity-50 cursor-not-allowed' : ''}" ${!hasPasswordAuth ? 'disabled' : ''}>
-                            <div id="disable-2fa-message" class="hidden mt-2 text-sm"></div>
+                            <div id="disable-2fa-message" class="hidden mt-2 text-sm text-center"></div>
                         </div>
                         <button type="submit" class="py-2 px-4 text-sm font-medium text-red-400 bg-red-900/30 hover:bg-red-900/60 rounded-md transition-colors ${!hasPasswordAuth ? 'opacity-50 cursor-not-allowed' : ''}" ${!hasPasswordAuth ? 'disabled' : ''}>Disable 2FA</button>
                     </div>
                      ${!hasPasswordAuth ? `<p class="text-xs text-yellow-400 mt-2">Password required. Cannot disable 2FA for accounts without a password.</p>` : ''}
                 </form>
             ` : `
-                <p class="text-sm text-text-secondary mt-2">Add an extra layer of security to your account using an authenticator app.</p>
-                <button id="enable-2fa-btn" class="mt-4 py-2 px-6 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-accent-purple hover:bg-accent-purple/80 transition-colors">
+                <p class="text-sm text-text-secondary">Add an extra layer of security to your account using an authenticator app.</p>
+                <button id="enable-2fa-btn" class="mt-4 w-full flex justify-center py-2.5 px-6 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-gradient-to-r from-accent-purple to-accent-pink hover:opacity-90 transition-opacity">
                     Enable 2FA
                 </button>
             `}
+            </div>
         </div>
     `;
 }
@@ -463,11 +617,11 @@ function renderLinkedAccountsCard(user) {
     if (!user) return '<p>Loading account settings...</p>';
 
     return `
-        <div class="p-6">
+        <div class="p-6 h-full flex flex-col">
             <h3 class="font-bold text-lg">Linked Accounts</h3>
             <p class="text-sm text-text-secondary mt-1 mb-6">Connect social accounts for quick and easy login.</p>
             <div id="link-accounts-message" class="hidden"></div>
-            <div class="space-y-4">
+            <div class="space-y-4 flex-grow flex flex-col justify-center">
                 <div class="flex items-center justify-between bg-primary p-4 rounded-lg">
                     <div class="flex items-center gap-4">
                         <svg class="w-6 h-6" viewBox="0 0 48 48"><path fill="#FFC107" d="M43.611,20.083H42V20H24v8h11.303c-1.649,4.657-6.08,8-11.303,8c-6.627,0-12-5.373-12-12c0-6.627,5.373-12,12-12c3.059,0,5.842,1.154,7.961,3.039l5.657-5.657C34.046,6.053,29.268,4,24,4C12.955,4,4,12.955,4,24c0,11.045,8.955,20,20,20c11.045,0,20-8.955,20-20C44,22.659,43.862,21.35,43.611,20.083z"></path><path fill="#FF3D00" d="M6.306,14.691l6.571,4.819C14.655,15.108,18.961,12,24,12c3.059,0,5.842,1.154,7.961,3.039l5.657-5.657C34.046,6.053,29.268,4,24,4C16.318,4,9.656,8.337,6.306,14.691z"></path><path fill="#4CAF50" d="M24,44c5.166,0,9.86-1.977,13.409-5.192l-6.19-5.238C29.211,35.091,26.715,36,24,36c-5.202,0-9.619-3.317-11.283-7.946l-6.522,5.025C9.505,39.556,16.227,44,24,44z"></path><path fill="#1976D2" d="M43.611,20.083H42V20H24v8h11.303c-0.792,2.237-2.231,4.166-4.087,5.574l6.19,5.238C39.901,36.627,44,30.638,44,24C44,22.659,43.862,21.35,43.611,20.083z"></path></svg>
@@ -499,6 +653,8 @@ export function renderSettingsPage(user) {
     }
     const hasPasswordAuth = user.has_password;
 
+    const gradientButtonClasses = "w-full flex justify-center py-2.5 px-6 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-gradient-to-r from-accent-purple to-accent-pink hover:opacity-90 transition-opacity";
+
     return `
         <header>
             <h1 class="text-3xl font-bold">Settings</h1>
@@ -507,12 +663,12 @@ export function renderSettingsPage(user) {
 
         <div class="mt-8 grid grid-cols-1 lg:grid-cols-5 gap-8 items-start">
             
-            <div class="lg:col-span-2 space-y-8">
-                <form id="profile-settings-form" class="bg-surface border border-primary rounded-xl overflow-hidden">
-                    <div class="p-6">
+            <div class="lg:col-span-2 space-y-8 flex flex-col">
+                <form id="profile-settings-form" class="bg-surface border border-primary rounded-xl flex flex-col flex-1">
+                    <div class="p-6 flex flex-col flex-grow">
                         <h3 class="font-bold text-lg">Profile Information</h3>
                         <p class="text-text-secondary text-sm mt-1 mb-6">This information may be displayed publicly.</p>
-                        <div class="space-y-6">
+                        <div class="space-y-6 flex-grow">
                             <div>
                                 <label for="display-name" class="block text-sm font-medium text-text-secondary mb-1">Display Name</label>
                                 <input type="text" id="display-name" value="${user.display_name ?? ''}"
@@ -525,40 +681,39 @@ export function renderSettingsPage(user) {
                                 </div>
                                 <label class="relative inline-flex items-center cursor-pointer">
                                     <input type="checkbox" id="leaderboard-toggle" class="sr-only peer" ${user.is_in_leaderboard ? 'checked' : ''}>
-                                    <div class="w-11 h-6 bg-primary peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-accent-purple rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-text-secondary after:border after:border-primary after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-accent-purple"></div>
+                                    <div class="w-11 h-6 bg-primary peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-accent-purple rounded-full peer dark:bg-subtle peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white dark:after:bg-text-secondary after:border-gray-300 dark:after:border-primary after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:peer-checked:bg-gradient-to-r dark:peer-checked:from-accent-purple dark:peer-checked:to-accent-pink"></div>
                                 </label>
                             </div>
                         </div>
-                    </div>
-                    <div class="bg-primary/50 border-t border-primary px-6 py-4 flex justify-end items-center">
-                        <div id="profile-settings-message" class="hidden text-sm mr-auto"></div>
-                        <button type="submit" id="save-profile-settings-btn"
-                                class="flex justify-center py-2 px-6 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-accent-purple hover:bg-accent-purple/80 transition-colors">
-                            Save Changes
-                        </button>
+                         <div class="mt-auto pt-6">
+                            <button type="submit" id="save-profile-settings-btn" class="${gradientButtonClasses}">
+                                Save Changes
+                            </button>
+                            <div id="profile-settings-message" class="hidden text-sm mt-3 text-center"></div>
+                        </div>
                     </div>
                 </form>
                 
-                 <div class="bg-surface border border-primary rounded-xl overflow-hidden">
+                 <div class="bg-surface border border-primary rounded-xl flex flex-col flex-1">
                     ${renderLinkedAccountsCard(user)}
                 </div>
             </div>
 
-            <div class="lg:col-span-3 space-y-8">
-                <div id="wallet-management-card" class="bg-surface border border-primary rounded-xl overflow-hidden">
+            <div class="lg:col-span-3 space-y-8 flex flex-col">
+                <div id="wallet-management-card" class="bg-surface border border-primary rounded-xl flex flex-col flex-1">
                     ${renderWalletManagementCard(user)}
                 </div>
                 
-                <div id="2fa-card" class="bg-surface border border-primary rounded-xl overflow-hidden">
+                <div id="2fa-card" class="bg-surface border border-primary rounded-xl flex flex-col flex-1">
                     ${render2FACardContent(user)}
                 </div>
                 
-                <form id="change-password-form" class="bg-surface border border-primary rounded-xl overflow-hidden">
-                    <div class="p-6">
+                <form id="change-password-form" class="bg-surface border border-primary rounded-xl flex flex-col flex-1">
+                    <div class="p-6 flex flex-col flex-grow">
                         <h3 class="font-bold text-lg">Change Password</h3>
                         <p class="text-text-secondary text-sm mt-1 mb-6">Update your password. You will be logged out after this action.</p>
-                        ${!hasPasswordAuth ? `<p class="text-sm p-4 bg-primary rounded-lg text-text-secondary">Password management is unavailable for accounts created via social login. To enable, please contact support.</p>` : `
-                        <div class="space-y-4">
+                        ${!hasPasswordAuth ? `<div class="flex-grow flex items-center justify-center"><p class="text-sm p-4 bg-primary rounded-lg text-text-secondary">Password management is unavailable for accounts created via social login. To enable, please contact support.</p></div>` : `
+                        <div class="space-y-4 flex-grow">
                             <div>
                                 <label for="current-password" class="block text-sm font-medium text-text-secondary mb-1">Current Password</label>
                                 <input type="password" id="current-password" required class="w-full bg-primary border border-subtle rounded-md px-3 py-2 text-text-main focus:ring-2 focus:ring-accent-purple focus:outline-none">
@@ -577,11 +732,11 @@ export function renderSettingsPage(user) {
                         `}
                     </div>
                     ${hasPasswordAuth ? `
-                    <div class="bg-primary/50 border-t border-primary px-6 py-4 flex justify-end items-center">
-                        <div id="change-password-message" class="hidden text-sm mr-auto"></div>
-                        <button type="submit" class="w-auto flex justify-center py-2 px-6 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-accent-purple hover:bg-accent-purple/80 transition-colors">
+                    <div class="bg-primary/50 border-t border-primary px-6 py-4 mt-auto">
+                        <button type="submit" class="${gradientButtonClasses}">
                             Update Password
                         </button>
+                        <div id="change-password-message" class="hidden text-sm mt-3 text-center"></div>
                     </div>
                     ` : ''}
                 </form>

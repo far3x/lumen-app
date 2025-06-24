@@ -1,31 +1,87 @@
 import Chart from 'chart.js/auto';
-import { icons } from './utils.js';
+import { icons, renderModal, updateBalancesInUI } from './utils.js';
+import { api as authApi, fetchAndStoreAccount, getAccount } from '../../../lib/auth.js';
 
 let chartInstance = null;
-let activeTimeRange = 'all';
 
-function renderWalletSection(account) {
+
+async function handleClaim(claimButton, user) {
+    const account = getAccount();
+    if (!account || account.lum_balance <= 0) return;
+
+    claimButton.disabled = true;
+    claimButton.innerHTML = `<span class="animate-spin inline-block w-5 h-5 border-2 border-transparent border-t-white rounded-full"></span> Claiming...`;
+
+    try {
+        const response = await authApi.post('/rewards/claim');
+        await fetchAndStoreAccount();
+        updateBalancesInUI();
+
+        const txLink = `https://solscan.io/tx/${response.data.transaction_hash}?cluster=devnet`;
+        const modalContent = `
+            <div class="text-center">
+                <div class="w-16 h-16 mx-auto mb-4 bg-green-900/50 text-green-300 rounded-full flex items-center justify-center">
+                    <svg class="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+                </div>
+                <h3 class="font-bold text-lg text-white">Claim Successful!</h3>
+                <p class="text-text-secondary mt-2 mb-4">${response.data.message}</p>
+                <a href="${txLink}" target="_blank" rel="noopener noreferrer" class="font-medium text-accent-cyan hover:underline">View Transaction</a>
+            </div>
+        `;
+        renderModal('Rewards Claimed', modalContent);
+        claimButton.disabled = false;
+        claimButton.innerHTML = 'Claim Rewards';
+
+    } catch (error) {
+        const errorMessage = error.response?.data?.detail || "An unknown error occurred.";
+        const errorContent = `
+             <div class="text-center">
+                <div class="w-16 h-16 mx-auto mb-4 bg-red-900/50 text-red-300 rounded-full flex items-center justify-center">
+                    <svg class="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                </div>
+                <h3 class="font-bold text-lg text-white">Claim Failed</h3>
+                <p class="text-text-secondary mt-2">${errorMessage}</p>
+            </div>
+        `;
+        renderModal('Error', errorContent);
+        claimButton.disabled = false;
+        claimButton.innerHTML = 'Claim Rewards';
+    }
+}
+
+function renderWalletSection(account, user) {
     const claimableBalance = account?.lum_balance || 0;
-    
+    const isWalletLinked = user?.solana_address;
+
+    const claimButtonHTML = `
+        <button id="claim-rewards-btn"
+                class="w-full md:w-auto px-8 py-3 font-bold bg-gradient-to-r from-accent-purple to-accent-pink text-white rounded-lg transition-all duration-300 hover:scale-105 hover:shadow-lg hover:shadow-accent-purple/30 hover:brightness-110 shrink-0
+                       ${(!isWalletLinked || claimableBalance <= 0) ? 'opacity-50 cursor-not-allowed' : ''}"
+                ${(!isWalletLinked || claimableBalance <= 0) ? 'disabled' : ''}
+                data-is-wallet-linked="${isWalletLinked ? 'true' : 'false'}">
+            Claim Rewards
+        </button>
+    `;
+
     return `
-    <div class="mt-8 relative bg-surface p-8 rounded-xl border border-primary overflow-hidden shadow-2xl shadow-black/30">
+    <div id="claim-button-area" class="mt-8 relative bg-surface p-8 rounded-xl border border-primary overflow-hidden shadow-2xl shadow-black/30">
         <div class="absolute -right-10 -top-10 text-primary/10">
             <svg class="w-48 h-48" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" d="M21 12a2.25 2.25 0 0 0-2.25-2.25H15a3 3 0 1 1-6 0H5.25A2.25 2.25 0 0 0 3 12m18 0v6a2.25 2.25 0 0 1-2.25 2.25H5.25A2.25 2.25 0 0 1 3 18v-6m18 0V9M3 12V9m18 3a2.25 2.25 0 0 0-2.25-2.25H5.25A2.25 2.25 0 0 0 3 12m15-3a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" />
+              <path stroke-linecap="round" stroke-linejoin="round" d="M21 12a2.25 2.25 0 0 0-2.25-2.25H15a3 3 0 1 1-6 0H5.25A2.25 2.25 0 0 0 3 12m18 0v6a2.25 2.25 0 0 1-2.25-2.25H5.25A2.25 2.25 0 0 1 3 18v-6m18 0V9M3 12V9m18 3a2.25 2.25 0 0 0-2.25-2.25H5.25A2.25 2.25 0 0 0 3 12m15-3a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" />
             </svg>
         </div>
         <div class="relative z-10 flex flex-col md:flex-row items-center justify-between gap-6">
             <div class="flex-grow text-center md:text-left">
                 <h3 class="text-2xl font-bold text-text-main">Claim Your Rewards</h3>
-                <p class="text-text-secondary mt-1">Connect your wallet to transfer your earned $LUM off-platform.</p>
+                <p class="text-text-secondary mt-1">
+                    ${isWalletLinked ? 'Your rewards are ready to be claimed.' : 'Link your wallet in Settings to enable claims.'}
+                </p>
             </div>
             <div class="text-center md:text-right">
                 <p class="text-sm text-text-secondary">Claimable Balance</p>
                 <p class="text-3xl font-bold pulse-text font-mono">${claimableBalance.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 4})}</p>
             </div>
-            <button class="w-full md:w-auto px-8 py-3 font-bold bg-gradient-to-r from-accent-purple to-accent-pink text-white rounded-lg transition-all duration-300 hover:scale-105 hover:shadow-lg hover:shadow-accent-purple/30 hover:brightness-110 opacity-60 cursor-not-allowed shrink-0">
-                Connect Wallet
-            </button>
+            ${claimButtonHTML}
         </div>
     </div>
     `;
@@ -42,9 +98,9 @@ function renderStatCard(label, value) {
     `;
 }
 
-function initializeChart(contributions, timeRange) {
+export function initializeChart(contributions, timeRange) {
     const canvas = document.getElementById('earningsChartCanvas');
-    const chartContainer = canvas.parentElement;
+    const chartContainer = canvas?.parentElement;
     const messageEl = document.getElementById('chart-message');
     if (!canvas || !chartContainer || !messageEl) return;
 
@@ -66,7 +122,7 @@ function initializeChart(contributions, timeRange) {
         startDate.setUTCDate(today.getUTCDate() - 6);
     } else if (timeRange === '30d') {
         startDate.setUTCDate(today.getUTCDate() - 29);
-    } else { // 'all'
+    } else { 
         if (processedContributions.length > 0) {
             startDate = new Date(processedContributions.reduce((min, c) => new Date(c.created_at) < min ? new Date(c.created_at) : min, new Date()));
             startDate.setUTCHours(0, 0, 0, 0);
@@ -122,39 +178,35 @@ function initializeChart(contributions, timeRange) {
     });
 }
 
-function attachChartButtonListeners(contributions) {
+export function attachChartButtonListeners(contributions, onRangeChangeCallback) {
     const buttonGroup = document.getElementById('chart-time-buttons');
     if (!buttonGroup) return;
 
-    buttonGroup.addEventListener('click', (e) => {
+    buttonGroup.removeEventListener('click', handleRangeChange);
+    buttonGroup.addEventListener('click', handleRangeChange);
+
+    function handleRangeChange(e) {
         const button = e.target.closest('button');
         if (!button) return;
 
         const newRange = button.dataset.range;
-        if (newRange === activeTimeRange) return;
-
-        activeTimeRange = newRange;
+        
+        if (typeof onRangeChangeCallback === 'function') {
+             onRangeChangeCallback(newRange);
+        }
 
         buttonGroup.querySelectorAll('button').forEach(btn => {
             btn.classList.remove('bg-primary', 'text-text-main');
             btn.classList.add('text-text-secondary');
         });
-
         button.classList.add('bg-primary', 'text-text-main');
         button.classList.remove('text-text-secondary');
-
-        initializeChart(contributions, newRange);
-    });
+    }
 }
 
 export function renderDashboardOverview(user, account, rank, allContributions) {
     const totalContributions = allContributions?.length || 0; 
     
-    setTimeout(() => {
-        initializeChart(allContributions, activeTimeRange);
-        attachChartButtonListeners(allContributions);
-    }, 50);
-
     return `
         <header class="animate-fade-in-up">
             <h1 class="text-3xl font-bold">Welcome, <span class="pulse-text">${user?.display_name ?? 'Contributor'}</span></h1>
@@ -164,8 +216,8 @@ export function renderDashboardOverview(user, account, rank, allContributions) {
         <div class="mt-8 grid grid-cols-2 lg:grid-cols-4 gap-6 animate-fade-in-up" style="animation-delay: 100ms;">
             
             <div class="col-span-2 bg-gradient-to-br from-accent-purple/80 to-accent-pink/80 p-6 rounded-xl text-white shadow-lg shadow-accent-purple/20">
-                <p class="text-sm font-medium text-purple-200">Total Balance</p>
-                <p id="overview-total-balance" class="text-5xl font-bold mt-2">${account?.lum_balance?.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 4 }) ?? '0.00'} $LUM</p>
+                <p class="text-sm font-medium text-purple-200">Total Earned (Lifetime)</p>
+                <p id="overview-total-balance" class="text-5xl font-bold mt-2">${account?.total_lum_earned?.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 4 }) ?? '0.00'} $LUM</p>
             </div>
 
             ${renderStatCard('Global Rank', rank ? rank.toLocaleString() : 'N/A')}
@@ -173,7 +225,7 @@ export function renderDashboardOverview(user, account, rank, allContributions) {
         </div>
 
         <div class="animate-fade-in-up" style="animation-delay: 300ms;">
-             ${renderWalletSection(account)}
+             ${renderWalletSection(account, user)}
         </div>
 
         <div class="animate-fade-in-up bg-surface p-6 rounded-xl border border-primary mt-6" style="animation-delay: 200ms;">
@@ -190,7 +242,5 @@ export function renderDashboardOverview(user, account, rank, allContributions) {
                 <div id="chart-message" class="hidden absolute inset-0 flex items-center justify-center text-text-secondary"></div>
             </div>
         </div>
-
-        
     `;
 }

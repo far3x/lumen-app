@@ -23,57 +23,91 @@ export const navigate = (path) => {
     handleLocation();
 }
 
+const renderFullPageLoader = () => {
+    return `
+        <div class="fixed inset-0 bg-background z-[100] flex flex-col items-center justify-center">
+            <img src="/logo.svg" alt="Lumen Logo" class="h-16 w-16 mb-6 animate-pulse">
+            <span class="animate-spin inline-block w-8 h-8 border-4 border-transparent border-t-accent-purple rounded-full"></span>
+            <p class="text-text-secondary mt-4 text-sm">Loading Lumen...</p>
+        </div>
+    `;
+};
+
+const renderContentLoader = () => {
+    return `<div class="flex-grow flex items-center justify-center min-h-[calc(100vh-200px)]"><span class="animate-spin inline-block w-8 h-8 border-4 border-transparent border-t-accent-purple rounded-full"></span></div>`;
+};
+
 const handleLocation = async () => {
     const path = window.location.pathname;
-
-    const redirectPath = localStorage.getItem('post_login_redirect');
-    if (isAuthenticated() && (path === '/login' || path === '/signup')) {
-        if (redirectPath) {
-            localStorage.removeItem('post_login_redirect');
-            navigate(redirectPath);
-        } else {
-            navigate('/app/dashboard');
-        }
-        return;
-    }
-
-    if (!isAuthenticated() && (path.startsWith('/app') || path.startsWith('/link'))) {
-        localStorage.setItem('post_login_redirect', path);
-        navigate('/login');
-        return;
-    }
-
-    let renderPromise;
-    if (path.startsWith('/docs/')) {
-        const pageId = path.split('/docs/')[1] || 'introduction';
-        renderPromise = import('./pages/docs/layout.js').then(m => m.renderDocsLayout(pageId));
-    } else {
-        const routeHandler = routes[path] || routes['/'];
-        renderPromise = routeHandler();
-    }
-    
     const fullScreenPages = ['/link', '/check-email', '/verify', '/forgot-password', '/reset-password'];
-    
-    // Show a loading indicator for smoother navigation
-    if (!fullScreenPages.includes(path)) {
-        app.innerHTML = renderNavbar(path) + `<div class="flex-grow flex items-center justify-center"><span class="animate-spin inline-block w-8 h-8 border-4 border-transparent border-t-accent-purple rounded-full"></span></div>` + renderFooter();
-    } else {
-        app.innerHTML = `<div class="flex-grow flex items-center justify-center min-h-screen"><span class="animate-spin inline-block w-8 h-8 border-4 border-transparent border-t-accent-purple rounded-full"></span></div>`;
-    }
+    let pageContentHTML = '';
 
     if (fullScreenPages.includes(path)) {
-        app.innerHTML = await renderPromise;
+        app.innerHTML = renderFullPageLoader();
     } else {
-        const pageContent = await renderPromise;
-        app.innerHTML = renderNavbar(path) + pageContent + renderFooter();
+        app.innerHTML = renderNavbar(path) + renderContentLoader() + renderFooter();
     }
-    
-    window.scrollTo(0, 0);
-    
-    requestAnimationFrame(() => {
-        attachNavEventListeners();
-        setupNavbarEventListeners();
-    });
+
+    try {
+        const redirectPath = localStorage.getItem('post_login_redirect');
+        if (isAuthenticated() && (path === '/login' || path === '/signup')) {
+            if (redirectPath) {
+                localStorage.removeItem('post_login_redirect');
+                navigate(redirectPath);
+            } else {
+                navigate('/app/dashboard');
+            }
+            return;
+        }
+
+        if (!isAuthenticated() && (path.startsWith('/app') || path.startsWith('/link'))) {
+            localStorage.setItem('post_login_redirect', path);
+            navigate('/login');
+            return;
+        }
+
+        let renderPromise;
+        if (path.startsWith('/docs/')) {
+            const pageId = path.split('/docs/')[1] || 'introduction';
+            renderPromise = import('./pages/docs/layout.js').then(m => m.renderDocsLayout(pageId));
+        } else {
+            const routeHandler = routes[path] || routes['/'];
+            if (typeof routeHandler !== 'function') {
+                console.error(`No route handler found for path: ${path}. Defaulting to home.`);
+                renderPromise = routes['/']();
+            } else {
+                renderPromise = routeHandler();
+            }
+        }
+        
+        pageContentHTML = await renderPromise;
+
+        if (fullScreenPages.includes(path)) {
+            app.innerHTML = pageContentHTML;
+        } else {
+            app.innerHTML = renderNavbar(path) + pageContentHTML + renderFooter();
+        }
+        
+        window.scrollTo(0, 0);
+        
+        requestAnimationFrame(() => {
+            attachNavEventListeners();
+            setupNavbarEventListeners();
+        });
+
+    } catch (error) {
+        console.error("Critical rendering error in handleLocation:", error);
+        app.innerHTML = `
+            ${!fullScreenPages.includes(path) ? renderNavbar(path) : ''}
+            <div class="flex-grow flex flex-col items-center justify-center text-center p-8 min-h-screen">
+                <h1 class="text-2xl font-bold text-red-400">Application Error</h1>
+                <p class="text-text-secondary mt-2">A critical error occurred while loading the page.</p>
+                <p class="mt-4 text-xs font-mono bg-primary p-4 rounded-lg text-red-300 w-full max-w-lg overflow-x-auto">${error.message || 'Unknown error'}</p>
+                <button onclick="location.reload()" class="mt-6 px-6 py-2 bg-accent-purple text-white font-bold rounded-lg">Refresh Page</button>
+            </div>
+            ${!fullScreenPages.includes(path) ? renderFooter() : ''}
+        `;
+    }
 };
 
 const attachNavEventListeners = () => {
@@ -126,22 +160,25 @@ export const initializeRouter = async () => {
     });
 
     walletService.on('disconnect', () => {
-        updateNavbarWalletState();
-        const disconnectEvent = new CustomEvent('walletUpdate');
-        document.dispatchEvent(disconnectEvent);
+        window.location.reload();
     });
 
-    await walletService.autoConnect();
+    walletService.autoConnect().catch(err => console.warn("Auto-connect failed:", err));
     
     try {
         if (isAuthenticated() && !getUser()) {
-            await fetchAndStoreUser();
+            fetchAndStoreUser().catch(err => {
+                console.error("Failed to fetch user on init, logging out:", err);
+                logout();
+                handleLocation();
+            });
         }
     } catch (error) {
-        console.error("Session invalid, clearing state.", error);
+        console.error("Initial auth check error:", error);
         logout();
     } finally {
         window.addEventListener('popstate', handleLocation);
+        
         document.body.addEventListener('click', (e) => {
             const link = e.target.closest('a[href]');
             if (link && !link.hasAttribute('data-external') && link.hostname === window.location.hostname) {

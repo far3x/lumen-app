@@ -1,0 +1,55 @@
+# frontend/.dockerignore
+
+# Node modules - these should be installed inside the container during build
+# or managed by a volume in development
+node_modules
+
+# Build output
+dist
+.output
+build
+
+# Vite specific cache
+.vite
+
+# Environment files that might contain secrets (if not handled by build args)
+# .env
+# .env.*
+# !.env.example 
+# (Uncomment .env lines if you are NOT passing env vars as build args for prod)
+
+# OS-specific files
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# IDE/Editor specific files
+.idea/
+.vscode/
+*.iml
+*.project
+*.classpath
+*.settings/
+
+# Log files
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+logs
+*.log
+
+# Git files
+.git
+.gitignore
+.gitattributes
+.gitmodules
+
+# Test reports
+coverage
+junit.xml
+*.html # If you have HTML test reports at the root
+
+# Temporary files
+*.tmp
+*.temp

@@ -1,7 +1,7 @@
 import axios from 'axios';
 import { navigate } from '../router.js';
+import { walletService } from './wallet.js';
 
-// Correctly constructs the API base URL from the environment variable
 const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000';
 
 export const api = axios.create({
@@ -59,6 +59,7 @@ export const login = (email, password) => {
 
 export const logout = async () => {
     try {
+        await walletService.disconnect();
         await api.post('/auth/logout');
     } catch (error) {
         console.error("Logout API call failed, clearing client-side data anyway.", error);
@@ -108,6 +109,11 @@ export const fetchLeaderboard = async () => {
 
 export const fetchContributions = async (page = 1, limit = 10) => {
     const response = await api.get(`/users/me/contributions?skip=${(page - 1) * limit}&limit=${limit}`);
+    return response.data;
+};
+
+export const fetchClaims = async (page = 1, limit = 10) => {
+    const response = await api.get(`/users/me/claims?skip=${(page - 1) * limit}&limit=${limit}`);
     return response.data;
 };
 
