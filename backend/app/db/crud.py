@@ -279,3 +279,7 @@ def get_user_claim_history(db: Session, user_id: int, skip: int = 0, limit: int 
     total_count = query.count()
     items = query.order_by(models.ClaimTransaction.created_at.desc()).offset(skip).limit(limit).all()
     return items, total_count
+
+def delete_user(db: Session, user: models.User):
+    db.delete(user)
+    db.commit()

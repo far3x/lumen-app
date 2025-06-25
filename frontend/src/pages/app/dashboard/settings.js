@@ -422,15 +422,48 @@ function renderBackupCodesModal(backupCodes) {
                 <strong>This is the only time you will see these codes.</strong> Store them somewhere extremely safe. If you lose your phone, these codes are the only way to get back into your account.
             </p>
             <div class="grid grid-cols-2 gap-3 my-6">${codesHtml}</div>
-            <p class="text-xs text-subtle mb-6">Each code can only be used once.</p>
-            <button id="backup-codes-close-btn" class="w-full flex justify-center py-3 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-gradient-to-r from-accent-purple to-accent-pink hover:opacity-90 transition-opacity">
-                I have saved my codes securely
+
+            <button id="save-backup-codes-txt" class="w-full mb-4 flex items-center justify-center gap-2 py-2.5 px-6 border border-subtle rounded-md text-sm font-medium text-text-main bg-primary hover:bg-subtle transition-colors">
+                <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" /></svg>
+                Save as .txt
+            </button>
+
+            <div class="my-4 p-4 bg-primary rounded-lg">
+                <label for="backup-codes-checkbox" class="flex items-center justify-center cursor-pointer">
+                    <input type="checkbox" id="backup-codes-checkbox" class="h-4 w-4 rounded bg-surface border-subtle text-accent-purple focus:ring-accent-purple focus:ring-offset-surface">
+                    <span class="ml-3 text-sm text-text-secondary">I have securely saved my backup codes.</span>
+                </label>
+            </div>
+
+            <button id="backup-codes-close-btn" class="w-full flex justify-center py-3 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-gradient-to-r from-accent-purple to-accent-pink transition-opacity disabled:opacity-50 disabled:cursor-not-allowed" disabled>
+                Done
             </button>
         </div>
     `;
 
     const { closeModal } = renderModal('Your Backup Codes', content);
-    document.getElementById('backup-codes-close-btn').addEventListener('click', closeModal);
+
+    const saveButton = document.getElementById('save-backup-codes-txt');
+    saveButton.addEventListener('click', () => {
+        const textContent = `Lumen Protocol Backup Codes\n\nGenerated: ${new Date().toISOString()}\n\nStore these codes securely. Each code can only be used once.\n\n` + backupCodes.join('\n');
+        const blob = new Blob([textContent], { type: 'text/plain' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = 'lumen-backup-codes.txt';
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+    });
+
+    const checkbox = document.getElementById('backup-codes-checkbox');
+    const closeButton = document.getElementById('backup-codes-close-btn');
+    checkbox.addEventListener('change', () => {
+        closeButton.disabled = !checkbox.checked;
+    });
+
+    closeButton.addEventListener('click', closeModal);
 }
 
 async function handleEnable2FASubmit(e, setupKey, dashboardState) {
@@ -511,12 +544,129 @@ async function show2FASetupModal(dashboardState) {
     }
 }
 
+async function handleDeleteAccount(user) {
+    const confirmationPhrase = "DELETE MY ACCOUNT";
+    
+    let modalContent = `
+        <div>
+            <p class="text-text-secondary mb-4">This action is irreversible. Please review the consequences carefully:</p>
+            <ul class="list-disc list-inside space-y-2 text-sm text-text-secondary bg-primary p-4 rounded-lg mb-4">
+                <li>Your email, display name, and social account links will be permanently deleted.</li>
+                <li>Your account balance and rewards will be forfeited.</li>
+                <li>All login sessions and access tokens will be invalidated.</li>
+                <li>Your past contributions will be retained but fully dissociated from you. To request deletion of contribution data, you must contact <a href="mailto:support@lumen.exchange" class="text-accent-cyan hover:underline">support@lumen.exchange</a>.</li>
+            </ul>
+            <div id="delete-account-message" class="hidden text-sm p-3 rounded-md bg-red-900/50 text-red-300 my-4 text-center"></div>
+    `;
 
-export function attachSettingsPageListeners(dashboardState) {
+    if (user.has_password) {
+        modalContent += `
+            <form id="delete-account-form">
+                <div class="mb-4">
+                    <label for="delete-password" class="block text-sm font-medium text-text-secondary mb-1">Confirm with your password</label>
+                    <input type="password" id="delete-password" required class="w-full bg-primary border border-subtle rounded-md px-3 py-2 text-text-main focus:ring-2 focus:ring-accent-purple focus:outline-none">
+                </div>
+                <label for="delete-confirmation" class="block text-sm font-medium text-text-secondary mb-1">To confirm, type "<strong class="text-text-main">${confirmationPhrase}</strong>" in the box below.</label>
+                <input type="text" id="delete-confirmation" required autocomplete="off" class="w-full bg-primary border border-subtle rounded-md px-3 py-2 text-text-main focus:ring-2 focus:ring-accent-purple focus:outline-none">
+                <button type="submit" id="final-delete-btn" class="mt-6 w-full flex justify-center py-3 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-red-800 hover:bg-red-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed">
+                    Permanently Delete My Account
+                </button>
+            </form>
+        </div>`;
+    } else {
+        modalContent += `
+            <p class="text-center text-text-secondary">Because you use a social login, we must verify your identity by sending a confirmation link to your registered email address.</p>
+            <button id="send-deletion-link-btn" class="mt-6 w-full flex justify-center py-3 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-red-800 hover:bg-red-700 transition-colors">
+                Send Deletion Email
+            </button>
+        </div>
+        `;
+    }
+
+    const { modalId, closeModal } = renderModal('Are you absolutely sure?', modalContent);
+    const modalBody = document.getElementById(`modal-body-${modalId}`);
+
+    if (user.has_password) {
+        const form = document.getElementById('delete-account-form');
+        const confirmInput = document.getElementById('delete-confirmation');
+        const deleteBtn = document.getElementById('final-delete-btn');
+        const msgEl = document.getElementById('delete-account-message');
+
+        const validateForm = () => {
+            deleteBtn.disabled = confirmInput.value !== confirmationPhrase;
+        };
+        confirmInput.addEventListener('input', validateForm);
+        validateForm();
+
+        form.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            deleteBtn.disabled = true;
+            deleteBtn.innerHTML = `<span class="animate-spin inline-block w-5 h-5 border-2 border-transparent border-t-white rounded-full"></span> Deleting...`;
+            if (msgEl) msgEl.classList.add('hidden');
+            try {
+                const password = document.getElementById('delete-password').value;
+                await api.delete('/users/me', { data: { password } });
+
+                if (modalBody) {
+                    modalBody.innerHTML = `
+                        <div class="text-center transition-all animate-fade-in-up">
+                            <h3 class="font-bold text-lg text-green-300">Account Deleted</h3>
+                            <p class="text-text-secondary mt-2">You will be logged out and redirected shortly.</p>
+                        </div>
+                    `;
+                }
+
+                setTimeout(async () => {
+                    await logout();
+                }, 2000);
+            } catch (error) {
+                deleteBtn.disabled = false;
+                deleteBtn.innerHTML = 'Permanently Delete My Account';
+                if (msgEl) {
+                    msgEl.textContent = error.response?.data?.detail || 'An error occurred during deletion.';
+                    msgEl.classList.remove('hidden');
+                }
+            }
+        });
+    } else {
+        const sendLinkBtn = document.getElementById('send-deletion-link-btn');
+        sendLinkBtn.addEventListener('click', async () => {
+            sendLinkBtn.disabled = true;
+            sendLinkBtn.innerHTML = `<span class="animate-spin inline-block w-5 h-5 border-2 border-transparent border-t-white rounded-full"></span> Sending...`;
+
+            try {
+                await api.post('/users/me/request-deletion');
+                if (modalBody) {
+                    modalBody.innerHTML = `
+                        <div class="text-center">
+                            <h3 class="font-bold text-lg text-green-300">Email Sent!</h3>
+                            <p class="text-text-secondary mt-2">Please check your inbox and click the link to finalize your account deletion.</p>
+                        </div>
+                    `;
+                }
+            } catch (error) {
+                sendLinkBtn.disabled = false;
+                sendLinkBtn.innerHTML = 'Send Deletion Email';
+                const msgEl = document.getElementById('delete-account-message');
+                if (msgEl) {
+                    msgEl.textContent = error.response?.data?.detail || 'Failed to send email.';
+                    msgEl.classList.remove('hidden');
+                }
+            }
+        });
+    }
+}
+
+function attachDeleteAccountListeners(user) {
+    document.getElementById('delete-account-btn')?.addEventListener('click', () => handleDeleteAccount(user));
+}
+
+export async function attachSettingsPageListeners(dashboardState) {
     document.getElementById('profile-settings-form')?.addEventListener('submit', (e) => handleProfileSettingsSubmit(e, dashboardState));
     document.getElementById('change-password-form')?.addEventListener('submit', handleChangePasswordSubmit);
     document.getElementById('enable-2fa-btn')?.addEventListener('click', () => show2FASetupModal(dashboardState));
     document.getElementById('disable-2fa-form')?.addEventListener('submit', (e) => handleDisable2FASubmit(e, dashboardState));
+    attachDeleteAccountListeners(dashboardState.user);
     
     document.querySelectorAll('.link-oauth-btn').forEach(button => {
         button.addEventListener('click', (e) => {
@@ -580,6 +730,116 @@ export function attachSettingsPageListeners(dashboardState) {
     document.addEventListener('walletUpdate', refreshWalletCard);
     
     refreshWalletCard();
+
+    document.getElementById('request-disable-2fa-link-btn')?.addEventListener('click', async (e) => {
+        const btnEl = e.currentTarget;
+        const msgEl = document.getElementById('disable-2fa-message');
+
+        btnEl.disabled = true;
+        btnEl.innerHTML = `<span class="animate-spin inline-block w-5 h-5 border-2 border-transparent border-t-white rounded-full"></span> Sending...`;
+        if (msgEl) msgEl.classList.add('hidden');
+        
+        try {
+            await api.post('/security/2fa/request-disable');
+            if (msgEl) {
+                msgEl.textContent = 'Disable link sent! Please check your email.';
+                msgEl.className = 'block text-sm p-3 rounded-md bg-green-900/50 text-green-300 mt-4 text-center';
+                msgEl.classList.remove('hidden');
+            }
+            btnEl.classList.add('hidden');
+        } catch (error) {
+            if (msgEl) {
+                msgEl.textContent = error.response?.data?.detail || 'Failed to send disable link.';
+                msgEl.className = 'block text-sm p-3 rounded-md bg-red-900/50 text-red-300 mt-4 text-center';
+                msgEl.classList.remove('hidden');
+            }
+            btnEl.disabled = false;
+            btnEl.innerHTML = 'Send Disable Link to Email';
+        }
+    });
+
+    const action = params.get('action');
+    const token = params.get('token');
+
+    if (action === 'disable-2fa' && token) {
+        const newUrl = new URL(window.location);
+        newUrl.searchParams.delete('action');
+        newUrl.searchParams.delete('token');
+        window.history.replaceState({}, '', newUrl);
+
+        const { modalId, closeModal } = renderModal('Disabling 2FA', `<div class="text-center p-8"><span class="animate-spin inline-block w-8 h-8 border-4 border-transparent border-t-accent-purple rounded-full"></span><p class="mt-4 text-text-secondary">Processing your request...</p></div>`);
+        const modalBody = document.getElementById(`modal-body-${modalId}`);
+
+        try {
+            await api.post('/security/2fa/confirm-disable', { token });
+            const user = await fetchAndStoreUser();
+            if (dashboardState) dashboardState.user = user;
+
+            if(modalBody) {
+                modalBody.innerHTML = `<div class="text-center transition-all animate-fade-in-up">
+                    <div class="w-16 h-16 mx-auto mb-4 bg-green-900/50 text-green-300 rounded-full flex items-center justify-center">
+                        <svg class="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+                    </div>
+                    <h3 class="font-bold text-lg text-text-main">2FA Disabled</h3>
+                    <p class="text-text-secondary mt-2">Two-Factor Authentication has been successfully disabled for your account.</p>
+                </div>`;
+            }
+
+            const twoFactorCard = document.getElementById('2fa-card');
+            if (twoFactorCard && user) {
+                twoFactorCard.innerHTML = render2FACardContent(user);
+                document.getElementById('enable-2fa-btn')?.addEventListener('click', () => show2FASetupModal(dashboardState));
+            }
+             setTimeout(closeModal, 3000);
+
+        } catch (error) {
+            if(modalBody) {
+                const errorMessage = error.response?.data?.detail || 'An unknown error occurred.';
+                modalBody.innerHTML = `<div class="text-center transition-all animate-fade-in-up">
+                    <div class="w-16 h-16 mx-auto mb-4 bg-red-900/50 text-red-300 rounded-full flex items-center justify-center">
+                        <svg class="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                    </div>
+                    <h3 class="font-bold text-lg text-text-main">Disable Failed</h3>
+                    <p class="text-text-secondary mt-2">${errorMessage}</p>
+                </div>`;
+            }
+            setTimeout(closeModal, 4000);
+        }
+    }
+
+    if (action === 'confirm-delete' && token) {
+        const newUrl = new URL(window.location);
+        newUrl.searchParams.delete('action');
+        newUrl.searchParams.delete('token');
+        window.history.replaceState({}, '', newUrl);
+
+        const { modalId } = renderModal('Confirming Deletion', `<div class="text-center p-8"><span class="animate-spin inline-block w-8 h-8 border-4 border-transparent border-t-accent-purple rounded-full"></span><p class="mt-4 text-text-secondary">Processing your account deletion...</p></div>`);
+        const modalBody = document.getElementById(`modal-body-${modalId}`);
+        try {
+            await api.delete('/users/me', { data: { token } });
+
+            if (modalBody) {
+                modalBody.innerHTML = `
+                    <div class="text-center transition-all animate-fade-in-up">
+                        <h3 class="font-bold text-lg text-green-300">Account Deleted</h3>
+                        <p class="text-text-secondary mt-2">You have been logged out. Redirecting now...</p>
+                    </div>
+                `;
+            }
+            
+            setTimeout(async () => {
+                await logout();
+            }, 2000);
+        } catch (error) {
+            if (modalBody) {
+                const errorMessage = error.response?.data?.detail || 'An unknown error occurred.';
+                modalBody.innerHTML = `<div class="text-center transition-all animate-fade-in-up">
+                    <h3 class="font-bold text-lg text-red-300">Deletion Failed</h3>
+                    <p class="text-text-secondary mt-2">${errorMessage}</p>
+                </div>`;
+            }
+        }
+    }
 }
 
 function render2FACardContent(user) {
@@ -591,17 +851,24 @@ function render2FACardContent(user) {
             <div class="mt-2 flex-grow flex flex-col justify-center">
             ${user.is_two_factor_enabled ? `
                 <p class="text-sm text-green-400">2FA is currently <strong>enabled</strong> on your account.</p>
-                <form id="disable-2fa-form" class="mt-4">
-                    <p class="text-xs text-text-secondary mb-2">To disable 2FA, please enter your password.</p>
-                    <div class="flex items-start gap-4">
-                        <div class="flex-grow">
-                            <input type="password" id="disable-2fa-password" required placeholder="Current Password" class="w-full bg-primary border border-subtle rounded-md px-3 py-2 text-text-main focus:ring-2 focus:ring-accent-purple focus:outline-none ${!hasPasswordAuth ? 'opacity-50 cursor-not-allowed' : ''}" ${!hasPasswordAuth ? 'disabled' : ''}>
-                            <div id="disable-2fa-message" class="hidden mt-2 text-sm text-center"></div>
+                ${hasPasswordAuth ? `
+                    <form id="disable-2fa-form" class="mt-4">
+                        <p class="text-xs text-text-secondary mb-2">To disable 2FA, please enter your password.</p>
+                        <div class="flex items-start gap-4">
+                            <div class="flex-grow">
+                                <input type="password" id="disable-2fa-password" required placeholder="Current Password" class="w-full bg-primary border border-subtle rounded-md px-3 py-2 text-text-main focus:ring-2 focus:ring-accent-purple focus:outline-none">
+                                <div id="disable-2fa-message" class="hidden mt-2 text-sm text-center"></div>
+                            </div>
+                            <button type="submit" class="py-2 px-4 text-sm font-medium text-red-400 bg-red-900/30 hover:bg-red-900/60 rounded-md transition-colors">Disable 2FA</button>
                         </div>
-                        <button type="submit" class="py-2 px-4 text-sm font-medium text-red-400 bg-red-900/30 hover:bg-red-900/60 rounded-md transition-colors ${!hasPasswordAuth ? 'opacity-50 cursor-not-allowed' : ''}" ${!hasPasswordAuth ? 'disabled' : ''}>Disable 2FA</button>
-                    </div>
-                     ${!hasPasswordAuth ? `<p class="text-xs text-yellow-400 mt-2">Password required. Cannot disable 2FA for accounts without a password.</p>` : ''}
-                </form>
+                    </form>
+                ` : `
+                    <p class="text-sm text-text-secondary mt-4">To disable 2FA for a passwordless account, we need to send a confirmation link to your registered email.</p>
+                    <button id="request-disable-2fa-link-btn" class="mt-4 w-full flex justify-center py-2.5 px-6 border border-subtle rounded-md text-sm font-medium text-text-main bg-primary hover:bg-subtle transition-colors">
+                        Send Disable Link to Email
+                    </button>
+                    <div id="disable-2fa-message" class="hidden mt-2 text-sm text-center"></div>
+                `}
             ` : `
                 <p class="text-sm text-text-secondary">Add an extra layer of security to your account using an authenticator app.</p>
                 <button id="enable-2fa-btn" class="mt-4 w-full flex justify-center py-2.5 px-6 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-gradient-to-r from-accent-purple to-accent-pink hover:opacity-90 transition-opacity">
@@ -643,6 +910,18 @@ function renderLinkedAccountsCard(user) {
                     }
                 </div>
             </div>
+        </div>
+    `;
+}
+
+function renderDeleteAccountCard() {
+    return `
+        <div class="bg-red-900/20 border border-red-500/30 rounded-xl p-6">
+            <h3 class="font-bold text-lg text-red-300">Danger Zone</h3>
+            <p class="text-sm text-red-400/80 mt-1 mb-4">Be careful, these actions are permanent.</p>
+            <button id="delete-account-btn" class="w-full text-center py-2.5 px-6 border border-red-500/50 rounded-md text-sm font-medium text-red-300 bg-red-900/30 hover:bg-red-900/60 transition-colors">
+                Delete Account
+            </button>
         </div>
     `;
 }
@@ -694,8 +973,12 @@ export function renderSettingsPage(user) {
                     </div>
                 </form>
                 
-                 <div class="bg-surface border border-primary rounded-xl flex flex-col flex-1">
+                <div class="bg-surface border border-primary rounded-xl flex flex-col flex-1">
                     ${renderLinkedAccountsCard(user)}
+                </div>
+
+                <div id="danger-zone-card">
+                    ${renderDeleteAccountCard()}
                 </div>
             </div>
 

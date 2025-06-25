@@ -79,6 +79,10 @@ class ApproveDeviceRequest(BaseModel):
     user_code: str
     device_name: Optional[str] = "Lumen CLI"
 
+class UserDeletePayload(BaseModel):
+    password: Optional[str] = None
+    token: Optional[str] = None
+
 class Account(BaseModel):
     lum_balance: float
     total_lum_earned: float

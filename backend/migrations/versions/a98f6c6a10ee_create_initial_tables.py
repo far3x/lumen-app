@@ -38,10 +38,13 @@ def upgrade() -> None:
         sa.Column('is_two_factor_enabled', sa.Boolean(), nullable=False, server_default=sa.text('false')),
         sa.Column('two_factor_secret', sa.String(), nullable=True),
         sa.Column('two_factor_backup_codes', sa.Text(), nullable=True),
+        sa.Column('two_factor_disable_token', sa.String(), nullable=True),
+        sa.Column('two_factor_disable_expires', sa.Float(), nullable=True),
         sa.Column('created_at', sa.DateTime(timezone=True), server_default=sa.text('now()'), nullable=True),
         sa.PrimaryKeyConstraint('id'),
         sa.UniqueConstraint('github_id'),
-        sa.UniqueConstraint('google_id')
+        sa.UniqueConstraint('google_id'),
+        sa.UniqueConstraint('two_factor_disable_token')
     )
     op.create_index(op.f('ix_users_email'), 'users', ['email'], unique=True)
     op.create_index(op.f('ix_users_id'), 'users', ['id'], unique=False)

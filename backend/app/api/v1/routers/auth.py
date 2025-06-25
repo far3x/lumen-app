@@ -88,7 +88,8 @@ async def register_user(request: Request, user: UserCreate, background_tasks: Ba
         template_body = {
             "login_link": login_link,
             "reset_password_link": reset_password_link,
-            "year": datetime.now().year
+            "year": datetime.now().year,
+            "logo_url": config.settings.PUBLIC_LOGO_URL
         }
         message = MessageSchema(
             subject="Lumen Protocol: Sign-up Attempt",
@@ -104,7 +105,8 @@ async def register_user(request: Request, user: UserCreate, background_tasks: Ba
         
         template_body = {
             "verification_link": verification_link,
-            "year": datetime.now().year
+            "year": datetime.now().year,
+            "logo_url": config.settings.PUBLIC_LOGO_URL
         }
         message = MessageSchema(
             subject="Lumen Protocol: Verify Your Email",
@@ -165,7 +167,8 @@ async def forgot_password(request: Request, payload: ForgotPasswordRequest, back
         
         template_body = {
             "reset_link": reset_link,
-            "year": datetime.now().year
+            "year": datetime.now().year,
+            "logo_url": config.settings.PUBLIC_LOGO_URL
         }
 
         message = MessageSchema(
@@ -359,6 +362,14 @@ async def auth_callback(request: Request, provider: str, db: Session = Depends(d
     if not user:
         user = crud.create_oauth_user(db, provider, user_info)
     
+    if user.is_two_factor_enabled:
+        tfa_token_expires = timedelta(minutes=5)
+        tfa_token = security.create_access_token(
+            data={"sub": f"tfa:{user.id}"}, expires_delta=tfa_token_expires
+        )
+        tfa_redirect_url = f"{config.settings.FRONTEND_URL}/2fa-verify?token={tfa_token}"
+        return RedirectResponse(url=tfa_redirect_url)
+
     access_token_expires = timedelta(minutes=config.settings.ACCESS_TOKEN_EXPIRE_MINUTES)
     access_token = security.create_access_token(data={"sub": str(user.id)}, expires_delta=access_token_expires)
     
