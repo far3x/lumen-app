@@ -1,6 +1,7 @@
 import secrets
 import hashlib
-from fastapi import APIRouter, Depends, HTTPException, BackgroundTasks, status, Request
+import tiktoken
+from fastapi import APIRouter, Depends, HTTPException, status, Request
 from sqlalchemy.orm import Session
 from app.core import config
 from app.db import database, crud, models
@@ -36,9 +37,9 @@ def get_user_id_from_pat_for_rate_limit(request: Request) -> str:
     
     return request.client.host
 
-
 @router.post("/device-auth", response_model=DeviceAuthResponse)
-async def cli_device_auth():
+@limiter.limit("10/minute")
+async def cli_device_auth(request: Request):
     user_code = "".join(secrets.choice("BCDFGHJKLMNPQRSTVWXYZ") for _ in range(8))
     user_code = f"{user_code[:4]}-{user_code[4:]}"
     device_code = secrets.token_urlsafe(32)
@@ -56,23 +57,10 @@ async def cli_device_auth():
         interval=5
     )
 
-@router.post("/token", response_model=Token)
-async def cli_token(device_code: str):
-    device_code_key = f"device_flow:device_code:{device_code}"
-    pat = redis_service.get(device_code_key)
-
-    if not pat:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail="Authorization pending, code expired, or invalid device code."
-        )
-    
-    redis_service.delete(device_code_key)
-
-    return Token(access_token=pat, token_type="bearer")
-
 @router.post("/handshake", response_model=str)
+@limiter.limit("60/minute", key_func=get_user_id_from_pat_for_rate_limit)
 async def cli_handshake(
+    request: Request,
     current_user: models.User = Depends(dependencies.get_current_user_from_pat)
 ):
     challenge = secrets.token_hex(16)
@@ -80,11 +68,13 @@ async def cli_handshake(
     redis_service.set_with_ttl(challenge_key, challenge, ttl_seconds=60)
     return challenge
 
-@router.post(
-    "/contribute",
-    status_code=status.HTTP_202_ACCEPTED
-)
-@limiter.limit("100/day", key_func=get_user_id_from_pat_for_rate_limit)
+try:
+    tokenizer = tiktoken.get_encoding("cl100k_base")
+except Exception:
+    tokenizer = None
+
+@router.post("/contribute", status_code=status.HTTP_202_ACCEPTED)
+@limiter.limit("5/day", key_func=get_user_id_from_pat_for_rate_limit)
 async def contribute_data(
     request: Request,
     payload: ContributionCreate,
@@ -94,6 +84,14 @@ async def contribute_data(
 ):
     challenge_key = f"challenge:{current_user.id}"
     redis_service.delete(challenge_key)
+
+    if tokenizer:
+        token_count = len(tokenizer.encode(payload.codebase))
+        if token_count > 700_000:
+            raise HTTPException(
+                status_code=status.HTTP_413_REQUEST_ENTITY_TOO_LARGE,
+                detail=f"Payload is too large. The request is not allowed."
+            )
     
     new_contribution = crud.create_contribution_record(
         db, 
@@ -105,14 +103,14 @@ async def contribute_data(
         initial_status="PENDING"
     )
     
-    task = process_contribution.delay(current_user.id, payload.codebase, new_contribution.id)
-    redis_service.set_with_ttl(f"task_status:{task.id}", "PENDING", 3600)
-    redis_service.set_with_ttl(f"contribution_task_map:{new_contribution.id}", task.id, 3600)
+    process_contribution.delay(current_user.id, payload.codebase, new_contribution.id)
 
-    return {"message": "Contribution received and is being processed.", "contribution_id": new_contribution.id, "task_id": task.id}
+    return {"message": "Contribution received and is being processed.", "contribution_id": new_contribution.id}
 
 @router.get("/contributions/{contribution_id}/status", response_model=ContributionStatus)
+@limiter.limit("30/minute", key_func=get_user_id_from_pat_for_rate_limit)
 async def get_contribution_status(
+    request: Request,
     contribution_id: int,
     db: Session = Depends(database.get_db)
 ):
@@ -120,16 +118,6 @@ async def get_contribution_status(
     if not contribution:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Contribution not found.")
     
-    task_id = redis_service.get(f"contribution_task_map:{contribution_id}")
-    if task_id:
-        celery_task_status = redis_service.get(f"task_status:{task_id}")
-        if celery_task_status:
-            return ContributionStatus(
-                status=celery_task_status,
-                contribution_id=contribution_id,
-                message=f"Processing status: {celery_task_status}"
-            )
-
     return ContributionStatus(
         status=contribution.status,
         contribution_id=contribution_id,
@@ -137,7 +125,7 @@ async def get_contribution_status(
     )
 
 @router.get("/contributions/history", response_model=List[ContributionCliResponse])
-@limiter.limit("20/minute", key_func=get_user_id_from_pat_for_rate_limit)
+@limiter.limit("30/minute", key_func=get_user_id_from_pat_for_rate_limit)
 async def get_contribution_history(
     request: Request,
     current_user: models.User = Depends(dependencies.get_current_user_from_pat),

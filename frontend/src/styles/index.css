@@ -35,6 +35,12 @@
   }
 }
 
+@layer base {
+    .animate-fade-in-up {
+        opacity: 0;
+    }
+}
+
 @font-face {
     font-family: 'Satoshi';
     src: url('/fonts/Satoshi-Variable.woff2') format('woff2');

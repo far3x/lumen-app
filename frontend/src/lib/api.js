@@ -1,16 +1,32 @@
 import axios from 'axios';
-import { getToken } from './auth.js';
+import FingerprintJS from '@fingerprintjs/fingerprintjs';
 
 const api = axios.create({
   baseURL: import.meta.env.VITE_API_URL || 'http://localhost:8000',
+  withCredentials: true,
 });
 
-api.interceptors.request.use((config) => {
-  const token = getToken();
-  if (token) {
-    config.headers.Authorization = `Bearer ${token}`;
+const getVisitorId = async () => {
+  try {
+    const fp = await FingerprintJS.load();
+    const result = await fp.get();
+    return result.visitorId;
+  } catch (error) {
+    console.error('FingerprintJS error:', error);
+    return 'fingerprint_unavailable';
+  }
+};
+
+let visitorIdPromise = getVisitorId();
+
+api.interceptors.request.use(async (config) => {
+  const visitorId = await visitorIdPromise;
+  if (visitorId) {
+    config.headers['X-Visitor-ID'] = visitorId;
   }
   return config;
+}, (error) => {
+  return Promise.reject(error);
 });
 
 export default api;

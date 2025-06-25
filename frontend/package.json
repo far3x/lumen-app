@@ -16,6 +16,7 @@
     "vite": "^5.2.0"
   },
   "dependencies": {
+    "@fingerprintjs/fingerprintjs": "^4.4.1",
     "@solana/wallet-adapter-base": "^0.9.27",
     "@solana/wallet-adapter-phantom": "^0.9.28",
     "@solana/web3.js": "^1.98.2",

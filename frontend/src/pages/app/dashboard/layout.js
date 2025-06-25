@@ -1,4 +1,4 @@
-import { getUser, getAccount, fetchLeaderboard, fetchContributions, fetchRecentContributions, logout, fetchAndStoreUser, fetchAndStoreAccount, isAuthenticated, fetchClaims, api as authApi } from '../../../lib/auth.js';
+import { getUser, getAccount, fetchLeaderboard, fetchContributions, fetchRecentContributions, logout, fetchAndStoreUser, fetchAndStoreAccount, isAuthenticated, fetchClaims, api as authApi, fetchAllContributions, setAccount } from '../../../lib/auth.js';
 import { updateBalancesInUI, renderModal } from './utils.js';
 import { navigate } from '../../../router.js';
 import { renderDashboardOverview, initializeChart, attachChartButtonListeners } from './overview.js';
@@ -8,12 +8,13 @@ import { renderReferralPage, handleReferralNotifyClick } from './referral.js';
 import { renderSettingsPage, attachSettingsPageListeners } from './settings.js';
 import { icons } from './utils.js';
 
-let balancePoller = null;
+let userWebSocket = null;
 let dashboardState = {
     user: null,
     account: null,
     userRank: null,
     allContributions: [],
+    chartContributions: [],
     recentContributions: [],
     allClaims: [],
 };
@@ -86,7 +87,6 @@ async function handleClaim(claimButton, user) {
         const response = await authApi.post('/rewards/claim');
         await fetchAndStoreAccount();
         dashboardState.account = getAccount();
-        updateBalancesInUI();
 
         const txLink = `https://solscan.io/tx/${response.data.transaction_hash}?cluster=devnet`;
         const modalContent = `
@@ -100,8 +100,6 @@ async function handleClaim(claimButton, user) {
             </div>
         `;
         renderModal('Rewards Claimed', modalContent);
-        claimButton.disabled = false;
-        claimButton.innerHTML = 'Claim Rewards';
 
     } catch (error) {
         const errorMessage = error.response?.data?.detail || "An unknown error occurred.";
@@ -115,8 +113,96 @@ async function handleClaim(claimButton, user) {
             </div>
         `;
         renderModal('Error', errorContent);
-        claimButton.disabled = false;
-        claimButton.innerHTML = 'Claim Rewards';
+    } finally {
+        updateBalancesInUI();
+    }
+}
+
+async function refreshDashboardData(isInitialLoad = false) {
+    const dashboardContentArea = document.getElementById('dashboard-content-area');
+
+    if (isInitialLoad) {
+        dashboardContentArea.innerHTML = `<div class="flex justify-center items-center h-64"><span class="animate-spin inline-block w-8 h-8 border-4 border-transparent border-t-accent-purple rounded-full"></span><p class="ml-4 text-text-secondary">Loading dashboard data...</p></div>`;
+    }
+
+    try {
+        const results = await Promise.allSettled([
+            fetchAndStoreAccount(),
+            fetchLeaderboard(),
+            fetchContributions(1, 10),
+            fetchRecentContributions(),
+            fetchClaims(1, 10),
+            fetchAllContributions()
+        ]);
+
+        dashboardState.account = results[0].status === 'fulfilled' ? results[0].value : getAccount();
+        dashboardState.userRank = results[1].status === 'fulfilled' ? results[1].value.current_user_rank : null;
+        
+        if (results[2].status === 'fulfilled') {
+            dashboardState.allContributions = results[2].value.items;
+            contributionsState.totalContributions = results[2].value.total;
+            contributionsState.isLastPage = (contributionsState.currentPage * 10) >= results[2].value.total;
+        }
+
+        dashboardState.recentContributions = results[3].status === 'fulfilled' ? results[3].value : [];
+        dashboardState.allClaims = results[4].status === 'fulfilled' ? results[4].value.items : [];
+        dashboardState.chartContributions = results[5].status === 'fulfilled' ? results[5].value : [];
+
+        const urlParams = new URLSearchParams(window.location.search);
+        const currentTabId = urlParams.get('tab') || 'overview';
+        loadContent(currentTabId);
+        updateBalancesInUI();
+
+    } catch (error) {
+        console.error("Dashboard data refresh failed:", error);
+        if (dashboardContentArea) {
+            dashboardContentArea.innerHTML = `<div class="text-center p-8 text-red-400">Could not refresh dashboard data. Some features might be unavailable.</div>`;
+        }
+    }
+}
+
+function connectUserWebSocket() {
+    if (userWebSocket && userWebSocket.readyState === WebSocket.OPEN) {
+        return;
+    }
+
+    const wsProtocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+    const wsUrl = `${wsProtocol}//${window.location.host}/ws/user/updates`;
+    
+    userWebSocket = new WebSocket(wsUrl);
+
+    userWebSocket.onopen = () => console.log("User WebSocket connected.");
+
+    userWebSocket.onmessage = (event) => {
+        const data = JSON.parse(event.data);
+        if (data.type === 'contribution_update') {
+            const contributionPayload = data.payload.contribution;
+            
+            const eventDetail = { detail: contributionPayload };
+            document.dispatchEvent(new CustomEvent('contributionUpdate', eventDetail));
+
+            if (contributionPayload.status === 'PROCESSED') {
+                refreshDashboardData();
+            }
+        }
+    };
+
+    userWebSocket.onclose = () => {
+        console.log("User WebSocket disconnected. Attempting to reconnect...");
+        setTimeout(connectUserWebSocket, 5000);
+    };
+
+    userWebSocket.onerror = (error) => {
+        console.error("User WebSocket error:", error);
+        userWebSocket.close();
+    };
+}
+
+function disconnectUserWebSocket() {
+    if (userWebSocket) {
+        userWebSocket.onclose = null;
+        userWebSocket.close();
+        userWebSocket = null;
     }
 }
 
@@ -136,13 +222,13 @@ function loadContent(tabId) {
 
     switch (activeTabForRender) {
         case 'overview':
-            contentHTML = renderDashboardOverview(dashboardState.user, dashboardState.account, dashboardState.userRank?.rank, dashboardState.allContributions);
+            contentHTML = renderDashboardOverview(dashboardState.user, dashboardState.account, dashboardState.userRank?.rank, contributionsState.totalContributions);
             break;
         case 'my-contributions':
             contentHTML = renderMyContributionsPage(dashboardState.allContributions);
             break;
         case 'network-feed':
-            contentHTML = renderRecentActivityPage(dashboardState.recentContributions, dashboardState.allClaims);
+            contentHTML = renderRecentActivityPage(dashboardState.allContributions, dashboardState.allClaims);
             break;
         case 'referral':
             contentHTML = renderReferralPage();
@@ -153,22 +239,23 @@ function loadContent(tabId) {
         default:
             const defaultTab = 'overview';
             window.history.replaceState({}, '', `?tab=${defaultTab}`);
-            contentHTML = renderDashboardOverview(dashboardState.user, dashboardState.account, dashboardState.userRank?.rank, dashboardState.allContributions);
+            contentHTML = renderDashboardOverview(dashboardState.user, dashboardState.account, dashboardState.userRank?.rank, contributionsState.totalContributions);
     }
     dashboardContentArea.innerHTML = contentHTML;
     
     if (activeTabForRender === 'overview') {
-        initializeChart(dashboardState.allContributions, activeTimeRange);
-        attachChartButtonListeners(dashboardState.allContributions, (newRange) => {
+        initializeChart(dashboardState.chartContributions, activeTimeRange);
+        attachChartButtonListeners(dashboardState.chartContributions, (newRange) => {
             activeTimeRange = newRange;
-            initializeChart(dashboardState.allContributions, newRange);
+            initializeChart(dashboardState.chartContributions, newRange);
         });
         const claimButton = document.getElementById('claim-rewards-btn');
         if (claimButton) {
             claimButton.addEventListener('click', () => handleClaim(claimButton, dashboardState.user));
         }
+        updateBalancesInUI();
     }
-    if (activeTabForRender === 'my-contributions') attachContributionPageListeners(dashboardState.allContributions);
+    if (activeTabForRender === 'my-contributions') attachContributionPageListeners(dashboardState);
     if (activeTabForRender === 'settings') attachSettingsPageListeners(dashboardState);
     if (activeTabForRender === 'referral') document.getElementById('notify-referral-btn')?.addEventListener('click', handleReferralNotifyClick);
 }
@@ -224,42 +311,9 @@ async function setupDashboard() {
         document.querySelectorAll('.navbar-user-display-name').forEach(el => el.textContent = user.display_name ?? 'User');
         if (account) updateBalancesInUI();
 
-        dashboardContentArea.innerHTML = `<div class="flex justify-center items-center h-64"><span class="animate-spin inline-block w-8 h-8 border-4 border-transparent border-t-accent-purple rounded-full"></span><p class="ml-4 text-text-secondary">Loading dashboard data...</p></div>`;
+        await refreshDashboardData(true);
 
-        const results = await Promise.allSettled([
-            fetchLeaderboard(),
-            fetchContributions(1, 10),
-            fetchRecentContributions(),
-            fetchClaims(1, 10)
-        ]);
-        
-        dashboardState.userRank = results[0].status === 'fulfilled' ? results[0].value.current_user_rank : null;
-        
-        if (results[1].status === 'fulfilled') {
-            dashboardState.allContributions = results[1].value.items;
-            contributionsState.totalContributions = results[1].value.total;
-            contributionsState.isLastPage = (contributionsState.currentPage * 10) >= results[1].value.total;
-        } else {
-            dashboardState.allContributions = [];
-            if (results[1].reason) console.error("Failed to fetch contributions:", results[1].reason);
-        }
-        
-        dashboardState.recentContributions = results[2].status === 'fulfilled' ? results[2].value : [];
-        if (results[2].status !== 'fulfilled' && results[2].reason) console.error("Failed to fetch recent contributions:", results[2].reason);
-        
-        dashboardState.allClaims = results[3].status === 'fulfilled' ? results[3].value.items : [];
-        if (results[3].status !== 'fulfilled' && results[3].reason) console.error("Failed to fetch claims:", results[3].reason);
-
-        if (balancePoller) clearInterval(balancePoller);
-        balancePoller = setInterval(async () => {
-            try {
-                const updatedAccount = await fetchAndStoreAccount();
-                if (updatedAccount) dashboardState.account = updatedAccount;
-                updateBalancesInUI();
-            } catch (error) {
-                if (error.response && error.response.status === 401) clearInterval(balancePoller);
-            }
-        }, 15000);
+        connectUserWebSocket();
 
     } catch (error) {
         console.error("Dashboard setup failed globally:", error);
@@ -268,12 +322,11 @@ async function setupDashboard() {
         }
         return;
     }
-
-    loadContent(currentTabId);
 }
 
 export function renderDashboardLayout() {
     activeTimeRange = 'all';
+    disconnectUserWebSocket();
     const content = `
     <main class="flex-grow bg-abyss-dark pt-28">
         <svg aria-hidden="true" style="position: absolute; width: 0; height: 0; overflow: hidden;">

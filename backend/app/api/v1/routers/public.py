@@ -1,14 +1,17 @@
-from fastapi import APIRouter, Depends, Query
+from fastapi import APIRouter, Depends, Query, Request
 from sqlalchemy.orm import Session
 from app.db import crud, database, models
 from app.schemas import LeaderboardEntry, ContributionResponse, ValuationMetrics, AiAnalysis, LeaderboardResponse
 from app.api.v1 import dependencies
 import json
+from app.core.limiter import limiter
 
 router = APIRouter(tags=["Public"])
 
 @router.get("/leaderboard", response_model=LeaderboardResponse)
+@limiter.limit("30/minute")
 def get_leaderboard(
+    request: Request,
     db: Session = Depends(database.get_db),
     current_user: models.User | None = Depends(dependencies.get_current_user_optional)
 ):
@@ -39,7 +42,9 @@ def get_leaderboard(
 
 
 @router.get("/recent-contributions", response_model=list[ContributionResponse])
+@limiter.limit("30/minute")
 def get_recent_contributions(
+    request: Request,
     db: Session = Depends(database.get_db),
     limit: int = Query(10, le=50, ge=1)
 ):

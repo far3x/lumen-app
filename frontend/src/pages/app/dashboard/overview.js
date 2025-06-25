@@ -4,51 +4,6 @@ import { api as authApi, fetchAndStoreAccount, getAccount } from '../../../lib/a
 
 let chartInstance = null;
 
-
-async function handleClaim(claimButton, user) {
-    const account = getAccount();
-    if (!account || account.lum_balance <= 0) return;
-
-    claimButton.disabled = true;
-    claimButton.innerHTML = `<span class="animate-spin inline-block w-5 h-5 border-2 border-transparent border-t-white rounded-full"></span> Claiming...`;
-
-    try {
-        const response = await authApi.post('/rewards/claim');
-        await fetchAndStoreAccount();
-        updateBalancesInUI();
-
-        const txLink = `https://solscan.io/tx/${response.data.transaction_hash}?cluster=devnet`;
-        const modalContent = `
-            <div class="text-center">
-                <div class="w-16 h-16 mx-auto mb-4 bg-green-900/50 text-green-300 rounded-full flex items-center justify-center">
-                    <svg class="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
-                </div>
-                <h3 class="font-bold text-lg text-white">Claim Successful!</h3>
-                <p class="text-text-secondary mt-2 mb-4">${response.data.message}</p>
-                <a href="${txLink}" target="_blank" rel="noopener noreferrer" class="font-medium text-accent-cyan hover:underline">View Transaction</a>
-            </div>
-        `;
-        renderModal('Rewards Claimed', modalContent);
-        claimButton.disabled = false;
-        claimButton.innerHTML = 'Claim Rewards';
-
-    } catch (error) {
-        const errorMessage = error.response?.data?.detail || "An unknown error occurred.";
-        const errorContent = `
-             <div class="text-center">
-                <div class="w-16 h-16 mx-auto mb-4 bg-red-900/50 text-red-300 rounded-full flex items-center justify-center">
-                    <svg class="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
-                </div>
-                <h3 class="font-bold text-lg text-white">Claim Failed</h3>
-                <p class="text-text-secondary mt-2">${errorMessage}</p>
-            </div>
-        `;
-        renderModal('Error', errorContent);
-        claimButton.disabled = false;
-        claimButton.innerHTML = 'Claim Rewards';
-    }
-}
-
 function renderWalletSection(account, user) {
     const claimableBalance = account?.lum_balance || 0;
     const isWalletLinked = user?.solana_address;
@@ -57,7 +12,6 @@ function renderWalletSection(account, user) {
         <button id="claim-rewards-btn"
                 class="w-full md:w-auto px-8 py-3 font-bold bg-gradient-to-r from-accent-purple to-accent-pink text-white rounded-lg transition-all duration-300 hover:scale-105 hover:shadow-lg hover:shadow-accent-purple/30 hover:brightness-110 shrink-0
                        ${(!isWalletLinked || claimableBalance <= 0) ? 'opacity-50 cursor-not-allowed' : ''}"
-                ${(!isWalletLinked || claimableBalance <= 0) ? 'disabled' : ''}
                 data-is-wallet-linked="${isWalletLinked ? 'true' : 'false'}">
             Claim Rewards
         </button>
@@ -70,18 +24,23 @@ function renderWalletSection(account, user) {
               <path stroke-linecap="round" stroke-linejoin="round" d="M21 12a2.25 2.25 0 0 0-2.25-2.25H15a3 3 0 1 1-6 0H5.25A2.25 2.25 0 0 0 3 12m18 0v6a2.25 2.25 0 0 1-2.25-2.25H5.25A2.25 2.25 0 0 1 3 18v-6m18 0V9M3 12V9m18 3a2.25 2.25 0 0 0-2.25-2.25H5.25A2.25 2.25 0 0 0 3 12m15-3a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" />
             </svg>
         </div>
-        <div class="relative z-10 flex flex-col md:flex-row items-center justify-between gap-6">
+        <div class="relative z-10 flex flex-col md:flex-row items-start justify-between gap-6">
             <div class="flex-grow text-center md:text-left">
                 <h3 class="text-2xl font-bold text-text-main">Claim Your Rewards</h3>
                 <p class="text-text-secondary mt-1">
                     ${isWalletLinked ? 'Your rewards are ready to be claimed.' : 'Link your wallet in Settings to enable claims.'}
                 </p>
+                <p id="claim-rewards-btn-subtext" class="text-xs text-yellow-400 mt-2 h-4"></p>
             </div>
-            <div class="text-center md:text-right">
-                <p class="text-sm text-text-secondary">Claimable Balance</p>
-                <p class="text-3xl font-bold pulse-text font-mono">${claimableBalance.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 4})}</p>
+            <div class="w-full md:w-auto flex flex-col items-center md:items-end">
+                <div class="text-center md:text-right">
+                    <p class="text-sm text-text-secondary">Claimable Balance</p>
+                    <p class="text-3xl font-bold pulse-text font-mono">${claimableBalance.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 4})}</p>
+                </div>
+                <div class="mt-4 w-full md:w-auto">
+                    ${claimButtonHTML}
+                </div>
             </div>
-            ${claimButtonHTML}
         </div>
     </div>
     `;
@@ -204,9 +163,7 @@ export function attachChartButtonListeners(contributions, onRangeChangeCallback)
     }
 }
 
-export function renderDashboardOverview(user, account, rank, allContributions) {
-    const totalContributions = allContributions?.length || 0; 
-    
+export function renderDashboardOverview(user, account, rank, totalContributions) {
     return `
         <header class="animate-fade-in-up">
             <h1 class="text-3xl font-bold">Welcome, <span class="pulse-text">${user?.display_name ?? 'Contributor'}</span></h1>

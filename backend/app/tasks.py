@@ -1,6 +1,5 @@
 import math
 import json
-import difflib
 import numpy as np
 import logging
 from sklearn.metrics.pairwise import cosine_similarity
@@ -11,11 +10,66 @@ from app.db import crud
 from app.services.valuation import hybrid_valuation_service
 from app.services.embedding import embedding_service
 from app.services.redis_service import redis_service
+from app.schemas import ContributionResponse, ValuationMetrics, AiAnalysis
 
 logger = logging.getLogger(__name__)
 
-SIMILARITY_REJECT_THRESHOLD = 0.98
-SIMILARITY_UPDATE_THRESHOLD = 0.80
+SIMILARITY_UPDATE_THRESHOLD = 0.85
+NEAR_PERFECT_SIMILARITY_THRESHOLD = 0.999 
+
+def publish_contribution_update(db, contribution_id: int, user_id: int):
+    contrib = crud.get_contribution_by_id(db, contribution_id)
+    if not contrib:
+        return
+
+    valuation_data = {}
+    if contrib.valuation_results and isinstance(contrib.valuation_results, str):
+        try:
+            data = json.loads(contrib.valuation_results)
+            if isinstance(data, dict):
+                valuation_data = data
+        except (json.JSONDecodeError, TypeError):
+            pass
+
+    manual_metrics = ValuationMetrics(
+        total_lloc=valuation_data.get('total_lloc', 0),
+        total_tokens=valuation_data.get('total_tokens', 0),
+        avg_complexity=valuation_data.get('avg_complexity', 0.0),
+        compression_ratio=valuation_data.get('compression_ratio', 0.0),
+        language_breakdown=valuation_data.get('language_breakdown', {})
+    )
+    
+    ai_analysis = AiAnalysis(
+        project_clarity_score=valuation_data.get('project_clarity_score', 0.0),
+        architectural_quality_score=valuation_data.get('architectural_quality_score', 0.0),
+        code_quality_score=valuation_data.get('code_quality_score', 0.0),
+        analysis_summary=valuation_data.get('analysis_summary')
+    )
+    
+    response_data = ContributionResponse(
+        id=contrib.id,
+        created_at=contrib.created_at,
+        reward_amount=contrib.reward_amount,
+        status=contrib.status,
+        valuation_details=valuation_data,
+        manual_metrics=manual_metrics,
+        ai_analysis=ai_analysis
+    )
+
+    account_details = crud.get_account_details(db, user_id=user_id)
+    
+    new_payload = {
+        "contribution": json.loads(response_data.model_dump_json())
+    }
+    if account_details:
+        new_payload["account"] = json.loads(account_details.model_dump_json())
+
+    message = {
+        "type": "contribution_update",
+        "payload": new_payload
+    }
+    
+    redis_service.r.publish(f"user-updates:{user_id}", json.dumps(message))
 
 @celery_app.task(bind=True)
 def process_contribution(self, user_id: int, codebase: str, contribution_db_id: int):
@@ -23,23 +77,24 @@ def process_contribution(self, user_id: int, codebase: str, contribution_db_id: 
     
     try:
         crud.update_contribution_status(db, contribution_db_id, "PROCESSING")
+        publish_contribution_update(db, contribution_db_id, user_id)
+        
         user = crud.get_user(db, user_id=user_id)
         if not user:
             logger.error(f"Error: User with ID {user_id} not found for contribution {contribution_db_id}.")
             crud.update_contribution_status(db, contribution_db_id, "FAILED")
+            publish_contribution_update(db, contribution_db_id, user_id)
             return
 
         logger.info(f"Processing contribution {contribution_db_id} for user {user_id}. Starting uniqueness check...")
         
         parsed_files = hybrid_valuation_service._parse_codebase(codebase)
-        
-        full_codebase_content = "\n".join(
-            file_data["content"] for file_data in parsed_files
-        )
+        full_codebase_content = "\n".join(file_data["content"] for file_data in parsed_files)
         
         if not full_codebase_content.strip():
             logger.warning(f"[UNIQUENESS_REJECT] Contribution {contribution_db_id} is empty after parsing. Yielding no reward.")
             crud.update_contribution_status(db, contribution_db_id, "REJECTED_EMPTY")
+            publish_contribution_update(db, contribution_db_id, user_id)
             return
 
         new_embedding = embedding_service.generate(full_codebase_content)
@@ -47,62 +102,81 @@ def process_contribution(self, user_id: int, codebase: str, contribution_db_id: 
         if new_embedding is None:
             logger.error(f"[UNIQUENESS_ERROR] Could not generate embedding for submission {contribution_db_id}.")
             crud.update_contribution_status(db, contribution_db_id, "FAILED_EMBEDDING")
+            publish_contribution_update(db, contribution_db_id, user_id)
             return
 
-        all_embeddings_data = crud.get_all_contribution_embeddings(db)
+        all_embeddings_data_with_recency = crud.get_all_contribution_embeddings_with_recency(db)
         
-        code_to_value = codebase
-        is_update = False
+        previous_codebase_for_valuation = None
         rejection_reason = None
 
-        if all_embeddings_data:
-            existing_embeddings = [np.array(json.loads(e[2])) for e in all_embeddings_data if e[2]]
-            if existing_embeddings:
-                similarities = cosine_similarity([new_embedding], existing_embeddings)[0]
-                max_similarity = np.max(similarities)
-                most_similar_index = np.argmax(similarities)
-                most_similar_id, most_similar_user_id, _ = all_embeddings_data[most_similar_index]
-
-                if max_similarity > SIMILARITY_REJECT_THRESHOLD:
-                    rejection_reason = "DUPLICATE_HIGH_SIMILARITY"
-                    logger.warning(f"[UNIQUENESS_REJECT] Contribution {contribution_db_id} rejected for high similarity ({max_similarity:.2f}) with contribution {most_similar_id}.")
-                    crud.update_contribution_status(db, contribution_db_id, rejection_reason)
-                    return
-
-                if max_similarity > SIMILARITY_UPDATE_THRESHOLD:
-                    if most_similar_user_id == user_id:
-                        is_update = True
-                        logger.info(f"Contribution {contribution_db_id} is an update to {most_similar_id}. Performing diff.")
-                        previous_contribution = crud.get_contribution_by_id(db, most_similar_id)
-                        if previous_contribution:
-                            diff = difflib.unified_diff(
-                                previous_contribution.raw_content.splitlines(keepends=True),
-                                codebase.splitlines(keepends=True),
-                                fromfile='previous', tofile='current'
-                            )
-                            added_lines = [line[1:] for line in diff if line.startswith('+') and not line.startswith('+++')]
-                            code_to_value = "".join(added_lines)
-                            if not code_to_value.strip():
-                                rejection_reason = "REJECTED_NO_NEW_CODE"
-                                logger.warning(f"[UNIQUENESS_REJECT] Contribution {contribution_db_id} is an update with no new code.")
-                        else:
-                            rejection_reason = "FAILED_DIFF_PROCESSING"
-                            logger.error(f"Could not find previous contribution {most_similar_id} for diff processing.")
-                    else:
-                        rejection_reason = "DUPLICATE_CROSS_USER"
-                        logger.warning(f"[UNIQUENESS_REJECT] Contribution {contribution_db_id} is too similar to another user's submission {most_similar_id}.")
+        if all_embeddings_data_with_recency:
+            existing_embeddings_tuples = [
+                e for e in all_embeddings_data_with_recency if e[0] != contribution_db_id and e[2]
+            ]
             
+            if existing_embeddings_tuples:
+                existing_embeddings_vectors = [np.array(json.loads(e[2])) for e in existing_embeddings_tuples]
+                similarities = cosine_similarity([new_embedding], existing_embeddings_vectors)[0]
+                max_similarity_overall = np.max(similarities)
+                
+                if max_similarity_overall > SIMILARITY_UPDATE_THRESHOLD:
+                    most_similar_index_overall = np.argmax(similarities)
+                    most_similar_id_overall, most_similar_user_id_overall, _, _ = existing_embeddings_tuples[most_similar_index_overall]
+
+                    if most_similar_user_id_overall == user_id:
+                        logger.info(f"[SIMILARITY_UPDATE_CANDIDATE] Max similarity {max_similarity_overall:.4f} to own code (C_ID:{most_similar_id_overall}). Determining latest similar submission for diff.")
+                        
+                        user_s_own_highly_similar_submissions = []
+                        for i, data_tuple in enumerate(existing_embeddings_tuples):
+                            c_id, c_user_id, _, c_created_at = data_tuple
+                            if c_user_id == user_id and similarities[i] >= NEAR_PERFECT_SIMILARITY_THRESHOLD:
+                                user_s_own_highly_similar_submissions.append({
+                                    "id": c_id,
+                                    "similarity": similarities[i],
+                                    "created_at": c_created_at
+                                })
+                        
+                        if user_s_own_highly_similar_submissions:
+                            user_s_own_highly_similar_submissions.sort(key=lambda x: x["created_at"], reverse=True)
+                            latest_similar_submission_for_diff = user_s_own_highly_similar_submissions[0]
+                            
+                            logger.info(f"[SIMILARITY_UPDATE] Confirmed as update to user's own C_ID:{latest_similar_submission_for_diff['id']} (Similarity: {latest_similar_submission_for_diff['similarity']:.4f}).")
+                            previous_contribution = crud.get_contribution_by_id(db, latest_similar_submission_for_diff['id'])
+                            if previous_contribution:
+                                previous_codebase_for_valuation = previous_contribution.raw_content
+                            else:
+                                logger.error(f"[SIMILARITY_ERROR] Could not retrieve previous C_ID:{latest_similar_submission_for_diff['id']} for diffing.")
+                                rejection_reason = "FAILED_DIFF_PROCESSING"
+                        else:
+                            logger.info(f"[SIMILARITY_PASS] User's own code similarity {max_similarity_overall:.4f} is not a near-perfect match to any single prior. Treating as new for diff, but will check plagiarism.")
+                            pass
+
+                    else:
+                        logger.warning(f"[SIMILARITY_REJECT] High similarity ({max_similarity_overall:.4f}) to code from another user (C_ID:{most_similar_id_overall}). Rejecting as potential plagiarism.")
+                        rejection_reason = "DUPLICATE_CROSS_USER"
+                else:
+                    logger.info(f"[SIMILARITY_PASS] Max overall similarity {max_similarity_overall:.4f} is below update threshold. Treating as new.")
+
             if rejection_reason:
                 crud.update_contribution_status(db, contribution_db_id, rejection_reason)
+                publish_contribution_update(db, contribution_db_id, user_id)
                 return
         
         logger.info(f"[UNIQUENESS_PASS] Contribution {contribution_db_id} is unique or a valid update. Proceeding to valuation...")
-        valuation_result = hybrid_valuation_service.calculate(db, code_to_value)
+        
+        valuation_result = hybrid_valuation_service.calculate(
+            db,
+            current_codebase=codebase,
+            previous_codebase=previous_codebase_for_valuation
+        )
+
         base_reward = valuation_result.get("final_reward", 0.0)
         valuation_details = valuation_result.get("valuation_details", {})
 
         contribution_record = crud.get_contribution_by_id(db, contribution_db_id)
         if not contribution_record:
+            logger.error(f"Failed to retrieve contribution record {contribution_db_id} before final update.")
             return
 
         contribution_record.valuation_results = json.dumps(valuation_details)
@@ -110,7 +184,8 @@ def process_contribution(self, user_id: int, codebase: str, contribution_db_id: 
         if base_reward > 0:
             total_reward_given = crud.apply_reward_to_user(db, user, base_reward)
             avg_complexity = valuation_details.get("avg_complexity", 0.0)
-            crud.update_network_stats(db, avg_complexity, total_reward_given)
+            if avg_complexity > 0 :
+                crud.update_network_stats(db, avg_complexity, total_reward_given)
             
             contribution_record.reward_amount = total_reward_given
             contribution_record.content_embedding = json.dumps(new_embedding.tolist()) if new_embedding is not None else None
@@ -120,20 +195,24 @@ def process_contribution(self, user_id: int, codebase: str, contribution_db_id: 
             db.commit()
             
             logger.info(f"[REWARD] Successfully processed and rewarded {total_reward_given:.4f} LUM for user {user_id} (Contribution {contribution_db_id}).")
-            logger.info(f"Valuation Details: {json.dumps(valuation_details, indent=2)}")
-            
-            redis_service.set_with_ttl(f"task_status:{self.request.id}", "PROCESSED", 3600)
         else:
             contribution_record.reward_amount = 0.0
-            contribution_record.status = "REJECTED_NO_REWARD"
+            contribution_record.content_embedding = json.dumps(new_embedding.tolist()) if new_embedding is not None else None
+            contribution_record.status = valuation_details.get("analysis_summary", "REJECTED_NO_REWARD")
+            if contribution_record.status == "Contribution rejected: No new valuable code detected in the update.":
+                contribution_record.status = "REJECTED_NO_NEW_CODE"
+            else:
+                contribution_record.status = "REJECTED_NO_REWARD"
+
             db.add(contribution_record)
             db.commit()
-            logger.warning(f"[REWARD] Contribution {contribution_db_id} was valued at 0.0 LUM and rejected.")
-            redis_service.set_with_ttl(f"task_status:{self.request.id}", "REJECTED", 3600)
+            logger.warning(f"[REWARD] Contribution {contribution_db_id} was valued at 0.0 LUM and status set to {contribution_record.status}.")
+        
+        publish_contribution_update(db, contribution_db_id, user_id)
 
     except Exception as e:
         logger.error(f"Unhandled error in process_contribution for c_id {contribution_db_id}: {e}", exc_info=True)
         crud.update_contribution_status(db, contribution_db_id, "FAILED")
-        redis_service.set_with_ttl(f"task_status:{self.request.id}", "FAILED", 3600)
+        publish_contribution_update(db, contribution_db_id, user_id)
     finally:
         db.close()

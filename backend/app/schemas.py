@@ -86,6 +86,9 @@ class Account(BaseModel):
     class Config:
         from_attributes = True
 
+class AccountDetails(Account):
+    last_claim_at: Optional[datetime] = None
+
 class ContributionCreate(BaseModel):
     codebase: constr(max_length=5000000)
 

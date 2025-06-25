@@ -74,7 +74,7 @@ async def verify_recaptcha(token: str):
             raise HTTPException(status_code=400, detail="Invalid reCAPTCHA token.")
 
 @router.post("/register", status_code=status.HTTP_201_CREATED)
-@limiter.limit("5/hour")
+@limiter.limit("2/hour")
 async def register_user(request: Request, user: UserCreate, background_tasks: BackgroundTasks, db: Session = Depends(database.get_db)):
     await verify_recaptcha(user.recaptcha_token)
 
@@ -118,7 +118,8 @@ async def register_user(request: Request, user: UserCreate, background_tasks: Ba
 
 
 @router.get("/verify-email")
-async def verify_email(token: str, db: Session = Depends(database.get_db)):
+@limiter.limit("3/hour")
+async def verify_email(request: Request, token: str, db: Session = Depends(database.get_db)):
     try:
         payload = jwt.decode(token, config.settings.SECRET_KEY, algorithms=[config.settings.ALGORITHM])
         subject = payload.get("sub")
@@ -145,8 +146,8 @@ async def verify_email(token: str, db: Session = Depends(database.get_db)):
     except JWTError:
         raise HTTPException(status_code=400, detail="Invalid or expired token.")
 
-@limiter.limit("3/hour")
 @router.post("/forgot-password")
+@limiter.limit("2/day")
 async def forgot_password(request: Request, payload: ForgotPasswordRequest, background_tasks: BackgroundTasks, db: Session = Depends(database.get_db)):
     user = crud.get_user_by_email(db, email=payload.email)
     if user:
@@ -180,10 +181,11 @@ async def forgot_password(request: Request, payload: ForgotPasswordRequest, back
     return {"message": "If an account with that email exists, a password reset link has been sent."}
 
 @router.post("/reset-password")
-async def reset_password(request: ResetPasswordRequest, db: Session = Depends(database.get_db)):
+@limiter.limit("5/day")
+async def reset_password(request: Request, payload: ResetPasswordRequest, db: Session = Depends(database.get_db)):
     try:
-        payload = jwt.decode(request.token, config.settings.SECRET_KEY, algorithms=[config.settings.ALGORITHM])
-        subject = payload.get("sub")
+        token_payload = jwt.decode(payload.token, config.settings.SECRET_KEY, algorithms=[config.settings.ALGORITHM])
+        subject = token_payload.get("sub")
         if not subject or not subject.startswith("reset:"):
             raise HTTPException(status_code=400, detail="Invalid token type.")
         
@@ -192,10 +194,10 @@ async def reset_password(request: ResetPasswordRequest, db: Session = Depends(da
         
         current_timestamp = datetime.now(timezone.utc).timestamp()
 
-        if not user or user.password_reset_token != request.token or user.password_reset_expires < current_timestamp:
+        if not user or user.password_reset_token != payload.token or user.password_reset_expires < current_timestamp:
             raise HTTPException(status_code=400, detail="Invalid or expired password reset token.")
         
-        user.hashed_password = security.get_password_hash(request.password)
+        user.hashed_password = security.get_password_hash(payload.password)
         user.password_reset_token = None
         user.password_reset_expires = None
         db.add(user)
@@ -207,7 +209,8 @@ async def reset_password(request: ResetPasswordRequest, db: Session = Depends(da
         raise HTTPException(status_code=400, detail="Invalid or expired token.")
 
 @router.post("/token")
-async def login_for_access_token(response: Response, form_data: OAuth2PasswordRequestForm = Depends(), db: Session = Depends(database.get_db)):
+@limiter.limit("10/minute")
+async def login_for_access_token(request: Request, response: Response, form_data: OAuth2PasswordRequestForm = Depends(), db: Session = Depends(database.get_db)):
     user = crud.get_user_by_email(db, email=form_data.username)
     if not user or not user.hashed_password or not security.verify_password(form_data.password, user.hashed_password):
         raise HTTPException(
@@ -233,10 +236,11 @@ async def login_for_access_token(response: Response, form_data: OAuth2PasswordRe
     return {"status": "success"}
 
 @router.post("/token/2fa")
-async def login_2fa_verification(response: Response, request: TwoFactorLoginRequest, db: Session = Depends(database.get_db)):
+@limiter.limit("5/minute")
+async def login_2fa_verification(request: Request, response: Response, payload: TwoFactorLoginRequest, db: Session = Depends(database.get_db)):
     try:
-        payload = jwt.decode(request.tfa_token, config.settings.SECRET_KEY, algorithms=[config.settings.ALGORITHM])
-        subject = payload.get("sub")
+        token_payload = jwt.decode(payload.tfa_token, config.settings.SECRET_KEY, algorithms=[config.settings.ALGORITHM])
+        subject = token_payload.get("sub")
         if not subject or not subject.startswith("tfa:"):
             raise HTTPException(status_code=400, detail="Invalid temporary token.")
         
@@ -250,7 +254,7 @@ async def login_2fa_verification(response: Response, request: TwoFactorLoginRequ
         decrypted_secret = encryption_service.decrypt(encrypted_secret)
         totp = pyotp.TOTP(decrypted_secret)
 
-        if not totp.verify(request.code):
+        if not totp.verify(payload.code):
             raise HTTPException(status_code=401, detail="Invalid 2FA code.")
 
         access_token_expires = timedelta(minutes=config.settings.ACCESS_TOKEN_EXPIRE_MINUTES)
@@ -264,10 +268,11 @@ async def login_2fa_verification(response: Response, request: TwoFactorLoginRequ
         raise HTTPException(status_code=400, detail="Invalid or expired temporary token.")
 
 @router.post("/token/2fa-backup")
-async def login_2fa_backup_code(response: Response, request: TwoFactorBackupCodeLoginRequest, db: Session = Depends(database.get_db)):
+@limiter.limit("5/minute")
+async def login_2fa_backup_code(request: Request, response: Response, payload: TwoFactorBackupCodeLoginRequest, db: Session = Depends(database.get_db)):
     try:
-        payload = jwt.decode(request.tfa_token, config.settings.SECRET_KEY, algorithms=[config.settings.ALGORITHM])
-        subject = payload.get("sub")
+        token_payload = jwt.decode(payload.tfa_token, config.settings.SECRET_KEY, algorithms=[config.settings.ALGORITHM])
+        subject = token_payload.get("sub")
         if not subject or not subject.startswith("tfa:"):
             raise HTTPException(status_code=400, detail="Invalid temporary token.")
         
@@ -280,10 +285,10 @@ async def login_2fa_backup_code(response: Response, request: TwoFactorBackupCode
         decrypted_codes_json = encryption_service.decrypt(user.two_factor_backup_codes)
         backup_codes = json.loads(decrypted_codes_json)
 
-        if request.backup_code not in backup_codes:
+        if payload.backup_code not in backup_codes:
             raise HTTPException(status_code=401, detail="Invalid backup code.")
 
-        backup_codes.remove(request.backup_code)
+        backup_codes.remove(payload.backup_code)
         user.two_factor_backup_codes = encryption_service.encrypt(json.dumps(backup_codes))
         db.commit()
 
@@ -380,7 +385,7 @@ async def logout(response: Response):
     response.delete_cookie("is_logged_in")
     return {"status": "success"}
 
-@router.post("/cli/approve-device", response_model=PATSchema)
+@router.post("/cli/approve-device")
 async def approve_cli_device(
     payload: ApproveDeviceRequest,
     db: Session = Depends(database.get_db),
@@ -397,9 +402,9 @@ async def approve_cli_device(
     
     raw_token = crud.create_pat_for_user(db, user=current_user, name=payload.device_name)
     
-    device_code_key = f"device_flow:device_code:{device_code}"
-    redis_service.set_with_ttl(key=device_code_key, value=raw_token, ttl_seconds=120)
+    message = { "token": raw_token }
+    redis_service.r.publish(f"cli-auth-success:{device_code}", json.dumps(message))
 
     redis_service.delete(user_code_key)
     
-    return PATSchema(name=payload.device_name, token=raw_token)
+    return {"status": "success", "message": "Device approved. Check your terminal."}

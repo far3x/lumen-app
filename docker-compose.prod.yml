@@ -4,7 +4,7 @@ services:
     container_name: lumen_db
     volumes:
       - postgres_data:/var/lib/postgresql/data/
-    env_file: ./.env # Ensure this points to prod.env in your actual setup or manage envs differently
+    env_file: ./.env
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
       interval: 5s
@@ -24,8 +24,8 @@ services:
       dockerfile: Dockerfile
     command: >
       sh -c "alembic upgrade head &&
-             uvicorn app.main:app --host 0.0.0.0 --port 8000"
-    env_file: ./.env # Ensure this points to prod.env
+             uvicorn app.main:app --host 0.0.0.0 --port 8000 --proxy-headers --forwarded-allow-ips='*'"
+    env_file: ./.env
     depends_on:
       db:
         condition: service_healthy
@@ -39,7 +39,7 @@ services:
       context: ./backend
       dockerfile: Dockerfile
     command: celery -A app.core.celery_app.celery_app worker --loglevel=info --pool=eventlet
-    env_file: ./.env # Ensure this points to prod.env
+    env_file: ./.env
     depends_on:
       - redis
       - api
@@ -51,7 +51,6 @@ services:
       context: ./frontend
       dockerfile: Dockerfile
       args:
-        # Passes .env variables into the frontend build
         VITE_API_URL: ${API_URL}
         VITE_GOOGLE_RECAPTCHA_SITE_KEY: ${GOOGLE_RECAPTCHA_SITE_KEY}
     restart: unless-stopped

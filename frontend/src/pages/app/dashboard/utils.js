@@ -73,12 +73,12 @@ export function renderWalletSelectionModal() {
 }
 
 export function escapeHtml(unsafe) {
-    if (!unsafe) return '';
+    if (typeof unsafe !== 'string' || !unsafe) return '';
     return unsafe
          .replace(/&/g, "&")
          .replace(/</g, "<")
          .replace(/>/g, ">")
-         .replace(/"/g, "\"")
+         .replace(/"/g, '"')
          .replace(/'/g, "'");
 }
 
@@ -123,31 +123,53 @@ export function updateBalancesInUI() {
     const account = getAccount();
     if (!account) return;
 
-    const claimableBalanceDisplay = `${(account.lum_balance ?? 0).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 4 })} $LUM`;
-    const claimableBalanceRaw = account.lum_balance ?? 0;
-    const lifetimeBalanceDisplay = `${(account.total_lum_earned ?? 0).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 4 })} $LUM`;
+    const claimableBalance = account.lum_balance ?? 0;
+    const lifetimeBalance = account.total_lum_earned ?? 0;
 
-    document.querySelectorAll('.navbar-user-balance').forEach(el => el.textContent = claimableBalanceDisplay);
+    document.querySelectorAll('.navbar-user-balance').forEach(el => {
+        el.textContent = `${claimableBalance.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 4 })} $LUM`;
+    });
     
     const overviewLifetimeEl = document.getElementById('overview-total-balance');
     if (overviewLifetimeEl) {
-        overviewLifetimeEl.textContent = lifetimeBalanceDisplay;
+        overviewLifetimeEl.textContent = `${lifetimeBalance.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 4 })} $LUM`;
     }
 
     const overviewClaimableEl = document.querySelector('#claim-button-area .pulse-text');
     if (overviewClaimableEl) {
-        overviewClaimableEl.textContent = claimableBalanceRaw.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 4});
+        overviewClaimableEl.textContent = claimableBalance.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 4});
     }
     
     const claimButton = document.getElementById('claim-rewards-btn');
     if(claimButton) {
+        const subtextEl = document.getElementById('claim-rewards-btn-subtext');
         const isWalletLinked = claimButton.dataset.isWalletLinked === 'true';
-        const shouldBeDisabled = claimableBalanceRaw <= 0 || !isWalletLinked;
-        claimButton.disabled = shouldBeDisabled;
-        if (shouldBeDisabled) {
+
+        claimButton.innerHTML = 'Claim Rewards';
+
+        if (!isWalletLinked || claimableBalance <= 0) {
+            claimButton.disabled = true;
             claimButton.classList.add('opacity-50', 'cursor-not-allowed');
+            if (subtextEl) subtextEl.textContent = '';
+            return;
+        }
+
+        const lastClaimTimestamp = account.last_claim_at ? new Date(account.last_claim_at).getTime() : 0;
+        const cooldown = 24 * 60 * 60 * 1000;
+        const now = Date.now();
+        const timeSinceLastClaim = now - lastClaimTimestamp;
+
+        if (lastClaimTimestamp !== 0 && timeSinceLastClaim < cooldown) {
+            claimButton.disabled = true;
+            claimButton.classList.add('opacity-50', 'cursor-not-allowed');
+            const remainingTime = cooldown - timeSinceLastClaim;
+            const hours = Math.floor(remainingTime / (1000 * 60 * 60));
+            const minutes = Math.floor((remainingTime % (1000 * 60 * 60)) / (1000 * 60));
+            if (subtextEl) subtextEl.textContent = `You can claim again in ${hours}h ${minutes}m.`;
         } else {
+            claimButton.disabled = false;
             claimButton.classList.remove('opacity-50', 'cursor-not-allowed');
+            if (subtextEl) subtextEl.textContent = '';
         }
     }
 }

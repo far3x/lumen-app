@@ -1,15 +1,18 @@
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, status, Request
 from sqlalchemy.orm import Session
 import json
 
 from app.db import crud, models, database
 from app.api.v1 import dependencies
 from app.schemas import ContributionResponse, ValuationMetrics, AiAnalysis
+from app.core.limiter import limiter
 
 router = APIRouter(prefix="/contributions", tags=["Contributions"])
 
 @router.get("/{contribution_id}", response_model=ContributionResponse)
+@limiter.limit("30/minute")
 def get_single_contribution(
+    request: Request,
     contribution_id: int,
     db: Session = Depends(database.get_db),
     current_user: models.User = Depends(dependencies.get_current_user)
@@ -18,25 +21,17 @@ def get_single_contribution(
     if not contrib or contrib.user_id != current_user.id:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Contribution not found")
 
-    # --- START OF THE FIX ---
     valuation_data = {}
     if contrib.valuation_results:
-        # This robustly handles dicts, single-encoded strings, and double-encoded strings
         data = contrib.valuation_results
         if isinstance(data, str):
-            try:
-                data = json.loads(data)
-            except (json.JSONDecodeError, TypeError):
-                data = {}
-        if isinstance(data, str): # Handle double-encoding
-            try:
-                data = json.loads(data)
-            except (json.JSONDecodeError, TypeError):
-                data = {}
-        
+            try: data = json.loads(data)
+            except (json.JSONDecodeError, TypeError): data = {}
+        if isinstance(data, str):
+            try: data = json.loads(data)
+            except (json.JSONDecodeError, TypeError): data = {}
         if isinstance(data, dict):
             valuation_data = data
-    # --- END OF THE FIX ---
 
     manual_metrics = ValuationMetrics(
         total_lloc=valuation_data.get('total_lloc', 0),
