@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="color-scheme" content="light dark">
     <meta name="supported-color-schemes" content="light dark">
-    <title>Reset Your Lumen Protocol Password</title>
+    <title>Confirm Lumen Protocol Account Deletion</title>
     <style>
         :root {
             color-scheme: light dark;
@@ -16,6 +16,7 @@
             .content-wrapper { background-color: #13131A !important; border-color: #3F3F4D !important; }
             .main-text, .secondary-text { color: #E5E5E5 !important; }
             .subtle-text { color: #A3A3B2 !important; }
+            .danger-button { background-color: #991b1b !important; }
         }
     </style>
 </head>
@@ -25,36 +26,32 @@
             <tr>
                 <td align="center">
                     <table class="content-wrapper" width="600" border="0" cellpadding="0" cellspacing="0" role="presentation" style="max-width: 600px; width: 100%; background-color: #ffffff; border: 1px solid #e5e7eb; border-radius: 12px; padding: 40px;">
-                        <!-- Header / Logo -->
                         <tr>
                             <td align="center" style="padding-bottom: 30px;">
                                 <img src="{{ logo_url }}" alt="Lumen Logo" style="width: 48px; height: 48px; display: block;">
                             </td>
                         </tr>
-                        <!-- Main Content -->
                         <tr>
                             <td align="center">
                                 <h1 class="main-text" style="font-size: 24px; font-weight: bold; color: #13131A; margin: 0 0 16px 0;">
-                                    Password Reset Request
+                                    Confirm Account Deletion
                                 </h1>
                                 <p class="secondary-text" style="font-size: 16px; color: #3F3F4D; line-height: 1.5; margin: 0 0 30px 0;">
-                                    We received a request to reset your password. Click the button below to set a new password. This link is valid for 1 hour.
+                                    You are receiving this because a request was made to permanently delete your Lumen Protocol account. This action is irreversible. To proceed, please click the button below. This confirmation link is valid for 1 hour.
                                 </p>
                             </td>
                         </tr>
-                        <!-- CTA Button -->
                         <tr>
                             <td align="center" style="padding-bottom: 30px;">
-                                <a href="{{ reset_link }}" target="_blank" style="display: inline-block; background-image: linear-gradient(to right, #8A2BE2, #FF69B4); color: #ffffff; font-size: 16px; font-weight: bold; text-decoration: none; padding: 14px 28px; border-radius: 8px;">
-                                    Reset Password
+                                <a href="{{ deletion_link }}" target="_blank" class="danger-button" style="display: inline-block; background-color: #b91c1c; color: #ffffff; font-size: 16px; font-weight: bold; text-decoration: none; padding: 14px 28px; border-radius: 8px;">
+                                    Permanently Delete Account
                                 </a>
                             </td>
                         </tr>
-                        <!-- Footer -->
                          <tr>
                             <td style="padding-top: 20px; border-top: 1px solid #e5e7eb;">
                                 <p class="subtle-text" style="font-size: 12px; color: #A3A3B2; text-align: center; margin: 0;">
-                                    If you did not request a password reset, please ignore this email.
+                                    If you did not make this request, you can safely ignore this email. Your account will not be deleted.
                                 </p>
                                 <p class="subtle-text" style="font-size: 12px; color: #A3A3B2; text-align: center; margin: 10px 0 0 0;">
                                     © {{ year }} Lumen Protocol. All rights reserved.

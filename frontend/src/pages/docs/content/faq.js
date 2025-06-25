@@ -58,6 +58,16 @@ export const renderFaq = () => `
 
     <h2 id="faq-general">General Questions</h2>
     <details class="group bg-surface border border-subtle/50 rounded-lg cursor-pointer my-4">
+        <summary class="flex items-center justify-between font-bold p-6">Why did you choose the Solana blockchain?</summary>
+        <div class="grid grid-rows-[0fr] group-open:grid-rows-[1fr] transition-[grid-template-rows] duration-500 ease-in-out">
+            <div class="overflow-hidden">
+                <p class="text-text-secondary px-6 pb-6">
+                    Our choice of Solana was deliberate and strategic. A data protocol that issues potentially thousands of micro-rewards per day requires a network with extremely high throughput and near-zero transaction costs. Solana's performance ensures that reward claims are fast and affordable for every contributor, regardless of the size of their reward. This makes the entire economic model feasible and user-friendly.
+                </p>
+            </div>
+        </div>
+    </details>
+    <details class="group bg-surface border border-subtle/50 rounded-lg cursor-pointer my-4">
         <summary class="flex items-center justify-between font-bold p-6">Can I choose which files to contribute from a project?</summary>
         <div class="grid grid-rows-[0fr] group-open:grid-rows-[1fr] transition-[grid-template-rows] duration-500 ease-in-out">
             <div class="overflow-hidden">

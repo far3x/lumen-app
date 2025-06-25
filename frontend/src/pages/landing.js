@@ -76,10 +76,10 @@ lum login</code></pre>
                             </div>
                          </div>
                         <h3 class="text-xl font-bold mt-6">Contribute Your Project</h3>
-                        <p class="text-text-secondary mt-2 flex-grow">Run <code>lum</code> in your project's root. The CLI analyzes, anonymizes, and packages your code locally.</p>
+                        <p class="text-text-secondary mt-2 flex-grow">Run <code>lum contribute</code> in your project's root. The CLI analyzes, anonymizes, and packages your code locally.</p>
                         <div class="mt-4">
                             <pre class="text-left bg-primary p-3 rounded-md text-sm text-accent-cyan overflow-x-auto w-full"><code>cd /path/to/my-project
-lum</code></pre>
+lum contribute</code></pre>
                         </div>
                     </div>
                     
@@ -90,11 +90,11 @@ lum</code></pre>
                             </div>
                         </div>
                         <h3 class="text-xl font-bold mt-6">Get Rewarded</h3>
-                        <p class="text-text-secondary mt-2 flex-grow">The protocol values your contribution based on uniqueness and complexity, rewarding you with $LUM tokens.</p>
+                        <p class="text-text-secondary mt-2 flex-grow">The protocol values your contribution and adds it to the processing queue. Track your rewards on your dashboard.</p>
                         <div class="mt-4">
                             <div class="text-left bg-primary p-4 rounded-md text-sm w-full">
-                                <p class="text-green-400">+ Contribution received!</p>
-                                <p class="text-text-secondary">+ <span class="font-bold text-white">128.42 $LUM</span> added to your balance.</p>
+                                <p class="text-green-400">✔ Contribution successful!</p>
+                                <p class="text-text-secondary">+ Your submission is now in the processing queue.</p>
                             </div>
                         </div>
                     </div>
@@ -120,7 +120,7 @@ lum</code></pre>
                         Large Language Models are hitting a wall. The public internet has been scraped, and <strong class="text-text-main">high-quality, human-written code is locked away</strong> in private repositories. This data scarcity threatens the future of AI innovation.
                     </p>
                     <p class="mt-4 text-text-secondary text-lg">
-                        Lumen creates a <strong class="text-text-main">transparent and fair marketplace</strong>. We empower developers to become the primary data source for the next wave of AI, ensuring they are compensated for the value they create. <a href="/docs/why-lumen" class="text-accent-cyan hover:underline font-semibold">Learn why Lumen is different →</a>
+                        Lumen creates a <strong class="text-text-main">transparent and fair data sourcing protocol</strong>. We empower developers to become the primary data source for the next wave of AI, ensuring they are compensated for the value they create. <a href="/docs/why-lumen" class="text-accent-cyan hover:underline font-semibold">Learn why Lumen is different →</a>
                     </p>
                 </div>
                 <div class="space-y-8">

@@ -18,6 +18,7 @@ const routes = {
     '/verify': () => import('./pages/verify.js').then(m => m.renderVerifyPage()),
     '/forgot-password': () => import('./pages/forgot-password.js').then(m => m.renderForgotPasswordPage()),
     '/reset-password': () => import('./pages/reset-password.js').then(m => m.renderResetPasswordPage()),
+    '/2fa-verify': () => import('./pages/2fa-verify.js').then(m => m.render2FAVerifyPage()),
     '/app/dashboard': () => import('./pages/app/dashboard/layout.js').then(m => m.renderDashboardLayout()),
 };
 
@@ -42,9 +43,9 @@ const renderContentLoader = () => {
 
 const handleLocation = async () => {
     const path = window.location.pathname;
-    const fullScreenPages = ['/link', '/check-email', '/verify', '/forgot-password', '/reset-password'];
+    const hash = window.location.hash;
+    const fullScreenPages = ['/link', '/check-email', '/verify', '/forgot-password', '/reset-password', '/2fa-verify'];
 
-    // Set frame visibility and show a loader
     if (fullScreenPages.includes(path)) {
         navbarContainer.classList.add('hidden');
         footerContainer.classList.add('hidden');
@@ -89,15 +90,23 @@ const handleLocation = async () => {
         
         const pageContentHTML = await renderPromise;
         
-        // Final render pass
         contentContainer.innerHTML = pageContentHTML;
 
         if (!fullScreenPages.includes(path)) {
             navbarContainer.innerHTML = renderNavbar(path);
             footerContainer.innerHTML = renderFooter();
         }
-        
-        window.scrollTo(0, 0);
+
+        if (hash) {
+            setTimeout(() => {
+                const element = document.getElementById(hash.substring(1));
+                if (element) {
+                    element.scrollIntoView({ behavior: 'smooth' });
+                }
+            }, 150);
+        } else {
+            window.scrollTo(0, 0);
+        }
         
         requestAnimationFrame(() => {
             attachNavEventListeners();
@@ -129,20 +138,6 @@ const handleLocation = async () => {
 };
 
 const attachNavEventListeners = () => {
-    document.querySelectorAll('a').forEach(link => {
-        if (link.hostname === window.location.hostname && !link.hasAttribute('data-external')) {
-            link.addEventListener('click', e => {
-                if (link.hash) {
-                    return;
-                }
-                e.preventDefault();
-                if (window.location.pathname !== link.pathname || window.location.search !== link.search) {
-                    navigate(link.pathname + link.search);
-                }
-            });
-        }
-    });
-
     const docsMobileNavTrigger = document.getElementById('docs-mobile-trigger');
     const mobilePanel = document.getElementById('docs-mobile-panel');
     const mobileOverlay = document.getElementById('docs-mobile-overlay');
@@ -199,12 +194,27 @@ export const initializeRouter = async () => {
         
         document.body.addEventListener('click', (e) => {
             const link = e.target.closest('a[href]');
-            if (link && !link.hasAttribute('data-external') && link.hostname === window.location.hostname) {
-                 if (link.hash) return;
-                 e.preventDefault();
-                 if (window.location.pathname !== link.pathname || window.location.search !== link.search) {
-                    navigate(link.pathname + link.search);
-                 }
+
+            if (!link || link.hasAttribute('data-external') || link.hostname !== window.location.hostname) {
+                return;
+            }
+
+            const currentUrl = new URL(window.location.href);
+            const targetUrl = new URL(link.href);
+
+            if (targetUrl.pathname === currentUrl.pathname && targetUrl.search === currentUrl.search && targetUrl.hash) {
+                e.preventDefault();
+                const element = document.getElementById(targetUrl.hash.substring(1));
+                if (element) {
+                    element.scrollIntoView({ behavior: 'smooth' });
+                    window.history.pushState(null, '', targetUrl.pathname + targetUrl.search + targetUrl.hash);
+                }
+                return;
+            }
+            
+            if (targetUrl.pathname !== currentUrl.pathname || targetUrl.search !== currentUrl.search) {
+                e.preventDefault();
+                navigate(targetUrl.pathname + targetUrl.search);
             }
         });
         

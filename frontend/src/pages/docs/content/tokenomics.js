@@ -1,34 +1,27 @@
 export const renderTokenomics = () => `
     <h1 id="tokenomics">$LUM: The Data Sourcing Token</h1>
-    <p class="lead text-xl text-text-secondary">The $LUM token is the native currency of the Lumen Protocol, operating on the Avalanche C-Chain. It is specifically designed to incentivize the contribution of high-value data, forming a critical part of the broader Skillful AI economic model.</p>
+    <p class="lead text-xl text-text-secondary">$LUM is the native SPL token of the Lumen Protocol, operating on the Solana blockchain. It is an incentive and governance token, specifically designed to fuel the acquisition of high-value data for training artificial intelligence.</p>
 
-    <h2 id="a-dual-token-economy">A Dual-Token Economy: $LUM & $SKAI</h2>
-    <p>The ecosystem is powered by two distinct but synergistic tokens:</p>
-    <ul>
-        <li><code>$LUM</code> <strong>(Lumen Protocol):</strong> The primary incentive token. Its purpose is to reward developers for contributing the raw material—high-quality data—that the entire ecosystem is built upon. It is the currency of data sourcing.</li>
-        <li><code>$SKAI</code> <strong>(Skillful AI):</strong> The primary utility token of the Skillful AI platform. It is used to access creator tools, subscribe to services, and transact on the AI marketplace. It is the currency of AI consumption and creation.</li>
-    </ul>
-    <p>This dual-token system creates a clear and efficient economic flow. Lumen focuses exclusively on optimizing data acquisition, while Skillful AI focuses on building a vibrant marketplace for AI services. Value generated in the Skillful AI marketplace drives the demand for better data, which in turn drives the value and utility of the $LUM rewards.</p>
-    
-    <h2 id="lum-core-utility">Core Utility of $LUM</h2>
+    <h2 id="core-utility">Core Utility of $LUM</h2>
+    <p>The $LUM token has a clear and focused set of utilities designed to create a self-sustaining economic loop:</p>
     <ol>
-        <li><strong>Data Contribution Rewards:</strong> The sole function of $LUM is to be the reward mechanism for developers who contribute their anonymized code via the Lumen CLI.</li>
-        <li><strong>Governance:</strong> Holding $LUM will grant voting rights over the Lumen Protocol itself, allowing the community to guide the future of the data valuation engine, reward structures, and supported data types.</li>
-        <li><strong>Protocol Buybacks (Future):</strong> As the Lumen Protocol generates revenue by providing data to the Skillful AI ecosystem, a portion of these earnings will be used to buy back $LUM from the open market to replenish the reward pools, creating a sustainable, deflationary pressure.</li>
+        <li><strong>Data Contribution Rewards:</strong> The primary function of $LUM is to be the reward mechanism for developers who contribute their anonymized code via the Lumen CLI. The amount of $LUM rewarded is directly proportional to the value of the data contributed, as determined by the <a href="/docs/valuation">Valuation Engine</a>.</li>
+        <li><strong>Data Access Payments:</strong> AI companies and researchers who wish to access the curated, high-quality datasets from the Lumen network must purchase $LUM on the open market and use it to pay for access. This creates direct, sustainable demand for the token.</li>
+        <li><strong>Governance:</strong> Holding and staking $LUM will grant voting rights over the Lumen Protocol itself. This will allow the community to guide the future of the valuation engine, reward structures, data policies, and the allocation of the community treasury.</li>
     </ol>
     
-    <h2 id="deployment-on-avalanche">Deployment on Avalanche</h2>
-    <p>$LUM will be launched as an ERC-20 token on the Avalanche (AVAX) C-Chain. This strategic choice was made for several key reasons:</p>
+    <h2 id="deployment-on-solana">Deployment on Solana</h2>
+    <p>$LUM will be launched as a standard SPL token on the Solana blockchain. This strategic choice was made for several key reasons:</p>
     <ul>
-        <li><strong>Low Transaction Fees:</strong> Essential for making reward claims economically viable for all contributors, regardless of the size of their reward.</li>
-        <li><strong>High Throughput:</strong> The ability to process a large volume of transactions quickly is critical for a protocol designed to handle millions of data contributions.</li>
-        <li><strong>Thriving Ecosystem:</strong> Avalanche is rapidly becoming a hub for DePIN, AI, and gaming projects, placing Lumen and Skillful AI at the center of a vibrant and innovative community.</li>
+        <li><strong>Low Transaction Fees:</strong> Essential for making reward claims economically viable for all contributors, regardless of the size of their reward. Solana's consistently low fees (fractions of a cent) are ideal.</li>
+        <li><strong>High Throughput & Scalability:</strong> The ability to process thousands of transactions per second is critical for a protocol designed to handle millions of data contributions and reward distributions.</li>
+        <li><strong>Robust DeFi Ecosystem:</strong> Launching on Solana provides immediate access to a deep and liquid ecosystem of decentralized exchanges (DEXs), making it easy for AI companies to acquire $LUM and for contributors to trade their rewards.</li>
     </ul>
 
     <h2 id="supply-and-emission">Total Supply & Emission Schedule</h2>
-    <p>The total supply of $LUM is fixed at <strong>1,000,000,000</strong> tokens. The emission schedule is designed to aggressively reward early adopters.</p>
+    <p>The total supply of $LUM is fixed at <strong>1,000,000,000</strong> tokens, ensuring scarcity and preventing inflation. The emission schedule is designed to aggressively reward early adopters and bootstrap the network's data liquidity.</p>
     <ul>
-        <li><strong>The Genesis Program:</strong> The first <strong>500 unique developers</strong> to make a valuable contribution will receive a one-time <strong>bonus of 500 $LUM</strong>, on top of their standard reward. This program is designed to bootstrap the initial, critical mass of data for the Skillful AI ecosystem.</li>
-        <li><strong>Epoch-Based Halving:</strong> The base reward rate for contributions is governed by epochs tied to the total data contributed to the network. This means contributions made today will earn significantly more $LUM than those made in the future, creating a powerful incentive to join the network early.</li>
+        <li><strong>The Genesis Program:</strong> The first <strong>500 unique developers</strong> to make a valuable contribution will receive a one-time <strong>bonus of 500 $LUM</strong>, on top of their standard reward. This program is designed to bootstrap the initial, critical mass of high-quality data.</li>
+        <li><strong>Epoch-Based Rewards:</strong> The base reward rate for contributions is governed by epochs tied to the total data contributed to the network. This means contributions made today will earn significantly more $LUM than those made in the future, creating a powerful incentive to join the network early and be a foundational contributor.</li>
     </ul>
 `;

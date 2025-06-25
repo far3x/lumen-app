@@ -11,6 +11,8 @@ class AppSettings(BaseSettings):
 
     DATABASE_URL: str = os.getenv("DATABASE_URL", "sqlite:///./lumen_exchange.db")
     FRONTEND_URL: str = os.getenv("FRONTEND_URL", "http://localhost:5173")
+    
+    PUBLIC_LOGO_URL: str = os.getenv("PUBLIC_LOGO_URL", "https://i.ibb.co/9HV06CSK/logso.png")
 
     API_URL: str = os.getenv("API_URL", "http://localhost:8000") 
 

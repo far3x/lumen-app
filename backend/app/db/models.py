@@ -26,10 +26,14 @@ class User(Base):
     is_two_factor_enabled = Column(Boolean, default=False, nullable=False)
     two_factor_secret = Column(String, nullable=True)
     two_factor_backup_codes = Column(Text, nullable=True)
+    two_factor_disable_token = Column(String, unique=True, nullable=True)
+    two_factor_disable_expires = Column(Float, nullable=True)
+    deletion_token = Column(String, unique=True, nullable=True)
+    deletion_token_expires = Column(Float, nullable=True)
     created_at = Column(DateTime(timezone=True), server_default=func.now())
     account = relationship("Account", back_populates="user", uselist=False, cascade="all, delete-orphan")
     personal_access_tokens = relationship("PersonalAccessToken", back_populates="user", cascade="all, delete-orphan")
-    contributions = relationship("Contribution", back_populates="user", cascade="all, delete-orphan")
+    contributions = relationship("Contribution", back_populates="user")
     claim_transactions = relationship("ClaimTransaction", back_populates="user", cascade="all, delete-orphan")
     
     @hybrid_property
@@ -76,7 +80,7 @@ class NetworkStats(Base):
 class Contribution(Base):
     __tablename__ = "contributions"
     id = Column(Integer, primary_key=True, index=True)
-    user_id = Column(Integer, ForeignKey("users.id"), nullable=False)
+    user_id = Column(Integer, ForeignKey("users.id", ondelete="SET NULL"), nullable=True)
     created_at = Column(DateTime(timezone=True), server_default=func.now())
     raw_content = Column(Text, nullable=False)
     valuation_results = Column(JSONB, nullable=False)

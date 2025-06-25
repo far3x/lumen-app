@@ -1,17 +1,21 @@
-from fastapi import APIRouter, Depends, HTTPException, Query, status, Request, Response
+from fastapi import APIRouter, Depends, HTTPException, Query, status, Request, Response, BackgroundTasks
 from sqlalchemy.orm import Session
 import json
+import secrets
+from datetime import timedelta, datetime, timezone
+from pathlib import Path
 from authlib.integrations.starlette_client import OAuth
 from solders.pubkey import Pubkey
 from solders.message import Message
 from nacl.signing import VerifyKey
 import nacl.exceptions
+from fastapi_mail import FastMail, MessageSchema, ConnectionConfig
 
 from app.db import crud, models, database
 from app.api.v1 import dependencies
-from app.schemas import User as UserSchema, AccountDetails, ContributionResponse, UserUpdate, ValuationMetrics, AiAnalysis, ChangePasswordRequest, WalletLinkRequest, ClaimTransactionResponse, SetWalletAddressRequest
+from app.schemas import User as UserSchema, AccountDetails, ContributionResponse, UserUpdate, ValuationMetrics, AiAnalysis, ChangePasswordRequest, WalletLinkRequest, ClaimTransactionResponse, SetWalletAddressRequest, UserDeletePayload
 from pydantic import BaseModel, constr
-from typing import List
+from typing import List, Optional
 from app.core import security, config
 from app.core.limiter import limiter
 
@@ -24,6 +28,20 @@ class PaginatedClaims(BaseModel):
     total: int
 
 router = APIRouter(prefix="/users", tags=["Users"])
+
+mail_conf = ConnectionConfig(
+    MAIL_USERNAME=config.settings.MAIL_USERNAME,
+    MAIL_PASSWORD=config.settings.MAIL_PASSWORD,
+    MAIL_FROM=config.settings.MAIL_FROM,
+    MAIL_PORT=config.settings.MAIL_PORT,
+    MAIL_SERVER=config.settings.MAIL_SERVER,
+    MAIL_FROM_NAME=config.settings.MAIL_FROM_NAME,
+    MAIL_STARTTLS=config.settings.MAIL_STARTTLS,
+    MAIL_SSL_TLS=config.settings.MAIL_SSL_TLS,
+    USE_CREDENTIALS=True,
+    VALIDATE_CERTS=True,
+    TEMPLATE_FOLDER=Path(__file__).parent.parent.parent.parent / 'templates'
+)
 
 oauth = OAuth()
 oauth.register( name='google', client_id=config.settings.GOOGLE_CLIENT_ID, client_secret=config.settings.GOOGLE_CLIENT_SECRET, server_metadata_url='https://accounts.google.com/.well-known/openid-configuration', client_kwargs={'scope': 'openid email profile'} )
@@ -45,6 +63,84 @@ async def update_users_me(
 ):
     updated_user = crud.update_user_profile(db, current_user, user_update)
     return updated_user
+
+@router.post("/me/request-deletion", status_code=status.HTTP_200_OK)
+@limiter.limit("3/day")
+async def request_account_deletion(
+    request: Request,
+    background_tasks: BackgroundTasks,
+    current_user: models.User = Depends(dependencies.get_current_user),
+    db: Session = Depends(database.get_db)
+):
+    if current_user.has_password:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Accounts with a password must use password confirmation to delete.")
+    if not current_user.email:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Cannot send deletion link, no email associated with this account.")
+
+    expires = timedelta(hours=1)
+    token = secrets.token_urlsafe(32)
+    
+    current_user.deletion_token = token
+    expires_at = datetime.now(timezone.utc) + expires
+    current_user.deletion_token_expires = expires_at.timestamp()
+    
+    db.add(current_user)
+    db.commit()
+
+    deletion_link = f"{config.settings.FRONTEND_URL}/app/dashboard?tab=settings&action=confirm-delete&token={token}"
+    
+    template_body = {
+        "deletion_link": deletion_link,
+        "year": datetime.now().year,
+        "logo_url": config.settings.PUBLIC_LOGO_URL
+    }
+
+    message = MessageSchema(
+        subject="Lumen Protocol: Confirm Account Deletion",
+        recipients=[current_user.email],
+        template_body=template_body,
+        subtype="html"
+    )
+    
+    fm = FastMail(mail_conf)
+    background_tasks.add_task(fm.send_message, message, template_name="account_deletion_email.html")
+    
+    return {"message": "A confirmation link to delete your account has been sent to your email."}
+
+
+@router.delete("/me", status_code=status.HTTP_200_OK)
+@limiter.limit("5/day")
+async def delete_users_me(
+    response: Response,
+    request: Request,
+    payload: UserDeletePayload,
+    current_user: models.User = Depends(dependencies.get_current_user),
+    db: Session = Depends(database.get_db)
+):
+    is_valid = False
+    if current_user.has_password:
+        if payload.password and security.verify_password(payload.password, current_user.hashed_password):
+            is_valid = True
+    elif payload.token:
+        current_timestamp = datetime.now(timezone.utc).timestamp()
+        if (current_user.deletion_token == payload.token and 
+            current_user.deletion_token_expires and 
+            current_user.deletion_token_expires >= current_timestamp):
+            is_valid = True
+            current_user.deletion_token = None
+            current_user.deletion_token_expires = None
+            db.add(current_user)
+            db.commit()
+
+    if not is_valid:
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid credentials or token for deletion.")
+
+    crud.delete_user(db, user=current_user)
+
+    response.delete_cookie("access_token")
+    response.delete_cookie("is_logged_in")
+    
+    return {"message": "Your account has been successfully deleted."}
 
 @router.post("/me/change-password")
 @limiter.limit("3/day")
