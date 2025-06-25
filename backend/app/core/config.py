@@ -23,8 +23,6 @@ class AppSettings(BaseSettings):
 
     LUMEN_CLIENT_SECRET: str = os.getenv("LUMEN_CLIENT_SECRET")
 
-    GOOGLE_CLIENT_ID: str = os.getenv("GOOGLE_CLIENT_ID")
-    GOOGLE_CLIENT_SECRET: str = os.getenv("GOOGLE_CLIENT_SECRET")
     GITHUB_CLIENT_ID: str = os.getenv("GITHUB_CLIENT_ID")
     GITHUB_CLIENT_SECRET: str = os.getenv("GITHUB_CLIENT_SECRET")
 
@@ -53,5 +51,8 @@ class AppSettings(BaseSettings):
     SOLANA_RPC_URL: str = os.getenv("SOLANA_RPC_URL")
     TREASURY_PRIVATE_KEY: str = os.getenv("TREASURY_PRIVATE_KEY")
     LUM_TOKEN_MINT_ADDRESS: str = os.getenv("LUM_TOKEN_MINT_ADDRESS")
+    
+    COOLDOWN_DAYS: int = int(os.getenv("COOLDOWN_DAYS", "7"))
+
 
 settings = AppSettings()

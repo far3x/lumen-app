@@ -1,4 +1,4 @@
-import { getUser, getAccount, fetchLeaderboard, fetchContributions, fetchRecentContributions, logout, fetchAndStoreUser, fetchAndStoreAccount, isAuthenticated, fetchClaims, api as authApi, fetchAllContributions, setAccount } from '../../../lib/auth.js';
+import { getUser, getAccount, fetchLeaderboard, fetchContributions, logout, fetchAndStoreUser, fetchAndStoreAccount, isAuthenticated, fetchClaims, api as authApi, fetchAllContributions, setAccount } from '../../../lib/auth.js';
 import { updateBalancesInUI, renderModal } from './utils.js';
 import { navigate } from '../../../router.js';
 import { renderDashboardOverview, initializeChart, attachChartButtonListeners } from './overview.js';
@@ -130,7 +130,6 @@ async function refreshDashboardData(isInitialLoad = false) {
             fetchAndStoreAccount(),
             fetchLeaderboard(),
             fetchContributions(1, 10),
-            fetchRecentContributions(),
             fetchClaims(1, 10),
             fetchAllContributions()
         ]);
@@ -144,9 +143,8 @@ async function refreshDashboardData(isInitialLoad = false) {
             contributionsState.isLastPage = (contributionsState.currentPage * 10) >= results[2].value.total;
         }
 
-        dashboardState.recentContributions = results[3].status === 'fulfilled' ? results[3].value : [];
-        dashboardState.allClaims = results[4].status === 'fulfilled' ? results[4].value.items : [];
-        dashboardState.chartContributions = results[5].status === 'fulfilled' ? results[5].value : [];
+        dashboardState.allClaims = results[3].status === 'fulfilled' ? results[3].value.items : [];
+        dashboardState.chartContributions = results[4].status === 'fulfilled' ? results[4].value : [];
 
         const urlParams = new URLSearchParams(window.location.search);
         const currentTabId = urlParams.get('tab') || 'overview';
@@ -271,7 +269,7 @@ async function setupDashboard() {
 
     const urlParams = new URLSearchParams(window.location.search);
     let currentTabId = urlParams.get('tab') || 'overview';
-    
+
     if (urlParams.get('status') === 'link_complete') {
         window.history.replaceState({}, document.title, "/app/dashboard?tab=settings&status=link_success");
         window.location.reload();
@@ -279,30 +277,16 @@ async function setupDashboard() {
     }
 
     try {
-        let user = getUser();
-        let account = getAccount();
-
-        if (isAuthenticated() && (!user || !account)) {
-            try {
-                const [fetchedUser, fetchedAccount] = await Promise.all([
-                    fetchAndStoreUser(),
-                    fetchAndStoreAccount()
-                ]);
-                user = fetchedUser;
-                account = fetchedAccount;
-            } catch (authError) {
-                console.error("Critical auth data fetch failed:", authError);
-                if (authError.response && authError.response.status === 401) {
-                    logout(); navigate('/login');
-                } else {
-                    dashboardContentArea.innerHTML = `<div class="text-center p-8 text-red-400">Failed to load your account information. Please try again.</div>`;
-                }
-                return;
-            }
+        if (!isAuthenticated()) {
+            logout();
+            return;
         }
 
-        if (!user) { logout(); navigate('/login'); return; }
-
+        const [user, account] = await Promise.all([
+            fetchAndStoreUser(),
+            fetchAndStoreAccount()
+        ]);
+        
         dashboardState.user = user;
         dashboardState.account = account;
         
@@ -317,7 +301,11 @@ async function setupDashboard() {
 
     } catch (error) {
         console.error("Dashboard setup failed globally:", error);
-        if (!(error.response && error.response.status === 401)) {
+        if (error.response && error.response.status === 401) {
+           logout();
+           return;
+        }
+        if (dashboardContentArea) {
            dashboardContentArea.innerHTML = `<div class="text-center p-8 text-red-400">Could not load all dashboard data. Some features might be unavailable. Error: ${error.message}</div>`;
         }
         return;

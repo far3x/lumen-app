@@ -26,7 +26,6 @@ def upgrade() -> None:
         sa.Column('email', sa.String(), nullable=True),
         sa.Column('hashed_password', sa.String(), nullable=True),
         sa.Column('github_id', sa.String(), nullable=True),
-        sa.Column('google_id', sa.String(), nullable=True),
         sa.Column('display_name', sa.String(), nullable=True),
         sa.Column('is_genesis_reward_claimed', sa.Boolean(), nullable=False, server_default=sa.text('false')),
         # FINAL CORRECT SCHEMA: default is 'false' for boolean in postgres
@@ -43,7 +42,6 @@ def upgrade() -> None:
         sa.Column('created_at', sa.DateTime(timezone=True), server_default=sa.text('now()'), nullable=True),
         sa.PrimaryKeyConstraint('id'),
         sa.UniqueConstraint('github_id'),
-        sa.UniqueConstraint('google_id'),
         sa.UniqueConstraint('two_factor_disable_token')
     )
     op.create_index(op.f('ix_users_email'), 'users', ['email'], unique=True)

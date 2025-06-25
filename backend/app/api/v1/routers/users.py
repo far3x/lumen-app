@@ -44,7 +44,6 @@ mail_conf = ConnectionConfig(
 )
 
 oauth = OAuth()
-oauth.register( name='google', client_id=config.settings.GOOGLE_CLIENT_ID, client_secret=config.settings.GOOGLE_CLIENT_SECRET, server_metadata_url='https://accounts.google.com/.well-known/openid-configuration', client_kwargs={'scope': 'openid email profile'} )
 oauth.register( name='github', client_id=config.settings.GITHUB_CLIENT_ID, client_secret=config.settings.GITHUB_CLIENT_SECRET, access_token_url='https://github.com/login/oauth/access_token', authorize_url='https://github.com/login/oauth/authorize', api_base_url='https://api.github.com/', client_kwargs={'scope': 'user:email'} )
 
 
@@ -216,20 +215,6 @@ async def set_wallet_address_manually(
     db.refresh(current_user)
     return current_user
 
-
-@router.post("/me/unlink-wallet", response_model=UserSchema)
-@limiter.limit("5/hour")
-async def unlink_wallet(
-    request: Request,
-    current_user: models.User = Depends(dependencies.get_current_user),
-    db: Session = Depends(database.get_db)
-):
-    current_user.solana_address = None
-    db.add(current_user)
-    db.commit()
-    db.refresh(current_user)
-    return current_user
-
 @router.get("/me/balance", response_model=AccountDetails)
 @limiter.limit("60/minute")
 def get_my_balance(
@@ -362,7 +347,7 @@ async def link_oauth_account(
     provider: str,
     current_user: models.User = Depends(dependencies.get_current_user)
 ):
-    if provider not in ['google', 'github']:
+    if provider not in ['github']:
         raise HTTPException(status_code=404, detail="Provider not found")
 
     request.session['oauth_link_user_id'] = current_user.id

@@ -6,12 +6,11 @@ from sqlalchemy.orm import Session
 from sqlalchemy import func, text
 from fastapi import HTTPException, status
 from typing import Optional
-from datetime import datetime
+from datetime import datetime, timedelta, timezone
 
-from app.core import security
+from app.core import security, config
 from app import schemas
 from . import models
-from datetime import timedelta
 
 def get_user(db: Session, user_id: int):
     return db.query(models.User).filter(models.User.id == user_id).first()
@@ -25,7 +24,6 @@ def get_user_by_pat(db: Session, pat: str):
     return token_obj.user if token_obj else None
 
 def get_user_by_oauth_id(db: Session, provider: str, oauth_id: str):
-    if provider == "google": return db.query(models.User).filter(models.User.google_id == oauth_id).first()
     if provider == "github": return db.query(models.User).filter(models.User.github_id == oauth_id).first()
     return None
 
@@ -36,6 +34,9 @@ def create_user(db: Session, user: schemas.UserCreate):
         display_name = f"user-{secrets.token_hex(4)}"
 
     db_user = models.User(email=user.email, hashed_password=hashed_password, display_name=display_name)
+    
+    if config.settings.COOLDOWN_DAYS > 0:
+        db_user.cooldown_until = datetime.now(timezone.utc) + timedelta(days=config.settings.COOLDOWN_DAYS)
     
     expires = timedelta(hours=24)
     verification_token = security.create_access_token(data={"sub": f"verify:{db_user.email}"}, expires_delta=expires)
@@ -82,8 +83,7 @@ def create_oauth_user(db: Session, provider: str, user_info: dict):
     if email:
         db_user = get_user_by_email(db, email=email)
         if db_user:
-            if provider == "google" and not db_user.google_id: db_user.google_id = user_info["sub"]
-            elif provider == "github" and not db_user.github_id: db_user.github_id = str(user_info["id"])
+            if provider == "github" and not db_user.github_id: db_user.github_id = str(user_info["id"])
             if not db_user.display_name:
                  db_user.display_name = clean_name
             db_user.is_verified = True
@@ -92,9 +92,13 @@ def create_oauth_user(db: Session, provider: str, user_info: dict):
             return db_user
 
     user_data = {"display_name": clean_name, "email": email, "is_verified": True}
-    if provider == "google": user_data["google_id"] = user_info["sub"]
-    elif provider == "github": user_data["github_id"] = str(user_info["id"])
+    if provider == "github": user_data["github_id"] = str(user_info["id"])
+    
     db_user = models.User(**user_data)
+    
+    if config.settings.COOLDOWN_DAYS > 0:
+        db_user.cooldown_until = datetime.now(timezone.utc) + timedelta(days=config.settings.COOLDOWN_DAYS)
+
     db.add(db_user)
     db.commit()
     db.refresh(db_user)

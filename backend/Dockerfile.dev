@@ -21,8 +21,6 @@ COPY --from=scc_builder /usr/local/bin/scc /usr/local/bin/scc
 
 COPY requirements.txt .
 
-RUN addgroup --system app && adduser --system --group app
-
-USER app
+RUN pip install -r requirements.txt
 
 CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000"]

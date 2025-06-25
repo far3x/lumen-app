@@ -1,18 +1,32 @@
 import Chart from 'chart.js/auto';
 import { icons, renderModal, updateBalancesInUI } from './utils.js';
 import { api as authApi, fetchAndStoreAccount, getAccount } from '../../../lib/auth.js';
+import { DateTime } from 'luxon';
 
 let chartInstance = null;
 
-function renderWalletSection(account, user) {
+function renderWalletSection(user, account) {
     const claimableBalance = account?.lum_balance || 0;
-    const isWalletLinked = user?.solana_address;
+    const isWalletLinked = !!user?.solana_address;
+    
+    let isClaimDisabled = !isWalletLinked || claimableBalance <= 0;
+    let cooldownMessage = '';
+
+    if (user && user.cooldown_until) {
+        const now = DateTime.utc();
+        const cooldownEnd = DateTime.fromISO(user.cooldown_until);
+        if (now < cooldownEnd) {
+            isClaimDisabled = true;
+            const remaining = cooldownEnd.diff(now, ['days', 'hours']).normalize();
+            cooldownMessage = `New account cooldown. You can claim in ${remaining.toFormat("d 'days,' h 'hours'")}.`;
+        }
+    }
 
     const claimButtonHTML = `
         <button id="claim-rewards-btn"
                 class="w-full md:w-auto px-8 py-3 font-bold bg-gradient-to-r from-accent-purple to-accent-pink text-white rounded-lg transition-all duration-300 hover:scale-105 hover:shadow-lg hover:shadow-accent-purple/30 hover:brightness-110 shrink-0
-                       ${(!isWalletLinked || claimableBalance <= 0) ? 'opacity-50 cursor-not-allowed' : ''}"
-                data-is-wallet-linked="${isWalletLinked ? 'true' : 'false'}">
+                       ${isClaimDisabled ? 'opacity-50 cursor-not-allowed' : ''}"
+                ${isClaimDisabled ? 'disabled' : ''}>
             Claim Rewards
         </button>
     `;
@@ -30,7 +44,7 @@ function renderWalletSection(account, user) {
                 <p class="text-text-secondary mt-1">
                     ${isWalletLinked ? 'Your rewards are ready to be claimed.' : 'Link your wallet in Settings to enable claims.'}
                 </p>
-                <p id="claim-rewards-btn-subtext" class="text-xs text-yellow-400 mt-2 h-4"></p>
+                <p id="claim-rewards-btn-subtext" class="text-xs text-yellow-400 mt-2 h-4">${cooldownMessage}</p>
             </div>
             <div class="w-full md:w-auto flex flex-col items-center md:items-end">
                 <div class="text-center md:text-right">
@@ -182,7 +196,7 @@ export function renderDashboardOverview(user, account, rank, totalContributions)
         </div>
 
         <div class="animate-fade-in-up" style="animation-delay: 300ms;">
-             ${renderWalletSection(account, user)}
+             ${renderWalletSection(user, account)}
         </div>
 
         <div class="animate-fade-in-up bg-surface p-6 rounded-xl border border-primary mt-6" style="animation-delay: 200ms;">
