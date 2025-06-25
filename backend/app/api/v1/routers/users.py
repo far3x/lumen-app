@@ -9,7 +9,7 @@ import nacl.exceptions
 
 from app.db import crud, models, database
 from app.api.v1 import dependencies
-from app.schemas import User as UserSchema, Account as AccountSchema, ContributionResponse, UserUpdate, ValuationMetrics, AiAnalysis, ChangePasswordRequest, WalletLinkRequest, ClaimTransactionResponse, SetWalletAddressRequest # Added SetWalletAddressRequest
+from app.schemas import User as UserSchema, AccountDetails, ContributionResponse, UserUpdate, ValuationMetrics, AiAnalysis, ChangePasswordRequest, WalletLinkRequest, ClaimTransactionResponse, SetWalletAddressRequest
 from pydantic import BaseModel, constr
 from typing import List
 from app.core import security, config
@@ -31,11 +31,12 @@ oauth.register( name='github', client_id=config.settings.GITHUB_CLIENT_ID, clien
 
 
 @router.get("/me", response_model=UserSchema)
-async def read_users_me(current_user: models.User = Depends(dependencies.get_current_user)):
+@limiter.limit("60/minute")
+async def read_users_me(request: Request, current_user: models.User = Depends(dependencies.get_current_user)):
     return current_user
 
 @router.put("/me", response_model=UserSchema)
-@limiter.limit("10/minute")
+@limiter.limit("15/hour")
 async def update_users_me(
     request: Request,
     user_update: UserUpdate,
@@ -46,24 +47,26 @@ async def update_users_me(
     return updated_user
 
 @router.post("/me/change-password")
+@limiter.limit("3/day")
 async def change_password(
-    request: ChangePasswordRequest,
+    request: Request,
+    payload: ChangePasswordRequest,
     current_user: models.User = Depends(dependencies.get_current_user),
     db: Session = Depends(database.get_db)
 ):
     if not current_user.hashed_password:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Cannot change password for accounts created with OAuth.")
 
-    if not security.verify_password(request.current_password, current_user.hashed_password):
+    if not security.verify_password(payload.current_password, current_user.hashed_password):
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Incorrect current password.")
     
-    current_user.hashed_password = security.get_password_hash(request.new_password)
+    current_user.hashed_password = security.get_password_hash(payload.new_password)
     db.add(current_user)
     db.commit()
     return {"message": "Password updated successfully. Please log in again."}
 
 @router.post("/me/link-wallet", response_model=UserSchema)
-@limiter.limit("10/minute")
+@limiter.limit("5/hour")
 async def link_wallet(
     request: Request,
     payload: WalletLinkRequest,
@@ -79,27 +82,13 @@ async def link_wallet(
         verify_key.verify(message_bytes, signature_bytes)
 
     except nacl.exceptions.BadSignatureError:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail="Signature verification failed: Invalid signature for the given message and public key. Ensure the correct wallet signed the message.",
-        )
-    except ValueError as e:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail=f"Invalid payload format: {e}. Check address, signature, or message encoding.",
-        )
-    except Exception as e:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail=f"Signature verification failed due to an unexpected error: {str(e)}",
-        )
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Signature verification failed.")
+    except Exception:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Invalid payload format.")
     
     existing_user = db.query(models.User).filter(models.User.solana_address == payload.solana_address).first()
     if existing_user and existing_user.id != current_user.id:
-        raise HTTPException(
-            status_code=status.HTTP_409_CONFLICT,
-            detail="This wallet is already linked to another account.",
-        )
+        raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="This wallet is already linked to another account.")
         
     current_user.solana_address = payload.solana_address
     db.add(current_user)
@@ -109,7 +98,7 @@ async def link_wallet(
     return current_user
 
 @router.post("/me/set-wallet-address", response_model=UserSchema)
-@limiter.limit("5/minute")
+@limiter.limit("5/hour")
 async def set_wallet_address_manually(
     request: Request,
     payload: SetWalletAddressRequest,
@@ -123,10 +112,7 @@ async def set_wallet_address_manually(
 
     existing_user = db.query(models.User).filter(models.User.solana_address == payload.solana_address).first()
     if existing_user and existing_user.id != current_user.id:
-        raise HTTPException(
-            status_code=status.HTTP_409_CONFLICT,
-            detail="This wallet address is already linked to another account.",
-        )
+        raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="This wallet address is already linked to another account.")
     
     current_user.solana_address = payload.solana_address
     db.add(current_user)
@@ -136,7 +122,7 @@ async def set_wallet_address_manually(
 
 
 @router.post("/me/unlink-wallet", response_model=UserSchema)
-@limiter.limit("10/minute")
+@limiter.limit("5/hour")
 async def unlink_wallet(
     request: Request,
     current_user: models.User = Depends(dependencies.get_current_user),
@@ -148,18 +134,72 @@ async def unlink_wallet(
     db.refresh(current_user)
     return current_user
 
-@router.get("/me/balance", response_model=AccountSchema)
+@router.get("/me/balance", response_model=AccountDetails)
+@limiter.limit("60/minute")
 def get_my_balance(
+    request: Request,
     current_user: models.User = Depends(dependencies.get_current_user), 
     db: Session = Depends(database.get_db)
 ):
-    account = crud.get_account(db, user_id=current_user.id)
-    if not account:
+    account_details = crud.get_account_details(db, user_id=current_user.id)
+    if not account_details:
         raise HTTPException(status_code=404, detail="Account not found")
-    return account
+    return account_details
+
+@router.get("/me/contributions/all", response_model=List[ContributionResponse])
+@limiter.limit("10/minute")
+def get_my_all_contributions(
+    request: Request,
+    current_user: models.User = Depends(dependencies.get_current_user),
+    db: Session = Depends(database.get_db)
+):
+    contributions = crud.get_all_user_contributions(db, user_id=current_user.id)
+    
+    response_list = []
+    for contrib in contributions:
+        valuation_data = {}
+        if contrib.valuation_results:
+            data = contrib.valuation_results
+            if isinstance(data, str):
+                try: data = json.loads(data)
+                except (json.JSONDecodeError, TypeError): data = {}
+            if isinstance(data, str):
+                try: data = json.loads(data)
+                except (json.JSONDecodeError, TypeError): data = {}
+            if isinstance(data, dict):
+                valuation_data = data
+        
+        manual_metrics = ValuationMetrics(
+            total_lloc=valuation_data.get('total_lloc', 0),
+            total_tokens=valuation_data.get('total_tokens', 0),
+            avg_complexity=valuation_data.get('avg_complexity', 0.0),
+            compression_ratio=valuation_data.get('compression_ratio', 0.0),
+            language_breakdown=valuation_data.get('language_breakdown', {})
+        )
+        
+        ai_analysis = AiAnalysis(
+            project_clarity_score=valuation_data.get('project_clarity_score', 0.0),
+            architectural_quality_score=valuation_data.get('architectural_quality_score', 0.0),
+            code_quality_score=valuation_data.get('code_quality_score', 0.0),
+            analysis_summary=valuation_data.get('analysis_summary')
+        )
+
+        response_list.append(ContributionResponse(
+            id=contrib.id,
+            created_at=contrib.created_at,
+            reward_amount=contrib.reward_amount,
+            status=contrib.status,
+            valuation_details=valuation_data,
+            manual_metrics=manual_metrics,
+            ai_analysis=ai_analysis
+        ))
+    
+    return response_list
 
 @router.get("/me/contributions", response_model=PaginatedContributions)
+@limiter.limit("30/minute")
 def get_my_contributions(
+    request: Request,
     current_user: models.User = Depends(dependencies.get_current_user),
     db: Session = Depends(database.get_db),
     skip: int = Query(0, ge=0),
@@ -209,7 +249,9 @@ def get_my_contributions(
     return PaginatedContributions(items=response_list, total=total_count)
 
 @router.get("/me/claims", response_model=PaginatedClaims)
+@limiter.limit("30/minute")
 def get_my_claims(
+    request: Request,
     current_user: models.User = Depends(dependencies.get_current_user),
     db: Session = Depends(database.get_db),
     skip: int = Query(0, ge=0),

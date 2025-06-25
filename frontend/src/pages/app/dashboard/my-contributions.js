@@ -1,20 +1,45 @@
-import { api, fetchContributions, checkContributionStatus, fetchAndStoreAccount } from '../../../lib/auth.js';
-import { getStatusClasses, getStatusText, renderModal, escapeHtml, icons, updateBalancesInUI } from './utils.js';
+import { api, fetchContributions } from '../../../lib/auth.js';
+import { getStatusClasses, getStatusText, renderModal, escapeHtml, icons } from './utils.js';
 
 export let contributionsState = {
     currentPage: 1,
     isLoading: false,
     isLastPage: false,
     totalContributions: 0,
-    pollerId: null,
 };
 
 export function resetContributionsState() {
-    if (contributionsState.pollerId) {
-        clearInterval(contributionsState.pollerId);
-    }
+    document.removeEventListener('contributionUpdate', handleContributionUpdate);
     const total = contributionsState.totalContributions;
-    contributionsState = { currentPage: 1, isLoading: false, isLastPage: false, totalContributions: total, pollerId: null };
+    contributionsState = { currentPage: 1, isLoading: false, isLastPage: false, totalContributions: total };
+}
+
+function handleContributionUpdate(event) {
+    const updatedContrib = event.detail;
+    const allContributions = window.dashboardState?.allContributions || [];
+
+    const index = allContributions.findIndex(c => c.id === updatedContrib.id);
+    if (index !== -1) {
+        allContributions[index] = updatedContrib;
+    } else {
+        allContributions.unshift(updatedContrib);
+    }
+    
+    const row = document.querySelector(`.contribution-row[data-id='${updatedContrib.id}']`);
+    if (row) {
+        row.outerHTML = renderSingleContributionRow(updatedContrib);
+        attachDetailModalListeners(allContributions);
+    } else {
+        const tableBody = document.querySelector('#contributions-table-container tbody');
+        if (tableBody) {
+            const emptyRow = tableBody.querySelector('td[colspan="5"]');
+            if (emptyRow) {
+                tableBody.innerHTML = '';
+            }
+            tableBody.insertAdjacentHTML('afterbegin', renderSingleContributionRow(updatedContrib));
+            attachDetailModalListeners(allContributions);
+        }
+    }
 }
 
 function renderProTipsSection() {
@@ -76,8 +101,8 @@ function renderContributionDetailModal(item) {
                         <p class="text-lg font-bold font-mono text-text-main">${details.rarity_multiplier?.toFixed(2) ?? 'N/A'}x</p>
                     </div>
                     <div class="bg-primary p-3 rounded-lg">
-                        <p class="text-xs text-subtle">Halving</p>
-                        <p class="text-lg font-bold font-mono text-text-main">${details.halving_multiplier?.toFixed(2) ?? 'N/A'}x</p>
+                        <p class="text-xs text-subtle">Multiplier</p>
+                        <p class="text-lg font-bold font-mono text-text-main">${details.network_growth_multiplier?.toFixed(2) ?? 'N/A'}x</p>
                     </div>
                 </div>
             </div>
@@ -109,6 +134,30 @@ function renderContributionDetailModal(item) {
     renderModal(`Contribution #${item.id}`, content);
 }
 
+function renderSingleContributionRow(item) {
+    return `
+    <tr class="contribution-row" data-id="${item.id}">
+        <td class="py-4 px-4 text-text-secondary">${new Date(item.created_at).toLocaleDateString()}</td>
+        <td class="py-4 px-4"><span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getStatusClasses(item.status)}">${getStatusText(item.status)}</span></td>
+        <td class="py-4 px-4 text-right font-mono ${item.reward_amount > 0 ? 'text-green-400' : 'text-text-secondary'}">${item.reward_amount > 0 ? `+${item.reward_amount.toFixed(4)}` : '...'}</td>
+        <td class="py-4 px-4 text-center">
+            <button class="details-btn text-text-secondary hover:brightness-150 transition-all disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:brightness-100" data-id="${item.id}" ${item.status !== 'PROCESSED' ? 'disabled' : ''}>
+                ${icons.view}
+            </button>
+        </td>
+        <td class="py-4 px-4 text-center">
+            ${item.transaction_hash ? `
+                <a href="https://solscan.io/tx/${item.transaction_hash}?cluster=devnet" target="_blank" rel="noopener noreferrer" class="inline-block text-text-secondary hover:brightness-150 transition-all" title="View on Solscan">
+                    <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" stroke="url(#dashboard-icon-gradient)" /></svg>
+                </a>
+            ` : `
+                <span class="text-subtle">-</span>
+            `}
+        </td>
+    </tr>
+    `;
+}
+
 function renderContributionHistory(contributions) {
     return `
         <div class="overflow-x-auto">
@@ -123,27 +172,7 @@ function renderContributionHistory(contributions) {
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-primary">
-                ${contributions.length > 0 ? contributions.map(item => `
-                    <tr class="contribution-row" data-id="${item.id}">
-                        <td class="py-4 px-4 text-text-secondary">${new Date(item.created_at).toLocaleDateString()}</td>
-                        <td class="py-4 px-4"><span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getStatusClasses(item.status)}">${getStatusText(item.status)}</span></td>
-                        <td class="py-4 px-4 text-right font-mono ${item.reward_amount > 0 ? 'text-green-400' : 'text-text-secondary'}">${item.reward_amount > 0 ? `+${item.reward_amount.toFixed(4)}` : '...'}</td>
-                        <td class="py-4 px-4 text-center">
-                            <button class="details-btn text-text-secondary hover:brightness-150 transition-all disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:brightness-100" data-id="${item.id}" ${item.status !== 'PROCESSED' ? 'disabled' : ''}>
-                                ${icons.view}
-                            </button>
-                        </td>
-                        <td class="py-4 px-4 text-center">
-                            ${item.transaction_hash ? `
-                                <a href="https://solscan.io/tx/${item.transaction_hash}?cluster=devnet" target="_blank" rel="noopener noreferrer" class="inline-block text-text-secondary hover:brightness-150 transition-all" title="View on Solscan">
-                                    <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" stroke="url(#dashboard-icon-gradient)" /></svg>
-                                </a>
-                            ` : `
-                                <span class="text-subtle">-</span>
-                            `}
-                        </td>
-                    </tr>
-                `).join('') : `<tr><td colspan="5" class="py-12 text-center text-text-secondary">
+                ${contributions.length > 0 ? contributions.map(renderSingleContributionRow).join('') : `<tr><td colspan="5" class="py-12 text-center text-text-secondary">
                     <div class="flex flex-col items-center">
                         <div class="w-12 h-12 text-accent-purple mb-4">${icons.contributions}</div>
                         <p>No contributions found yet.</p>
@@ -170,7 +199,7 @@ function renderContributionsPagination() {
     `;
 }
 
-async function changeContributionsPage(direction, allContributions) {
+async function changeContributionsPage(direction, dashboardState) {
     if (contributionsState.isLoading) return;
     
     const newPage = contributionsState.currentPage + direction;
@@ -185,12 +214,11 @@ async function changeContributionsPage(direction, allContributions) {
         contributionsState.totalContributions = result.total;
         contributionsState.isLastPage = (contributionsState.currentPage * 10) >= result.total;
         
-        allContributions.length = 0;
-        allContributions.push(...result.items);
+        dashboardState.allContributions.length = 0;
+        dashboardState.allContributions.push(...result.items);
 
         document.getElementById('contributions-table-container').innerHTML = renderContributionHistory(result.items);
-        attachDetailModalListeners(allContributions);
-        startContributionStatusPoller(allContributions);
+        attachDetailModalListeners(dashboardState.allContributions);
     } catch (error) {
         console.error("Failed to fetch new page of contributions:", error);
     } finally {
@@ -221,61 +249,13 @@ function attachDetailModalListeners(allContributions) {
     });
 }
 
-function startContributionStatusPoller(allContributions) {
-    const processingContributions = allContributions.filter(c => ['PENDING', 'PROCESSING'].includes(c.status));
-
-    if (processingContributions.length === 0) {
-        if (contributionsState.pollerId) {
-            clearInterval(contributionsState.pollerId);
-            contributionsState.pollerId = null;
-        }
-        return;
-    }
-
-    if (contributionsState.pollerId) return;
-
-    contributionsState.pollerId = setInterval(async () => {
-        let needsUIRefresh = false;
-
-        for (const contrib of [...processingContributions]) {
-            try {
-                const statusResponse = await checkContributionStatus(contrib.id);
-                if (statusResponse.data && !['PENDING', 'PROCESSING'].includes(statusResponse.data.status)) {
-                    const fullContribResponse = await api.get(`/contributions/${contrib.id}`);
-                    const updatedContrib = fullContribResponse.data;
-
-                    const index = allContributions.findIndex(c => c.id === updatedContrib.id);
-                    if (index !== -1) {
-                        allContributions[index] = updatedContrib;
-                    }
-                    
-                    needsUIRefresh = true;
-                }
-            } catch (error) {
-                console.error(`Failed to check status for contribution ${contrib.id}`, error);
-                needsUIRefresh = true;
-                break;
-            }
-        }
-
-        if (needsUIRefresh) {
-            clearInterval(contributionsState.pollerId);
-            contributionsState.pollerId = null;
-            
-            document.getElementById('contributions-table-container').innerHTML = renderContributionHistory(allContributions);
-            attachDetailModalListeners(allContributions);
-            startContributionStatusPoller(allContributions);
-        }
-    }, 5000);
-}
-
-
-export function attachContributionPageListeners(allContributions) {
-    attachDetailModalListeners(allContributions);
-    document.getElementById('prev-page-btn')?.addEventListener('click', () => changeContributionsPage(-1, allContributions));
-    document.getElementById('next-page-btn')?.addEventListener('click', () => changeContributionsPage(1, allContributions));
+export function attachContributionPageListeners(dashboardState) {
+    window.dashboardState = dashboardState;
+    attachDetailModalListeners(dashboardState.allContributions);
+    document.getElementById('prev-page-btn')?.addEventListener('click', () => changeContributionsPage(-1, dashboardState));
+    document.getElementById('next-page-btn')?.addEventListener('click', () => changeContributionsPage(1, dashboardState));
     updatePaginationButtons();
-    startContributionStatusPoller(allContributions);
+    document.addEventListener('contributionUpdate', handleContributionUpdate);
 }
 
 export function renderMyContributionsPage(initialContributions) {

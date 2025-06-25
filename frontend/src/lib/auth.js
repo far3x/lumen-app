@@ -12,6 +12,11 @@ export const api = axios.create({
 let user = null;
 let account = null;
 
+export const setAccount = (newAccountData) => {
+    account = newAccountData;
+    localStorage.setItem('lumen_account', JSON.stringify(account));
+};
+
 export const isAuthenticated = () => {
     return document.cookie.includes('is_logged_in=true');
 };
@@ -109,6 +114,11 @@ export const fetchLeaderboard = async () => {
 
 export const fetchContributions = async (page = 1, limit = 10) => {
     const response = await api.get(`/users/me/contributions?skip=${(page - 1) * limit}&limit=${limit}`);
+    return response.data;
+};
+
+export const fetchAllContributions = async () => {
+    const response = await api.get(`/users/me/contributions/all`);
     return response.data;
 };
 

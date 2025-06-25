@@ -2,6 +2,10 @@ import { icons } from './utils.js';
 
 function renderActivityItem(item) {
     if (item.type === 'CONTRIBUTION') {
+        const rewardText = item.reward_amount > 0 
+            ? `<strong class="font-medium text-green-400">+${item.reward_amount.toFixed(4)} $LUM</strong>`
+            : `<strong class="font-medium text-text-secondary">No reward granted</strong>`;
+
         return `
             <li class="flex items-start space-x-4 animate-fade-in-up">
                 <div class="p-3 bg-primary rounded-full mt-1 text-accent-purple">${icons.contributions}</div>
@@ -10,7 +14,7 @@ function renderActivityItem(item) {
                         <strong class="font-bold">You</strong> contributed new code to the network.
                     </p>
                     <p class="text-text-secondary mt-1">
-                        Valuation: <strong class="font-medium text-green-400">+${item.reward_amount.toFixed(4)} $LUM</strong>
+                        Valuation: ${rewardText}
                     </p>
                 </div>
                 <span class="text-xs text-subtle font-mono whitespace-nowrap">${new Date(item.created_at).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' })}</span>

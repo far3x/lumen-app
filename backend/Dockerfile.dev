@@ -1,0 +1,28 @@
+FROM python:3.11-slim AS scc_builder
+
+RUN apt-get update -y && \
+    apt-get install -y --no-install-recommends curl tar gzip && \
+    curl -L "https://github.com/boyter/scc/releases/download/v3.5.0/scc_Linux_x86_64.tar.gz" -o scc.tar.gz && \
+    tar -xzf scc.tar.gz && \
+    mv scc /usr/local/bin/scc && \
+    rm scc.tar.gz && \
+    apt-get purge -y --auto-remove curl && \
+    apt-get clean && \
+    rm -rf /var/lib/apt/lists/*
+
+FROM python:3.11-slim
+
+WORKDIR /usr/src/app
+
+ENV PYTHONDONTWRITEBYTECODE 1
+ENV PYTHONUNBUFFERED 1
+
+COPY --from=scc_builder /usr/local/bin/scc /usr/local/bin/scc
+
+COPY requirements.txt .
+
+RUN addgroup --system app && adduser --system --group app
+
+USER app
+
+CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000"]

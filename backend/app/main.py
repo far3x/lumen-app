@@ -1,15 +1,17 @@
-from fastapi import FastAPI
+from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from starlette.middleware.sessions import SessionMiddleware
 from slowapi.errors import RateLimitExceeded
 from app.core.limiter import limiter
 from app.core.config import settings
 from app.db.database import Base, engine, SessionLocal
-from app.api.v1.routers import auth, cli, users, public, security, contributions, rewards
+from app.api.v1.routers import auth, cli, users, public, security, contributions, rewards, websockets
 from app.core.celery_app import celery_app
 import logging
 from slowapi.middleware import SlowAPIMiddleware
-from uvicorn.middleware.proxy_headers import ProxyHeadersMiddleware
+import asyncio
+from app.services.websocket_manager import manager
+from app.api.v1.dependencies import get_current_user_optional
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -19,9 +21,19 @@ app = FastAPI(
     version=settings.PROJECT_VERSION
 )
 
-app.add_middleware(ProxyHeadersMiddleware, trusted_hosts="*")
-
 app.state.limiter = limiter
+
+@app.middleware("http")
+async def add_user_to_state(request: Request, call_next):
+    from app.db.database import SessionLocal
+    db = SessionLocal()
+    try:
+        await get_current_user_optional(request, db)
+    finally:
+        db.close()
+    response = await call_next(request)
+    return response
+
 app.add_middleware(SlowAPIMiddleware)
 
 app.add_middleware(
@@ -29,15 +41,15 @@ app.add_middleware(
     allow_origins=[settings.FRONTEND_URL],
     allow_credentials=True,
     allow_methods=["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
-    allow_headers=["Authorization", "Content-Type", "X-Lumen-Challenge", "X-Lumen-Signature", "X-Lumen-Timestamp"],
+    allow_headers=["Authorization", "Content-Type", "X-Lumen-Challenge", "X-Lumen-Signature", "X-Lumen-Timestamp", "X-Visitor-ID"],
 )
 app.add_middleware(SessionMiddleware, secret_key=settings.SECRET_KEY)
 
 @app.on_event("startup")
 async def startup_event():
-    logger.info("Application startup: Initializing database...")
+    logger.info("Application startup: Initializing...")
     try:
-        logger.info("Database tables created/checked successfully.")
+        logger.info("Database tables checked.")
         
         from app.db import crud
         db = SessionLocal()
@@ -54,18 +66,19 @@ async def startup_event():
             logger.error(f"Error seeding network stats: {e}")
         finally:
             db.close()
+        
+        asyncio.create_task(manager.listen_for_redis_messages())
+        logger.info("Redis Pub/Sub listener started.")
 
     except Exception as e:
-        logger.critical(f"FATAL ERROR during database startup: {e}")
+        logger.critical(f"FATAL ERROR during startup: {e}")
     logger.info("Application startup complete.")
-
 
 @app.on_event("shutdown")
 def shutdown_event():
     logger.info("Application shutdown: Closing database connections...")
     engine.dispose()
     logger.info("Database connections closed.")
-
 
 app.include_router(auth.router, prefix="/api/v1")
 app.include_router(cli.router, prefix="/api/v1")
@@ -74,7 +87,9 @@ app.include_router(public.router, prefix="/api/v1")
 app.include_router(security.router, prefix="/api/v1")
 app.include_router(contributions.router, prefix="/api/v1")
 app.include_router(rewards.router, prefix="/api/v1")
+app.include_router(websockets.router)
 
 @app.get("/", tags=["Root"])
-async def read_root():
+@limiter.limit("10/minute")
+async def read_root(request: Request):
     return {"message": f"Welcome to {settings.PROJECT_NAME} API"}

@@ -5,6 +5,8 @@ import secrets
 from sqlalchemy.orm import Session
 from sqlalchemy import func, text
 from fastapi import HTTPException, status
+from typing import Optional
+from datetime import datetime
 
 from app.core import security
 from app import schemas
@@ -113,8 +115,18 @@ def create_account_for_user(db: Session, user: models.User):
     db.add(db_account); db.commit(); db.refresh(db_account)
     return db_account
 
-def get_account(db: Session, user_id: int):
-    return db.query(models.Account).filter(models.Account.user_id == user_id).first()
+def get_account_details(db: Session, user_id: int) -> Optional[schemas.AccountDetails]:
+    account = db.query(models.Account).filter(models.Account.user_id == user_id).first()
+    if not account:
+        return None
+    
+    last_claim_at = db.query(func.max(models.ClaimTransaction.created_at)).filter(models.ClaimTransaction.user_id == user_id).scalar()
+    
+    return schemas.AccountDetails(
+        lum_balance=account.lum_balance,
+        total_lum_earned=account.total_lum_earned,
+        last_claim_at=last_claim_at
+    )
 
 def get_network_stats(db: Session):
     return db.query(models.NetworkStats).first()
@@ -141,7 +153,7 @@ def update_network_stats(db: Session, complexity_score: float, reward_amount: fl
     db.commit()
 
 def apply_reward_to_user(db: Session, user: models.User, reward_amount: float):
-    account = get_account(db, user_id=user.id)
+    account = user.account
     if not account: return 0.0
     
     total_reward = reward_amount
@@ -162,11 +174,12 @@ def apply_reward_to_user(db: Session, user: models.User, reward_amount: float):
     db.commit()
     return total_reward
 
-def get_all_contribution_embeddings(db: Session) -> list[tuple[int, int, str]]:
+def get_all_contribution_embeddings_with_recency(db: Session) -> list[tuple[int, int, str, datetime]]:
     return db.query(
         models.Contribution.id,
         models.Contribution.user_id,
-        models.Contribution.content_embedding
+        models.Contribution.content_embedding,
+        models.Contribution.created_at
     ).filter(models.Contribution.content_embedding.isnot(None)).all()
 
 def get_contribution_by_id(db: Session, contribution_id: int) -> models.Contribution | None:
@@ -196,6 +209,9 @@ def create_contribution_record(db: Session, user: models.User, codebase: str, va
     db.refresh(db_contribution)
     return db_contribution
 
+def get_all_user_contributions(db: Session, user_id: int):
+    return db.query(models.Contribution).filter(models.Contribution.user_id == user_id).order_by(models.Contribution.created_at.asc()).all()
+
 def get_user_contributions(db: Session, user_id: int, skip: int = 0, limit: int = 100):
     return db.query(models.Contribution).filter(models.Contribution.user_id == user_id).order_by(models.Contribution.created_at.desc()).offset(skip).limit(limit).all()
 
@@ -213,7 +229,7 @@ def get_recent_processed_contributions(db: Session, limit: int = 10):
              .order_by(models.Contribution.created_at.desc())\
              .limit(limit).all()
 
-def get_user_contributions_paginated(db: Session, user_id: int, skip: int = 0, limit: int = 100):
+def get_user_contributions_paginated(db: Session, user_id: int, skip: int = 0, limit: int = 10):
     query = db.query(models.Contribution).filter(models.Contribution.user_id == user_id)
     total_count = query.count()
     items = query.order_by(models.Contribution.created_at.desc()).offset(skip).limit(limit).all()

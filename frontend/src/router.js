@@ -4,6 +4,9 @@ import { isAuthenticated, fetchAndStoreUser, getUser, logout } from './lib/auth.
 import { walletService } from './lib/wallet.js';
 
 const app = document.getElementById('app');
+const navbarContainer = document.getElementById('navbar-container');
+const contentContainer = document.getElementById('content-container');
+const footerContainer = document.getElementById('footer-container');
 
 const routes = {
     '/': () => import('./pages/landing.js').then(m => m.renderLandingPage()),
@@ -25,7 +28,7 @@ export const navigate = (path) => {
 
 const renderFullPageLoader = () => {
     return `
-        <div class="fixed inset-0 bg-background z-[100] flex flex-col items-center justify-center">
+        <div class="flex-grow flex flex-col items-center justify-center">
             <img src="/logo.svg" alt="Lumen Logo" class="h-16 w-16 mb-6 animate-pulse">
             <span class="animate-spin inline-block w-8 h-8 border-4 border-transparent border-t-accent-purple rounded-full"></span>
             <p class="text-text-secondary mt-4 text-sm">Loading Lumen...</p>
@@ -34,18 +37,22 @@ const renderFullPageLoader = () => {
 };
 
 const renderContentLoader = () => {
-    return `<div class="flex-grow flex items-center justify-center min-h-[calc(100vh-200px)]"><span class="animate-spin inline-block w-8 h-8 border-4 border-transparent border-t-accent-purple rounded-full"></span></div>`;
+    return `<div class="flex-grow flex items-center justify-center"><span class="animate-spin inline-block w-8 h-8 border-4 border-transparent border-t-accent-purple rounded-full"></span></div>`;
 };
 
 const handleLocation = async () => {
     const path = window.location.pathname;
     const fullScreenPages = ['/link', '/check-email', '/verify', '/forgot-password', '/reset-password'];
-    let pageContentHTML = '';
 
+    // Set frame visibility and show a loader
     if (fullScreenPages.includes(path)) {
-        app.innerHTML = renderFullPageLoader();
+        navbarContainer.classList.add('hidden');
+        footerContainer.classList.add('hidden');
+        contentContainer.innerHTML = renderFullPageLoader();
     } else {
-        app.innerHTML = renderNavbar(path) + renderContentLoader() + renderFooter();
+        navbarContainer.classList.remove('hidden');
+        footerContainer.classList.remove('hidden');
+        contentContainer.innerHTML = renderContentLoader();
     }
 
     try {
@@ -80,12 +87,14 @@ const handleLocation = async () => {
             }
         }
         
-        pageContentHTML = await renderPromise;
+        const pageContentHTML = await renderPromise;
+        
+        // Final render pass
+        contentContainer.innerHTML = pageContentHTML;
 
-        if (fullScreenPages.includes(path)) {
-            app.innerHTML = pageContentHTML;
-        } else {
-            app.innerHTML = renderNavbar(path) + pageContentHTML + renderFooter();
+        if (!fullScreenPages.includes(path)) {
+            navbarContainer.innerHTML = renderNavbar(path);
+            footerContainer.innerHTML = renderFooter();
         }
         
         window.scrollTo(0, 0);
@@ -97,15 +106,24 @@ const handleLocation = async () => {
 
     } catch (error) {
         console.error("Critical rendering error in handleLocation:", error);
-        app.innerHTML = `
-            ${!fullScreenPages.includes(path) ? renderNavbar(path) : ''}
-            <div class="flex-grow flex flex-col items-center justify-center text-center p-8 min-h-screen">
+
+        if (fullScreenPages.includes(path)) {
+            navbarContainer.classList.add('hidden');
+            footerContainer.classList.add('hidden');
+        } else {
+            navbarContainer.classList.remove('hidden');
+            footerContainer.classList.remove('hidden');
+            navbarContainer.innerHTML = renderNavbar(path);
+            footerContainer.innerHTML = renderFooter();
+        }
+
+        contentContainer.innerHTML = `
+            <div class="flex-grow flex flex-col items-center justify-center text-center p-8">
                 <h1 class="text-2xl font-bold text-red-400">Application Error</h1>
                 <p class="text-text-secondary mt-2">A critical error occurred while loading the page.</p>
                 <p class="mt-4 text-xs font-mono bg-primary p-4 rounded-lg text-red-300 w-full max-w-lg overflow-x-auto">${error.message || 'Unknown error'}</p>
                 <button onclick="location.reload()" class="mt-6 px-6 py-2 bg-accent-purple text-white font-bold rounded-lg">Refresh Page</button>
             </div>
-            ${!fullScreenPages.includes(path) ? renderFooter() : ''}
         `;
     }
 };
