@@ -38,13 +38,6 @@ mail_conf = ConnectionConfig(
 
 oauth = OAuth()
 oauth.register(
-    name='google',
-    server_metadata_url='https://accounts.google.com/.well-known/openid-configuration',
-    client_id=config.settings.GOOGLE_CLIENT_ID,
-    client_secret=config.settings.GOOGLE_CLIENT_SECRET,
-    client_kwargs={'scope': 'openid email profile'}
-)
-oauth.register(
     name='github',
     client_id=config.settings.GITHUB_CLIENT_ID,
     client_secret=config.settings.GITHUB_CLIENT_SECRET,
@@ -55,6 +48,12 @@ oauth.register(
     api_base_url='https://api.github.com/',
     client_kwargs={'scope': 'user:email'},
 )
+
+def get_visitor_id_for_rate_limit(request: Request) -> str:
+    visitor_id = request.headers.get("X-Visitor-ID")
+    if visitor_id:
+        return visitor_id
+    return request.client.host
 
 async def verify_recaptcha(token: str):
     if not config.settings.GOOGLE_RECAPTCHA_SECRET_KEY:
@@ -74,7 +73,7 @@ async def verify_recaptcha(token: str):
             raise HTTPException(status_code=400, detail="Invalid reCAPTCHA token.")
 
 @router.post("/register", status_code=status.HTTP_201_CREATED)
-@limiter.limit("2/hour")
+@limiter.limit("1/day", key_func=get_visitor_id_for_rate_limit)
 async def register_user(request: Request, user: UserCreate, background_tasks: BackgroundTasks, db: Session = Depends(database.get_db)):
     await verify_recaptcha(user.recaptcha_token)
 
@@ -339,8 +338,7 @@ async def auth_callback(request: Request, provider: str, db: Session = Depends(d
         if user_to_link.email and oauth_email and user_to_link.email.lower() != oauth_email.lower():
             return RedirectResponse(url=f"{config.settings.FRONTEND_URL}/app/dashboard?tab=settings&error=email_mismatch")
 
-        if provider == "google": user_to_link.google_id = oauth_id
-        elif provider == "github": user_to_link.github_id = oauth_id
+        if provider == "github": user_to_link.github_id = oauth_id
         
         if not user_to_link.email and oauth_email:
             user_to_link.email = oauth_email

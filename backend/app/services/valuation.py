@@ -253,6 +253,7 @@ Text to analyze:
             response = self.model.generate_content(prompt, generation_config=self.generation_config)
             print("[VALUATION_STEP] Received response from Gemini.")
             cleaned_response = re.sub(r'^```json\s*|\s*```$', '', response.text.strip(), flags=re.MULTILINE)
+            print(json.loads(cleaned_response))
             return json.loads(cleaned_response)
         except Exception as e:
             print(f"[VALUATION_ERROR] Error calling Gemini API: {e}")

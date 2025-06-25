@@ -4,6 +4,7 @@ from sqlalchemy.orm import relationship
 from sqlalchemy.sql import func
 from sqlalchemy.dialects.postgresql import JSONB
 from sqlalchemy.ext.hybrid import hybrid_property
+from datetime import datetime
 
 from .database import Base
 from app.core.config import settings
@@ -14,7 +15,6 @@ class User(Base):
     email = Column(String, unique=True, index=True, nullable=True)
     hashed_password = Column(String, nullable=True)
     github_id = Column(String, unique=True, nullable=True)
-    google_id = Column(String, unique=True, nullable=True)
     display_name = Column(String)
     solana_address = Column(String, unique=True, nullable=True, index=True)
     is_genesis_reward_claimed = Column(Boolean, default=False, nullable=False)
@@ -31,6 +31,7 @@ class User(Base):
     deletion_token = Column(String, unique=True, nullable=True)
     deletion_token_expires = Column(Float, nullable=True)
     created_at = Column(DateTime(timezone=True), server_default=func.now())
+    cooldown_until = Column(DateTime(timezone=True), nullable=True)
     account = relationship("Account", back_populates="user", uselist=False, cascade="all, delete-orphan")
     personal_access_tokens = relationship("PersonalAccessToken", back_populates="user", cascade="all, delete-orphan")
     contributions = relationship("Contribution", back_populates="user")

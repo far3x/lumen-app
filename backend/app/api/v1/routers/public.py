@@ -1,20 +1,29 @@
 from fastapi import APIRouter, Depends, Query, Request
+from fastapi.responses import JSONResponse
 from sqlalchemy.orm import Session
+import json
+
 from app.db import crud, database, models
 from app.schemas import LeaderboardEntry, ContributionResponse, ValuationMetrics, AiAnalysis, LeaderboardResponse
 from app.api.v1 import dependencies
-import json
 from app.core.limiter import limiter
+from app.services.redis_service import redis_service
 
 router = APIRouter(tags=["Public"])
 
 @router.get("/leaderboard", response_model=LeaderboardResponse)
-@limiter.limit("30/minute")
+@limiter.limit("60/minute")
 def get_leaderboard(
     request: Request,
     db: Session = Depends(database.get_db),
     current_user: models.User | None = Depends(dependencies.get_current_user_optional)
 ):
+    cache_key = "cache:leaderboard"
+    cached_leaderboard = redis_service.get(cache_key)
+
+    if cached_leaderboard:
+        return JSONResponse(content=json.loads(cached_leaderboard))
+
     top_users_data = crud.get_leaderboard(db, skip=0, limit=10)
     
     top_10_entries = []
@@ -34,20 +43,30 @@ def get_leaderboard(
                 display_name=user_rank_data.display_name,
                 total_lum_earned=user_rank_data.total_lum_earned
             )
-
-    return LeaderboardResponse(
+    
+    response_data = LeaderboardResponse(
         top_users=top_10_entries,
         current_user_rank=current_user_rank_entry
     )
 
+    redis_service.set_with_ttl(cache_key, response_data.model_dump_json(), 60)
+
+    return response_data
+
 
 @router.get("/recent-contributions", response_model=list[ContributionResponse])
-@limiter.limit("30/minute")
+@limiter.limit("60/minute")
 def get_recent_contributions(
     request: Request,
     db: Session = Depends(database.get_db),
     limit: int = Query(10, le=50, ge=1)
 ):
+    cache_key = f"cache:recent_contributions:limit={limit}"
+    cached_contributions = redis_service.get(cache_key)
+
+    if cached_contributions:
+        return JSONResponse(content=json.loads(cached_contributions))
+
     recent_contributions_data = crud.get_recent_processed_contributions(db, limit=limit)
     response_list = []
     for contrib, display_name in recent_contributions_data:
@@ -88,4 +107,9 @@ def get_recent_contributions(
             ai_analysis=ai_analysis,
             user_display_name=display_name
         ))
+
+    response_json = json.dumps([item.model_dump(mode='json') for item in response_list])
+
+    redis_service.set_with_ttl(cache_key, response_json, 60)
+
     return response_list

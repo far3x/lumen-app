@@ -11,7 +11,8 @@ from app.services.redis_service import redis_service
 from app.api.v1 import dependencies
 from app.tasks import process_contribution
 from app.core.limiter import limiter
-from typing import List
+from typing import List, Optional
+from datetime import datetime, timezone
 
 router = APIRouter(prefix="/cli", tags=["CLI"])
 
@@ -36,6 +37,23 @@ def get_user_id_from_pat_for_rate_limit(request: Request) -> str:
         db.close()
     
     return request.client.host
+
+def get_cooldown_user_key_from_pat(request: Request) -> Optional[str]:
+    auth_header = request.headers.get("authorization")
+    if not auth_header or not auth_header.lower().startswith("bearer "):
+        return None
+    pat = auth_header.split(" ")[1]
+    if not pat.startswith("lum_pat_"):
+        return None
+
+    db = SessionLocal()
+    try:
+        user = crud.get_user_by_pat(db, pat)
+        if user and user.cooldown_until and datetime.now(timezone.utc) < user.cooldown_until:
+            return str(user.id)
+    finally:
+        db.close()
+    return None
 
 @router.post("/device-auth", response_model=DeviceAuthResponse)
 @limiter.limit("10/minute")
@@ -74,6 +92,7 @@ except Exception:
     tokenizer = None
 
 @router.post("/contribute", status_code=status.HTTP_202_ACCEPTED)
+@limiter.limit("1/day", key_func=get_cooldown_user_key_from_pat)
 @limiter.limit("5/day", key_func=get_user_id_from_pat_for_rate_limit)
 async def contribute_data(
     request: Request,

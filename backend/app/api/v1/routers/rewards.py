@@ -1,6 +1,7 @@
 from fastapi import APIRouter, Depends, HTTPException, status, Request
 from sqlalchemy.orm import Session
 from pydantic import BaseModel
+from datetime import datetime, timezone, timedelta
 
 from app.db import crud, models, database
 from app.api.v1 import dependencies
@@ -20,6 +21,15 @@ def claim_rewards(
     db: Session = Depends(database.get_db),
     current_user: models.User = Depends(dependencies.get_current_user)
 ):
+    if current_user.cooldown_until and datetime.now(timezone.utc) < current_user.cooldown_until:
+        remaining_time = current_user.cooldown_until - datetime.now(timezone.utc)
+        days, seconds = remaining_time.days, remaining_time.seconds
+        hours = seconds // 3600
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail=f"New accounts must wait before claiming. You can claim in {days} days and {hours} hours."
+        )
+
     if not current_user.solana_address:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,

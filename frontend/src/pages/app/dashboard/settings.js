@@ -131,51 +131,6 @@ async function handleSaveManualWalletAddress(e) {
     }
 }
 
-
-async function handleUnlinkWallet() {
-    const confirmationContent = `
-        <div class="text-center">
-            <p class="text-text-secondary mb-6">Are you sure you want to unlink your rewards address? You will not be able to receive on-chain rewards until a new address is set.</p>
-            <div class="flex justify-center gap-4">
-                <button id="unlink-cancel-btn" class="px-6 py-2 bg-primary hover:bg-subtle/80 text-text-main font-medium rounded-md transition-colors">Cancel</button>
-                <button id="unlink-confirm-btn" class="px-6 py-2 bg-red-900/80 hover:bg-red-900 text-red-300 font-medium rounded-md transition-colors">Yes, Unlink</button>
-            </div>
-        </div>
-    `;
-
-    const { modalId, closeModal } = renderModal('Confirm Unlink Wallet', confirmationContent);
-    const modalBody = document.getElementById(`modal-body-${modalId}`);
-
-    document.getElementById('unlink-cancel-btn').addEventListener('click', closeModal);
-    document.getElementById('unlink-confirm-btn').addEventListener('click', async (e) => {
-        e.currentTarget.disabled = true;
-        e.currentTarget.innerHTML = `<span class="animate-spin inline-block w-5 h-5 border-2 border-transparent border-t-white rounded-full"></span>`;
-
-        try {
-            await api.post('/users/me/unlink-wallet');
-            await fetchAndStoreUser();
-            
-            if (modalBody) {
-                modalBody.innerHTML = `
-                    <div class="text-center transition-all animate-fade-in-up">
-                        <div class="w-16 h-16 mx-auto mb-4 bg-green-900/50 text-green-300 rounded-full flex items-center justify-center">
-                            <svg class="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
-                        </div>
-                        <h3 class="font-bold text-lg text-text-main">Wallet Address Unlinked</h3>
-                        <p class="text-text-secondary mt-2">Your account no longer has a rewards address set.</p>
-                    </div>
-                `;
-            }
-            setTimeout(() => { closeModal(); window.location.reload(); }, 2000);
-        } catch (error) {
-            if (modalBody) {
-                modalBody.innerHTML = `<p class="text-red-400 text-center">Failed to unlink wallet. Please try again.</p>`;
-            }
-            setTimeout(closeModal, 2000);
-        }
-    });
-}
-
 function renderWalletManagementCard(user) {
     const adapter = walletService.getAdapter();
     const isPhantomSiteConnected = walletService.isWalletConnected() && adapter && adapter.name === 'Phantom';
@@ -188,48 +143,35 @@ function renderWalletManagementCard(user) {
 
     if (linkedRewardsAddress) {
         const truncatedRewardsAddress = `${linkedRewardsAddress.slice(0, 6)}...${linkedRewardsAddress.slice(-6)}`;
-        content += `
-            <p class="text-sm text-text-secondary mt-1 mb-2">Your rewards will be sent to:</p>
+        content = `
+            <p class="text-sm text-text-secondary mt-1 mb-2">Your rewards will be sent to this permanent address:</p>
             <div class="bg-primary p-4 rounded-lg flex items-center justify-between">
                 <div class="flex items-center gap-3">
                     <svg class="w-6 h-6 text-green-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
                     <span class="font-mono text-text-main">${truncatedRewardsAddress}</span>
                 </div>
-                <button id="unlink-wallet-btn" class="text-sm font-medium text-red-400 hover:underline">Unlink/Change</button>
             </div>
+            <p class="text-xs text-text-secondary text-center mt-4">To ensure fairness and prevent abuse, wallet addresses cannot be changed. Please contact support if you have lost access to this wallet.</p>
         `;
-        if (isPhantomSiteConnected && siteConnectedPhantomAddress !== linkedRewardsAddress) {
-            const truncatedSiteAddress = `${siteConnectedPhantomAddress.slice(0,6)}...${siteConnectedPhantomAddress.slice(-6)}`;
-            content += `
-                <p class="text-sm text-text-secondary mt-4 mb-2">Phantom wallet <strong class="font-mono text-text-main">${truncatedSiteAddress}</strong> is connected to this site.</p>
-                <button id="link-phantom-wallet-btn" data-original-text="Use Phantom for Rewards" class="${primaryWalletActionClasses}">
-                    Use Phantom for Rewards
-                </button>
-            `;
-        } else if (!isPhantomSiteConnected) {
-             content += `
-                <button id="settings-connect-phantom-btn" class="mt-4 ${primaryWalletActionClasses}">
-                    Connect Phantom to Manage
-                </button>
-            `;
-        }
     } else {
+        content = `<p class="text-sm text-text-secondary mt-1 mb-4 text-center">Link a Solana wallet to receive your $LUM rewards. This is a permanent, one-time action.</p>`;
+        
         if (isPhantomSiteConnected) {
             const truncatedSiteAddress = `${siteConnectedPhantomAddress.slice(0,6)}...${siteConnectedPhantomAddress.slice(-6)}`;
             content += `
-                <p class="text-sm text-text-secondary mt-1 mb-4">Phantom wallet <strong class="font-mono text-text-main">${truncatedSiteAddress}</strong> is connected. Link it for rewards, or enter another address manually.</p>
+                <p class="text-sm text-text-secondary text-center mt-1 mb-4">Phantom wallet <strong class="font-mono text-text-main">${truncatedSiteAddress}</strong> is connected. Link it for rewards, or enter another address manually.</p>
                 <button id="link-phantom-wallet-btn" data-original-text="Link Connected Phantom Wallet" class="${primaryWalletActionClasses}">
                     Link Connected Phantom Wallet
                 </button>
             `;
         } else {
             content += `
-                <p class="text-sm text-text-secondary mt-1 mb-2">Connect Phantom wallet to link automatically, or enter any Solana address manually for rewards.</p>
                 <button id="settings-connect-phantom-btn" class="${primaryWalletActionClasses}">
                     Connect Phantom Wallet
                 </button>
             `;
         }
+        
         content += `
             <div class="my-4 flex items-center">
                 <div class="flex-grow border-t border-primary"></div>
@@ -237,10 +179,10 @@ function renderWalletManagementCard(user) {
                 <div class="flex-grow border-t border-primary"></div>
             </div>
             <form id="manual-wallet-form">
-                <p class="text-sm text-text-secondary mt-1 mb-2">Enter any Solana address manually:</p>
+                <p class="text-sm text-text-secondary mt-1 mb-2 text-center">Enter any Solana address manually:</p>
                 <input type="text" id="manual-solana-address" placeholder="Your Solana Address" class="w-full bg-primary border border-subtle rounded-md px-3 py-2 text-text-main focus:ring-2 focus:ring-accent-purple focus:outline-none">
                 <button id="save-manual-wallet-btn" type="submit" class="mt-3 ${secondaryWalletActionClasses}">
-                    Save Manual Address
+                    Save Address
                 </button>
             </form>
         `;
@@ -264,7 +206,6 @@ function attachWalletManagementListeners(user) {
         linkPhantomBtn.addEventListener('click', () => handleLinkPhantomWallet(user));
     }
     
-    document.getElementById('unlink-wallet-btn')?.addEventListener('click', handleUnlinkWallet);
     document.getElementById('manual-wallet-form')?.addEventListener('submit', handleSaveManualWalletAddress);
 }
 
@@ -886,19 +827,9 @@ function renderLinkedAccountsCard(user) {
     return `
         <div class="p-6 h-full flex flex-col">
             <h3 class="font-bold text-lg">Linked Accounts</h3>
-            <p class="text-sm text-text-secondary mt-1 mb-6">Connect social accounts for quick and easy login.</p>
+            <p class="text-sm text-text-secondary mt-1 mb-6">Connect a social account for quick and easy login.</p>
             <div id="link-accounts-message" class="hidden"></div>
             <div class="space-y-4 flex-grow flex flex-col justify-center">
-                <div class="flex items-center justify-between bg-primary p-4 rounded-lg">
-                    <div class="flex items-center gap-4">
-                        <svg class="w-6 h-6" viewBox="0 0 48 48"><path fill="#FFC107" d="M43.611,20.083H42V20H24v8h11.303c-1.649,4.657-6.08,8-11.303,8c-6.627,0-12-5.373-12-12c0-6.627,5.373-12,12-12c3.059,0,5.842,1.154,7.961,3.039l5.657-5.657C34.046,6.053,29.268,4,24,4C12.955,4,4,12.955,4,24c0,11.045,8.955,20,20,20c11.045,0,20-8.955,20-20C44,22.659,43.862,21.35,43.611,20.083z"></path><path fill="#FF3D00" d="M6.306,14.691l6.571,4.819C14.655,15.108,18.961,12,24,12c3.059,0,5.842,1.154,7.961,3.039l5.657-5.657C34.046,6.053,29.268,4,24,4C16.318,4,9.656,8.337,6.306,14.691z"></path><path fill="#4CAF50" d="M24,44c5.166,0,9.86-1.977,13.409-5.192l-6.19-5.238C29.211,35.091,26.715,36,24,36c-5.202,0-9.619-3.317-11.283-7.946l-6.522,5.025C9.505,39.556,16.227,44,24,44z"></path><path fill="#1976D2" d="M43.611,20.083H42V20H24v8h11.303c-0.792,2.237-2.231,4.166-4.087,5.574l6.19,5.238C39.901,36.627,44,30.638,44,24C44,22.659,43.862,21.35,43.611,20.083z"></path></svg>
-                        <span class="font-medium">Google</span>
-                    </div>
-                    ${user.google_id
-                        ? `<span class="text-sm font-medium text-green-400">Connected</span>`
-                        : `<button data-provider="google" class="link-oauth-btn text-sm font-medium py-1 px-4 rounded-md bg-surface hover:bg-subtle transition-colors">Connect</button>`
-                    }
-                </div>
                 <div class="flex items-center justify-between bg-primary p-4 rounded-lg">
                      <div class="flex items-center gap-4">
                         <svg class="w-6 h-6 text-white" fill="currentColor" viewBox="0 0 24 24"><path fill-rule="evenodd" d="M12 2C6.477 2 2 6.477 2 12c0 4.418 2.865 8.165 6.839 9.49.5.092.682-.217.682-.482 0-.237-.009-.868-.014-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.531 1.032 1.531 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.031-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.203 2.398.1 2.651.64.7 1.03 1.595 1.03 2.688 0 3.848-2.338 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.001 10.001 0 0022 12c0-5.523-4.477-10-10-10z" clip-rule="evenodd" /></svg>
@@ -995,7 +926,7 @@ export function renderSettingsPage(user) {
                     <div class="p-6 flex flex-col flex-grow">
                         <h3 class="font-bold text-lg">Change Password</h3>
                         <p class="text-text-secondary text-sm mt-1 mb-6">Update your password. You will be logged out after this action.</p>
-                        ${!hasPasswordAuth ? `<div class="flex-grow flex items-center justify-center"><p class="text-sm p-4 bg-primary rounded-lg text-text-secondary">Password management is unavailable for accounts created via social login. To enable, please contact support.</p></div>` : `
+                        ${!hasPasswordAuth ? `<div class="flex-grow flex items-center justify-center"><p class="text-sm p-4 bg-primary rounded-lg text-text-secondary">Password management is unavailable for accounts created via social login.</p></div>` : `
                         <div class="space-y-4 flex-grow">
                             <div>
                                 <label for="current-password" class="block text-sm font-medium text-text-secondary mb-1">Current Password</label>

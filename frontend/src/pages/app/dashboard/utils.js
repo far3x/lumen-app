@@ -1,5 +1,6 @@
-import { getAccount } from "../../../lib/auth.js";
+import { getAccount, getUser } from "../../../lib/auth.js";
 import { walletService } from "../../../lib/wallet.js";
+import { DateTime } from "luxon";
 
 export function renderWalletSelectionModal() {
     const modalExists = document.getElementById('wallet-selection-modal');
@@ -121,7 +122,8 @@ export function getStatusText(status) {
 
 export function updateBalancesInUI() {
     const account = getAccount();
-    if (!account) return;
+    const user = getUser();
+    if (!account || !user) return;
 
     const claimableBalance = account.lum_balance ?? 0;
     const lifetimeBalance = account.total_lum_earned ?? 0;
@@ -143,10 +145,21 @@ export function updateBalancesInUI() {
     const claimButton = document.getElementById('claim-rewards-btn');
     if(claimButton) {
         const subtextEl = document.getElementById('claim-rewards-btn-subtext');
-        const isWalletLinked = claimButton.dataset.isWalletLinked === 'true';
+        
 
-        claimButton.innerHTML = 'Claim Rewards';
-
+        if (user.cooldown_until) {
+            const now = DateTime.utc();
+            const cooldownEnd = DateTime.fromISO(user.cooldown_until);
+            if (now < cooldownEnd) {
+                claimButton.disabled = true;
+                claimButton.classList.add('opacity-50', 'cursor-not-allowed');
+                const remaining = cooldownEnd.diff(now, ['days', 'hours']).normalize();
+                if (subtextEl) subtextEl.textContent = `New account cooldown. You can claim in ${remaining.toFormat("d 'days,' h 'hours'")}.`;
+                return;
+            }
+        }
+        
+        const isWalletLinked = !!user.solana_address;
         if (!isWalletLinked || claimableBalance <= 0) {
             claimButton.disabled = true;
             claimButton.classList.add('opacity-50', 'cursor-not-allowed');
@@ -171,6 +184,7 @@ export function updateBalancesInUI() {
             claimButton.classList.remove('opacity-50', 'cursor-not-allowed');
             if (subtextEl) subtextEl.textContent = '';
         }
+
     }
 }
 

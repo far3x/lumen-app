@@ -16,9 +16,9 @@ class User(BaseModel):
     is_verified: bool
     is_two_factor_enabled: bool
     has_password: bool
-    google_id: Optional[str] = None
     github_id: Optional[str] = None
     solana_address: Optional[str] = None
+    cooldown_until: Optional[datetime] = None
 
     class Config:
         from_attributes = True
