@@ -2,6 +2,7 @@ import { renderNavbar, setupNavbarEventListeners, updateNavbarWalletState } from
 import { renderFooter } from './components/footer.js';
 import { isAuthenticated, fetchAndStoreUser, getUser, logout } from './lib/auth.js';
 import { walletService } from './lib/wallet.js';
+import Lenis from 'lenis';
 
 const app = document.getElementById('app');
 const navbarContainer = document.getElementById('navbar-container');
@@ -23,6 +24,7 @@ const routes = {
 };
 
 export const navigate = (path) => {
+    if (window.location.pathname === path) return;
     window.history.pushState({}, '', path);
     handleLocation();
 }
@@ -37,14 +39,35 @@ const renderFullPageLoader = () => {
     `;
 };
 
-const renderContentLoader = () => {
-    return `<div class="flex-grow flex items-center justify-center"><span class="animate-spin inline-block w-8 h-8 border-4 border-transparent border-t-accent-purple rounded-full"></span></div>`;
-};
+function setupScrollAnimations() {
+    const animatedElements = document.querySelectorAll('.scroll-animate');
+    if (animatedElements.length === 0) return;
+
+    const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                entry.target.classList.add('scrolled-in');
+            }
+        });
+    }, {
+        threshold: 0.1,
+        rootMargin: '0px 0px -50px 0px'
+    });
+
+    animatedElements.forEach(el => {
+        observer.observe(el);
+    });
+}
 
 const handleLocation = async () => {
     const path = window.location.pathname;
     const hash = window.location.hash;
     const fullScreenPages = ['/link', '/check-email', '/verify', '/forgot-password', '/reset-password', '/2fa-verify'];
+
+    contentContainer.classList.add('page-transition-out');
+    footerContainer.classList.add('page-transition-out');
+
+    await new Promise(resolve => setTimeout(resolve, 200));
 
     if (fullScreenPages.includes(path)) {
         navbarContainer.classList.add('hidden');
@@ -53,7 +76,8 @@ const handleLocation = async () => {
     } else {
         navbarContainer.classList.remove('hidden');
         footerContainer.classList.remove('hidden');
-        contentContainer.innerHTML = renderContentLoader();
+        contentContainer.innerHTML = `<div class="flex-grow flex items-center justify-center"><span class="animate-spin inline-block w-8 h-8 border-4 border-transparent border-t-accent-purple rounded-full"></span></div>`;
+        footerContainer.innerHTML = '';
     }
 
     try {
@@ -111,21 +135,11 @@ const handleLocation = async () => {
         requestAnimationFrame(() => {
             attachNavEventListeners();
             setupNavbarEventListeners();
+            setupScrollAnimations();
         });
 
     } catch (error) {
         console.error("Critical rendering error in handleLocation:", error);
-
-        if (fullScreenPages.includes(path)) {
-            navbarContainer.classList.add('hidden');
-            footerContainer.classList.add('hidden');
-        } else {
-            navbarContainer.classList.remove('hidden');
-            footerContainer.classList.remove('hidden');
-            navbarContainer.innerHTML = renderNavbar(path);
-            footerContainer.innerHTML = renderFooter();
-        }
-
         contentContainer.innerHTML = `
             <div class="flex-grow flex flex-col items-center justify-center text-center p-8">
                 <h1 class="text-2xl font-bold text-red-400">Application Error</h1>
@@ -134,6 +148,9 @@ const handleLocation = async () => {
                 <button onclick="location.reload()" class="mt-6 px-6 py-2 bg-accent-purple text-white font-bold rounded-lg">Refresh Page</button>
             </div>
         `;
+    } finally {
+        contentContainer.classList.remove('page-transition-out');
+        footerContainer.classList.remove('page-transition-out');
     }
 };
 
@@ -166,6 +183,13 @@ const attachNavEventListeners = () => {
 }
 
 export const initializeRouter = async () => {
+    const lenis = new Lenis();
+    function raf(time) {
+        lenis.raf(time);
+        requestAnimationFrame(raf);
+    }
+    requestAnimationFrame(raf);
+
     walletService.on('connect', (publicKey) => {
         updateNavbarWalletState();
         const connectEvent = new CustomEvent('walletUpdate');
@@ -204,11 +228,8 @@ export const initializeRouter = async () => {
 
             if (targetUrl.pathname === currentUrl.pathname && targetUrl.search === currentUrl.search && targetUrl.hash) {
                 e.preventDefault();
-                const element = document.getElementById(targetUrl.hash.substring(1));
-                if (element) {
-                    element.scrollIntoView({ behavior: 'smooth' });
-                    window.history.pushState(null, '', targetUrl.pathname + targetUrl.search + targetUrl.hash);
-                }
+                lenis.scrollTo(targetUrl.hash);
+                window.history.pushState(null, '', targetUrl.pathname + targetUrl.search + targetUrl.hash);
                 return;
             }
             
