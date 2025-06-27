@@ -28,17 +28,17 @@ export function renderLandingPage() {
             <div class="absolute top-0 left-0 w-full h-full bg-black/50 -z-10"></div>
 
             <div class="container mx-auto px-6 relative z-10">
-                <h1 class="text-4xl md:text-6xl lg:text-7xl font-bold tracking-tighter animate-fade-in-up" style="--i:1;">
+                <h1 class="text-4xl md:text-6xl lg:text-7xl font-bold tracking-tighter animate-fade-in-up" style="animation-delay: 100ms;">
                     Monetize Your Code.
                     <br>
                     <span class="pulse-text block">Power the Future of AI.</span>
                 </h1>
                 
-                <p class="max-w-3xl mx-auto mt-6 text-lg md:text-xl text-text-secondary animate-fade-in-up" style="animation-delay: 100ms;">
+                <p class="max-w-3xl mx-auto mt-6 text-lg md:text-xl text-text-secondary animate-fade-in-up" style="animation-delay: 300ms;">
                     Your code is the most valuable dataset on the planet. Anonymously contribute to the future of AI and get rewarded for its true worth.
                 </p>
                 
-                <div class="mt-10 flex justify-center items-center gap-4 animate-fade-in-up" style="animation-delay: 200ms;">
+                <div class="mt-10 flex justify-center items-center gap-4 animate-fade-in-up" style="animation-delay: 500ms;">
                     <a href="/login" class="px-8 py-3 font-bold bg-gradient-to-r from-accent-purple to-accent-pink text-white rounded-lg transition-all duration-300 hover:scale-105 hover:shadow-lg hover:shadow-accent-purple/30 hover:brightness-110">Start Earning Now</a>
                     <a href="/docs/introduction" class="px-8 py-3 font-bold bg-primary text-text-main rounded-lg transition-all duration-300 hover:bg-subtle/80 hover:-translate-y-1">Read the Docs</a>
                 </div>
@@ -49,13 +49,13 @@ export function renderLandingPage() {
             <div class="absolute inset-0 bg-[radial-gradient(ellipse_at_center,transparent_20%,#08080A)]"></div>
             <div class="container mx-auto px-6 max-w-7xl relative z-10">
                 
-                <div class="text-center max-w-2xl mx-auto animate-fade-in-up">
+                <div class="text-center max-w-2xl mx-auto scroll-animate">
                     <h2 class="text-3xl md:text-4xl font-bold">A Frictionless Contributor Experience</h2>
                     <p class="mt-4 text-text-secondary">Go from code to crypto in minutes. Our open-source CLI is designed to integrate seamlessly into your workflow without compromising your privacy.</p>
                 </div>
 
                 <div class="mt-16 grid md:grid-cols-3 gap-8">
-                    <div class="border border-subtle/50 p-8 rounded-xl bg-surface/80 flex flex-col animate-fade-in-up transition-all duration-300" style="animation-delay: 200ms;">
+                    <div class="border border-subtle/50 p-8 rounded-xl bg-surface/80 flex flex-col scroll-animate transition-all duration-300 hover:transform hover:-translate-y-2 hover:border-accent-purple hover:shadow-xl hover:shadow-accent-purple/10" style="transition-delay: 100ms;">
                         <div class="mx-auto w-16 h-16 p-[1px] rounded-lg bg-hero-gradient">
                             <div class="w-full h-full bg-primary rounded-[7px] flex items-center justify-center">
                                 <svg class="w-8 h-8" fill="none" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" stroke="url(#icon-gradient)" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path></svg>
@@ -69,7 +69,7 @@ lum login</code></pre>
                         </div>
                     </div>
                     
-                    <div class="border border-subtle/50 p-8 rounded-xl bg-surface/80 flex flex-col animate-fade-in-up transition-all duration-300" style="animation-delay: 300ms;">
+                    <div class="border border-subtle/50 p-8 rounded-xl bg-surface/80 flex flex-col scroll-animate transition-all duration-300 hover:transform hover:-translate-y-2 hover:border-accent-pink hover:shadow-xl hover:shadow-accent-pink/10" style="transition-delay: 200ms;">
                          <div class="mx-auto w-16 h-16 p-[1px] rounded-lg bg-hero-gradient">
                             <div class="w-full h-full bg-primary rounded-[7px] flex items-center justify-center">
                                 <svg class="w-8 h-8" fill="none" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" stroke="url(#icon-gradient)" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"></path></svg>
@@ -83,7 +83,7 @@ lum contribute</code></pre>
                         </div>
                     </div>
                     
-                    <div class="border border-subtle/50 p-8 rounded-xl bg-surface/80 flex flex-col animate-fade-in-up transition-all duration-300" style="animation-delay: 400ms;">
+                    <div class="border border-subtle/50 p-8 rounded-xl bg-surface/80 flex flex-col scroll-animate transition-all duration-300 hover:transform hover:-translate-y-2 hover:border-accent-cyan hover:shadow-xl hover:shadow-accent-cyan/10" style="transition-delay: 300ms;">
                         <div class="mx-auto w-16 h-16 p-[1px] rounded-lg bg-hero-gradient">
                             <div class="w-full h-full bg-primary rounded-[7px] flex items-center justify-center">
                                <svg class="w-8 h-8" fill="none" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" stroke="url(#icon-gradient)" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"></path></svg>
@@ -100,7 +100,7 @@ lum contribute</code></pre>
                     </div>
                 </div>
 
-                <div class="mt-16 text-center animate-fade-in-up" style="animation-delay: 500ms;">
+                <div class="mt-16 text-center scroll-animate" style="transition-delay: 400ms;">
                     <p class="text-text-secondary">Ready to get started? Dive into the documentation or explore the code.</p>
                     <div class="mt-6 flex flex-col sm:flex-row justify-center items-center gap-4">
                         <a href="/docs/installation" class="w-full sm:w-auto px-6 py-3 font-bold bg-primary text-text-main rounded-lg transition-all duration-300 hover:bg-subtle/80 hover:-translate-y-1">Installation Guide</a>
@@ -114,7 +114,7 @@ lum contribute</code></pre>
         
         <section class="py-20 md:py-32 bg-background">
             <div class="container mx-auto px-6 max-w-7xl grid md:grid-cols-2 gap-16 items-center">
-                <div class="animate-fade-in-up">
+                <div class="scroll-animate">
                     <h2 class="text-3xl md:text-4xl font-bold">The AI Data Crisis is Here. <br><span class="gradient-text">Lumen is the Solution.</span></h2>
                     <p class="mt-6 text-text-secondary text-lg">
                         Large Language Models are hitting a wall. The public internet has been scraped, and <strong class="text-text-main">high-quality, human-written code is locked away</strong> in private repositories. This data scarcity threatens the future of AI innovation.
@@ -124,7 +124,7 @@ lum contribute</code></pre>
                     </p>
                 </div>
                 <div class="space-y-8">
-                    <div class="flex items-start space-x-4 animate-fade-in-up" style="animation-delay: 200ms;">
+                    <div class="flex items-start space-x-4 scroll-animate" style="transition-delay: 100ms;">
                         <div class="p-[1px] rounded-lg bg-hero-gradient">
                             <div class="p-3 bg-primary rounded-[7px]"> <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" stroke="url(#icon-gradient)" d="M8 9l3 3-3 3m5 0h3M5 20h14a2 2 0 002-2V6a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg> </div>
                         </div>
@@ -133,7 +133,7 @@ lum contribute</code></pre>
                             <p class="text-text-secondary text-sm">Developers submit anonymized code via the secure Lumen CLI.</p>
                         </div>
                     </div>
-                    <div class="flex items-start space-x-4 animate-fade-in-up" style="animation-delay: 300ms;">
+                    <div class="flex items-start space-x-4 scroll-animate" style="transition-delay: 200ms;">
                          <div class="p-[1px] rounded-lg bg-hero-gradient">
                             <div class="p-3 bg-primary rounded-[7px]"> <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" stroke="url(#icon-gradient)" d="M12 20V10M18 20V4M6 20V16"></path></svg> </div>
                         </div>
@@ -142,7 +142,7 @@ lum contribute</code></pre>
                             <p class="text-text-secondary text-sm">The protocol analyzes, values, and adds the data to specialized training sets, rewarding the developer with $LUM.</p>
                         </div>
                     </div>
-                    <div class="flex items-start space-x-4 animate-fade-in-up" style="animation-delay: 400ms;">
+                    <div class="flex items-start space-x-4 scroll-animate" style="transition-delay: 300ms;">
                         <div class="p-[1px] rounded-lg bg-hero-gradient">
                             <div class="p-3 bg-primary rounded-[7px]"> <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" stroke="url(#icon-gradient)" d="M4 6a2 2 0 012-2h12a2 2 0 012 2v8H4V6zm-2 8h20v2H2v-2z"></path></svg> </div>
                         </div>
@@ -157,12 +157,12 @@ lum contribute</code></pre>
 
         <section class="py-20 md:py-32 bg-abyss-dark bg-starfield-pattern bg-starfield-size">
             <div class="container mx-auto px-6">
-                <div class="text-center max-w-3xl mx-auto animate-fade-in-up">
+                <div class="text-center max-w-3xl mx-auto scroll-animate">
                     <h2 class="text-4xl md:text-5xl font-bold"><span class="gradient-text">$LUM</span>: The Token Fueling the Data Economy</h2>
                     <p class="mt-4 text-lg text-text-secondary">The native token of the Lumen Protocol, designed for utility, governance, and long-term value accrual.</p>
                 </div>
                 <div class="mt-20 max-w-6xl mx-auto grid lg:grid-cols-5 gap-16 items-center">
-                    <div class="lg:col-span-3 animate-fade-in-up" style="animation-delay: 200ms;">
+                    <div class="lg:col-span-3 scroll-animate" style="transition-delay: 100ms;">
                         <h3 class="text-2xl font-bold mb-8">Token Allocation</h3>
                         <div class="space-y-8">
                             <div>
@@ -187,7 +187,7 @@ lum contribute</code></pre>
                             </div>
                         </div>
                     </div>
-                    <div class="lg:col-span-2 space-y-8 animate-fade-in-up" style="animation-delay: 300ms;">
+                    <div class="lg:col-span-2 space-y-8 scroll-animate" style="transition-delay: 200ms;">
                         <div class="p-[1px] bg-gradient-to-r from-accent-purple via-accent-pink to-accent-cyan rounded-xl">
                             <div class="bg-surface rounded-[11px] p-8">
                                 <h4 class="font-bold text-lg">Total Supply</h4>
@@ -207,7 +207,7 @@ lum contribute</code></pre>
         </section>
 
         <section class="py-20 md:py-32 bg-background">
-            <div class="container mx-auto px-6 max-w-4xl animate-fade-in-up">
+            <div class="container mx-auto px-6 max-w-4xl scroll-animate">
                  <div class="text-center mb-16">
                     <h2 class="text-3xl md:text-4xl font-bold">Frequently Asked Questions</h2>
                 </div>
