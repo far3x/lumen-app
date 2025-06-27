@@ -2,6 +2,8 @@ services:
   db:
     image: postgres:13-alpine
     container_name: lumen_db
+    ports:
+      - "5433:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data/
     env_file: ./.env
@@ -21,11 +23,15 @@ services:
     container_name: lumen_api
     build:
       context: ./backend
-      dockerfile: Dockerfile
+      dockerfile: Dockerfile.dev
     command: >
       sh -c "alembic upgrade head &&
-             uvicorn app.main:app --host 0.0.0.0 --port 8000 --proxy-headers --forwarded-allow-ips='*'"
+             uvicorn app.main:app --reload --host 0.0.0.0 --port 8000"
+    volumes:
+      - ./backend:/usr/src/app
     env_file: ./.env
+    ports:
+      - "8000:8000"
     depends_on:
       db:
         condition: service_healthy
@@ -37,8 +43,10 @@ services:
     container_name: lumen_worker
     build:
       context: ./backend
-      dockerfile: Dockerfile
-    command: celery -A app.core.celery_app.celery_app worker --loglevel=info --pool=eventlet
+      dockerfile: Dockerfile.dev
+    command: celery -A app.core.celery_app.celery_app worker --loglevel=info --pool=eventlet --concurrency=1 --prefetch-multiplier=1 --max-tasks-per-child=10
+    volumes:
+      - ./backend:/usr/src/app
     env_file: ./.env
     depends_on:
       - redis
@@ -49,26 +57,17 @@ services:
     container_name: lumen_frontend
     build:
       context: ./frontend
-      dockerfile: Dockerfile
-      args:
-        VITE_API_URL: ${API_URL}
-        VITE_GOOGLE_RECAPTCHA_SITE_KEY: ${GOOGLE_RECAPTCHA_SITE_KEY}
-    restart: unless-stopped
-
-  nginx:
-    image: nginx:stable-alpine
-    container_name: lumen_nginx
-    ports:
-      - "80:80"
-      - "443:443"
+      dockerfile: Dockerfile.dev
     volumes:
-      - ./nginx/lumen.conf:/etc/nginx/conf.d/default.conf
-      - ./certbot/conf:/etc/letsencrypt
-      - ./certbot/www:/var/www/certbot
-    depends_on:
-      - api
-      - frontend
+      - ./frontend:/app
+      - frontend_modules:/app/node_modules
+    ports:
+      - "5173:5173"
+    environment:
+      - VITE_API_URL=${API_URL} 
+      - VITE_GOOGLE_RECAPTCHA_SITE_KEY=${GOOGLE_RECAPTCHA_SITE_KEY}
     restart: unless-stopped
 
 volumes:
   postgres_data:
+  frontend_modules:
