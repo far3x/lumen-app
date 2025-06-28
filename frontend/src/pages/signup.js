@@ -205,7 +205,7 @@ function renderSignupForm() {
 
 export function renderSignupPage() {
     const content = `
-    <main class="flex-grow flex items-center justify-center p-6 isolate min-h-screen pt-28">
+    <main class="relative flex-grow flex items-center justify-center p-6 isolate min-h-screen">
         <video
             autoplay
             loop

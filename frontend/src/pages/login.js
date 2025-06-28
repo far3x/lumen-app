@@ -34,7 +34,6 @@ function setupEventListeners() {
             const provider = e.currentTarget.dataset.provider;
             const redirectPath = localStorage.getItem('post_login_redirect') || '/app/dashboard';
             const state = btoa(JSON.stringify({ redirect_path: redirectPath }));
-            // Use the environment variable for the base URL
             const baseUrl = import.meta.env.VITE_API_URL || 'http://localhost:8000';
             window.location.href = `${baseUrl}/api/v1/auth/login/${provider}?state=${state}`;
         });
@@ -264,7 +263,7 @@ export function renderLoginPage() {
     const successMessage = registrationSuccess ? 'Registration successful! Please log in.' : '';
 
     const content = `
-    <main class="flex-grow flex items-center justify-center p-6 isolate min-h-screen pt-28">
+    <main class="relative flex-grow flex items-center justify-center p-6 isolate min-h-screen">
         <video
             autoplay
             loop

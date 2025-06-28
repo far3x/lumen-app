@@ -30,7 +30,22 @@
     }
 
     .animate-fade-in-up {
+        opacity: 0;
         animation: fade-in-up 0.8s ease-out forwards;
+    }
+
+    video::-webkit-media-controls-enclosure,
+    video::-webkit-media-controls {
+        display: none !important;
+    }
+
+    @media (hover: hover) and (pointer: fine) {
+        html {
+            cursor: url('/cursors/default.cur'), auto;
+        }
+        a, button {
+            cursor: url('/cursors/pointer.cur'), pointer;
+        }
     }
 }
 
@@ -48,23 +63,33 @@
   }
 
   .faq-item {
-    @apply relative bg-surface rounded-xl transition-all duration-300;
+    @apply relative rounded-xl transition-all duration-300 isolate;
   }
   
   .faq-item:hover {
      @apply transform -translate-y-1;
   }
 
+  .faq-item > * {
+    @apply relative z-10;
+  }
+
+  .faq-item::after {
+    content: '';
+    @apply absolute inset-0 rounded-xl bg-surface transition-colors duration-300 -z-10;
+  }
+
   .faq-item::before {
     content: '';
     @apply absolute -inset-px rounded-xl bg-gradient-to-r from-accent-purple via-accent-pink to-accent-cyan;
-    @apply opacity-0 transition-opacity duration-300 -z-10;
+    @apply opacity-0 transition-opacity duration-300 -z-20;
   }
 
-  .faq-item:hover,
-  .faq-item[open] {
+  .faq-item:hover::after,
+  .faq-item[open]::after {
     @apply bg-primary;
   }
+
   .faq-item:hover::before,
   .faq-item[open]::before {
     @apply opacity-100;
