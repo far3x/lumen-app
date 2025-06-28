@@ -3,7 +3,8 @@ import { walletService } from "../../../lib/wallet.js";
 import { DateTime } from "luxon";
 
 export function renderWalletSelectionModal() {
-    const modalExists = document.getElementById('wallet-selection-modal');
+    const modalId = 'wallet-selection-modal';
+    const modalExists = document.getElementById(modalId);
     if (modalExists) return;
 
     const phantomWallet = walletService.supportedWallets.find(w => w.name === 'Phantom');
@@ -31,13 +32,12 @@ export function renderWalletSelectionModal() {
         modalContentHTML = `<p class="text-text-secondary text-center">No supported wallets found. Please install Phantom or set your address manually in Settings.</p>`;
     }
 
-
     const modalHTML = `
-        <div id="wallet-selection-modal" class="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 flex items-center justify-center p-4 animate-fade-in-up" style="animation-duration: 0.2s;">
-            <div id="modal-content" class="bg-surface w-full max-w-xs rounded-xl border border-primary shadow-2xl shadow-black/50">
+        <div id="${modalId}" class="modal-overlay fixed inset-0 bg-black/70 backdrop-blur-sm z-50 flex items-center justify-center p-4 animate-fade-in-up" style="animation-duration: 0.2s;">
+            <div class="modal-content bg-surface w-full max-w-xs rounded-xl border border-primary shadow-2xl shadow-black/50">
                 <header class="p-4 border-b border-primary flex justify-between items-center">
                     <h2 class="text-lg font-bold">Connect Phantom Wallet</h2>
-                    <button id="modal-close-btn" class="p-2 text-text-secondary hover:text-text-main rounded-full hover:bg-primary">
+                    <button class="modal-close-btn p-2 text-text-secondary hover:text-text-main rounded-full hover:bg-primary">
                         <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
                     </button>
                 </header>
@@ -50,17 +50,24 @@ export function renderWalletSelectionModal() {
     document.body.insertAdjacentHTML('beforeend', modalHTML);
     document.body.classList.add('modal-open');
 
+    const modal = document.getElementById(modalId);
+    
     const closeModal = () => {
-        const modal = document.getElementById('wallet-selection-modal');
         if (modal) {
-            document.body.classList.remove('modal-open');
-            modal.remove();
+            modal.classList.remove('animate-fade-in-up');
+            modal.classList.add('animate-fade-out-down');
+            setTimeout(() => {
+                modal.remove();
+                if (document.querySelectorAll('.modal-overlay').length === 0) {
+                    document.body.classList.remove('modal-open');
+                }
+            }, 200);
         }
     };
 
-    document.getElementById('modal-close-btn').addEventListener('click', closeModal);
-    document.getElementById('wallet-selection-modal').addEventListener('click', (e) => {
-        if (e.target.id === 'wallet-selection-modal') closeModal();
+    modal.querySelector('.modal-close-btn').addEventListener('click', closeModal);
+    modal.addEventListener('click', (e) => {
+        if (e.target.id === modalId) closeModal();
     });
 
     document.querySelectorAll('.wallet-option-btn').forEach(button => {
@@ -198,18 +205,21 @@ export function renderModal(title, content, options = {}) {
     const sizeClasses = {
         md: 'max-w-md',
         lg: 'max-w-2xl',
+        xl: 'max-w-4xl',
+        '2xl': 'max-w-5xl',
+        '3xl': 'max-w-6xl'
     };
 
     const modalHtml = `
         <div id="${modalId}" class="modal-overlay fixed inset-0 bg-black/70 backdrop-blur-sm z-50 flex items-center justify-center p-4 animate-fade-in-up" style="animation-duration: 0.2s;">
-            <div class="modal-content bg-surface w-full ${sizeClasses[size]} rounded-xl border border-primary shadow-2xl shadow-black/50 overflow-hidden">
-                <header class="p-4 border-b border-primary flex justify-between items-center">
+            <div class="modal-content bg-surface w-full ${sizeClasses[size]} rounded-xl border border-primary shadow-2xl shadow-black/50 flex flex-col max-h-full">
+                <header class="p-4 border-b border-primary flex justify-between items-center flex-shrink-0">
                     <h2 class="text-lg font-bold">${title}</h2>
                     <button class="modal-close-btn p-2 text-text-secondary hover:text-text-main rounded-full hover:bg-primary">
                         <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
                     </button>
                 </header>
-                <div id="modal-body-${modalId}" class="p-6 max-h-[70vh] overflow-y-auto">
+                <div id="modal-body-${modalId}" class="p-6 overflow-y-auto min-h-0 flex-1">
                     ${content}
                 </div>
             </div>
@@ -223,10 +233,14 @@ export function renderModal(title, content, options = {}) {
     
     const closeModal = () => {
         if (modal) {
-            document.body.classList.remove('modal-open');
             modal.classList.remove('animate-fade-in-up');
             modal.classList.add('animate-fade-out-down');
-            setTimeout(() => modal.remove(), 200);
+            setTimeout(() => {
+                modal.remove();
+                if (document.querySelectorAll('.modal-overlay').length === 0) {
+                    document.body.classList.remove('modal-open');
+                }
+            }, 200);
         }
     };
 

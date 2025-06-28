@@ -98,6 +98,19 @@
   .faq-item[open]::before {
     @apply opacity-100;
   }
+
+  .lang-tag {
+    @apply text-xs font-bold px-3 py-1.5 rounded-full bg-primary border border-subtle;
+  }
+
+  .progress-ring {
+    @apply relative flex items-center justify-center;
+  }
+  .progress-ring-circle {
+    @apply transition-all duration-1000 ease-out;
+    transform: rotate(-90deg);
+    transform-origin: 50% 50%;
+  }
 }
 
 @font-face {

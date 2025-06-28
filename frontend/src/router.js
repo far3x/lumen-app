@@ -182,8 +182,10 @@ const attachNavEventListeners = () => {
     }
 }
 
+export let lenis;
+
 export const initializeRouter = async () => {
-    const lenis = new Lenis();
+    lenis = new Lenis();
     function raf(time) {
         lenis.raf(time);
         requestAnimationFrame(raf);
