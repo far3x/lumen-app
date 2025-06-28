@@ -83,55 +83,75 @@ function renderScoreBar(label, score) {
 
 function renderContributionDetailModal(item) {
     const details = item.valuation_details || {};
+    const languageBreakdown = details.language_breakdown || {};
+    const languageEntries = Object.entries(languageBreakdown);
+
     const content = `
         <div class="space-y-6">
-            <div>
-                <h3 class="font-bold text-text-main mb-3">Valuation Report</h3>
-                <div class="grid grid-cols-2 md:grid-cols-4 gap-4 text-center">
-                    <div class="bg-primary p-3 rounded-lg">
-                        <p class="text-xs text-subtle">Tokens</p>
-                        <p class="text-lg font-bold font-mono text-text-main">${details.total_tokens?.toLocaleString() ?? 'N/A'}</p>
-                    </div>
-                    <div class="bg-primary p-3 rounded-lg">
-                        <p class="text-xs text-subtle">Complexity</p>
-                        <p class="text-lg font-bold font-mono text-text-main">${details.avg_complexity?.toFixed(2) ?? 'N/A'}</p>
-                    </div>
-                    <div class="bg-primary p-3 rounded-lg">
-                        <p class="text-xs text-subtle">Uniqueness</p>
-                        <p class="text-lg font-bold font-mono text-text-main">${details.rarity_multiplier?.toFixed(2) ?? 'N/A'}x</p>
-                    </div>
-                    <div class="bg-primary p-3 rounded-lg">
-                        <p class="text-xs text-subtle">Multiplier</p>
-                        <p class="text-lg font-bold font-mono text-text-main">${details.network_growth_multiplier?.toFixed(2) ?? 'N/A'}x</p>
-                    </div>
-                </div>
+            <div class="text-center border-b border-primary pb-6">
+                <p class="text-text-secondary text-sm">Final Reward</p>
+                <p class="text-5xl font-bold gradient-text mt-1">+${(item.reward_amount ?? 0).toFixed(4)} $LUM</p>
             </div>
 
-            <div>
-                <h3 class="font-bold text-text-main mb-3">AI Analysis</h3>
-                <div class="bg-primary p-4 rounded-lg space-y-4">
-                    ${renderScoreBar('Project Clarity', details.project_clarity_score)}
-                    ${renderScoreBar('Architectural Quality', details.architectural_quality_score)}
-                    ${renderScoreBar('Code Quality', details.code_quality_score)}
-                    ${details.analysis_summary ? `
-                        <div class="pt-4 border-t border-subtle/50">
-                            <p class="text-sm text-text-secondary leading-relaxed">${escapeHtml(details.analysis_summary)}</p>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-6">
+                <div class="space-y-4">
+                    <h3 class="font-bold text-text-main">Valuation Metrics</h3>
+                    <ul class="space-y-2 text-sm">
+                        <li class="flex justify-between">
+                            <span class="text-text-secondary">Tokens Analyzed</span>
+                            <span class="font-mono text-text-main">${details.total_tokens?.toLocaleString() ?? 'N/A'}</span>
+                        </li>
+                        <li class="flex justify-between">
+                            <span class="text-text-secondary">Avg. Complexity Score</span>
+                            <span class="font-mono text-text-main">${details.avg_complexity?.toFixed(2) ?? 'N/A'}</span>
+                        </li>
+                         <li class="flex justify-between">
+                            <span class="text-text-secondary">Uniqueness Multiplier</span>
+                            <span class="font-mono text-text-main">${details.rarity_multiplier?.toFixed(2) ?? 'N/A'}x</span>
+                        </li>
+                        <li class="flex justify-between">
+                            <span class="text-text-secondary">Network Growth Multiplier</span>
+                            <span class="font-mono text-text-main">${details.network_growth_multiplier?.toFixed(2) ?? 'N/A'}x</span>
+                        </li>
+                    </ul>
+                    ${languageEntries.length > 0 ? `
+                        <div>
+                            <h4 class="font-medium text-text-main text-sm mb-2">Languages Detected</h4>
+                            <div class="flex flex-wrap gap-2">
+                                ${languageEntries.map(([lang, count]) => `
+                                    <span class="text-xs font-medium bg-primary text-text-secondary px-2 py-1 rounded-full">${lang}</span>
+                                `).join('')}
+                            </div>
                         </div>
-                    ` : '<p class="text-sm text-text-secondary">No AI summary available for this contribution.</p>'}
+                    `: ''}
+                </div>
+                
+                <div class="space-y-4">
+                    <h3 class="font-bold text-text-main">AI Analysis</h3>
+                    <div class="bg-primary/50 p-4 rounded-lg space-y-4">
+                        ${renderScoreBar('Project Clarity', details.project_clarity_score)}
+                        ${renderScoreBar('Architectural Quality', details.architectural_quality_score)}
+                        ${renderScoreBar('Code Quality', details.code_quality_score)}
+                    </div>
+                     ${details.analysis_summary ? `
+                        <div>
+                             <h4 class="font-medium text-text-main text-sm mb-2">AI Summary</h4>
+                            <p class="text-sm text-text-secondary leading-relaxed max-h-24 overflow-y-auto pr-2">${escapeHtml(details.analysis_summary)}</p>
+                        </div>
+                    ` : ''}
                 </div>
             </div>
             
-            <div>
-                <h3 class="font-bold text-text-main mb-3">Reward Breakdown</h3>
-                <div class="bg-primary p-4 rounded-lg text-center">
-                    <p class="text-text-secondary text-sm">Final Reward</p>
-                    <p class="text-3xl font-bold gradient-text mt-1">+${item.reward_amount.toFixed(4)} $LUM</p>
-                </div>
-            </div>
-
+            ${item.transaction_hash ? `
+            <div class="text-center pt-6 border-t border-primary">
+                 <a href="https://solscan.io/tx/${item.transaction_hash}?cluster=devnet" target="_blank" rel="noopener noreferrer" class="inline-flex items-center gap-2 text-accent-cyan hover:underline text-sm font-medium">
+                    View on Solscan
+                    <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" /></svg>
+                </a>
+            </div>` : ''}
         </div>
     `;
-    renderModal(`Contribution #${item.id}`, content);
+    renderModal(`Contribution #${item.id} Details`, content, { size: 'lg' });
 }
 
 function renderSingleContributionRow(item) {

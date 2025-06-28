@@ -48,10 +48,14 @@ export function renderWalletSelectionModal() {
         </div>
     `;
     document.body.insertAdjacentHTML('beforeend', modalHTML);
+    document.body.classList.add('modal-open');
 
     const closeModal = () => {
         const modal = document.getElementById('wallet-selection-modal');
-        if (modal) modal.remove();
+        if (modal) {
+            document.body.classList.remove('modal-open');
+            modal.remove();
+        }
     };
 
     document.getElementById('modal-close-btn').addEventListener('click', closeModal);
@@ -188,11 +192,17 @@ export function updateBalancesInUI() {
     }
 }
 
-export function renderModal(title, content) {
+export function renderModal(title, content, options = {}) {
     const modalId = `modal-${Date.now()}`;
+    const size = options.size || 'md';
+    const sizeClasses = {
+        md: 'max-w-md',
+        lg: 'max-w-2xl',
+    };
+
     const modalHtml = `
         <div id="${modalId}" class="modal-overlay fixed inset-0 bg-black/70 backdrop-blur-sm z-50 flex items-center justify-center p-4 animate-fade-in-up" style="animation-duration: 0.2s;">
-            <div class="modal-content bg-surface w-full max-w-md rounded-xl border border-primary shadow-2xl shadow-black/50 overflow-hidden">
+            <div class="modal-content bg-surface w-full ${sizeClasses[size]} rounded-xl border border-primary shadow-2xl shadow-black/50 overflow-hidden">
                 <header class="p-4 border-b border-primary flex justify-between items-center">
                     <h2 class="text-lg font-bold">${title}</h2>
                     <button class="modal-close-btn p-2 text-text-secondary hover:text-text-main rounded-full hover:bg-primary">
@@ -207,11 +217,13 @@ export function renderModal(title, content) {
     `;
 
     document.body.insertAdjacentHTML('beforeend', modalHtml);
+    document.body.classList.add('modal-open');
 
     const modal = document.getElementById(modalId);
     
     const closeModal = () => {
         if (modal) {
+            document.body.classList.remove('modal-open');
             modal.classList.remove('animate-fade-in-up');
             modal.classList.add('animate-fade-out-down');
             setTimeout(() => modal.remove(), 200);

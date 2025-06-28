@@ -12,6 +12,10 @@
         -moz-osx-font-smoothing: grayscale;
     }
 
+    body.modal-open {
+        overflow: hidden;
+    }
+
     #content-container,
     #footer-container > div {
         @apply transition-all duration-200 ease-in-out;
