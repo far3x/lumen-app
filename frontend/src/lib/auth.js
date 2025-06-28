@@ -73,6 +73,7 @@ export const logout = async () => {
         account = null;
         localStorage.removeItem('lumen_user');
         localStorage.removeItem('lumen_account');
+        localStorage.removeItem('post_login_redirect');
         document.cookie = "access_token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
         document.cookie = "is_logged_in=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
         navigate('/login');
