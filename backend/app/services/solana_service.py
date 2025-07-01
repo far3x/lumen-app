@@ -98,8 +98,6 @@ class SolanaService:
         logger.info(f"Initiating transfer of {amount_lamports} lamports to {recipient_address_str}")
 
         try:
-            # --- START OF FIX ---
-            # The parameter name is `dest`, not `destination`. This is the final correction for this call.
             params = TransferParams(
                 program_id=TOKEN_PROGRAM_ID,
                 source=source_ata,
@@ -109,7 +107,6 @@ class SolanaService:
             )
             
             instruction = spl_transfer(params)
-            # --- END OF FIX ---
             
             tx_signature = self._send_and_confirm_tx([instruction], [self.treasury_keypair])
             logger.info(f"Transfer successful. Signature: {tx_signature}")
