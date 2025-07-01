@@ -338,7 +338,7 @@ Text to analyze:
         
         contribution_quality_score = base_value * rarity_multiplier * ai_weighted_multiplier
         target_usd_reward = self.BASE_USD_VALUE_PER_POINT * contribution_quality_score
-        
+
         total_lum_distributed = stats.total_lum_distributed if stats else 0
         simulated_lum_price = self.INITIAL_LUM_USD_PRICE + (self.PRICE_GROWTH_FACTOR * math.sqrt(total_lum_distributed))
         
@@ -362,7 +362,7 @@ Text to analyze:
             "simulated_lum_price_usd": round(simulated_lum_price, 6),
             "target_usd_reward": round(target_usd_reward, 4),
             "network_growth_multiplier": round(network_growth_multiplier, 2),
-            "final_reward": round(final_reward, 4)
+            "final_reward": round(final_reward, 2)
         })
 
         return {"final_reward": final_reward, "valuation_details": valuation_details}
