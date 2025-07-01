@@ -146,8 +146,8 @@ function renderSignupForm() {
             </div>
             
             <div class="w-full max-w-md mx-auto">
-                <div class="bg-surface/80 backdrop-blur-md p-8 rounded-xl border border-primary shadow-2xl shadow-black/20">
-                    <div class="text-center mb-6">
+                <div class="bg-surface/80 backdrop-blur-md p-6 rounded-xl border border-primary shadow-2xl shadow-black/20">
+                    <div class="text-center mb-4">
                         <h1 class="text-2xl font-bold text-white">Get Started with Lumen</h1>
                         <p class="text-text-secondary mt-2 text-sm">And start earning $LUM today.</p>
                     </div>
@@ -159,7 +159,7 @@ function renderSignupForm() {
                         </button>
                     </div>
                     
-                    <div class="my-6 flex items-center">
+                    <div class="my-4 flex items-center">
                         <div class="flex-grow border-t border-primary"></div>
                         <span class="flex-shrink mx-4 text-xs text-subtle uppercase">Or create an account with email</span>
                         <div class="flex-grow border-t border-primary"></div>
@@ -167,24 +167,26 @@ function renderSignupForm() {
 
                     <div id="form-error-message" class="hidden text-red-400 bg-red-900/50 p-3 rounded-md mb-4 text-sm"></div>
 
-                    <form id="signup-form" class="space-y-4" novalidate>
+                    <form id="signup-form" class="space-y-3" novalidate>
                         <div>
                             <label for="email" class="text-sm font-medium text-text-secondary">Email</label>
                             <input id="email" name="email" type="email" autocomplete="email" required class="mt-1 block w-full bg-primary border border-subtle rounded-md px-3 py-2 text-text-main focus:ring-2 focus:ring-accent-purple focus:outline-none">
                             <div id="email-error" class="error-text h-4"></div>
                         </div>
-                        <div>
-                            <label for="password" class="text-sm font-medium text-text-secondary">Password</label>
-                            <input id="password" name="password" type="password" required class="mt-1 block w-full bg-primary border border-subtle rounded-md px-3 py-2 text-text-main focus:ring-2 focus:ring-accent-purple focus:outline-none">
-                            <div class="strength-bar"><div id="strength-bar-fill" class="strength-bar-fill"></div></div>
-                            <div id="password-error" class="error-text h-4"><span id="strength-text" class="text-xs text-subtle"></span></div>
+                        <div class="space-y-2">
+                            <div>
+                                <label for="password" class="text-sm font-medium text-text-secondary">Password</label>
+                                <input id="password" name="password" type="password" required class="mt-1 block w-full bg-primary border border-subtle rounded-md px-3 py-2 text-text-main focus:ring-2 focus:ring-accent-purple focus:outline-none">
+                                <div class="strength-bar"><div id="strength-bar-fill" class="strength-bar-fill"></div></div>
+                                <div id="password-error" class="error-text h-4"><span id="strength-text" class="text-xs text-subtle"></span></div>
+                            </div>
+                            <div>
+                                <label for="confirmPassword" class="text-sm font-medium text-text-secondary">Confirm Password</label>
+                                <input id="confirmPassword" name="confirmPassword" type="password" required class="mt-1 block w-full bg-primary border border-subtle rounded-md px-3 py-2 text-text-main focus:ring-2 focus:ring-accent-purple focus:outline-none">
+                                <div id="confirmPassword-error" class="error-text h-4"></div>
+                            </div>
                         </div>
-                        <div>
-                            <label for="confirmPassword" class="text-sm font-medium text-text-secondary">Confirm Password</label>
-                            <input id="confirmPassword" name="confirmPassword" type="password" required class="mt-1 block w-full bg-primary border border-subtle rounded-md px-3 py-2 text-text-main focus:ring-2 focus:ring-accent-purple focus:outline-none">
-                            <div id="confirmPassword-error" class="error-text h-4"></div>
-                        </div>
-                        <div id="recaptcha-widget-container" class="pt-2 flex justify-center"></div>
+                        <div id="recaptcha-widget-container" class="!mt-2 flex justify-center"></div>
                         <div class="pt-2">
                             <button type="submit" class="w-full flex justify-center py-3 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-gradient-to-r from-accent-purple to-accent-pink hover:opacity-90 transition-opacity">
                                 Create Account
@@ -192,7 +194,7 @@ function renderSignupForm() {
                         </div>
                     </form>
 
-                    <p class="mt-6 text-center text-sm text-text-secondary">
+                    <p class="mt-4 text-center text-sm text-text-secondary">
                         Already have an account?
                         <a href="/login" class="font-medium text-accent-cyan hover:underline">Sign In</a>
                     </p>
@@ -205,7 +207,7 @@ function renderSignupForm() {
 
 export function renderSignupPage() {
     const content = `
-    <main class="relative flex-grow flex items-center justify-center p-6 isolate min-h-screen">
+    <main class="relative flex-grow flex justify-center p-6 py-28 isolate min-h-screen">
         <video
             autoplay
             loop
