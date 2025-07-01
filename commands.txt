@@ -13,3 +13,6 @@ pip install -r requirements.txt
 
 run redis for db on docker
 run mailhog for mail on docker
+
+
+doppler run -- docker compose -f docker-compose.yml up --build -d
