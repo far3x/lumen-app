@@ -50,9 +50,31 @@ oauth.register( name='github', client_id=config.settings.GITHUB_CLIENT_ID, clien
 @router.get("/me", response_model=UserSchema)
 @limiter.limit("60/minute")
 async def read_users_me(request: Request, current_user: models.User = Depends(dependencies.get_current_user)):
-    return current_user
+    has_beta_access = True
+    waitlist_position = None
 
-@router.put("/me", response_model=UserSchema)
+    if config.settings.BETA_MODE_ENABLED:
+        if current_user.id > config.settings.BETA_MAX_USERS:
+            has_beta_access = False
+            waitlist_position = current_user.id - config.settings.BETA_MAX_USERS
+    
+    user_data = {
+        "id": current_user.id,
+        "email": current_user.email,
+        "display_name": current_user.display_name,
+        "is_in_leaderboard": current_user.is_in_leaderboard,
+        "is_verified": current_user.is_verified,
+        "is_two_factor_enabled": current_user.is_two_factor_enabled,
+        "has_password": current_user.has_password,
+        "github_id": current_user.github_id,
+        "solana_address": current_user.solana_address,
+        "cooldown_until": current_user.cooldown_until,
+        "has_beta_access": has_beta_access,
+        "waitlist_position": waitlist_position
+    }
+    return UserSchema(**user_data)
+
+@router.put("/me", response_model=UserSchema, dependencies=[Depends(dependencies.verify_beta_access)])
 @limiter.limit("15/hour")
 async def update_users_me(
     request: Request,
@@ -63,7 +85,7 @@ async def update_users_me(
     updated_user = crud.update_user_profile(db, current_user, user_update)
     return updated_user
 
-@router.post("/me/request-deletion", status_code=status.HTTP_200_OK)
+@router.post("/me/request-deletion", status_code=status.HTTP_200_OK, dependencies=[Depends(dependencies.verify_beta_access)])
 @limiter.limit("3/day")
 async def request_account_deletion(
     request: Request,
@@ -107,7 +129,7 @@ async def request_account_deletion(
     return {"message": "A confirmation link to delete your account has been sent to your email."}
 
 
-@router.delete("/me", status_code=status.HTTP_200_OK)
+@router.delete("/me", status_code=status.HTTP_200_OK, dependencies=[Depends(dependencies.verify_beta_access)])
 @limiter.limit("5/day")
 async def delete_users_me(
     response: Response,
@@ -141,7 +163,7 @@ async def delete_users_me(
     
     return {"message": "Your account has been successfully deleted."}
 
-@router.post("/me/change-password")
+@router.post("/me/change-password", dependencies=[Depends(dependencies.verify_beta_access)])
 @limiter.limit("3/day")
 async def change_password(
     request: Request,
@@ -160,7 +182,7 @@ async def change_password(
     db.commit()
     return {"message": "Password updated successfully. Please log in again."}
 
-@router.post("/me/link-wallet", response_model=UserSchema)
+@router.post("/me/link-wallet", response_model=UserSchema, dependencies=[Depends(dependencies.verify_beta_access)])
 @limiter.limit("5/hour")
 async def link_wallet(
     request: Request,
@@ -192,7 +214,7 @@ async def link_wallet(
     
     return current_user
 
-@router.post("/me/set-wallet-address", response_model=UserSchema)
+@router.post("/me/set-wallet-address", response_model=UserSchema, dependencies=[Depends(dependencies.verify_beta_access)])
 @limiter.limit("5/hour")
 async def set_wallet_address_manually(
     request: Request,
@@ -215,7 +237,7 @@ async def set_wallet_address_manually(
     db.refresh(current_user)
     return current_user
 
-@router.get("/me/balance", response_model=AccountDetails)
+@router.get("/me/balance", response_model=AccountDetails, dependencies=[Depends(dependencies.verify_beta_access)])
 @limiter.limit("60/minute")
 def get_my_balance(
     request: Request,
@@ -227,7 +249,7 @@ def get_my_balance(
         raise HTTPException(status_code=404, detail="Account not found")
     return account_details
 
-@router.get("/me/contributions/all", response_model=List[ContributionResponse])
+@router.get("/me/contributions/all", response_model=List[ContributionResponse], dependencies=[Depends(dependencies.verify_beta_access)])
 @limiter.limit("10/minute")
 def get_my_all_contributions(
     request: Request,
@@ -277,7 +299,7 @@ def get_my_all_contributions(
     
     return response_list
 
-@router.get("/me/contributions", response_model=PaginatedContributions)
+@router.get("/me/contributions", response_model=PaginatedContributions, dependencies=[Depends(dependencies.verify_beta_access)])
 @limiter.limit("30/minute")
 def get_my_contributions(
     request: Request,
@@ -329,7 +351,7 @@ def get_my_contributions(
     
     return PaginatedContributions(items=response_list, total=total_count)
 
-@router.get("/me/claims", response_model=PaginatedClaims)
+@router.get("/me/claims", response_model=PaginatedClaims, dependencies=[Depends(dependencies.verify_beta_access)])
 @limiter.limit("30/minute")
 def get_my_claims(
     request: Request,
@@ -341,7 +363,7 @@ def get_my_claims(
     claims, total_count = crud.get_user_claim_history(db, user_id=current_user.id, skip=skip, limit=limit)
     return PaginatedClaims(items=claims, total=total_count)
 
-@router.get('/link-oauth/{provider}')
+@router.get('/link-oauth/{provider}', dependencies=[Depends(dependencies.verify_beta_access)])
 async def link_oauth_account(
     request: Request,
     provider: str,

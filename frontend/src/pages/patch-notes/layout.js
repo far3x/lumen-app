@@ -1,11 +1,16 @@
 export const patchNotes = {
+    '2025-07-02-3': { 
+        title: 'Protocol Upgrade: Beta Program, Priority Queues & UX Polish', 
+        date: 'July 3, 2025',
+        content: () => import('./content/2025_07_02_3.js').then(m => m.renderContent()) 
+    },
     '2025-07-02-2': { 
         title: 'Settings Page Redesign & UX Polish', 
         date: 'July 2, 2025',
         content: () => import('./content/2025_07_02_2.js').then(m => m.renderContent()) 
     },
     '2025-07-02-1': { 
-        title: 'Security Hardening, Community Features', 
+        title: 'Security Hardening & Community Features', 
         date: 'July 2, 2025',
         content: () => import('./content/2025_07_02_1.js').then(m => m.renderContent()) 
     },

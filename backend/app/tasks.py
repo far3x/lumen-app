@@ -11,70 +11,92 @@ from app.services.valuation import hybrid_valuation_service
 from app.services.embedding import embedding_service
 from app.services.redis_service import redis_service
 from app.schemas import ContributionResponse, ValuationMetrics, AiAnalysis
+from app.services.solana_service import solana_service
 
 logger = logging.getLogger(__name__)
 
 SIMILARITY_UPDATE_THRESHOLD = 0.85
 NEAR_PERFECT_SIMILARITY_THRESHOLD = 0.999 
 
+def publish_user_update(db, user_id: int, event_type: str, payload: dict):
+    message = { "type": event_type, "payload": payload }
+    redis_service.r.publish(f"user-updates:{user_id}", json.dumps(message))
+
 def publish_contribution_update(db, contribution_id: int, user_id: int):
     contrib = crud.get_contribution_by_id(db, contribution_id)
-    if not contrib:
-        return
+    if not contrib: return
 
     valuation_data = {}
     if contrib.valuation_results and isinstance(contrib.valuation_results, str):
         try:
             data = json.loads(contrib.valuation_results)
-            if isinstance(data, dict):
-                valuation_data = data
-        except (json.JSONDecodeError, TypeError):
-            pass
+            if isinstance(data, dict): valuation_data = data
+        except (json.JSONDecodeError, TypeError): pass
 
     manual_metrics = ValuationMetrics(
-        total_lloc=valuation_data.get('total_lloc', 0),
-        total_tokens=valuation_data.get('total_tokens', 0),
-        avg_complexity=valuation_data.get('avg_complexity', 0.0),
-        compression_ratio=valuation_data.get('compression_ratio', 0.0),
+        total_lloc=valuation_data.get('total_lloc', 0), total_tokens=valuation_data.get('total_tokens', 0),
+        avg_complexity=valuation_data.get('avg_complexity', 0.0), compression_ratio=valuation_data.get('compression_ratio', 0.0),
         language_breakdown=valuation_data.get('language_breakdown', {})
     )
-    
     ai_analysis = AiAnalysis(
-        project_clarity_score=valuation_data.get('project_clarity_score', 0.0),
-        architectural_quality_score=valuation_data.get('architectural_quality_score', 0.0),
-        code_quality_score=valuation_data.get('code_quality_score', 0.0),
-        analysis_summary=valuation_data.get('analysis_summary')
+        project_clarity_score=valuation_data.get('project_clarity_score', 0.0), architectural_quality_score=valuation_data.get('architectural_quality_score', 0.0),
+        code_quality_score=valuation_data.get('code_quality_score', 0.0), analysis_summary=valuation_data.get('analysis_summary')
     )
     
     response_data = ContributionResponse(
-        id=contrib.id,
-        created_at=contrib.created_at,
-        reward_amount=contrib.reward_amount,
-        status=contrib.status,
-        valuation_details=valuation_data,
-        manual_metrics=manual_metrics,
-        ai_analysis=ai_analysis
+        id=contrib.id, created_at=contrib.created_at, reward_amount=contrib.reward_amount, status=contrib.status,
+        valuation_details=valuation_data, manual_metrics=manual_metrics, ai_analysis=ai_analysis, transaction_hash=contrib.transaction_hash
     )
-
     account_details = crud.get_account_details(db, user_id=user_id)
-    
-    new_payload = {
-        "contribution": json.loads(response_data.model_dump_json())
-    }
+    new_payload = { "contribution": json.loads(response_data.model_dump_json()) }
     if account_details:
         new_payload["account"] = json.loads(account_details.model_dump_json())
 
-    message = {
-        "type": "contribution_update",
-        "payload": new_payload
-    }
-    
-    redis_service.r.publish(f"user-updates:{user_id}", json.dumps(message))
+    publish_user_update(db, user_id, "contribution_update", new_payload)
+
+@celery_app.task(bind=True)
+def process_claim(self, user_id: int, claim_id: int):
+    db = SessionLocal()
+    try:
+        user = crud.get_user(db, user_id=user_id)
+        if not user or not user.solana_address:
+            raise Exception("User or Solana address not found.")
+        
+        account = crud.get_account_details(db, user_id=user.id)
+        if not account or account.lum_balance <= 0:
+            raise Exception("No claimable balance.")
+        
+        claimable_amount = account.lum_balance
+        amount_lamports = int(claimable_amount * (10**9))
+        
+        tx_hash = solana_service.transfer_lum_tokens(
+            recipient_address_str=user.solana_address,
+            amount_lamports=amount_lamports
+        )
+        
+        crud.reset_claimable_balance(db, user_id=user.id)
+        crud.update_claim_transaction_hash(db, claim_id, tx_hash)
+        
+        updated_account = crud.get_account_details(db, user_id=user.id)
+        
+        publish_user_update(db, user_id, "claim_success", {
+            "message": f"Successfully claimed {claimable_amount:.4f} LUM.",
+            "transaction_hash": tx_hash,
+            "account": json.loads(updated_account.model_dump_json())
+        })
+
+    except Exception as e:
+        logger.error(f"Claim processing failed for claim_id {claim_id}: {e}", exc_info=True)
+        publish_user_update(db, user_id, "claim_failed", {
+            "message": f"Claim failed: {str(e)}"
+        })
+    finally:
+        db.close()
+
 
 @celery_app.task(bind=True)
 def process_contribution(self, user_id: int, codebase: str, contribution_db_id: int):
     db = SessionLocal()
-    
     try:
         crud.update_contribution_status(db, contribution_db_id, "PROCESSING")
         publish_contribution_update(db, contribution_db_id, user_id)
@@ -111,9 +133,7 @@ def process_contribution(self, user_id: int, codebase: str, contribution_db_id: 
         rejection_reason = None
 
         if all_embeddings_data_with_recency:
-            existing_embeddings_tuples = [
-                e for e in all_embeddings_data_with_recency if e[0] != contribution_db_id and e[2]
-            ]
+            existing_embeddings_tuples = [e for e in all_embeddings_data_with_recency if e[0] != contribution_db_id and e[2]]
             
             if existing_embeddings_tuples:
                 existing_embeddings_vectors = [np.array(json.loads(e[2])) for e in existing_embeddings_tuples]
@@ -131,11 +151,7 @@ def process_contribution(self, user_id: int, codebase: str, contribution_db_id: 
                         for i, data_tuple in enumerate(existing_embeddings_tuples):
                             c_id, c_user_id, _, c_created_at = data_tuple
                             if c_user_id == user_id and similarities[i] >= NEAR_PERFECT_SIMILARITY_THRESHOLD:
-                                user_s_own_highly_similar_submissions.append({
-                                    "id": c_id,
-                                    "similarity": similarities[i],
-                                    "created_at": c_created_at
-                                })
+                                user_s_own_highly_similar_submissions.append({ "id": c_id, "similarity": similarities[i], "created_at": c_created_at })
                         
                         if user_s_own_highly_similar_submissions:
                             user_s_own_highly_similar_submissions.sort(key=lambda x: x["created_at"], reverse=True)
@@ -151,7 +167,6 @@ def process_contribution(self, user_id: int, codebase: str, contribution_db_id: 
                         else:
                             logger.info(f"[SIMILARITY_PASS] User's own code similarity {max_similarity_overall:.4f} is not a near-perfect match to any single prior. Treating as new for diff, but will check plagiarism.")
                             pass
-
                     else:
                         logger.warning(f"[SIMILARITY_REJECT] High similarity ({max_similarity_overall:.4f}) to code from another user (C_ID:{most_similar_id_overall}). Rejecting as potential plagiarism.")
                         rejection_reason = "DUPLICATE_CROSS_USER"
@@ -165,12 +180,7 @@ def process_contribution(self, user_id: int, codebase: str, contribution_db_id: 
         
         logger.info(f"[UNIQUENESS_PASS] Contribution {contribution_db_id} is unique or a valid update. Proceeding to valuation...")
         
-        valuation_result = hybrid_valuation_service.calculate(
-            db,
-            current_codebase=codebase,
-            previous_codebase=previous_codebase_for_valuation
-        )
-
+        valuation_result = hybrid_valuation_service.calculate(db, current_codebase=codebase, previous_codebase=previous_codebase_for_valuation)
         base_reward = valuation_result.get("final_reward", 0.0)
         valuation_details = valuation_result.get("valuation_details", {})
 
@@ -183,11 +193,19 @@ def process_contribution(self, user_id: int, codebase: str, contribution_db_id: 
         
         if base_reward > 0:
             total_reward_given = crud.apply_reward_to_user(db, user, base_reward)
+            
+            if settings.BETA_MODE_ENABLED and user.id <= settings.BETA_MAX_USERS and not user.is_beta_bonus_claimed:
+                bonus_reward = crud.apply_reward_to_user(db, user, settings.BETA_GENESIS_BONUS)
+                total_reward_given += bonus_reward
+                user.is_beta_bonus_claimed = True
+                db.add(user)
+                logger.info(f"[REWARD] Awarded Genesis Bonus of {settings.BETA_GENESIS_BONUS} LUM to user {user_id}.")
+
             avg_complexity = valuation_details.get("avg_complexity", 0.0)
             if avg_complexity > 0 :
                 crud.update_network_stats(db, avg_complexity, total_reward_given)
             
-            contribution_record.reward_amount = total_reward_given
+            contribution_record.reward_amount = total_reward_given - (bonus_reward if 'bonus_reward' in locals() else 0)
             contribution_record.content_embedding = json.dumps(new_embedding.tolist()) if new_embedding is not None else None
             contribution_record.status = "PROCESSED"
             
@@ -203,7 +221,6 @@ def process_contribution(self, user_id: int, codebase: str, contribution_db_id: 
                 contribution_record.status = "REJECTED_NO_NEW_CODE"
             else:
                 contribution_record.status = "REJECTED_NO_REWARD"
-
             db.add(contribution_record)
             db.commit()
             logger.warning(f"[REWARD] Contribution {contribution_db_id} was valued at 0.0 LUM and status set to {contribution_record.status}.")

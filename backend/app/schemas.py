@@ -19,6 +19,8 @@ class User(BaseModel):
     github_id: Optional[str] = None
     solana_address: Optional[str] = None
     cooldown_until: Optional[datetime] = None
+    has_beta_access: bool
+    waitlist_position: Optional[int] = None
 
     class Config:
         from_attributes = True
@@ -181,3 +183,7 @@ class FeedbackCreate(BaseModel):
     page: Optional[str] = Field(None, max_length=255)
     rating: Optional[int] = Field(None, ge=1, le=5)
     content: str = Field(..., min_length=10, max_length=2000)
+
+class ClaimRequestResponse(BaseModel):
+    message: str
+    claim_id: int

@@ -39,7 +39,7 @@ export function renderLandingPage() {
                 </p>
                 
                 <div class="mt-10 flex justify-center items-center gap-4 animate-fade-in-up" style="animation-delay: 500ms;">
-                    <a href="/login" class="px-8 py-3 font-bold bg-gradient-to-r from-accent-purple to-accent-pink text-white rounded-lg transition-all duration-300 hover:scale-105 hover:shadow-lg hover:shadow-accent-purple/30 hover:brightness-110">Start Earning Now</a>
+                    <a href="/signup" class="px-8 py-3 font-bold bg-gradient-to-r from-accent-purple to-accent-pink text-white rounded-lg transition-all duration-300 hover:scale-105 hover:shadow-lg hover:shadow-accent-purple/30 hover:brightness-110">Start Earning Now</a>
                     <a href="/docs/introduction" class="px-8 py-3 font-bold bg-primary text-text-main rounded-lg transition-all duration-300 hover:bg-subtle/80 hover:-translate-y-1">Read the Docs</a>
                 </div>
             </div>
@@ -48,7 +48,6 @@ export function renderLandingPage() {
         <section class="relative py-20 md:py-32 bg-abyss-dark bg-grid-pattern bg-grid-size animate-grid-pan overflow-hidden">
             <div class="absolute inset-0 bg-[radial-gradient(ellipse_at_center,transparent_20%,#08080A)]"></div>
             <div class="container mx-auto px-6 max-w-7xl relative z-10">
-                
                 <div class="text-center max-w-2xl mx-auto scroll-animate">
                     <h2 class="text-3xl md:text-4xl font-bold">A Frictionless Contributor Experience</h2>
                     <p class="mt-4 text-text-secondary">Go from code to crypto in minutes. Our open-source CLI is designed to integrate seamlessly into your workflow without compromising your privacy.</p>
@@ -70,11 +69,11 @@ lum login</code></pre>
                     </div>
                     
                     <div class="border border-subtle/50 p-8 rounded-xl bg-surface/80 flex flex-col scroll-animate transition-all duration-300 hover:transform hover:-translate-y-2 hover:border-accent-pink hover:shadow-xl hover:shadow-accent-pink/10" style="transition-delay: 200ms;">
-                         <div class="mx-auto w-16 h-16 p-[1px] rounded-lg bg-hero-gradient">
+                        <div class="mx-auto w-16 h-16 p-[1px] rounded-lg bg-hero-gradient">
                             <div class="w-full h-full bg-primary rounded-[7px] flex items-center justify-center">
                                 <svg class="w-8 h-8" fill="none" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" stroke="url(#icon-gradient)" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"></path></svg>
                             </div>
-                         </div>
+                        </div>
                         <h3 class="text-xl font-bold mt-6">Contribute Your Project</h3>
                         <p class="text-text-secondary mt-2 flex-grow">Run <code>lum contribute</code> in your project's root. The CLI analyzes, anonymizes, and packages your code locally.</p>
                         <div class="mt-4">
@@ -86,7 +85,7 @@ lum contribute</code></pre>
                     <div class="border border-subtle/50 p-8 rounded-xl bg-surface/80 flex flex-col scroll-animate transition-all duration-300 hover:transform hover:-translate-y-2 hover:border-accent-cyan hover:shadow-xl hover:shadow-accent-cyan/10" style="transition-delay: 300ms;">
                         <div class="mx-auto w-16 h-16 p-[1px] rounded-lg bg-hero-gradient">
                             <div class="w-full h-full bg-primary rounded-[7px] flex items-center justify-center">
-                               <svg class="w-8 h-8" fill="none" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" stroke="url(#icon-gradient)" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"></path></svg>
+                            <svg class="w-8 h-8" fill="none" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" stroke="url(#icon-gradient)" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"></path></svg>
                             </div>
                         </div>
                         <h3 class="text-xl font-bold mt-6">Get Rewarded</h3>
@@ -99,15 +98,19 @@ lum contribute</code></pre>
                         </div>
                     </div>
                 </div>
+            </div>
+        </section>
 
-                <div class="mt-16 text-center scroll-animate" style="transition-delay: 400ms;">
-                    <p class="text-text-secondary">Ready to get started? Dive into the documentation or explore the code.</p>
-                    <div class="mt-6 flex flex-col sm:flex-row justify-center items-center gap-4">
-                        <a href="/docs/installation" class="w-full sm:w-auto px-6 py-3 font-bold bg-primary text-text-main rounded-lg transition-all duration-300 hover:bg-subtle/80 hover:-translate-y-1">Installation Guide</a>
-                        <a href="https://github.com/Far3000-YT/lumen" target="_blank" rel="noopener" data-external="true" class="group w-full sm:w-auto px-6 py-3 font-bold bg-transparent border border-subtle text-text-secondary rounded-lg flex items-center justify-center transition-all duration-300 hover:bg-subtle/40 hover:text-text-main hover:-translate-y-1">
-                            View on GitHub ${externalLinkIcon}
-                        </a>
-                    </div>
+        <section class="py-20 md:py-32 bg-abyss-dark">
+            <div class="container mx-auto px-6 max-w-4xl text-center scroll-animate">
+                <h2 class="text-3xl md:text-4xl font-bold">Become a <span class="gradient-text">Genesis Contributor</span></h2>
+                <p class="mt-4 max-w-2xl mx-auto text-lg text-text-secondary">The Lumen network is in its genesis phase. Be one of the first 500 developers to make a successful contribution and you'll receive an exclusive, one-time reward.</p>
+                <p class="mt-6 text-5xl font-bold text-white">1,000 <span class="gradient-text">$LUM</span> Bonus</p>
+                <p class="text-sm text-text-secondary mt-1">Awarded on top of your standard contribution reward.</p>
+                <div class="mt-8">
+                    <a href="/signup" class="px-8 py-3 font-bold bg-gradient-to-r from-accent-purple to-accent-pink text-white rounded-lg transition-all duration-300 hover:scale-105 hover:shadow-lg hover:shadow-accent-purple/30 hover:brightness-110">
+                        Claim Your Spot
+                    </a>
                 </div>
             </div>
         </section>
@@ -134,7 +137,7 @@ lum contribute</code></pre>
                         </div>
                     </div>
                     <div class="flex items-start space-x-4 scroll-animate" style="transition-delay: 200ms;">
-                         <div class="p-[1px] rounded-lg bg-hero-gradient">
+                        <div class="p-[1px] rounded-lg bg-hero-gradient">
                             <div class="p-3 bg-primary rounded-[7px]"> <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" stroke="url(#icon-gradient)" d="M12 20V10M18 20V4M6 20V16"></path></svg> </div>
                         </div>
                         <div>
@@ -220,7 +223,7 @@ lum contribute</code></pre>
                         <div class="grid grid-rows-[0fr] group-open:grid-rows-[1fr] transition-[grid-template-rows] duration-500 ease-in-out">
                             <div class="overflow-hidden">
                                 <p class="text-text-secondary px-6 pb-6">
-                                    Yes. Security is our paramount concern. The entire anonymization process runs locally on your machine via our open-source CLI. Sensitive data like secrets, PII, and API keys are scrubbed *before* anything is ever uploaded. You can audit the code yourself for full transparency.
+                                    Yes. Security is our paramount concern. The entire anonymization process runs locally on your machine via our open-source CLI. Sensitive data like secrets, PII, and API keys are scrubbed anything is ever uploaded. You can audit the code yourself for full transparency.
                                 </p>
                             </div>
                         </div>

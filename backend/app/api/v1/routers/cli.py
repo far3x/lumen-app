@@ -38,23 +38,6 @@ def get_user_id_from_pat_for_rate_limit(request: Request) -> str:
     
     return request.client.host
 
-def get_cooldown_user_key_from_pat(request: Request) -> Optional[str]:
-    auth_header = request.headers.get("authorization")
-    if not auth_header or not auth_header.lower().startswith("bearer "):
-        return None
-    pat = auth_header.split(" ")[1]
-    if not pat.startswith("lum_pat_"):
-        return None
-
-    db = SessionLocal()
-    try:
-        user = crud.get_user_by_pat(db, pat)
-        if user and user.cooldown_until and datetime.now(timezone.utc) < user.cooldown_until:
-            return str(user.id)
-    finally:
-        db.close()
-    return None
-
 @router.post("/device-auth", response_model=DeviceAuthResponse)
 @limiter.limit("10/minute")
 async def cli_device_auth(request: Request):
@@ -92,12 +75,11 @@ except Exception:
     tokenizer = None
 
 @router.post("/contribute", status_code=status.HTTP_202_ACCEPTED)
-@limiter.limit("1/day", key_func=get_cooldown_user_key_from_pat)
 @limiter.limit("5/day", key_func=get_user_id_from_pat_for_rate_limit)
 async def contribute_data(
     request: Request,
     payload: ContributionCreate,
-    current_user: models.User = Depends(dependencies.get_current_user_from_pat),
+    current_user: models.User = Depends(dependencies.verify_beta_access_for_cli),
     signature_check: None = Depends(dependencies.verify_contribution_signature),
     db: Session = Depends(database.get_db)
 ):
@@ -131,12 +113,16 @@ async def contribute_data(
 async def get_contribution_status(
     request: Request,
     contribution_id: int,
-    db: Session = Depends(database.get_db)
+    db: Session = Depends(database.get_db),
+    current_user: models.User = Depends(dependencies.get_current_user_from_pat)
 ):
     contribution = crud.get_contribution_by_id(db, contribution_id)
     if not contribution:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Contribution not found.")
     
+    if contribution.user_id != current_user.id:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="You do not have permission to view this contribution.")
+
     return ContributionStatus(
         status=contribution.status,
         contribution_id=contribution_id,

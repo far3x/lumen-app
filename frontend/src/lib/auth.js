@@ -9,6 +9,20 @@ export const api = axios.create({
     withCredentials: true,
 });
 
+api.interceptors.response.use(
+    response => response,
+    async (error) => {
+        if (error.response?.status === 403 && error.response.data.detail === 'USER_ON_WAITLIST') {
+            return Promise.reject(error);
+        }
+        if (error.response?.status === 401) {
+            console.log("Unauthorized, logging out.");
+            await logout();
+        }
+        return Promise.reject(error);
+    }
+);
+
 let user = null;
 let account = null;
 

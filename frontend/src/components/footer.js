@@ -64,6 +64,7 @@ export function renderFooter() {
                         <ul class="mt-4 space-y-3">
                         <li><a href="https://github.com/Far3000-YT/lumen" target="_blank" rel="noopener" data-external="true" class="group flex items-center text-text-secondary hover:text-text-main transition-colors">GitHub ${externalLinkIcon}</a></li>
                         <li><a href="https://twitter.com/0xFar3000" target="_blank" rel="noopener" data-external="true" class="group flex items-center text-text-secondary hover:text-text-main transition-colors">X / Twitter ${externalLinkIcon}</a></li>
+                        <li><a href="mailto:contact@lumen.onl" class="text-text-secondary hover:text-text-main transition-colors">Contact</a></li>
                         <li><a href="#" id="feedback-button" class="text-text-secondary hover:text-text-main transition-colors">Provide Feedback</a></li>
                         </ul>
                     </div>

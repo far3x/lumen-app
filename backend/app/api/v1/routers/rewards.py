@@ -1,25 +1,21 @@
 from fastapi import APIRouter, Depends, HTTPException, status, Request
 from sqlalchemy.orm import Session
-from pydantic import BaseModel
-from datetime import datetime, timezone, timedelta
+from datetime import datetime, timezone
 
 from app.db import crud, models, database
 from app.api.v1 import dependencies
-from app.services.solana_service import solana_service
 from app.core.limiter import limiter
+from app.tasks import process_claim
+from app.schemas import ClaimRequestResponse
 
 router = APIRouter(prefix="/rewards", tags=["Rewards"])
 
-class ClaimResponse(BaseModel):
-    message: str
-    transaction_hash: str
-
-@router.post("/claim", response_model=ClaimResponse)
+@router.post("/claim", response_model=ClaimRequestResponse, status_code=status.HTTP_202_ACCEPTED)
 @limiter.limit("1/day")
 def claim_rewards(
     request: Request,
     db: Session = Depends(database.get_db),
-    current_user: models.User = Depends(dependencies.get_current_user)
+    current_user: models.User = Depends(dependencies.verify_beta_access)
 ):
     if current_user.cooldown_until and datetime.now(timezone.utc) < current_user.cooldown_until:
         remaining_time = current_user.cooldown_until - datetime.now(timezone.utc)
@@ -42,37 +38,17 @@ def claim_rewards(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="You have no claimable rewards."
         )
+    
+    claim_record = crud.log_claim_transaction(
+        db, 
+        user_id=current_user.id, 
+        amount=account.lum_balance, 
+        tx_hash="PENDING"
+    )
 
-    claimable_amount = account.lum_balance
-    amount_lamports = int(claimable_amount * (10**9))
+    process_claim.delay(current_user.id, claim_record.id)
 
-    try:
-        tx_hash = solana_service.transfer_lum_tokens(
-            recipient_address_str=current_user.solana_address,
-            amount_lamports=amount_lamports
-        )
-        
-        crud.reset_claimable_balance(db, user_id=current_user.id)
-        crud.log_claim_transaction(
-            db, 
-            user_id=current_user.id, 
-            amount=claimable_amount, 
-            tx_hash=tx_hash
-        )
-        
-        success_message = (
-            f"Successfully claimed {claimable_amount:.4f} LUM. "
-            "The transaction may take a moment to appear on Solscan."
-        )
-        return ClaimResponse(
-            message=success_message,
-            transaction_hash=tx_hash
-        )
-
-    except ValueError as e:
-         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(e))
-    except Exception as e:
-        raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"An on-chain error occurred during the claim process. Your balance has not been affected. Please try again later. Error: {e}"
-        )
+    return ClaimRequestResponse(
+        message="Your claim request has been received and is being processed. You will be notified upon completion.",
+        claim_id=claim_record.id
+    )

@@ -34,7 +34,7 @@ mail_conf = ConnectionConfig(
 class TokenPayload(BaseModel):
     token: str
 
-@router.post("/2fa/setup", response_model=TwoFactorSetupResponse)
+@router.post("/2fa/setup", response_model=TwoFactorSetupResponse, dependencies=[Depends(dependencies.verify_beta_access)])
 @limiter.limit("5/hour")
 async def setup_2fa(request: Request, current_user: models.User = Depends(dependencies.get_current_user)):
     if current_user.is_two_factor_enabled:
@@ -48,7 +48,7 @@ async def setup_2fa(request: Request, current_user: models.User = Depends(depend
     
     return TwoFactorSetupResponse(provisioning_uri=provisioning_uri, setup_key=setup_key)
 
-@router.post("/2fa/enable")
+@router.post("/2fa/enable", dependencies=[Depends(dependencies.verify_beta_access)])
 @limiter.limit("5/hour")
 async def enable_2fa(request: Request, payload: TwoFactorEnableRequest, db: Session = Depends(database.get_db), current_user: models.User = Depends(dependencies.get_current_user)):
     totp = pyotp.TOTP(payload.setup_key)
@@ -65,7 +65,7 @@ async def enable_2fa(request: Request, payload: TwoFactorEnableRequest, db: Sess
 
     return {"backup_codes": backup_codes}
 
-@router.post("/2fa/disable")
+@router.post("/2fa/disable", dependencies=[Depends(dependencies.verify_beta_access)])
 @limiter.limit("5/hour")
 async def disable_2fa(request: Request, payload: TwoFactorDisableRequest, db: Session = Depends(database.get_db), current_user: models.User = Depends(dependencies.get_current_user)):
     if not current_user.hashed_password or not security.verify_password(payload.password, current_user.hashed_password):
@@ -78,7 +78,7 @@ async def disable_2fa(request: Request, payload: TwoFactorDisableRequest, db: Se
 
     return {"message": "2FA has been disabled."}
 
-@router.post("/2fa/request-disable")
+@router.post("/2fa/request-disable", dependencies=[Depends(dependencies.verify_beta_access)])
 @limiter.limit("3/hour")
 async def request_disable_2fa(
     request: Request,
