@@ -103,7 +103,7 @@ function render2FAForm() {
             <form id="2fa-form">
                 <div class="flex justify-center gap-2 my-6">
                     ${Array(6).fill(0).map((_, i) => `
-                        <input type="text" inputmode="numeric" pattern="[0-9]*" maxlength="1" id="code-input-${i}" class="code-input w-12 h-14 text-center text-2xl font-mono bg-primary border border-subtle rounded-md text-text-main focus:ring-2 focus:ring-accent-purple focus:outline-none">
+                        <input type="text" inputmode="numeric" pattern="[0-9]*" maxlength="1" id="code-input-${i}" class="code-input w-12 h-14 text-center text-2xl font-mono bg-primary border border-subtle rounded-md text-text-main focus:ring-2 focus:ring-accent-purple focus:outline-none" autocomplete="one-time-code">
                     `).join('')}
                 </div>
                  <button type="submit" class="w-full flex justify-center py-3 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-gradient-to-r from-accent-purple to-accent-pink hover:opacity-90 transition-opacity">
@@ -112,7 +112,7 @@ function render2FAForm() {
             </form>
         ` : `
             <form id="backup-code-form" class="space-y-4">
-                <input type="text" id="backup-code" name="backup-code" placeholder="xxxx-xxxx" required class="block w-full text-center tracking-widest font-mono bg-primary border border-subtle rounded-md px-3 py-3 text-text-main focus:ring-2 focus:ring-accent-purple focus:outline-none">
+                <input type="text" id="backup-code" name="backup-code" placeholder="xxxx-xxxx" required class="block w-full text-center tracking-widest font-mono bg-primary border border-subtle rounded-md px-3 py-3 text-text-main focus:ring-2 focus:ring-accent-purple focus:outline-none" autocomplete="one-time-code">
                 <button type="submit" class="w-full flex justify-center py-3 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-gradient-to-r from-accent-purple to-accent-pink hover:opacity-90 transition-opacity">
                     Verify Backup Code
                 </button>

@@ -105,8 +105,8 @@ const handleLocation = async () => {
             const pageId = path.split('/docs/')[1] || 'introduction';
             renderPromise = import('./pages/docs/layout.js').then(m => m.renderDocsLayout(pageId));
         } else if (path.startsWith('/patch-notes')) {
-            const versionId = path.split('/patch-notes/')[1] || Object.keys(await import('./pages/patch-notes/layout.js').then(m => m.patchNotes || {}))[0] || 'v1.0.2';
-            renderPromise = import('./pages/patch-notes/layout.js').then(m => m.renderPatchNotesLayout(versionId));
+            const noteId = path.split('/patch-notes/')[1] || Object.keys((await import('./pages/patch-notes/layout.js')).patchNotes || {})[0];
+            renderPromise = import('./pages/patch-notes/layout.js').then(m => m.renderPatchNotesLayout(noteId));
         } else {
             const routeHandler = routes[path] || routes['/'];
             if (typeof routeHandler !== 'function') {

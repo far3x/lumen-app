@@ -464,7 +464,7 @@ async function show2FASetupModal(dashboardState) {
 
                 <form id="enable-2fa-form" class="mt-6">
                     <label for="2fa-verification-code" class="text-sm font-medium text-text-secondary">Enter the 6-digit code from your app to confirm:</label>
-                    <input type="text" id="2fa-verification-code" required autocomplete="off"
+                    <input type="text" id="2fa-verification-code" required autocomplete="one-time-code"
                            class="mt-1 block w-full bg-primary border border-subtle rounded-md px-3 py-2 text-text-main text-center text-2xl tracking-widest font-mono focus:ring-2 focus:ring-accent-purple focus:outline-none">
                     <div id="enable-2fa-message" class="hidden text-sm p-3 rounded-md bg-red-900/50 text-red-300 mt-4 text-center"></div>
                     <button type="submit" class="mt-4 w-full flex justify-center py-3 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-gradient-to-r from-accent-purple to-accent-pink hover:opacity-90 transition-opacity">
@@ -871,89 +871,90 @@ export function renderSettingsPage(user) {
             <p class="text-text-secondary mt-1">Manage your profile and account security.</p>
         </header>
 
-        <div class="mt-8 grid grid-cols-1 lg:grid-cols-5 gap-8 items-start">
-            
-            <div class="lg:col-span-2 space-y-8 flex flex-col">
-                <form id="profile-settings-form" class="bg-surface border border-primary rounded-xl flex flex-col flex-1">
-                    <div class="p-6 flex flex-col flex-grow">
-                        <h3 class="font-bold text-lg">Profile Information</h3>
-                        <p class="text-text-secondary text-sm mt-1 mb-6">This information may be displayed publicly.</p>
-                        <div class="space-y-6 flex-grow">
-                            <div>
-                                <label for="display-name" class="block text-sm font-medium text-text-secondary mb-1">Display Name</label>
-                                <input type="text" id="display-name" value="${user.display_name ?? ''}"
-                                    class="w-full px-3 py-2 bg-primary border border-subtle rounded-md text-text-main focus:ring-2 focus:ring-accent-purple focus:outline-none">
-                            </div>
-                            <div class="flex items-center justify-between pt-2">
+        <div class="mt-8 flex flex-col gap-8">
+            <div class="grid grid-cols-1 lg:grid-cols-5 gap-8 items-stretch">
+                <div class="lg:col-span-3 flex flex-col gap-8">
+                    <form id="profile-settings-form" class="bg-surface border border-primary rounded-xl flex flex-col flex-1">
+                        <div class="p-6 flex flex-col flex-grow">
+                            <h3 class="font-bold text-lg">Profile Information</h3>
+                            <p class="text-text-secondary text-sm mt-1 mb-6">This information may be displayed publicly.</p>
+                            <div class="space-y-6 flex-grow">
                                 <div>
-                                    <label for="leaderboard-toggle" class="text-sm font-medium text-text-main">Leaderboard Visibility</label>
-                                    <p class="text-xs text-text-secondary">Show my rank on public leaderboards.</p>
+                                    <label for="display-name" class="block text-sm font-medium text-text-secondary mb-1">Display Name</label>
+                                    <input type="text" id="display-name" value="${user.display_name ?? ''}"
+                                        class="w-full px-3 py-2 bg-primary border border-subtle rounded-md text-text-main focus:ring-2 focus:ring-accent-purple focus:outline-none">
                                 </div>
-                                <label class="relative inline-flex items-center cursor-pointer">
-                                    <input type="checkbox" id="leaderboard-toggle" class="sr-only peer" ${user.is_in_leaderboard ? 'checked' : ''}>
-                                    <div class="w-11 h-6 bg-primary peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-accent-purple rounded-full peer dark:bg-subtle peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white dark:after:bg-text-secondary after:border-gray-300 dark:after:border-primary after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:peer-checked:bg-gradient-to-r dark:peer-checked:from-accent-purple dark:peer-checked:to-accent-pink"></div>
-                                </label>
+                                <div class="flex items-center justify-between pt-2">
+                                    <div>
+                                        <label for="leaderboard-toggle" class="text-sm font-medium text-text-main">Leaderboard Visibility</label>
+                                        <p class="text-xs text-text-secondary">Show my rank on public leaderboards.</p>
+                                    </div>
+                                    <label class="relative inline-flex items-center cursor-pointer">
+                                        <input type="checkbox" id="leaderboard-toggle" class="sr-only peer" ${user.is_in_leaderboard ? 'checked' : ''}>
+                                        <div class="w-11 h-6 bg-primary peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-accent-purple rounded-full peer dark:bg-subtle peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white dark:after:bg-text-secondary after:border-gray-300 dark:after:border-primary after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:peer-checked:bg-gradient-to-r dark:peer-checked:from-accent-purple dark:peer-checked:to-accent-pink"></div>
+                                    </label>
+                                </div>
+                            </div>
+                            <div class="mt-auto pt-6">
+                                <button type="submit" id="save-profile-settings-btn" class="${gradientButtonClasses}">
+                                    Save Changes
+                                </button>
+                                <div id="profile-settings-message" class="hidden text-sm mt-3 text-center"></div>
                             </div>
                         </div>
-                         <div class="mt-auto pt-6">
-                            <button type="submit" id="save-profile-settings-btn" class="${gradientButtonClasses}">
-                                Save Changes
-                            </button>
-                            <div id="profile-settings-message" class="hidden text-sm mt-3 text-center"></div>
+                    </form>
+                    
+                    <form id="change-password-form" class="bg-surface border border-primary rounded-xl flex flex-col flex-1">
+                        <div class="p-6 flex flex-col flex-grow">
+                            <h3 class="font-bold text-lg">Change Password</h3>
+                            <p class="text-text-secondary text-sm mt-1 mb-6">Update your password. You will be logged out after this action.</p>
+                            ${!hasPasswordAuth ? `<div class="flex-grow flex items-center justify-center"><p class="text-sm p-4 bg-primary rounded-lg text-text-secondary">Password management is unavailable for accounts created via social login.</p></div>` : `
+                            <div class="space-y-4 flex-grow">
+                                <div>
+                                    <label for="current-password" class="block text-sm font-medium text-text-secondary mb-1">Current Password</label>
+                                    <input type="password" id="current-password" required class="w-full bg-primary border border-subtle rounded-md px-3 py-2 text-text-main focus:ring-2 focus:ring-accent-purple focus:outline-none">
+                                </div>
+                                <div>
+                                    <label for="new-password" class="block text-sm font-medium text-text-secondary mb-1">New Password</label>
+                                    <input type="password" id="new-password" required class="w-full bg-primary border border-subtle rounded-md px-3 py-2 text-text-main focus:ring-2 focus:ring-accent-purple focus:outline-none">
+                                    <div class="strength-bar"><div id="new-password-strength-bar-fill" class="strength-bar-fill"></div></div>
+                                    <div class="error-text h-4"><span id="new-password-strength-text" class="text-xs text-subtle"></span></div>
+                                </div>
+                                <div>
+                                    <label for="confirm-password" class="block text-sm font-medium text-text-secondary mb-1">Confirm New Password</label>
+                                    <input type="password" id="confirm-password" required class="w-full bg-primary border border-subtle rounded-md px-3 py-2 text-text-main focus:ring-2 focus:ring-accent-purple focus:outline-none">
+                                </div>
+                            </div>
+                            `}
                         </div>
-                    </div>
-                </form>
-                
-                <div class="bg-surface border border-primary rounded-xl flex flex-col flex-1">
-                    ${renderLinkedAccountsCard(user)}
+                        ${hasPasswordAuth ? `
+                        <div class="bg-primary/50 border-t border-primary px-6 py-4 mt-auto">
+                            <button type="submit" class="${gradientButtonClasses}">
+                                Update Password
+                            </button>
+                            <div id="change-password-message" class="hidden text-sm mt-3 text-center"></div>
+                        </div>
+                        ` : ''}
+                    </form>
                 </div>
 
-                <div id="danger-zone-card">
-                    ${renderDeleteAccountCard()}
+                <div class="lg:col-span-2 flex flex-col gap-8">
+                     <div id="wallet-management-card" class="bg-surface border border-primary rounded-xl flex flex-col flex-1">
+                        ${renderWalletManagementCard(user)}
+                    </div>
+                    
+                    <div id="2fa-card" class="bg-surface border border-primary rounded-xl flex flex-col flex-1">
+                        ${render2FACardContent(user)}
+                    </div>
+
+                    <div class="bg-surface border border-primary rounded-xl flex flex-col flex-1">
+                        ${renderLinkedAccountsCard(user)}
+                    </div>
                 </div>
             </div>
 
-            <div class="lg:col-span-3 space-y-8 flex flex-col">
-                <div id="wallet-management-card" class="bg-surface border border-primary rounded-xl flex flex-col flex-1">
-                    ${renderWalletManagementCard(user)}
-                </div>
-                
-                <div id="2fa-card" class="bg-surface border border-primary rounded-xl flex flex-col flex-1">
-                    ${render2FACardContent(user)}
-                </div>
-                
-                <form id="change-password-form" class="bg-surface border border-primary rounded-xl flex flex-col flex-1">
-                    <div class="p-6 flex flex-col flex-grow">
-                        <h3 class="font-bold text-lg">Change Password</h3>
-                        <p class="text-text-secondary text-sm mt-1 mb-6">Update your password. You will be logged out after this action.</p>
-                        ${!hasPasswordAuth ? `<div class="flex-grow flex items-center justify-center"><p class="text-sm p-4 bg-primary rounded-lg text-text-secondary">Password management is unavailable for accounts created via social login.</p></div>` : `
-                        <div class="space-y-4 flex-grow">
-                            <div>
-                                <label for="current-password" class="block text-sm font-medium text-text-secondary mb-1">Current Password</label>
-                                <input type="password" id="current-password" required class="w-full bg-primary border border-subtle rounded-md px-3 py-2 text-text-main focus:ring-2 focus:ring-accent-purple focus:outline-none">
-                            </div>
-                            <div>
-                                <label for="new-password" class="block text-sm font-medium text-text-secondary mb-1">New Password</label>
-                                <input type="password" id="new-password" required class="w-full bg-primary border border-subtle rounded-md px-3 py-2 text-text-main focus:ring-2 focus:ring-accent-purple focus:outline-none">
-                                <div class="strength-bar"><div id="new-password-strength-bar-fill" class="strength-bar-fill"></div></div>
-                                <div class="error-text h-4"><span id="new-password-strength-text" class="text-xs text-subtle"></span></div>
-                            </div>
-                            <div>
-                                <label for="confirm-password" class="block text-sm font-medium text-text-secondary mb-1">Confirm New Password</label>
-                                <input type="password" id="confirm-password" required class="w-full bg-primary border border-subtle rounded-md px-3 py-2 text-text-main focus:ring-2 focus:ring-accent-purple focus:outline-none">
-                            </div>
-                        </div>
-                        `}
-                    </div>
-                    ${hasPasswordAuth ? `
-                    <div class="bg-primary/50 border-t border-primary px-6 py-4 mt-auto">
-                        <button type="submit" class="${gradientButtonClasses}">
-                            Update Password
-                        </button>
-                        <div id="change-password-message" class="hidden text-sm mt-3 text-center"></div>
-                    </div>
-                    ` : ''}
-                </form>
+            <div id="danger-zone-card" class="w-full mt-4">
+                ${renderDeleteAccountCard()}
             </div>
         </div>
     `;
