@@ -32,10 +32,8 @@ export function renderFooter() {
     <div class="transition-all duration-200 ease-in-out">
         <footer class="relative bg-abyss-dark border-t border-primary footer-gradient-border">
             <div class="container mx-auto px-6 py-20">
-                <!-- CTA Section -->
                 ${ctaSection}
 
-                <!-- Links Grid -->
                 <div class="grid grid-cols-1 md:grid-cols-4 lg:grid-cols-5 gap-8 scroll-animate">
                     <div class="col-span-1 lg:col-span-2">
                         <a href="/" class="flex items-center space-x-2">
@@ -50,6 +48,7 @@ export function renderFooter() {
                             <li><a href="/docs/introduction" class="text-text-secondary hover:text-text-main transition-colors">Introduction</a></li>
                             <li><a href="/docs/tokenomics" class="text-text-secondary hover:text-text-main transition-colors">$LUM Token</a></li>
                             <li><a href="/docs/contributing" class="text-text-secondary hover:text-text-main transition-colors">Contribute Data</a></li>
+                            <li><a href="/patch-notes/" class="text-text-secondary hover:text-text-main transition-colors">Patch Notes</a></li>
                         </ul>
                     </div>
                     <div>
@@ -65,11 +64,11 @@ export function renderFooter() {
                         <ul class="mt-4 space-y-3">
                         <li><a href="https://github.com/Far3000-YT/lumen" target="_blank" rel="noopener" data-external="true" class="group flex items-center text-text-secondary hover:text-text-main transition-colors">GitHub ${externalLinkIcon}</a></li>
                         <li><a href="https://twitter.com/0xFar3000" target="_blank" rel="noopener" data-external="true" class="group flex items-center text-text-secondary hover:text-text-main transition-colors">X / Twitter ${externalLinkIcon}</a></li>
+                        <li><a href="#" id="feedback-button" class="text-text-secondary hover:text-text-main transition-colors">Provide Feedback</a></li>
                         </ul>
                     </div>
                 </div>
 
-                <!-- Bottom Bar -->
                 <div class="mt-16 pt-8 border-t border-primary flex flex-col sm:flex-row justify-between items-center text-sm scroll-animate">
                     <p class="text-subtle order-2 sm:order-1 mt-4 sm:mt-0">© ${year} Lumen Protocol. All rights reserved.</p>
                     <div class="flex space-x-6 order-1 sm:order-2">

@@ -1,6 +1,108 @@
 import { getAccount, getUser } from "../../../lib/auth.js";
+import api from "../../../lib/api.js";
 import { walletService } from "../../../lib/wallet.js";
 import { DateTime } from "luxon";
+
+export function renderFeedbackModal() {
+    const modalId = 'feedback-modal';
+    const existingModal = document.getElementById(modalId);
+    if (existingModal) {
+        existingModal.querySelector('textarea')?.focus();
+        return;
+    }
+    
+    let currentRating = 0;
+
+    const content = `
+        <div id="feedback-form-container">
+            <p class="text-center text-text-secondary mb-4">We value your input. What can we do better?</p>
+            <form id="feedback-form" novalidate>
+                <div class="mb-4">
+                    <label class="block text-sm font-medium text-text-secondary mb-2 text-center">How would you rate your experience?</label>
+                    <div id="star-rating" class="flex justify-center items-center gap-2 text-3xl text-subtle cursor-pointer">
+                        ${[1, 2, 3, 4, 5].map(i => `<span class="star" data-value="${i}">☆</span>`).join('')}
+                    </div>
+                </div>
+                <div class="mb-4">
+                     <label for="feedback-content" class="block text-sm font-medium text-text-secondary mb-2">Your Feedback</label>
+                    <textarea id="feedback-content" rows="4" minlength="10" maxlength="2000" required class="w-full bg-primary border border-subtle rounded-md px-3 py-2 text-text-main focus:ring-2 focus:ring-accent-purple focus:outline-none" placeholder="Tell us about your experience, or suggest an improvement..."></textarea>
+                    <div id="char-counter" class="text-right text-xs text-subtle mt-1">0 / 2000</div>
+                </div>
+                <div id="feedback-message" class="hidden text-sm p-3 rounded-md my-4 text-center"></div>
+                <button type="submit" id="submit-feedback-btn" class="w-full flex justify-center py-2.5 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-gradient-to-r from-accent-purple to-accent-pink hover:opacity-90 transition-opacity">
+                    Submit Feedback
+                </button>
+            </form>
+        </div>
+    `;
+
+    const { closeModal } = renderModal('Provide Feedback', content, { size: 'md' });
+    const formContainer = document.getElementById('feedback-form-container');
+    const form = document.getElementById('feedback-form');
+    const messageEl = document.getElementById('feedback-message');
+    const submitBtn = document.getElementById('submit-feedback-btn');
+
+    const stars = document.querySelectorAll('#star-rating .star');
+    stars.forEach(star => {
+        star.addEventListener('click', () => {
+            currentRating = parseInt(star.dataset.value);
+            stars.forEach(s => {
+                s.innerHTML = s.dataset.value <= currentRating ? '★' : '☆';
+                s.classList.toggle('text-yellow-400', s.dataset.value <= currentRating);
+            });
+        });
+    });
+    
+    const textarea = document.getElementById('feedback-content');
+    const charCounter = document.getElementById('char-counter');
+    textarea.addEventListener('input', () => {
+        const count = textarea.value.length;
+        charCounter.textContent = `${count} / 2000`;
+        charCounter.classList.toggle('text-red-400', count > 2000);
+    });
+
+    form.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const content = document.getElementById('feedback-content').value;
+        messageEl.classList.add('hidden');
+
+        if (content.length < 10) {
+            messageEl.textContent = 'Please provide at least 10 characters of feedback.';
+            messageEl.className = 'block text-sm p-3 rounded-md bg-red-900/50 text-red-300 mt-2 text-center';
+            messageEl.classList.remove('hidden');
+            return;
+        }
+
+        submitBtn.disabled = true;
+        submitBtn.innerHTML = `<span class="animate-spin inline-block w-5 h-5 border-2 border-transparent border-t-white rounded-full"></span> Submitting...`;
+        
+        try {
+            await api.post('/feedback', {
+                page: window.location.pathname,
+                rating: currentRating || null,
+                content: content
+            });
+            
+            formContainer.innerHTML = `
+                <div class="text-center transition-all animate-fade-in-up">
+                    <div class="w-16 h-16 mx-auto mb-4 bg-green-900/50 text-green-300 rounded-full flex items-center justify-center">
+                        <svg class="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+                    </div>
+                    <h3 class="font-bold text-lg text-text-main">Feedback Submitted!</h3>
+                    <p class="text-text-secondary mt-2">Thank you for helping us improve Lumen.</p>
+                </div>
+            `;
+            setTimeout(closeModal, 2500);
+
+        } catch (error) {
+            messageEl.textContent = error.response?.data?.detail || 'An error occurred. Please try again.';
+            messageEl.className = 'block text-sm p-3 rounded-md bg-red-900/50 text-red-300 mt-2 text-center';
+            messageEl.classList.remove('hidden');
+            submitBtn.disabled = false;
+            submitBtn.innerHTML = 'Submit Feedback';
+        }
+    });
+}
 
 export function renderWalletSelectionModal() {
     const modalId = 'wallet-selection-modal';

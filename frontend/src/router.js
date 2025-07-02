@@ -3,6 +3,7 @@ import { renderFooter } from './components/footer.js';
 import { isAuthenticated, fetchAndStoreUser, getUser, logout } from './lib/auth.js';
 import { walletService } from './lib/wallet.js';
 import Lenis from 'lenis';
+import { renderFeedbackModal } from './pages/app/dashboard/utils.js';
 
 const app = document.getElementById('app');
 const navbarContainer = document.getElementById('navbar-container');
@@ -103,6 +104,9 @@ const handleLocation = async () => {
         if (path.startsWith('/docs/')) {
             const pageId = path.split('/docs/')[1] || 'introduction';
             renderPromise = import('./pages/docs/layout.js').then(m => m.renderDocsLayout(pageId));
+        } else if (path.startsWith('/patch-notes')) {
+            const versionId = path.split('/patch-notes/')[1] || Object.keys(await import('./pages/patch-notes/layout.js').then(m => m.patchNotes || {}))[0] || 'v1.0.2';
+            renderPromise = import('./pages/patch-notes/layout.js').then(m => m.renderPatchNotesLayout(versionId));
         } else {
             const routeHandler = routes[path] || routes['/'];
             if (typeof routeHandler !== 'function') {
@@ -220,8 +224,14 @@ export const initializeRouter = async () => {
         window.addEventListener('popstate', handleLocation);
         
         document.body.addEventListener('click', (e) => {
-            const link = e.target.closest('a[href]');
+            let link = e.target.closest('a[href]');
 
+            if (e.target.closest('#feedback-button')) {
+                e.preventDefault();
+                renderFeedbackModal();
+                return;
+            }
+            
             if (!link || link.hasAttribute('data-external') || link.hostname !== window.location.hostname) {
                 return;
             }
@@ -229,6 +239,12 @@ export const initializeRouter = async () => {
             const currentUrl = new URL(window.location.href);
             const targetUrl = new URL(link.href);
 
+            if (targetUrl.pathname.startsWith('/patch-notes')) {
+                e.preventDefault();
+                navigate(targetUrl.pathname);
+                return;
+            }
+            
             if (targetUrl.pathname === currentUrl.pathname && targetUrl.search === currentUrl.search && targetUrl.hash) {
                 e.preventDefault();
                 lenis.scrollTo(targetUrl.hash);

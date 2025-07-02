@@ -1,5 +1,5 @@
 import { api, fetchContributions } from '../../../lib/auth.js';
-import { getStatusClasses, getStatusText, renderModal, escapeHtml, icons } from './utils.js';
+import { getStatusClasses, getStatusText, renderModal, escapeHtml, icons, renderFeedbackModal } from './utils.js';
 
 export let contributionsState = {
     currentPage: 1,
@@ -39,6 +39,25 @@ function handleContributionUpdate(event) {
             tableBody.insertAdjacentHTML('afterbegin', renderSingleContributionRow(updatedContrib));
             attachDetailModalListeners(allContributions);
         }
+    }
+}
+
+function triggerContextualFeedback() {
+    const key = 'lumen_feedback_prompt_contributions';
+    const lastPrompted = localStorage.getItem(key);
+    
+    if (lastPrompted) {
+        const oneWeekAgo = Date.now() - 7 * 24 * 60 * 60 * 1000;
+        if (parseInt(lastPrompted) > oneWeekAgo) {
+            return;
+        }
+    }
+
+    if (contributionsState.totalContributions >= 3) {
+        setTimeout(() => {
+            renderFeedbackModal();
+            localStorage.setItem(key, Date.now().toString());
+        }, 1500);
     }
 }
 
@@ -263,6 +282,7 @@ export function attachContributionPageListeners(dashboardState) {
     document.getElementById('next-page-btn')?.addEventListener('click', () => changeContributionsPage(1, dashboardState));
     updatePaginationButtons();
     document.addEventListener('contributionUpdate', handleContributionUpdate);
+    triggerContextualFeedback();
 }
 
 export function renderMyContributionsPage(initialContributions) {
