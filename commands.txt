@@ -15,4 +15,5 @@ run redis for db on docker
 run mailhog for mail on docker
 
 
-doppler run -- docker compose -f docker-compose.yml up --build -d
+doppler run -- docker compose -f docker-compose.yml up --build
+doppler run -- docker compose -f docker-compose.yml down
