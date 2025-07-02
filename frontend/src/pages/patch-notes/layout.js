@@ -1,26 +1,31 @@
-const patchNotes = {
-    'v1.0.2': { 
-        title: 'Security Hardening & Community Features', 
-        date: 'July 3, 2025',
-        content: () => import('./content/v1_0_2.js').then(m => m.renderContent()) 
-    },
-    'v1.0.1': { 
-        title: 'The Data Hub Launch', 
+export const patchNotes = {
+    '2025-07-02-2': { 
+        title: 'Settings Page Redesign & UX Polish', 
         date: 'July 2, 2025',
-        content: () => import('./content/v1_0_1.js').then(m => m.renderContent()) 
+        content: () => import('./content/2025_07_02_2.js').then(m => m.renderContent()) 
+    },
+    '2025-07-02-1': { 
+        title: 'Security Hardening, Community Features', 
+        date: 'July 2, 2025',
+        content: () => import('./content/2025_07_02_1.js').then(m => m.renderContent()) 
+    },
+    '2025-07-01': { 
+        title: 'The Data Hub Launch', 
+        date: 'July 1, 2025',
+        content: () => import('./content/2025_07_01.js').then(m => m.renderContent()) 
     },
 };
 
-function renderSidebar(activeVersion) {
+function renderSidebar(activeNoteId) {
     return `
         <nav class="space-y-4">
             <div>
                 <h4 class="px-3 text-xs font-bold uppercase text-subtle tracking-wider mb-2">Release History</h4>
                 <div class="space-y-1">
-                    ${Object.entries(patchNotes).map(([version, { title, date }]) => `
-                        <a href="/patch-notes/${version}" class="block p-3 rounded-md transition-colors ${activeVersion === version ? 'bg-primary' : 'hover:bg-surface'}">
-                            <p class="font-bold ${activeVersion === version ? 'text-accent-cyan' : 'text-text-main'}">${title}</p>
-                            <p class="text-xs text-text-secondary">${version} - ${date}</p>
+                    ${Object.entries(patchNotes).map(([noteId, { title, date }]) => `
+                        <a href="/patch-notes/${noteId}" class="block p-3 rounded-md transition-colors ${activeNoteId === noteId ? 'bg-primary' : 'hover:bg-surface'}">
+                            <p class="font-bold ${activeNoteId === noteId ? 'text-accent-cyan' : 'text-text-main'}">${title}</p>
+                            <p class="text-xs text-text-secondary">${date}</p>
                         </a>
                     `).join('')}
                 </div>
@@ -29,9 +34,9 @@ function renderSidebar(activeVersion) {
     `;
 }
 
-export async function renderPatchNotesLayout(version) {
-    const versionKey = patchNotes[version] ? version : Object.keys(patchNotes)[0];
-    const page = patchNotes[versionKey];
+export async function renderPatchNotesLayout(noteId) {
+    const noteKey = patchNotes[noteId] ? noteId : Object.keys(patchNotes)[0];
+    const page = patchNotes[noteKey];
     
     const contentHtml = await page.content();
 
@@ -45,7 +50,7 @@ export async function renderPatchNotesLayout(version) {
                 <div class="relative flex lg:gap-8">
                     <aside class="hidden lg:block w-72 flex-shrink-0 pr-8">
                         <div class="sticky top-20 h-[calc(100vh-5rem)] overflow-y-auto py-10">
-                            ${renderSidebar(versionKey)}
+                            ${renderSidebar(noteKey)}
                         </div>
                     </aside>
 
