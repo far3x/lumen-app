@@ -136,6 +136,26 @@ services:
       - api
       - frontend
     restart: unless-stopped
+  
+  backup:
+    container_name: lumen_backup
+    build:
+      context: ./backup
+      dockerfile: Dockerfile
+    environment:
+      POSTGRES_HOST: db
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      
+      S3_BUCKET_NAME: ${S3_BUCKET_NAME}
+      AWS_ACCESS_KEY_ID: ${AWS_ACCESS_KEY_ID}
+      AWS_SECRET_ACCESS_KEY: ${AWS_SECRET_ACCESS_KEY}
+      AWS_DEFAULT_REGION: ${AWS_DEFAULT_REGION}
+    depends_on:
+      db:
+        condition: service_healthy
+    restart: unless-stopped
 
 volumes:
   postgres_data:

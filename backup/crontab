@@ -1,0 +1,2 @@
+#daily at 3 am
+0 3 * * * /app/backup.sh
