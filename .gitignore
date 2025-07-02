@@ -34,7 +34,7 @@ prod.env
 /backend/.env
 /backend/.env.*
 
-*/__pycache__/*
+**/__pycache__/
 
 # --- Node / Vite Frontend ---
 /frontend/node_modules/
