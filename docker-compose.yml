@@ -33,7 +33,7 @@ services:
       db:
         condition: service_healthy
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -h localhost -p 5432 -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
+      test: ["CMD-SHELL", "PGPASSWORD=$$PGBOUNCER_PASSWORD pg_isready -h localhost -p $$PGBOUNCER_PORT -U $$PGBOUNCER_USER -d $$PGBOUNCER_DATABASE"]
       interval: 5s
       timeout: 5s
       retries: 5
