@@ -32,12 +32,6 @@ services:
     depends_on:
       db:
         condition: service_healthy
-    healthcheck:
-      test: ["CMD-SHELL", "PGPASSWORD=$$PGBOUNCER_PASSWORD pg_isready -h localhost -p $$PGBOUNCER_PORT -U $$PGBOUNCER_USER -d $$PGBOUNCER_DATABASE"]
-      interval: 5s
-      timeout: 5s
-      retries: 5
-      start_period: 10s
     restart: unless-stopped
 
   redis:
@@ -91,7 +85,7 @@ services:
       BETA_GENESIS_BONUS: ${BETA_GENESIS_BONUS}
     depends_on:
       pgbouncer:
-        condition: service_healthy
+        condition: service_started
       redis:
         condition: service_started
     restart: unless-stopped
@@ -140,7 +134,7 @@ services:
       BETA_GENESIS_BONUS: ${BETA_GENESIS_BONUS}
     depends_on:
       pgbouncer:
-        condition: service_healthy
+        condition: service_started
       redis:
         condition: service_started
       api:
@@ -191,7 +185,7 @@ services:
       BETA_GENESIS_BONUS: ${BETA_GENESIS_BONUS}
     depends_on:
       pgbouncer:
-        condition: service_healthy
+        condition: service_started
       redis:
         condition: service_started
       api:
