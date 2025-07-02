@@ -1,15 +1,21 @@
-from fastapi import APIRouter, Depends, Query, Request
+from fastapi import APIRouter, Depends, Query, Request, Header, HTTPException, status
 from fastapi.responses import JSONResponse
 from sqlalchemy.orm import Session
 import json
 
 from app.db import crud, database, models
-from app.schemas import LeaderboardEntry, ContributionResponse, ValuationMetrics, AiAnalysis, LeaderboardResponse
+from app.schemas import LeaderboardEntry, ContributionResponse, ValuationMetrics, AiAnalysis, LeaderboardResponse, FeedbackCreate
 from app.api.v1 import dependencies
 from app.core.limiter import limiter
 from app.services.redis_service import redis_service
 
 router = APIRouter(tags=["Public"])
+
+def get_visitor_id_key(request: Request) -> str:
+    visitor_id = request.headers.get("X-Visitor-ID")
+    if visitor_id:
+        return visitor_id
+    return request.client.host
 
 @router.get("/leaderboard", response_model=LeaderboardResponse)
 @limiter.limit("60/minute")
@@ -113,3 +119,26 @@ def get_recent_contributions(
     redis_service.set_with_ttl(cache_key, response_json, 60)
 
     return response_list
+
+@router.post("/feedback", status_code=status.HTTP_201_CREATED)
+@limiter.limit("2/day", key_func=get_visitor_id_key)
+async def submit_feedback(
+    request: Request,
+    feedback_data: FeedbackCreate,
+    x_visitor_id: str = Header(...),
+    db: Session = Depends(database.get_db),
+    current_user: models.User | None = Depends(dependencies.get_current_user_optional)
+):
+    user_id = current_user.id if current_user else None
+    
+    db_feedback = models.Feedback(
+        user_id=user_id,
+        visitor_id=x_visitor_id,
+        page=feedback_data.page,
+        rating=feedback_data.rating,
+        content=feedback_data.content
+    )
+    db.add(db_feedback)
+    db.commit()
+    
+    return {"message": "Thank you for your feedback!"}

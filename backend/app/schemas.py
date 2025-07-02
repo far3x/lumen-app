@@ -1,4 +1,4 @@
-from pydantic import BaseModel, EmailStr, constr, field_validator
+from pydantic import BaseModel, EmailStr, constr, field_validator, Field
 from typing import Optional, List, Dict, Any
 from datetime import datetime
 from solders.pubkey import Pubkey
@@ -176,3 +176,8 @@ class SetWalletAddressRequest(BaseModel):
         except ValueError:
             raise ValueError('Invalid Solana address format')
         return v
+
+class FeedbackCreate(BaseModel):
+    page: Optional[str] = Field(None, max_length=255)
+    rating: Optional[int] = Field(None, ge=1, le=5)
+    content: str = Field(..., min_length=10, max_length=2000)

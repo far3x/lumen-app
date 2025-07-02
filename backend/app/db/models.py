@@ -36,6 +36,7 @@ class User(Base):
     personal_access_tokens = relationship("PersonalAccessToken", back_populates="user", cascade="all, delete-orphan")
     contributions = relationship("Contribution", back_populates="user")
     claim_transactions = relationship("ClaimTransaction", back_populates="user", cascade="all, delete-orphan")
+    feedback = relationship("Feedback", back_populates="user", cascade="all, delete-orphan")
     
     @hybrid_property
     def has_password(self):
@@ -90,3 +91,14 @@ class Contribution(Base):
     status = Column(String, default="PENDING", nullable=False)
     transaction_hash = Column(String, nullable=True, index=True)
     user = relationship("User", back_populates="contributions")
+
+class Feedback(Base):
+    __tablename__ = "feedback"
+    id = Column(Integer, primary_key=True, index=True)
+    user_id = Column(Integer, ForeignKey("users.id"), nullable=True)
+    visitor_id = Column(String, index=True, nullable=False)
+    page = Column(String, nullable=True)
+    rating = Column(Integer, nullable=True)
+    content = Column(Text, nullable=False)
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
+    user = relationship("User", back_populates="feedback")
