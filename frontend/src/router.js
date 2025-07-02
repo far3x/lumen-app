@@ -1,6 +1,6 @@
 import { renderNavbar, setupNavbarEventListeners, updateNavbarWalletState } from './components/navbar.js';
 import { renderFooter } from './components/footer.js';
-import { isAuthenticated, fetchAndStoreUser, getUser, logout } from './lib/auth.js';
+import { isAuthenticated, fetchAndStoreUser, getUser, logout, validateAndRefreshUserSession } from './lib/auth.js';
 import { walletService } from './lib/wallet.js';
 import Lenis from 'lenis';
 import { renderFeedbackModal } from './pages/app/dashboard/utils.js';
@@ -231,14 +231,9 @@ export const initializeRouter = async () => {
     walletService.autoConnect().catch(err => console.warn("Auto-connect failed:", err));
     
     try {
-        if (isAuthenticated() && !getUser()) {
-            await fetchAndStoreUser().catch(err => {
-                console.error("Failed to fetch user on init, logging out:", err);
-                logout();
-            });
-        }
+        await validateAndRefreshUserSession();
     } catch (error) {
-        console.error("Initial auth check error:", error);
+        console.error("Initial session validation threw an unhandled error:", error);
         logout();
     } finally {
         window.addEventListener('popstate', handleLocation);

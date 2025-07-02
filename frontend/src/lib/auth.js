@@ -108,6 +108,27 @@ export const fetchAndStoreAccount = async () => {
     return account;
 };
 
+export const validateAndRefreshUserSession = async () => {
+    if (!isAuthenticated()) {
+        return; 
+    }
+
+    try {
+        const response = await api.get('/users/me');
+        const remoteUser = response.data;
+        const localUser = getUser();
+
+        if (!localUser || JSON.stringify(localUser) !== JSON.stringify(remoteUser)) {
+            user = remoteUser;
+            localStorage.setItem('lumen_user', JSON.stringify(remoteUser));
+            console.log("User session state synced with backend.");
+        }
+    } catch (error) {
+        console.error("Session validation failed during startup. The API interceptor will handle logout.", error);
+    }
+};
+
+
 export const updateUserProfile = async (displayName, isInLeaderboard) => {
     const response = await api.put('/users/me', {
         display_name: displayName,
