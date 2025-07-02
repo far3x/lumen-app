@@ -11,6 +11,7 @@ const footerContainer = document.getElementById('footer-container');
 
 const routes = {
     '/': () => import('./pages/landing.js').then(m => m.renderLandingPage()),
+    '/data': () => import('./pages/data-hub.js').then(m => m.renderDataHubPage()),
     '/login': () => import('./pages/login.js').then(m => m.renderLoginPage()),
     '/signup': () => import('./pages/signup.js').then(m => m.renderSignupPage()),
     '/link': () => import('./pages/link.js').then(m => m.renderLinkPage()),

@@ -170,6 +170,7 @@ export function renderNavbar(currentPath) {
                 <nav class="flex flex-col space-y-2">
                     <a href="/docs/introduction" class="${getMobileNavLinkClasses('/docs/introduction')}">Docs</a>
                     <a href="${leaderboardLink}" class="${getMobileNavLinkClasses('/leaderboard')}">Leaderboard</a>
+                    <a href="/data" class="${getMobileNavLinkClasses('/data')}">Data Hub</a>
                     <a href="/docs/tokenomics" class="${getMobileNavLinkClasses('/docs/tokenomics')}">Tokenomics</a>
                     <a href="/docs/roadmap" class="${getMobileNavLinkClasses('/docs/roadmap')}">Roadmap</a>
                     <a href="https://github.com/Far3000-YT/lumen" target="_blank" rel="noopener" data-external="true" class="${getMobileNavLinkClasses('')}">GitHub ${externalLinkIcon}</a>
@@ -230,6 +231,7 @@ export function renderNavbar(currentPath) {
             <nav class="hidden lg:flex items-center justify-center text-sm font-medium">
                 <a href="/docs/introduction" class="${getNavLinkClasses('/docs/introduction')}">Docs</a>
                 <a href="${leaderboardLink}" class="${getNavLinkClasses('/leaderboard')}">Leaderboard</a>
+                <a href="/data" class="${getNavLinkClasses('/data')}">Data Hub</a>
                 <a href="/docs/tokenomics" class="${getNavLinkClasses('/docs/tokenomics')}">Tokenomics</a>
                 <a href="https://github.com/Far3000-YT/lumen" target="_blank" rel="noopener noreferrer" data-external="true" class="${getNavLinkClasses('')}">GitHub ${externalLinkIcon}</a>
             </nav>

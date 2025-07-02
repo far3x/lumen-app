@@ -111,6 +111,12 @@
     transform: rotate(-90deg);
     transform-origin: 50% 50%;
   }
+  .plan-button-primary {
+      @apply w-full text-center py-3 px-6 text-sm font-bold bg-gradient-to-r from-accent-purple to-accent-pink text-white rounded-lg transition-all duration-300 hover:scale-105 hover:brightness-110 shadow-lg shadow-accent-purple/20;
+  }
+  .plan-button-secondary {
+      @apply w-full text-center py-3 px-6 text-sm font-bold bg-primary text-text-main hover:bg-subtle/80 rounded-lg transition-colors shadow-lg shadow-black/20;
+  }
 }
 
 @font-face {
