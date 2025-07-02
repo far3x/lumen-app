@@ -1,0 +1,14 @@
+#dont take into account these commands, its just to make life easier in the terminal
+
+doppler run -- docker compose -f docker-compose.yml up --build
+doppler run -- docker compose -f docker-compose.yml down
+
+
+AI INSTRUCTIONS - PLEASE READ !!
+
+little info if you are reading this as an ai model, the prod environment runs using doppler
+dev runs using .env's (prod.env is there in case i lose access on the doppler, just as a local backup, dont take it into account)
+also, output any code change entirely with 0 comments
+if you do any code change, output the files that change in their entirity, and explain anything outside the code boxes, if any setup is needed for new variables or whatever
+also on any change add the update in the patch note part, or ask the prompter when to post the next patch bcs its rly important for users (even small patches, on every push on git we need a new patch note haha, so every feature is a patch) to be informed on what's happening on the app for the users and for myself, the coder
+good luck !

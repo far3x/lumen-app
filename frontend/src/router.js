@@ -4,6 +4,7 @@ import { isAuthenticated, fetchAndStoreUser, getUser, logout } from './lib/auth.
 import { walletService } from './lib/wallet.js';
 import Lenis from 'lenis';
 import { renderFeedbackModal } from './pages/app/dashboard/utils.js';
+import { renderWaitlistPage, attachWaitlistPageListeners } from './pages/waitlist.js';
 
 const app = document.getElementById('app');
 const navbarContainer = document.getElementById('navbar-container');
@@ -15,6 +16,7 @@ const routes = {
     '/data': () => import('./pages/data-hub.js').then(m => m.renderDataHubPage()),
     '/login': () => import('./pages/login.js').then(m => m.renderLoginPage()),
     '/signup': () => import('./pages/signup.js').then(m => m.renderSignupPage()),
+    '/waitlist': () => Promise.resolve(renderWaitlistPage()),
     '/link': () => import('./pages/link.js').then(m => m.renderLinkPage()),
     '/leaderboard': () => import('./pages/public_dashboard.js').then(m => m.renderPublicDashboard()),
     '/check-email': () => import('./pages/check-email.js').then(m => m.renderCheckEmailPage()),
@@ -64,7 +66,7 @@ function setupScrollAnimations() {
 const handleLocation = async () => {
     const path = window.location.pathname;
     const hash = window.location.hash;
-    const fullScreenPages = ['/link', '/check-email', '/verify', '/forgot-password', '/reset-password', '/2fa-verify'];
+    const fullScreenPages = ['/link', '/check-email', '/verify', '/forgot-password', '/reset-password', '/2fa-verify', '/waitlist'];
 
     contentContainer.classList.add('page-transition-out');
     footerContainer.classList.add('page-transition-out');
@@ -83,6 +85,16 @@ const handleLocation = async () => {
     }
 
     try {
+        const user = getUser();
+        if (user && !user.has_beta_access && path !== '/waitlist') {
+            navigate('/waitlist');
+            return;
+        }
+        if (user && user.has_beta_access && path === '/waitlist') {
+            navigate('/app/dashboard');
+            return;
+        }
+
         const redirectPath = localStorage.getItem('post_login_redirect');
         if (isAuthenticated() && (path === '/login' || path === '/signup')) {
             if (redirectPath) {
@@ -141,9 +153,18 @@ const handleLocation = async () => {
             attachNavEventListeners();
             setupNavbarEventListeners();
             setupScrollAnimations();
+            if (path === '/waitlist') {
+                attachWaitlistPageListeners();
+            }
         });
 
     } catch (error) {
+        if (error.response?.data?.detail === 'USER_ON_WAITLIST') {
+            await fetchAndStoreUser();
+            navigate('/waitlist');
+            return;
+        }
+
         console.error("Critical rendering error in handleLocation:", error);
         contentContainer.innerHTML = `
             <div class="flex-grow flex flex-col items-center justify-center text-center p-8">
@@ -211,10 +232,9 @@ export const initializeRouter = async () => {
     
     try {
         if (isAuthenticated() && !getUser()) {
-            fetchAndStoreUser().catch(err => {
+            await fetchAndStoreUser().catch(err => {
                 console.error("Failed to fetch user on init, logging out:", err);
                 logout();
-                handleLocation();
             });
         }
     } catch (error) {

@@ -9,7 +9,7 @@ from app.core.limiter import limiter
 
 router = APIRouter(prefix="/contributions", tags=["Contributions"])
 
-@router.get("/{contribution_id}", response_model=ContributionResponse)
+@router.get("/{contribution_id}", response_model=ContributionResponse, dependencies=[Depends(dependencies.verify_beta_access)])
 @limiter.limit("30/minute")
 def get_single_contribution(
     request: Request,

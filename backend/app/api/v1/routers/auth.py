@@ -394,7 +394,7 @@ async def logout(response: Response):
     response.delete_cookie("is_logged_in")
     return {"status": "success"}
 
-@router.post("/cli/approve-device")
+@router.post("/cli/approve-device", dependencies=[Depends(dependencies.verify_beta_access)])
 async def approve_cli_device(
     payload: ApproveDeviceRequest,
     db: Session = Depends(database.get_db),

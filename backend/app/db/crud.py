@@ -222,14 +222,14 @@ def get_user_contributions(db: Session, user_id: int, skip: int = 0, limit: int 
 def get_leaderboard(db: Session, skip: int = 0, limit: int = 100):
     return db.query(models.User, models.Account.total_lum_earned)\
              .join(models.Account)\
-             .filter(models.User.is_in_leaderboard == True)\
+             .filter(models.User.is_in_leaderboard == True, models.User.id <= config.settings.BETA_MAX_USERS if config.settings.BETA_MODE_ENABLED else True)\
              .order_by(models.Account.total_lum_earned.desc())\
              .offset(skip).limit(limit).all()
 
 def get_recent_processed_contributions(db: Session, limit: int = 10):
     return db.query(models.Contribution, models.User.display_name)\
              .join(models.User)\
-             .filter(models.Contribution.status == "PROCESSED", models.User.is_in_leaderboard == True)\
+             .filter(models.Contribution.status == "PROCESSED", models.User.is_in_leaderboard == True, models.User.id <= config.settings.BETA_MAX_USERS if config.settings.BETA_MODE_ENABLED else True)\
              .order_by(models.Contribution.created_at.desc())\
              .limit(limit).all()
 
@@ -250,12 +250,17 @@ def get_user_rank(db: Session, user_id: int):
                 ROW_NUMBER() OVER (ORDER BY a.total_lum_earned DESC) as rank
             FROM users u
             JOIN accounts a ON u.id = a.user_id
-            WHERE u.is_in_leaderboard = :is_in_leaderboard
+            WHERE u.is_in_leaderboard = :is_in_leaderboard AND (:beta_mode_disabled OR u.id <= :beta_max_users)
         ) as ranked_users
         WHERE ranked_users.id = :user_id
     """)
 
-    result = db.execute(query, {"is_in_leaderboard": True, "user_id": user_id}).first()
+    result = db.execute(query, {
+        "is_in_leaderboard": True, 
+        "user_id": user_id,
+        "beta_mode_disabled": not config.settings.BETA_MODE_ENABLED,
+        "beta_max_users": config.settings.BETA_MAX_USERS
+    }).first()
     return result
 
 def reset_claimable_balance(db: Session, user_id: int):
@@ -276,6 +281,13 @@ def log_claim_transaction(db: Session, user_id: int, amount: float, tx_hash: str
     db.add(claim)
     db.commit()
     db.refresh(claim)
+    return claim
+
+def update_claim_transaction_hash(db: Session, claim_id: int, tx_hash: str):
+    claim = db.query(models.ClaimTransaction).filter_by(id=claim_id).first()
+    if claim:
+        claim.transaction_hash = tx_hash
+        db.commit()
     return claim
 
 def get_user_claim_history(db: Session, user_id: int, skip: int = 0, limit: int = 100):

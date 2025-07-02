@@ -41,6 +41,14 @@ async def get_current_user(request: Request, db: Session = Depends(get_db)) -> m
     request.state.user = user
     return user
 
+async def verify_beta_access(user: models.User = Depends(get_current_user)):
+    if config.settings.BETA_MODE_ENABLED and user.id > config.settings.BETA_MAX_USERS:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="USER_ON_WAITLIST"
+        )
+    return user
+
 async def get_current_user_from_pat(pat: str = Depends(oauth2_scheme), db: Session = Depends(get_db)) -> models.User:
     credentials_exception = HTTPException(
         status_code=status.HTTP_401_UNAUTHORIZED,
@@ -53,6 +61,14 @@ async def get_current_user_from_pat(pat: str = Depends(oauth2_scheme), db: Sessi
     
     if user is None:
         raise credentials_exception
+    return user
+
+async def verify_beta_access_for_cli(user: models.User = Depends(get_current_user_from_pat)):
+    if config.settings.BETA_MODE_ENABLED and user.id > config.settings.BETA_MAX_USERS:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="USER_ON_WAITLIST"
+        )
     return user
 
 async def get_current_user_from_ws(

@@ -5,7 +5,13 @@ let formState = 'password';
 let tfa_token = '';
 
 async function onLoginSuccess() {
-    await fetchAndStoreUser();
+    const user = await fetchAndStoreUser();
+    
+    if (user && !user.has_beta_access) {
+        navigate('/waitlist');
+        return;
+    }
+
     await fetchAndStoreAccount();
     const redirectPath = localStorage.getItem('post_login_redirect');
     if (redirectPath) {
@@ -61,6 +67,10 @@ function setupEventListeners() {
                     await onLoginSuccess();
                 }
             } catch (error) {
+                if (error.response?.data?.detail === 'USER_ON_WAITLIST') {
+                    await onLoginSuccess();
+                    return;
+                }
                 errorMessageElement.textContent = error.response?.data?.detail || 'Incorrect email or password.';
                 errorMessageElement.classList.remove('hidden');
                 submitButton.disabled = false;
