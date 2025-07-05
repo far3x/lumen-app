@@ -224,7 +224,7 @@ export function renderNavbar(currentPath) {
         <div class="relative w-full h-14 bg-surface/10 border border-white/10 backdrop-blur-xl rounded-full flex items-center justify-between px-4 sm:px-6">
             <div class="flex-1 flex justify-start">
                 <a href="/" class="flex items-center gap-x-2" title="Lumen Home">
-                    <img src="/logo.svg" alt="Lumen Logo" class="h-8 w-8">
+                    <img src="/logo.png" alt="Lumen Logo" class="h-8 w-8">
                     <span class="hidden sm:block text-xl font-bold text-text-main">Lumen</span>
                 </a>
             </div>

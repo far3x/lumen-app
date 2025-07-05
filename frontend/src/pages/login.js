@@ -238,7 +238,7 @@ function renderLoginForm(successMessage = '') {
         <div class="w-full max-w-6xl mx-auto grid lg:grid-cols-2 gap-16 items-center">
             <div class="hidden lg:flex flex-col justify-center text-left pr-10">
                 <a href="/" class="inline-flex items-center space-x-3 mb-8">
-                    <img src="/logo.svg" alt="Lumen Logo" class="h-12 w-12">
+                    <img src="/logo.png" alt="Lumen Logo" class="h-12 w-12">
                     <span class="text-3xl font-bold text-text-main">Lumen</span>
                 </a>
                 <h1 class="text-5xl font-bold tracking-tight text-white leading-tight">Welcome Back.</h1>
