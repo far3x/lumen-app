@@ -78,7 +78,7 @@ export function renderLinkPage() {
         <div class="w-full max-w-md mx-auto">
             <div class="bg-surface/80 backdrop-blur-md p-8 rounded-xl border border-primary shadow-2xl shadow-black/20 text-center">
                 <a href="/" class="inline-flex items-center space-x-3 mb-6">
-                    <img src="/logo.svg" alt="Lumen Logo" class="h-10 w-10">
+                    <img src="/logo.png" alt="Lumen Logo" class="h-10 w-10">
                     <span class="text-2xl font-bold text-text-main">Lumen Protocol</span>
                 </a>
                 

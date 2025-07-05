@@ -33,7 +33,7 @@ function renderSidebar(activeTab, user) {
     <div class="p-4 bg-surface rounded-xl border border-primary">
         <div class="text-center mb-6">
             <div class="w-20 h-20 rounded-full mx-auto mb-3 bg-surface p-4 border-2 border-primary flex items-center justify-center">
-                <img src="/logo.svg" alt="Lumen Logo" class="h-10 w-10">
+                <img src="/logo.png" alt="Lumen Logo" class="h-10 w-10">
             </div>
             <h3 class="font-bold text-lg text-text-main">${user?.display_name ?? 'User'}</h3>
             <a href="/leaderboard" class="font-semibold gradient-text hover:brightness-125 transition">View Leaderboard</a>

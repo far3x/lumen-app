@@ -37,7 +37,7 @@ export function renderFooter() {
                 <div class="grid grid-cols-1 md:grid-cols-4 lg:grid-cols-5 gap-8 scroll-animate">
                     <div class="col-span-1 lg:col-span-2">
                         <a href="/" class="flex items-center space-x-2">
-                            <img src="/logo.svg" alt="Lumen Logo" class="h-8 w-8">
+                            <img src="/logo.png" alt="Lumen Logo" class="h-8 w-8">
                             <span class="text-xl font-bold text-text-main">Lumen Protocol</span>
                         </a>
                         <p class="text-text-secondary mt-4 max-w-xs">The decentralized data exchange powering the next generation of artificial intelligence.</p>
