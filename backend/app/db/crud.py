@@ -178,13 +178,18 @@ def apply_reward_to_user(db: Session, user: models.User, reward_amount: float):
     db.commit()
     return total_reward
 
-def get_all_contribution_embeddings_with_recency(db: Session) -> list[tuple[int, int, str, datetime]]:
+def get_nearest_neighbors(db: Session, embedding, limit: int = 5):
+    """
+    Finds the nearest neighbors for a given embedding using cosine similarity.
+    Returns a list of tuples (Contribution, distance).
+    """
     return db.query(
-        models.Contribution.id,
-        models.Contribution.user_id,
-        models.Contribution.content_embedding,
-        models.Contribution.created_at
-    ).filter(models.Contribution.content_embedding.isnot(None)).all()
+        models.Contribution,
+        models.Contribution.content_embedding.cosine_distance(embedding).label('distance')
+    ).filter(models.Contribution.content_embedding.isnot(None))\
+     .order_by(models.Contribution.content_embedding.cosine_distance(embedding))\
+     .limit(limit)\
+     .all()
 
 def get_contribution_by_id(db: Session, contribution_id: int) -> models.Contribution | None:
     return db.query(models.Contribution).filter(models.Contribution.id == contribution_id).first()
@@ -199,13 +204,12 @@ def update_contribution_status(db: Session, contribution_id: int, status: str):
     return contribution
 
 def create_contribution_record(db: Session, user: models.User, codebase: str, valuation_results: dict, reward: float, embedding: list[float] | None, initial_status: str = "PENDING"):
-    embedding_str = json.dumps(embedding.tolist()) if embedding is not None else None
     db_contribution = models.Contribution(
         user_id=user.id,
         raw_content=codebase,
         valuation_results=json.dumps(valuation_results),
         reward_amount=reward,
-        content_embedding=embedding_str,
+        content_embedding=embedding,
         status=initial_status
     )
     db.add(db_contribution)
