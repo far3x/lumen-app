@@ -1,6 +1,6 @@
 export const patchNotes = {
     '2025_07_08': { 
-        title: 'Backend Overhaul: Preparing for Hyperscale', 
+        title: 'The Velocity Update: 15x Faster, Smarter & More Efficient', 
         date: 'July 8, 2025',
         content: () => import('./content/2025_07_08.js').then(m => m.renderContent()) 
     },
