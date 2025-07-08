@@ -2,7 +2,6 @@ import math
 import json
 import numpy as np
 import logging
-from sklearn.metrics.pairwise import cosine_similarity
 from app.core.celery_app import celery_app
 from app.core.config import settings
 from app.db.database import SessionLocal
@@ -15,8 +14,12 @@ from app.services.solana_service import solana_service
 
 logger = logging.getLogger(__name__)
 
-SIMILARITY_UPDATE_THRESHOLD = 0.85
-NEAR_PERFECT_SIMILARITY_THRESHOLD = 0.999 
+# Note: Cosine distance is what pgvector's <=> operator returns.
+# Cosine similarity is 1 - cosine_distance.
+SIMILARITY_UPDATE_THRESHOLD = 0.85 
+NEAR_PERFECT_SIMILARITY_THRESHOLD = 0.999
+DISTANCE_UPDATE_THRESHOLD = 1 - SIMILARITY_UPDATE_THRESHOLD
+NEAR_PERFECT_DISTANCE_THRESHOLD = 1 - NEAR_PERFECT_SIMILARITY_THRESHOLD
 
 def publish_user_update(db, user_id: int, event_type: str, payload: dict):
     message = { "type": event_type, "payload": payload }
@@ -127,56 +130,40 @@ def process_contribution(self, user_id: int, codebase: str, contribution_db_id: 
             publish_contribution_update(db, contribution_db_id, user_id)
             return
 
-        all_embeddings_data_with_recency = crud.get_all_contribution_embeddings_with_recency(db)
+        nearest_neighbors = crud.get_nearest_neighbors(db, new_embedding, limit=5)
         
         previous_codebase_for_valuation = None
         rejection_reason = None
 
-        if all_embeddings_data_with_recency:
-            existing_embeddings_tuples = [e for e in all_embeddings_data_with_recency if e[0] != contribution_db_id and e[2]]
+        # Filter out the current contribution itself from neighbors if it somehow appears
+        nearest_neighbors = [res for res in nearest_neighbors if res[0].id != contribution_db_id]
+
+        if nearest_neighbors:
+            most_similar_contrib, min_distance = nearest_neighbors[0]
             
-            if existing_embeddings_tuples:
-                existing_embeddings_vectors = [np.array(json.loads(e[2])) for e in existing_embeddings_tuples]
-                similarities = cosine_similarity([new_embedding], existing_embeddings_vectors)[0]
-                max_similarity_overall = np.max(similarities)
-                
-                if max_similarity_overall > SIMILARITY_UPDATE_THRESHOLD:
-                    most_similar_index_overall = np.argmax(similarities)
-                    most_similar_id_overall, most_similar_user_id_overall, _, _ = existing_embeddings_tuples[most_similar_index_overall]
+            # cosine_similarity = 1 - cosine_distance
+            max_similarity_overall = 1 - min_distance
 
-                    if most_similar_user_id_overall == user_id:
-                        logger.info(f"[SIMILARITY_UPDATE_CANDIDATE] Max similarity {max_similarity_overall:.4f} to own code (C_ID:{most_similar_id_overall}). Determining latest similar submission for diff.")
-                        
-                        user_s_own_highly_similar_submissions = []
-                        for i, data_tuple in enumerate(existing_embeddings_tuples):
-                            c_id, c_user_id, _, c_created_at = data_tuple
-                            if c_user_id == user_id and similarities[i] >= NEAR_PERFECT_SIMILARITY_THRESHOLD:
-                                user_s_own_highly_similar_submissions.append({ "id": c_id, "similarity": similarities[i], "created_at": c_created_at })
-                        
-                        if user_s_own_highly_similar_submissions:
-                            user_s_own_highly_similar_submissions.sort(key=lambda x: x["created_at"], reverse=True)
-                            latest_similar_submission_for_diff = user_s_own_highly_similar_submissions[0]
-                            
-                            logger.info(f"[SIMILARITY_UPDATE] Confirmed as update to user's own C_ID:{latest_similar_submission_for_diff['id']} (Similarity: {latest_similar_submission_for_diff['similarity']:.4f}).")
-                            previous_contribution = crud.get_contribution_by_id(db, latest_similar_submission_for_diff['id'])
-                            if previous_contribution:
-                                previous_codebase_for_valuation = previous_contribution.raw_content
-                            else:
-                                logger.error(f"[SIMILARITY_ERROR] Could not retrieve previous C_ID:{latest_similar_submission_for_diff['id']} for diffing.")
-                                rejection_reason = "FAILED_DIFF_PROCESSING"
-                        else:
-                            logger.info(f"[SIMILARITY_PASS] User's own code similarity {max_similarity_overall:.4f} is not a near-perfect match to any single prior. Treating as new for diff, but will check plagiarism.")
-                            pass
+            if max_similarity_overall > SIMILARITY_UPDATE_THRESHOLD:
+                if most_similar_contrib.user_id == user_id:
+                    logger.info(f"[SIMILARITY_UPDATE_CANDIDATE] Max similarity {max_similarity_overall:.4f} to own code (C_ID:{most_similar_contrib.id}). Checking for near-perfect match.")
+                    
+                    if min_distance <= NEAR_PERFECT_DISTANCE_THRESHOLD:
+                        logger.info(f"[SIMILARITY_UPDATE] Confirmed as update to user's own C_ID:{most_similar_contrib.id} (Similarity: {max_similarity_overall:.4f}).")
+                        previous_codebase_for_valuation = most_similar_contrib.raw_content
                     else:
-                        logger.warning(f"[SIMILARITY_REJECT] High similarity ({max_similarity_overall:.4f}) to code from another user (C_ID:{most_similar_id_overall}). Rejecting as potential plagiarism.")
-                        rejection_reason = "DUPLICATE_CROSS_USER"
+                        logger.info(f"[SIMILARITY_PASS] User's own code similarity {max_similarity_overall:.4f} is not a near-perfect match. Treating as new, but will check plagiarism.")
+                        pass
                 else:
-                    logger.info(f"[SIMILARITY_PASS] Max overall similarity {max_similarity_overall:.4f} is below update threshold. Treating as new.")
+                    logger.warning(f"[SIMILARITY_REJECT] High similarity ({max_similarity_overall:.4f}) to code from another user (C_ID:{most_similar_contrib.id}). Rejecting as potential plagiarism.")
+                    rejection_reason = "DUPLICATE_CROSS_USER"
+            else:
+                 logger.info(f"[SIMILARITY_PASS] Max overall similarity {max_similarity_overall:.4f} is below update threshold. Treating as new.")
 
-            if rejection_reason:
-                crud.update_contribution_status(db, contribution_db_id, rejection_reason)
-                publish_contribution_update(db, contribution_db_id, user_id)
-                return
+        if rejection_reason:
+            crud.update_contribution_status(db, contribution_db_id, rejection_reason)
+            publish_contribution_update(db, contribution_db_id, user_id)
+            return
         
         logger.info(f"[UNIQUENESS_PASS] Contribution {contribution_db_id} is unique or a valid update. Proceeding to valuation...")
         
@@ -206,7 +193,7 @@ def process_contribution(self, user_id: int, codebase: str, contribution_db_id: 
                 crud.update_network_stats(db, avg_complexity, total_reward_given)
             
             contribution_record.reward_amount = total_reward_given - (bonus_reward if 'bonus_reward' in locals() else 0)
-            contribution_record.content_embedding = json.dumps(new_embedding.tolist()) if new_embedding is not None else None
+            contribution_record.content_embedding = new_embedding
             contribution_record.status = "PROCESSED"
             
             db.add(contribution_record)
@@ -215,7 +202,7 @@ def process_contribution(self, user_id: int, codebase: str, contribution_db_id: 
             logger.info(f"[REWARD] Successfully processed and rewarded {total_reward_given:.4f} LUM for user {user_id} (Contribution {contribution_db_id}).")
         else:
             contribution_record.reward_amount = 0.0
-            contribution_record.content_embedding = json.dumps(new_embedding.tolist()) if new_embedding is not None else None
+            contribution_record.content_embedding = new_embedding
             contribution_record.status = valuation_details.get("analysis_summary", "REJECTED_NO_REWARD")
             if contribution_record.status == "Contribution rejected: No new valuable code detected in the update.":
                 contribution_record.status = "REJECTED_NO_NEW_CODE"

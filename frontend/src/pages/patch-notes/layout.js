@@ -1,4 +1,9 @@
 export const patchNotes = {
+    '2025_07_08': { 
+        title: 'Backend Overhaul: Preparing for Hyperscale', 
+        date: 'July 8, 2025',
+        content: () => import('./content/2025_07_08.js').then(m => m.renderContent()) 
+    },
     '2025_07_05': { 
         title: 'Announcing @lumencli on X & Brand Refresh', 
         date: 'July 5, 2025',

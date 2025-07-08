@@ -5,6 +5,7 @@ from sqlalchemy.sql import func
 from sqlalchemy.dialects.postgresql import JSONB
 from sqlalchemy.ext.hybrid import hybrid_property
 from datetime import datetime
+from pgvector.sqlalchemy import Vector
 
 from .database import Base
 from app.core.config import settings
@@ -88,7 +89,7 @@ class Contribution(Base):
     raw_content = Column(Text, nullable=False)
     valuation_results = Column(JSONB, nullable=False)
     reward_amount = Column(Float, nullable=False)
-    content_embedding = Column(Text, nullable=True)
+    content_embedding = Column(Vector(384), nullable=True)
     status = Column(String, default="PENDING", nullable=False)
     transaction_hash = Column(String, nullable=True, index=True)
     user = relationship("User", back_populates="contributions")
