@@ -1,20 +1,25 @@
 export const patchNotes = {
-    '2025-07-02-3': { 
+    '2025_07_05': { 
+        title: 'Announcing @lumencli on X & Brand Refresh', 
+        date: 'July 5, 2025',
+        content: () => import('./content/2025_07_05.js').then(m => m.renderContent()) 
+    },
+    '2025_07_02-3': { 
         title: 'Protocol Upgrade: Beta Program, Priority Queues & UX Polish', 
         date: 'July 3, 2025',
         content: () => import('./content/2025_07_02_3.js').then(m => m.renderContent()) 
     },
-    '2025-07-02-2': { 
+    '2025_07_02-2': { 
         title: 'Settings Page Redesign & UX Polish', 
         date: 'July 2, 2025',
         content: () => import('./content/2025_07_02_2.js').then(m => m.renderContent()) 
     },
-    '2025-07-02-1': { 
+    '2025_07_02-1': { 
         title: 'Security Hardening & Community Features', 
         date: 'July 2, 2025',
         content: () => import('./content/2025_07_02_1.js').then(m => m.renderContent()) 
     },
-    '2025-07-01': { 
+    '2025_07_01': { 
         title: 'The Data Hub Launch', 
         date: 'July 1, 2025',
         content: () => import('./content/2025_07_01.js').then(m => m.renderContent()) 
