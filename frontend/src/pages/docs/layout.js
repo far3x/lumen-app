@@ -8,10 +8,12 @@ const docPages = {
     'valuation': { title: 'The Valuation Engine', content: () => import('./content/valuation.js').then(m => m.renderValuation()), toc: [ { id: 'valuation-engine', title: 'The Valuation Engine' }, { id: 'phase-one-uniqueness', title: 'Phase 1: Uniqueness' }, { id: 'phase-two-quantitative-analysis', title: 'Phase 2: Quantitative Analysis' }, { id: 'phase-three-qualitative-analysis', title: 'Phase 3: Qualitative Analysis' }, { id: 'phase-four-reward-calculation', title: 'Phase 4: Reward Calculation' } ]},
     'security': { title: 'Security', content: () => import('./content/security.js').then(m => m.renderSecurity()), toc: [ { id: 'security-by-design', title: 'Security by Design' }, { id: 'cli-security', title: 'CLI & Local-First Processing' }, { id: 'platform-security', title: 'Platform Security' }, { id: 'api-security', title: 'API Security' }, { id: 'on-chain-security', title: 'On-Chain Security' } ]},
     'tokenomics': { title: 'Tokenomics', content: () => import('./content/tokenomics.js').then(m => m.renderTokenomics()), toc: [ { id: 'tokenomics', title: '$LUM Tokenomics' }, { id: 'core-utility', title: 'Core Utility' }, { id: 'deployment-on-solana', title: 'Deployment on Solana' }, { id: 'supply-and-emission', 'title': 'Supply & Emission' } ]},
-    'roadmap': { title: 'Roadmap', content: () => import('./content/roadmap.js').then(m => m.renderRoadmap()), toc: [ { id: 'roadmap', title: 'Roadmap' } ]},
     'governance': { title: 'Governance', content: () => import('./content/governance.js').then(m => m.renderGovernance()), toc: [ { id: 'governance', title: 'Protocol Governance' }, { id: 'lumen-improvement-proposals', title: 'LIPs' }, { id: 'progressive-decentralization', title: 'Decentralization' } ]},
+    'roadmap': { title: 'Roadmap', content: () => import('./content/roadmap.js').then(m => m.renderRoadmap()), toc: [ { id: 'roadmap', title: 'Roadmap' } ]},
     'faq': { title: 'FAQ', content: () => import('./content/faq.js').then(m => m.renderFaq()), toc: [ { id: 'faq', title: 'FAQ' }, { id: 'faq-security', title: 'Security & Privacy' }, { id: 'faq-rewards', title: 'Rewards & Value' } ]},
 };
+
+const orderedDocKeys = Object.keys(docPages);
 
 function renderSidebarContent(activePage) {
     const navLink = (id, name) => {
@@ -107,6 +109,37 @@ function renderMobileDocsNav(pageId, activePage) {
     `;
 }
 
+function renderDocsNavigationButtons(pageKey) {
+    const currentIndex = orderedDocKeys.indexOf(pageKey);
+    const prevKey = currentIndex > 0 ? orderedDocKeys[currentIndex - 1] : null;
+    const nextKey = currentIndex < orderedDocKeys.length - 1 ? orderedDocKeys[currentIndex + 1] : null;
+
+    const prevButton = prevKey ? `
+        <a href="/docs/${prevKey}" class="group flex items-center gap-4 p-4 rounded-lg bg-surface border border-primary hover:border-subtle/80 transition-colors text-left">
+            <svg class="w-6 h-6 shrink-0" fill="none" viewBox="0 0 24 24" stroke="url(#dashboard-icon-gradient)" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7" /></svg>
+            <div>
+                <p class="text-sm text-text-secondary">Previous</p>
+                <p class="font-semibold text-text-main">${docPages[prevKey].title}</p>
+            </div>
+        </a>` : '<div></div>';
+
+    const nextButton = nextKey ? `
+        <a href="/docs/${nextKey}" class="group flex items-center justify-end gap-4 p-4 rounded-lg bg-surface border border-primary hover:border-subtle/80 transition-colors text-right">
+             <div>
+                <p class="text-sm text-text-secondary">Next</p>
+                <p class="font-semibold text-text-main">${docPages[nextKey].title}</p>
+            </div>
+            <svg class="w-6 h-6 shrink-0" fill="none" viewBox="0 0 24 24" stroke="url(#dashboard-icon-gradient)" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" /></svg>
+        </a>` : '<div></div>';
+
+    return `
+        <div class="mt-16 pt-8 border-t border-primary/50 grid grid-cols-1 md:grid-cols-2 gap-4">
+            ${prevButton}
+            ${nextButton}
+        </div>
+    `;
+}
+
 export async function renderDocsLayout(pageId) {
     const pageKey = docPages[pageId] ? pageId : 'introduction';
     const page = docPages[pageKey];
@@ -114,7 +147,16 @@ export async function renderDocsLayout(pageId) {
     const contentHtml = await page.content();
 
     return `
-        <main class="flex-grow bg-background pt-28">
+        <main class="flex-grow bg-docs-gradient pt-28">
+            <svg aria-hidden="true" style="position: absolute; width: 0; height: 0; overflow: hidden;">
+              <defs>
+                <linearGradient id="dashboard-icon-gradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                  <stop offset="0%" style="stop-color: #8A2BE2;" />
+                  <stop offset="50%" style="stop-color: #FF69B4;" />
+                  <stop offset="100%" style="stop-color: #00D9D9;" />
+                </linearGradient>
+              </defs>
+            </svg>
             <div class="container mx-auto px-6">
                 <div class="relative flex lg:gap-8">
                     <aside class="hidden lg:block w-64 flex-shrink-0 pr-8">
@@ -125,6 +167,7 @@ export async function renderDocsLayout(pageId) {
 
                     <article class="flex-1 min-w-0 prose-custom py-10">
                         ${contentHtml}
+                        ${renderDocsNavigationButtons(pageKey)}
                     </article>
 
                     <aside class="hidden xl:block w-64 flex-shrink-0 pl-8">

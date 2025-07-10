@@ -29,6 +29,7 @@ export default {
           linear-gradient(90deg, rgba(138, 43, 226, 0.15) 1px, transparent 1px)
         `,
         'starfield-pattern': 'radial-gradient(circle at center, rgba(255, 255, 255, 0.1) 0.5px, transparent 0)',
+        'docs-gradient': 'radial-gradient(ellipse at top, #1D1D26 0%, #08080A 80%)',
       },
       backgroundSize: {
         'grid-size': '40px 40px',

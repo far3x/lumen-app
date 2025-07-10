@@ -1,4 +1,4 @@
-import { getUser, getAccount, fetchLeaderboard, fetchContributions, logout, fetchAndStoreUser, fetchAndStoreAccount, isAuthenticated, fetchClaims, api as authApi, fetchAllContributions, setAccount } from '../../../lib/auth.js';
+import { getUser, getAccount, fetchContributions, logout, fetchAndStoreUser, fetchAndStoreAccount, isAuthenticated, fetchClaims, api as authApi, fetchAllContributions, setAccount } from '../../../lib/auth.js';
 import { updateBalancesInUI, renderModal } from './utils.js';
 import { navigate } from '../../../router.js';
 import { renderDashboardOverview, initializeChart, attachChartButtonListeners } from './overview.js';
@@ -9,6 +9,7 @@ import { renderSettingsPage, attachSettingsPageListeners } from './settings.js';
 import { icons } from './utils.js';
 
 let userWebSocket = null;
+let pingInterval = null;
 let dashboardState = {
     user: null,
     account: null,
@@ -128,14 +129,14 @@ async function refreshDashboardData(isInitialLoad = false) {
     try {
         const results = await Promise.allSettled([
             fetchAndStoreAccount(),
-            fetchLeaderboard(),
+            authApi.get('/users/me/rank'),
             fetchContributions(1, 10),
             fetchClaims(1, 10),
             fetchAllContributions()
         ]);
 
         dashboardState.account = results[0].status === 'fulfilled' ? results[0].value : getAccount();
-        dashboardState.userRank = results[1].status === 'fulfilled' ? results[1].value.current_user_rank : null;
+        dashboardState.userRank = results[1].status === 'fulfilled' ? results[1].value.data : null;
         
         if (results[2].status === 'fulfilled') {
             dashboardState.allContributions = results[2].value.items;
@@ -163,40 +164,56 @@ function connectUserWebSocket() {
     if (userWebSocket && userWebSocket.readyState === WebSocket.OPEN) {
         return;
     }
+    if (pingInterval) clearInterval(pingInterval);
 
-    const wsProtocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
-    const wsUrl = `${wsProtocol}//${window.location.host}/ws/user/updates`;
-    
+    const apiUrlString = import.meta.env.VITE_API_URL || 'http://localhost:8000';
+    const apiUrl = new URL(apiUrlString);
+    const wsProtocol = apiUrl.protocol === 'https:' ? 'wss:' : 'ws:';
+    const wsUrl = `${wsProtocol}//${apiUrl.host}/ws/user/updates`;
+        
     userWebSocket = new WebSocket(wsUrl);
 
-    userWebSocket.onopen = () => console.log("User WebSocket connected.");
+    userWebSocket.onopen = () => {
+        pingInterval = setInterval(() => {
+            if (userWebSocket.readyState === WebSocket.OPEN) {
+                userWebSocket.send(JSON.stringify({ type: 'ping' }));
+            }
+        }, 30000);
+    };
 
     userWebSocket.onmessage = (event) => {
         const data = JSON.parse(event.data);
-        if (data.type === 'contribution_update') {
-            const contributionPayload = data.payload.contribution;
-            
-            const eventDetail = { detail: contributionPayload };
-            document.dispatchEvent(new CustomEvent('contributionUpdate', eventDetail));
 
-            if (contributionPayload.status === 'PROCESSED') {
+        if (data.type === 'pong') return;
+
+        if (data.payload && data.payload.account) {
+            setAccount(data.payload.account);
+            updateBalancesInUI();
+        }
+
+        if (data.type === 'contribution_update') {
+            document.dispatchEvent(new CustomEvent('contributionUpdate', { detail: data.payload.contribution }));
+            if (data.payload.contribution.status === 'PROCESSED' || data.payload.contribution.status === 'REJECTED_NO_NEW_CODE') {
                 refreshDashboardData();
             }
         }
     };
 
-    userWebSocket.onclose = () => {
-        console.log("User WebSocket disconnected. Attempting to reconnect...");
-        setTimeout(connectUserWebSocket, 5000);
+    userWebSocket.onclose = (event) => {
+        if (pingInterval) clearInterval(pingInterval);
+        if (!event.wasClean) {
+            setTimeout(connectUserWebSocket, 5000);
+        }
     };
 
     userWebSocket.onerror = (error) => {
-        console.error("User WebSocket error:", error);
         userWebSocket.close();
     };
 }
 
 function disconnectUserWebSocket() {
+    if (pingInterval) clearInterval(pingInterval);
+    pingInterval = null;
     if (userWebSocket) {
         userWebSocket.onclose = null;
         userWebSocket.close();

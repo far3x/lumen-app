@@ -1,0 +1,18 @@
+
+- review local data anonymization
+- lumen client - fix gitignore not reading well (backend\lib -> removing anything that ends in \lib, for example frontend\lib...)
+
+- make the referral system (no abuse with alt accounts etc...)
+- add gemini logo in landing page for higher trust, landing page redesign
+
+- change reverse proxy to return 404 / error when bots scrape the website (can change robots.txt ?)
+
+
+- weekly bonuses ?? this week -> rust += 10 LUM$ automatically if good quality ? + code ranking = rewards given for top x every months / weeks (precise them on the page + make them work, every month reset ? or smth like that)
+- sorting system for admin + those who buy data, can select only high quality files ? or by score, language etc... (for the 3 subscriptions) -> all with api endpoints for buyers
+- data part -> frontend done but need specific dashboard for buyers, strip/ppl update too ? unlock it after a delay? (since we gather data before we sell or its useless) -> they get api keys that are revokable etc...
+- potential admin dashboard (for far3000yt@gmail.com)
+- make feedback readable somewhere in that dashboard (private api for only admin, so me, id have an entire section just for my acc, accessible from a link and nothing else)
+
+- link actual rpc... etc (no devnet) in prod
+- vps upgrade after 50 daily users

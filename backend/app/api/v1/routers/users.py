@@ -13,7 +13,7 @@ from fastapi_mail import FastMail, MessageSchema, ConnectionConfig
 
 from app.db import crud, models, database
 from app.api.v1 import dependencies
-from app.schemas import User as UserSchema, AccountDetails, ContributionResponse, UserUpdate, ValuationMetrics, AiAnalysis, ChangePasswordRequest, WalletLinkRequest, ClaimTransactionResponse, SetWalletAddressRequest, UserDeletePayload
+from app.schemas import User as UserSchema, AccountDetails, ContributionResponse, UserUpdate, ValuationMetrics, AiAnalysis, ChangePasswordRequest, WalletLinkRequest, ClaimTransactionResponse, SetWalletAddressRequest, UserDeletePayload, LeaderboardEntry
 from pydantic import BaseModel, constr
 from typing import List, Optional
 from app.core import security, config
@@ -73,6 +73,25 @@ async def read_users_me(request: Request, current_user: models.User = Depends(de
         "waitlist_position": waitlist_position
     }
     return UserSchema(**user_data)
+
+@router.get("/me/rank", response_model=Optional[LeaderboardEntry])
+@limiter.limit("60/minute")
+async def get_my_rank(
+    request: Request, 
+    current_user: models.User = Depends(dependencies.get_current_user),
+    db: Session = Depends(database.get_db)
+):
+    if not current_user.is_verified or not current_user.is_in_leaderboard:
+        return None
+        
+    user_rank_data = crud.get_user_rank(db, user_id=current_user.id)
+    if user_rank_data:
+        return LeaderboardEntry(
+            rank=user_rank_data.rank,
+            display_name=user_rank_data.display_name,
+            total_lum_earned=user_rank_data.total_lum_earned
+        )
+    return None
 
 @router.put("/me", response_model=UserSchema, dependencies=[Depends(dependencies.verify_beta_access)])
 @limiter.limit("15/hour")

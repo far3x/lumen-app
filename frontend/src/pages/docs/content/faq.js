@@ -2,7 +2,33 @@ export const renderFaq = () => `
     <h1 id="faq">Frequently Asked Questions</h1>
     <p class="lead text-xl text-text-secondary">Your questions, answered. If you don't find what you're looking for, feel free to use the feedback button in the footer to contact us.</p>
     
-    <h2 id="faq-general">General Questions</h2>
+    <h2 id="faq-general">Fundamental Questions</h2>
+    <details class="group bg-surface border border-subtle/50 rounded-lg cursor-pointer my-4">
+        <summary class="flex items-center justify-between font-bold p-6">What is Lumen in simple terms?</summary>
+        <div class="grid grid-rows-[0fr] group-open:grid-rows-[1fr] transition-[grid-template-rows] duration-500 ease-in-out">
+            <div class="overflow-hidden">
+                <p class="text-text-secondary px-6 pb-6">
+                    Lumen is a platform that pays developers with crypto tokens ($LUM) for contributing their code. This code is then safely anonymized and used to create high-quality datasets for training better Artificial Intelligence models. It's a way for you to turn your private coding projects into a valuable, reward-earning asset.
+                </p>
+            </div>
+        </div>
+    </details>
+    <details class="group bg-surface border border-subtle/50 rounded-lg cursor-pointer my-4">
+        <summary class="flex items-center justify-between font-bold p-6">How do I contribute my code?</summary>
+        <div class="grid grid-rows-[0fr] group-open:grid-rows-[1fr] transition-[grid-template-rows] duration-500 ease-in-out">
+            <div class="overflow-hidden">
+                <div class="text-text-secondary px-6 pb-6">
+                    <p>The process is designed to be simple and fit into your existing workflow:</p>
+                    <ol class="!my-4 list-decimal list-inside space-y-2">
+                        <li><strong>Install the CLI:</strong> Open your terminal and run <code>pip install pylumen</code>.</li>
+                        <li><strong>Log In:</strong> Link the tool to your account with <code>lum login</code>. This will open your browser for secure authentication.</li>
+                        <li><strong>Contribute:</strong> Navigate to your project's root folder in the terminal and run <code>lum contribute</code>.</li>
+                    </ol>
+                    <p class="!mt-4">That's it! The CLI handles the rest.</p>
+                </div>
+            </div>
+        </div>
+    </details>
     <details class="group bg-surface border border-subtle/50 rounded-lg cursor-pointer my-4">
         <summary class="flex items-center justify-between font-bold p-6">What is the Genesis Contributor Program?</summary>
         <div class="grid grid-rows-[0fr] group-open:grid-rows-[1fr] transition-[grid-template-rows] duration-500 ease-in-out">
@@ -13,6 +39,8 @@ export const renderFaq = () => `
             </div>
         </div>
     </details>
+
+    <h2 id="faq-rewards">Rewards & Value</h2>
     <details class="group bg-surface border border-subtle/50 rounded-lg cursor-pointer my-4">
         <summary class="flex items-center justify-between font-bold p-6">How does $LUM get its value?</summary>
         <div class="grid grid-rows-[0fr] group-open:grid-rows-[1fr] transition-[grid-template-rows] duration-500 ease-in-out">
@@ -23,18 +51,6 @@ export const renderFaq = () => `
             </div>
         </div>
     </details>
-    <details class="group bg-surface border border-subtle/50 rounded-lg cursor-pointer my-4">
-        <summary class="flex items-center justify-between font-bold p-6">Why did you choose the Solana blockchain?</summary>
-        <div class="grid grid-rows-[0fr] group-open:grid-rows-[1fr] transition-[grid-template-rows] duration-500 ease-in-out">
-            <div class="overflow-hidden">
-                <p class="text-text-secondary px-6 pb-6">
-                    Our choice of Solana was deliberate and strategic. A data protocol that issues potentially thousands of micro-rewards per day requires a network with extremely high throughput and near-zero transaction costs. Solana's performance ensures that reward claims are fast and affordable for every contributor, regardless of the size of their reward. This makes the entire economic model feasible and user-friendly.
-                </p>
-            </div>
-        </div>
-    </details>
-
-    <h2 id="faq-rewards">Rewards & Value</h2>
     <details class="group bg-surface border border-subtle/50 rounded-lg cursor-pointer my-4">
         <summary class="flex items-center justify-between font-bold p-6">What kind of code is most valuable?</summary>
         <div class="grid grid-rows-[0fr] group-open:grid-rows-[1fr] transition-[grid-template-rows] duration-500 ease-in-out">
@@ -58,11 +74,11 @@ export const renderFaq = () => `
 
     <h2 id="faq-security">Security & Privacy</h2>
     <details class="group bg-surface border border-subtle/50 rounded-lg cursor-pointer my-4">
-        <summary class="flex items-center justify-between font-bold p-6">Is contributing my code safe?</summary>
+        <summary class="flex items-center justify-between font-bold p-6">What exactly happens to my data when I contribute?</summary>
         <div class="grid grid-rows-[0fr] group-open:grid-rows-[1fr] transition-[grid-template-rows] duration-500 ease-in-out">
             <div class="overflow-hidden">
                 <p class="text-text-secondary px-6 pb-6">
-                    This is our single most important security guarantee. The entire anonymization pipeline runs <strong>locally on your machine</strong> via our open-source CLI. Your raw code is never transmitted. We scrub secrets, API keys, and PII before anything is packaged for submission. The CLI itself is open-source, so you or anyone else can audit its behavior at any time to verify our claims.
+                    The entire process is designed for security. First, the Lumen CLI runs <strong>on your own computer</strong> to scan and remove sensitive information like API keys, passwords, and personal details. Only this clean, anonymized version of your code is sent to our servers. It is then added to our high-quality datasets that AI companies can purchase access to for training their models. Your original, raw code never leaves your machine.
                 </p>
             </div>
         </div>
