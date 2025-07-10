@@ -1,7 +1,7 @@
 #dont take into account these commands, its just to make life easier in the terminal
 
-doppler run -- docker compose -f docker-compose.yml up --build
-doppler run -- docker compose -f docker-compose.yml down
+doppler run -- docker compose up --build
+doppler run -- docker compose down
 
 #to connect to db locally, never run this on vps
 ssh -L 63333:localhost:5432 root@69.62.107.41 -N
