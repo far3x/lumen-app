@@ -226,7 +226,7 @@ def get_user_contributions(db: Session, user_id: int, skip: int = 0, limit: int 
 def get_leaderboard(db: Session, skip: int = 0, limit: int = 100):
     return db.query(models.User, models.Account.total_lum_earned)\
              .join(models.Account)\
-             .filter(models.User.is_in_leaderboard == True, models.User.id <= config.settings.BETA_MAX_USERS if config.settings.BETA_MODE_ENABLED else True)\
+             .filter(models.User.is_in_leaderboard == True, models.User.is_verified == True, models.User.id <= config.settings.BETA_MAX_USERS if config.settings.BETA_MODE_ENABLED else True)\
              .order_by(models.Account.total_lum_earned.desc())\
              .offset(skip).limit(limit).all()
 
@@ -254,13 +254,16 @@ def get_user_rank(db: Session, user_id: int):
                 ROW_NUMBER() OVER (ORDER BY a.total_lum_earned DESC) as rank
             FROM users u
             JOIN accounts a ON u.id = a.user_id
-            WHERE u.is_in_leaderboard = :is_in_leaderboard AND (:beta_mode_disabled OR u.id <= :beta_max_users)
+            WHERE u.is_in_leaderboard = :is_in_leaderboard 
+              AND u.is_verified = :is_verified 
+              AND (:beta_mode_disabled OR u.id <= :beta_max_users)
         ) as ranked_users
         WHERE ranked_users.id = :user_id
     """)
 
     result = db.execute(query, {
         "is_in_leaderboard": True, 
+        "is_verified": True,
         "user_id": user_id,
         "beta_mode_disabled": not config.settings.BETA_MODE_ENABLED,
         "beta_max_users": config.settings.BETA_MAX_USERS

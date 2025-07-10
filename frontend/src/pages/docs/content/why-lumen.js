@@ -6,7 +6,7 @@ export const renderWhyLumen = () => `
     <p>Your work has powered the digital world. Now, it will power the intelligent one. Lumen ensures you are a key stakeholder in this revolution.</p>
     <ul>
         <li><strong>Meaningful Rewards:</strong> Contribute your anonymized code and earn $LUM tokens. Your work directly fuels the AI ecosystem, and you are rewarded for the value you provide based on a sophisticated, transparent <a href="/docs/valuation">valuation engine</a>.</li>
-        <li><strong>Built on Solana:</strong> By operating on the Solana blockchain, claiming rewards is fast and affordable. Say goodbye to prohibitive gas fees; your earnings are yours to keep.</li>
+        <li><strong>Leveraging Solana for Rewards:</strong> Our reward system utilizes the Solana blockchain, making the process of claiming your earned $LUM fast and extremely affordable. This avoids the high gas fees of other networks, ensuring your rewards are not diminished by transaction costs.</li>
         <li><strong>Effortless & Secure:</strong> Our "local-first" CLI ensures your code is anonymized on your machine before upload. Your security and IP are protected by design. <a href="/docs/security">Learn more about our security-first approach</a>.</li>
         <li><strong>Direct Impact:</strong> The data you contribute will be used to train the next generation of AI models, helping to solve real-world problems and advance the state of the art.</li>
     </ul>

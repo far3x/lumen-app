@@ -1,4 +1,9 @@
 export const patchNotes = {
+    '2025_07_10': { 
+        title: 'The Clarity Update: A Full Docs Redesign & UI Polish', 
+        date: 'July 10, 2025',
+        content: () => import('./content/2025_07_10.js').then(m => m.renderContent()) 
+    },
     '2025_07_08': { 
         title: 'The Velocity Update: 15x Faster, Smarter & More Efficient', 
         date: 'July 8, 2025',
@@ -49,14 +54,60 @@ function renderSidebar(activeNoteId) {
     `;
 }
 
+function renderMobileNav(activeNoteId) {
+    return `
+        <div id="patch-notes-mobile-overlay" class="fixed inset-0 bg-black/50 z-40 hidden lg:hidden" aria-hidden="true"></div>
+        <div id="patch-notes-mobile-panel" class="fixed top-0 left-0 w-72 h-full bg-background z-50 transform -translate-x-full transition-transform duration-300 ease-in-out lg:hidden">
+            <div class="h-full overflow-y-auto p-6">
+                <div class="flex justify-between items-center mb-6">
+                    <span class="font-bold text-lg">Releases</span>
+                    <button id="patch-notes-mobile-close" type="button" class="p-2 text-text-secondary hover:text-text-main">
+                        <span class="sr-only">Close menu</span>
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                    </button>
+                </div>
+                ${renderSidebar(activeNoteId)}
+            </div>
+        </div>
+    `;
+}
+
+function attachMobileNavListeners() {
+    const trigger = document.getElementById('patch-notes-mobile-trigger');
+    const panel = document.getElementById('patch-notes-mobile-panel');
+    const overlay = document.getElementById('patch-notes-mobile-overlay');
+    const closeBtn = document.getElementById('patch-notes-mobile-close');
+
+    const toggleMenu = () => {
+        if (panel && overlay) {
+            panel.classList.toggle('-translate-x-full');
+            overlay.classList.toggle('hidden');
+        }
+    };
+    
+    trigger?.addEventListener('click', toggleMenu);
+    closeBtn?.addEventListener('click', toggleMenu);
+    overlay?.addEventListener('click', toggleMenu);
+
+    panel?.querySelectorAll('a').forEach(link => {
+        link.addEventListener('click', () => {
+            if (panel && !panel.classList.contains('-translate-x-full')) {
+                toggleMenu();
+            }
+        });
+    });
+}
+
 export async function renderPatchNotesLayout(noteId) {
     const noteKey = patchNotes[noteId] ? noteId : Object.keys(patchNotes)[0];
     const page = patchNotes[noteKey];
     
     const contentHtml = await page.content();
 
+    requestAnimationFrame(attachMobileNavListeners);
+
     return `
-        <main class="flex-grow bg-abyss-dark pt-28">
+        <main class="flex-grow bg-docs-gradient pt-28">
             <div class="container mx-auto px-6">
                 <div class="text-center mb-12">
                     <h1 class="text-5xl font-bold tracking-tighter pulse-text">Release Notes</h1>
@@ -70,14 +121,21 @@ export async function renderPatchNotesLayout(noteId) {
                     </aside>
 
                     <article class="flex-1 min-w-0 prose-custom py-10 border-t border-l-0 lg:border-l lg:border-t-0 border-primary lg:pl-10">
-                        <div class="flex justify-between items-baseline mb-4">
+                        <div class="flex flex-col sm:flex-row sm:justify-between sm:items-baseline mb-4 gap-2 sm:gap-4">
                             <h1 class="mt-0 mb-0" id="main-title">${page.title}</h1>
-                            <span class="text-sm font-mono text-subtle">${page.date}</span>
+                            <span class="text-sm font-mono text-subtle shrink-0">${page.date}</span>
                         </div>
                         <div class="w-full h-px bg-gradient-to-r from-accent-purple via-accent-pink to-accent-cyan opacity-40 mb-8"></div>
                         ${contentHtml}
                     </article>
                 </div>
+            </div>
+            ${renderMobileNav(noteKey)}
+            <div class="lg:hidden fixed bottom-4 left-1/2 -translate-x-1/2 z-30">
+                <button id="patch-notes-mobile-trigger" type="button" class="flex items-center gap-x-2 bg-surface text-text-main font-bold px-5 py-3 rounded-full border border-primary shadow-2xl shadow-black">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path></svg>
+                    Menu
+                </button>
             </div>
         </main>
     `;

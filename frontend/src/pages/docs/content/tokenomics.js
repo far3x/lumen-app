@@ -1,6 +1,6 @@
 export const renderTokenomics = () => `
     <h1 id="tokenomics">$LUM: The Data Sourcing Token</h1>
-    <p class="lead text-xl text-text-secondary">$LUM is the native SPL token of the Lumen Protocol, operating on the Solana blockchain. It is an incentive and governance token, specifically designed to fuel the acquisition of high-value data for training artificial intelligence.</p>
+    <p class="lead text-xl text-text-secondary">$LUM is the native utility and governance token of the Lumen Protocol. It is an SPL token operating on the Solana blockchain, specifically designed to fuel the acquisition of high-value data for training artificial intelligence.</p>
 
     <h2 id="core-utility">Core Utility of $LUM</h2>
     <p>The $LUM token has a clear and focused set of utilities designed to create a self-sustaining economic loop:</p>
@@ -11,7 +11,7 @@ export const renderTokenomics = () => `
     </ol>
     
     <h2 id="deployment-on-solana">Deployment on Solana</h2>
-    <p>$LUM will be launched as a standard SPL token on the Solana blockchain. This strategic choice was made for several key reasons:</p>
+    <p>$LUM is deployed as a standard SPL token on the Solana blockchain. This strategic choice was made for several key reasons:</p>
     <ul>
         <li><strong>Low Transaction Fees:</strong> Essential for making reward claims economically viable for all contributors, regardless of the size of their reward. Solana's consistently low fees (fractions of a cent) are ideal.</li>
         <li><strong>High Throughput & Scalability:</strong> The ability to process thousands of transactions per second is critical for a protocol designed to handle millions of data contributions and reward distributions.</li>

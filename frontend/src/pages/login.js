@@ -5,6 +5,7 @@ let formState = 'password';
 let tfa_token = '';
 
 async function onLoginSuccess() {
+    console.log("Login successful, preparing to redirect...");
     const user = await fetchAndStoreUser();
     
     if (user && !user.has_beta_access) {
@@ -14,6 +15,7 @@ async function onLoginSuccess() {
 
     await fetchAndStoreAccount();
     const redirectPath = localStorage.getItem('post_login_redirect');
+    console.log('Post-login redirect path found in localStorage:', redirectPath);
     if (redirectPath) {
         localStorage.removeItem('post_login_redirect');
         navigate(redirectPath);

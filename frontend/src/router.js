@@ -138,6 +138,12 @@ const handleLocation = async () => {
             footerContainer.innerHTML = renderFooter();
         }
 
+        if (lenis) {
+            lenis.scrollTo(0, { immediate: true });
+        } else {
+            window.scrollTo(0, 0);
+        }
+        
         if (hash) {
             setTimeout(() => {
                 const element = document.getElementById(hash.substring(1));
@@ -145,8 +151,6 @@ const handleLocation = async () => {
                     element.scrollIntoView({ behavior: 'smooth' });
                 }
             }, 150);
-        } else {
-            window.scrollTo(0, 0);
         }
         
         requestAnimationFrame(() => {
