@@ -59,7 +59,18 @@
   }
   .gradient-border-bottom::after {
     content: '';
-    @apply absolute bottom-0 left-0 right-0 h-px bg-gradient-to-r from-accent-purple via-accent-pink to-accent-cyan opacity-50;
+    @apply absolute bottom-0 left-0 right-0 h-px bg-gradient-to-r from-accent-purple via-accent-pink to-accent-cyan;
+  }
+
+  .animated-gradient-border {
+    @apply relative p-[1px] rounded-2xl;
+  }
+  .animated-gradient-border::before {
+    content: '';
+    @apply absolute -inset-px rounded-2xl -z-10;
+    background: linear-gradient(135deg, theme('colors.accent-purple'), theme('colors.accent-pink'), theme('colors.accent-cyan'));
+    opacity: var(--border-opacity, 0);
+    transition: opacity 0.3s ease-in-out;
   }
 
   .gradient-divider {
