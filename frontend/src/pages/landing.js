@@ -3,6 +3,78 @@ export function renderLandingPage() {
         <path stroke-linecap="round" stroke-linejoin="round" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
     </svg>`;
 
+    const scrollStorySection = `
+    <section id="product-motion-story" class="relative h-[200vh] bg-transparent" style="margin-top: -50vh; z-index: 15;">
+        <div class="sticky top-0 h-screen w-full overflow-hidden">
+            <div id="motion-story-canvas" class="w-full h-full flex items-center justify-center">
+                <div id="motion-border-container" class="animated-gradient-border absolute w-[90%] max-w-7xl rounded-2xl aspect-[16/9]" style="--scale: 1; --translate-y: 15vh; --border-opacity: 1; transform: translateY(var(--translate-y)) scale(var(--scale));">
+                     <div class="relative w-full h-full bg-abyss-dark rounded-2xl overflow-hidden">
+                        <img id="dashboard1-img" src="/dashboard.png" alt="Lumen Dashboard" class="absolute inset-0 w-full h-full object-cover object-top" style="opacity: 1;" />
+                        <img id="dashboard2-img" src="/dashboard2.png" alt="Lumen Dashboard with reward" class="absolute inset-0 w-full h-full object-cover object-top" style="opacity: 0;" />
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+    `;
+
+    function setupScrollAnimation() {
+        const section = document.getElementById('product-motion-story');
+        if (!section) return;
+
+        const borderContainer = document.getElementById('motion-border-container');
+        const dashboard1 = document.getElementById('dashboard1-img');
+        const dashboard2 = document.getElementById('dashboard2-img');
+
+        function onScroll() {
+            const rect = section.getBoundingClientRect();
+            const scrollableHeight = section.scrollHeight - window.innerHeight;
+            
+            if (rect.top > window.innerHeight || rect.bottom < 0) {
+                return; 
+            }
+
+            let progress = Math.max(0, Math.min(1, -rect.top / scrollableHeight));
+            
+            const scale = 1;
+            let translateY, d1Opacity, d2Opacity, borderOpacity;
+            
+            const break1 = 0.4;
+            const break2 = 0.8;
+
+            if (progress < break1) {
+                const p = progress / break1;
+                translateY = 15 - (p * 15);
+                borderOpacity = 1;
+                d1Opacity = 1;
+                d2Opacity = 0;
+            } else if (progress < break2) {
+                const p = (progress - break1) / (break2 - break1);
+                translateY = 0;
+                borderOpacity = 1;
+                d1Opacity = 1 - p;
+                d2Opacity = p;
+            } else {
+                translateY = 0;
+                borderOpacity = 1;
+                d1Opacity = 0;
+                d2Opacity = 1;
+            }
+            
+            borderContainer.style.setProperty('--scale', scale);
+            borderContainer.style.setProperty('--translate-y', `${translateY}vh`);
+            borderContainer.style.setProperty('--border-opacity', borderOpacity);
+            
+            dashboard1.style.opacity = d1Opacity;
+            dashboard2.style.opacity = d2Opacity;
+        }
+
+        window.addEventListener('scroll', onScroll, { passive: true });
+        onScroll();
+    }
+    
+    requestAnimationFrame(setupScrollAnimation);
+
     return `
     <main id="content-root" class="flex-grow">
         
@@ -16,7 +88,7 @@ export function renderLandingPage() {
           </defs>
         </svg>
 
-        <section class="relative flex flex-col justify-center min-h-screen text-center overflow-hidden isolate gradient-border-bottom">
+        <section class="relative flex flex-col justify-center min-h-screen text-center overflow-hidden isolate gradient-border-bottom" style="z-index: 10;">
             <video
                 autoplay
                 loop
@@ -45,7 +117,12 @@ export function renderLandingPage() {
             </div>
         </section>
 
-        <section class="relative py-20 md:py-32 bg-abyss-dark bg-grid-pattern bg-grid-size animate-grid-pan overflow-hidden">
+        <div class="hidden lg:block">
+            ${scrollStorySection}
+        </div>
+
+        <!-- FIX 2: This section now provides the dark background that appears behind the floating image as you scroll. -->
+        <section class="relative py-20 md:py-32 bg-abyss-dark bg-grid-pattern bg-grid-size animate-grid-pan overflow-hidden" style="z-index: 5;">
             <div class="absolute inset-0 bg-[radial-gradient(ellipse_at_center,transparent_20%,#08080A)]"></div>
             <div class="container mx-auto px-6 max-w-7xl relative z-10">
                 <div class="text-center max-w-2xl mx-auto scroll-animate">

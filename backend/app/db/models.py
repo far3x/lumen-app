@@ -44,6 +44,18 @@ class User(Base):
     def has_password(self):
         return self.hashed_password is not None
 
+    @hybrid_property
+    def has_beta_access(self):
+        if not settings.BETA_MODE_ENABLED:
+            return True
+        return self.id <= settings.BETA_MAX_USERS
+
+    @hybrid_property
+    def waitlist_position(self):
+        if not settings.BETA_MODE_ENABLED or self.id <= settings.BETA_MAX_USERS:
+            return None
+        return self.id - settings.BETA_MAX_USERS
+
 class Account(Base):
     __tablename__ = "accounts"
     id = Column(Integer, primary_key=True, index=True)
