@@ -27,15 +27,24 @@
     }
 
     .scroll-animate {
-        @apply opacity-0 translate-y-5 transition-all duration-700 ease-out;
+        @apply opacity-0 transition-all duration-700 ease-out;
     }
     .scroll-animate.scrolled-in {
-        @apply opacity-100 translate-y-0;
+        @apply opacity-100;
+        transform: none !important;
     }
 
     .animate-fade-in-up {
-        opacity: 0;
-        animation: fade-in-up 0.8s ease-out forwards;
+        transform: translateY(2rem);
+    }
+    .animate-fade-in-left {
+        transform: translateX(-2rem);
+    }
+    .animate-fade-in-right {
+        transform: translateX(2rem);
+    }
+    .animate-zoom-in {
+        transform: scale(0.95);
     }
 
     video::-webkit-media-controls-enclosure,
@@ -71,6 +80,13 @@
     background: linear-gradient(135deg, theme('colors.accent-purple'), theme('colors.accent-pink'), theme('colors.accent-cyan'));
     opacity: var(--border-opacity, 0);
     transition: opacity 0.3s ease-in-out;
+  }
+  
+  .glow-card-hover {
+    @apply transition-all duration-300;
+  }
+  .glow-card-hover:hover {
+    @apply shadow-[0_0_35px_5px] shadow-accent-purple/10;
   }
 
   .gradient-divider {
