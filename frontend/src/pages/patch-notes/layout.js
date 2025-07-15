@@ -1,4 +1,9 @@
 export const patchNotes = {
+    '2025_07_15': { 
+        title: 'The Story of Lumen: A Complete Landing Page Redesign', 
+        date: 'July 15, 2025',
+        content: () => import('./content/2025_07_15.js').then(m => m.renderContent()) 
+    },
     '2025_07_10': { 
         title: 'The Clarity Update: A Full Docs Redesign & UI Polish', 
         date: 'July 10, 2025',

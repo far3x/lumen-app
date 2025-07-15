@@ -1,12 +1,9 @@
-// frontend/src/pages/landing.js
 export function renderLandingPage() {
     
     const initializeCarousel = () => {
         const carousel = document.getElementById('logo-carousel');
         if (carousel) {
-            // Duplicate the logos to create a seamless loop
             carousel.innerHTML += carousel.innerHTML;
-            // Add the animation class to start the scroll
             carousel.classList.add('animate-marquee-slow');
         }
     };
@@ -162,7 +159,6 @@ export function renderLandingPage() {
     </section>
     `;
 
-    // Defer the carousel initialization until after the first paint
     requestAnimationFrame(initializeCarousel);
 
     return `
