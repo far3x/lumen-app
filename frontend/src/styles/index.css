@@ -1,3 +1,4 @@
+/* frontend/src/styles/index.css */
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -127,7 +128,7 @@
   }
 
   .lang-tag {
-    @apply text-xs font-bold px-3 py-1.5 rounded-full bg-primary border border-subtle;
+    @apply text-xs font-bold px-3 py-1.5 rounded-full bg-primary border-subtle;
   }
 
   .progress-ring {
@@ -144,6 +145,73 @@
   .plan-button-secondary {
       @apply w-full text-center py-3 px-6 text-sm font-bold bg-primary text-text-main hover:bg-subtle/80 rounded-lg transition-colors shadow-lg shadow-black/20;
   }
+
+  .trapped-text {
+      position: relative;
+      color: #A3A3B2;
+      text-shadow: 1px 1px 1px rgba(0,0,0,0.5);
+      animation: text-glitch 4s infinite steps(1);
+  }
+
+  @keyframes text-glitch {
+      0%, 100% {
+          transform: translate(0, 0);
+          text-shadow: 1px 1px 1px rgba(0,0,0,0.5);
+      }
+      2% {
+          transform: translate(-1px, 1px);
+          text-shadow: 2px -1px 3px rgba(138, 43, 226, 0.3);
+      }
+      4% {
+          transform: translate(1px, -1px);
+          text-shadow: -2px 1px 3px rgba(255, 105, 180, 0.3);
+      }
+      6% {
+          transform: translate(0, 0);
+          text-shadow: 1px 1px 1px rgba(0,0,0,0.5);
+      }
+      30%, 34%, 38%, 90%, 94%, 98% {
+          transform: translate(0, 0);
+          text-shadow: 1px 1px 1px rgba(0,0,0,0.5);
+      }
+      32%, 92% {
+          transform: translate(1px, -1px);
+          text-shadow: -2px 1px 3px rgba(255, 105, 180, 0.3);
+      }
+      36%, 96% {
+          transform: translate(-1px, 1px);
+           text-shadow: 2px -1px 3px rgba(138, 43, 226, 0.3);
+      }
+  }
+
+  .animate-claim-spot-button {
+      animation: pulse-glow-strong 2.5s infinite ease-in-out;
+      transition: all 0.3s ease;
+      display: inline-block;
+  }
+
+  .animate-claim-spot-button:hover {
+      animation-play-state: paused;
+      transform: scale(1.1);
+      box-shadow: 0 0 40px 10px rgba(138, 43, 226, 0.4), 0 0 20px 0px rgba(255, 105, 180, 0.3);
+      filter: brightness(1.2);
+  }
+
+  @keyframes pulse-glow-strong {
+      0% {
+          transform: scale(1);
+          box-shadow: 0 0 15px -5px rgba(138, 43, 226, 0.5);
+      }
+      50% {
+          transform: scale(1.05);
+          box-shadow: 0 0 35px 5px rgba(255, 105, 180, 0.3);
+      }
+      100% {
+          transform: scale(1);
+          box-shadow: 0 0 15px -5px rgba(138, 43, 226, 0.5);
+      }
+  }
+
 }
 
 @font-face {
@@ -277,4 +345,16 @@ details > summary::-webkit-details-marker {
 
 .strength-bar-fill {
     @apply h-1.5 rounded-full transition-all duration-300;
+}
+
+@keyframes marquee-slow {
+    from { transform: translateX(0); }
+    to { transform: translateX(-50%); }
+}
+
+.animate-marquee-slow {
+    animation: marquee-slow 40s linear infinite;
+    will-change: transform;
+    contain: paint;
+    backface-visibility: hidden;
 }
