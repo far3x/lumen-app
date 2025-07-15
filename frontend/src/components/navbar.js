@@ -1,3 +1,4 @@
+// frontend/src/components/navbar.js
 import { isAuthenticated, getUser, logout, getAccount, api as authApi, fetchAndStoreUser } from '../lib/auth.js';
 import { walletService } from '../lib/wallet.js';
 import { navigate } from '../router.js';
@@ -221,7 +222,7 @@ export function renderNavbar(currentPath) {
 
     return `
     <header class="fixed top-4 left-1/2 -translate-x-1/2 w-[95%] max-w-7xl z-50">
-        <div class="relative w-full h-14 bg-surface/10 border border-white/10 backdrop-blur-xl rounded-full flex items-center justify-between px-4 sm:px-6">
+        <div class="relative w-full h-14 bg-surface/10 border border-white/10 backdrop-blur-xl rounded-full flex items-center justify-between px-2">
             <div class="flex-1 flex justify-start">
                 <a href="/" class="flex items-center gap-x-2" title="Lumen Home">
                     <img src="/logo.png" alt="Lumen Logo" class="h-8 w-8">
