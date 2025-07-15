@@ -1,15 +1,10 @@
 - clear vps disk, usage too high, docker maybe taking cache
+- change reverse proxy to return 404 / error when bots scrape the website (can change robots.txt ?)
 
 - review local data anonymization
 - lumen client - fix gitignore not reading well (backend\lib -> removing anything that ends in \lib, for example frontend\lib...)
 
 - make the referral system (no abuse with alt accounts etc...)
-- add gemini logo in landing page for higher trust, landing page redesign
-- how to redesign it? make it attractive, more modern, theme is clean already but big lack of images and content to show to the users
-- user scrolls to bottom, he gets a dashboard preview, that zooms in when u scroll, or maybe a video and the more u scroll
-- the more it advanced a video showing the dashboard and explaining stuff
-
-- change reverse proxy to return 404 / error when bots scrape the website (can change robots.txt ?)
 
 
 - weekly bonuses ?? this week -> rust += 10 LUM$ automatically if good quality ? + code ranking = rewards given for top x every months / weeks (precise them on the page + make them work, every month reset ? or smth like that)
