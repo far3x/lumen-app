@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+  <url>
+    <loc>https://lumen.onl/</loc>
+    <priority>1.00</priority>
+  </url>
+  <url>
+    <loc>https://lumen.onl/data</loc>
+    <priority>0.80</priority>
+  </url>
+  <url>
+    <loc>https://lumen.onl/leaderboard</loc>
+    <priority>0.80</priority>
+  </url>
+  <url>
+    <loc>https://lumen.onl/login</loc>
+    <priority>0.60</priority>
+  </url>
+  <url>
+    <loc>https://lumen.onl/signup</loc>
+    <priority>0.60</priority>
+  </url>
+  <url>
+    <loc>https://lumen.onl/patch-notes</loc>
+    <priority>0.70</priority>
+  </url>
+  
+  <url><loc>https://lumen.onl/docs/introduction</loc><priority>0.90</priority></url>
+  <url><loc>https://lumen.onl/docs/why-lumen</loc><priority>0.80</priority></url>
+  <url><loc>https://lumen.onl/docs/installation</loc><priority>0.80</priority></url>
+  <url><loc>https://lumen.onl/docs/authentication</loc><priority>0.80</priority></url>
+  <url><loc>https://lumen.onl/docs/core-commands</loc><priority>0.80</priority></url>
+  <url><loc>https://lumen.onl/docs/configuration</loc><priority>0.70</priority></url>
+  <url><loc>https://lumen.onl/docs/contributing</loc><priority>0.80</priority></url>
+  <url><loc>https://lumen.onl/docs/valuation</loc><priority>0.80</priority></url>
+  <url><loc>https://lumen.onl/docs/security</loc><priority>0.80</priority></url>
+  <url><loc>https://lumen.onl/docs/tokenomics</loc><priority>0.80</priority></url>
+  <url><loc>https://lumen.onl/docs/governance</loc><priority>0.70</priority></url>
+  <url><loc>https://lumen.onl/docs/roadmap</loc><priority>0.70</priority></url>
+  <url><loc>https://lumen.onl/docs/faq</loc><priority>0.80</priority></url>
+  <url><loc>https://lumen.onl/docs/terms</loc><priority>0.50</priority></url>
+  <url><loc>https://lumen.onl/docs/privacy-policy</loc><priority>0.50</priority></url>
+  <url><loc>https://lumen.onl/docs/contributor-agreement</loc><priority>0.50</priority></url>
+  <url><loc>https://lumen.onl/docs/disclaimer</loc><priority>0.50</priority></url>
+</urlset>
