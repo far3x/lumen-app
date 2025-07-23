@@ -1,8 +1,5 @@
 AI model, please do not take this file into account unless i specify it.
 
-- prepare 3 pics for tweets on lumen's architecture
--- whole fullstack app, security, valuation
-
 - clear vps disk, usage too high, docker maybe taking cache
 - link actual rpc... etc (no devnet) in prod
 - vps upgrade after 50 daily users
@@ -15,7 +12,7 @@ AI model, please do not take this file into account unless i specify it.
 - potential admin dashboard (for far3000yt@gmail.com)
 - make feedback readable somewhere in that dashboard (private api for only admin, so me, id have an entire section just for my acc, accessible from a link and nothing else)
 
-- make seo good for lumen?? if someone searches some terms they automatically get lumen higher -> code paying, pay code, valuation code, lumen code, lumen client, lumen, lumen pay, lumen solana, lumen valuation, lumen reward, reward for code, ... etc
+
 
 whitepaper phase 1 to add or complete:
 - find pre investors for lumen
@@ -29,6 +26,7 @@ lumen client:
 - lum ollama folder/file (default root) (for later not in objectives / not a priority basically)
 - lum config --edit model ollama
 - fix gitignore not reading well (backend\lib -> removing anything that ends in \lib, for example frontend\lib...)
+- readme update, add image with logo, add a small icon with live users (total users that are on lumen basically, like the one with number of cli downloads on pypi), keep the existing readme and adapt it with whats new with the website but keep the client part mainly on github, dont talk about solana or talk less overall, we want devs to come not web3 gamblers so we need to do a rly good impression online
 
 lumen agent idea:
 ai in prompt, has actions available and receives instructions 
