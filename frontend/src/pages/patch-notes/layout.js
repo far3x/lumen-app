@@ -1,4 +1,9 @@
 export const patchNotes = {
+    '2025_07_23': { 
+        title: 'The Legal Framework & Docs Reorganization Update', 
+        date: 'July 16, 2025',
+        content: () => import('./content/2025_07_23.js').then(m => m.renderContent()) 
+    },
     '2025_07_15': { 
         title: 'The Story of Lumen: A Complete Landing Page Redesign', 
         date: 'July 15, 2025',
@@ -19,10 +24,10 @@ export const patchNotes = {
         date: 'July 5, 2025',
         content: () => import('./content/2025_07_05.js').then(m => m.renderContent()) 
     },
-    '2025_07_02-3': { 
+    '2025_07_03': { 
         title: 'Protocol Upgrade: Beta Program, Priority Queues & UX Polish', 
         date: 'July 3, 2025',
-        content: () => import('./content/2025_07_02_3.js').then(m => m.renderContent()) 
+        content: () => import('./content/2025_07_03.js').then(m => m.renderContent()) 
     },
     '2025_07_02-2': { 
         title: 'Settings Page Redesign & UX Polish', 
@@ -120,7 +125,7 @@ export async function renderPatchNotesLayout(noteId) {
                 </div>
                 <div class="relative flex lg:gap-8">
                     <aside class="hidden lg:block w-72 flex-shrink-0 pr-8">
-                        <div class="sticky top-20 h-[calc(100vh-5rem)] overflow-y-auto py-10">
+                        <div class="sticky top-20 h-[calc(100vh-5rem)] overflow-y-auto py-10 independent-scroll">
                             ${renderSidebar(noteKey)}
                         </div>
                     </aside>

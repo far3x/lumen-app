@@ -34,8 +34,8 @@ export function renderFooter() {
             <div class="container mx-auto px-6 py-20">
                 ${ctaSection}
 
-                <div class="grid grid-cols-1 md:grid-cols-4 lg:grid-cols-5 gap-8 scroll-animate">
-                    <div class="col-span-1 lg:col-span-2">
+                <div class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-8 scroll-animate">
+                    <div class="col-span-2 lg:col-span-1">
                         <a href="/" class="flex items-center space-x-2">
                             <img src="/logo.png" alt="Lumen Logo" class="h-8 w-8">
                             <span class="text-xl font-bold text-text-main">Lumen Protocol</span>
@@ -66,6 +66,15 @@ export function renderFooter() {
                         <li><a href="https://twitter.com/0xFar3000" target="_blank" rel="noopener" data-external="true" class="group flex items-center text-text-secondary hover:text-text-main transition-colors">X / Twitter ${externalLinkIcon}</a></li>
                         <li><a href="mailto:contact@lumen.onl" class="text-text-secondary hover:text-text-main transition-colors">Contact</a></li>
                         <li><a href="#" id="feedback-button" class="text-text-secondary hover:text-text-main transition-colors">Provide Feedback</a></li>
+                        </ul>
+                    </div>
+                    <div>
+                        <h3 class="font-bold text-text-main tracking-wider uppercase">Legal</h3>
+                        <ul class="mt-4 space-y-3">
+                            <li><a href="/docs/terms" class="text-text-secondary hover:text-text-main transition-colors">Terms & Conditions</a></li>
+                            <li><a href="/docs/privacy-policy" class="text-text-secondary hover:text-text-main transition-colors">Privacy Policy</a></li>
+                            <li><a href="/docs/contributor-agreement" class="text-text-secondary hover:text-text-main transition-colors">Contributor Agreement</a></li>
+                            <li><a href="/docs/disclaimer" class="text-text-secondary hover:text-text-main transition-colors">Disclaimer</a></li>
                         </ul>
                     </div>
                 </div>
