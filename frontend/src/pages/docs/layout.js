@@ -1,16 +1,89 @@
 const docPages = {
-    'introduction': { title: 'Introduction', content: () => import('./content/introduction.js').then(m => m.renderIntroduction()), toc: [ { id: 'introduction', title: 'Introduction' }, { id: 'the-data-imperative', title: 'The Data Imperative' }, { id: 'the-lumen-solution', title: 'The Lumen Solution' } ]},
-    'why-lumen': { title: 'Why Lumen?', content: () => import('./content/why-lumen.js').then(m => m.renderWhyLumen()), toc: [ { id: 'why-lumen', title: 'The Lumen Advantage' }, { id: 'for-developers', title: 'For Developers' }, { id: 'for-the-ai-ecosystem', title: 'For the AI Ecosystem' } ]},
-    'installation': { title: 'Installation', content: () => import('./content/installation.js').then(m => m.renderInstallation()), toc: [ { id: 'installation', title: 'Installation' }, { id: 'prerequisites', title: 'Prerequisites' }, { id: 'install-with-pip', title: 'Standard Installation' }, { id: 'verifying', title: 'Verifying' }, { id: 'troubleshooting', title: 'Troubleshooting' } ]},
-    'authentication': { title: 'Authentication', content: () => import('./content/authentication.js').then(m => m.renderAuthentication()), toc: [ { id: 'authentication', title: 'CLI Authentication' }, { id: 'the-process', title: 'The Device Authorization Flow' }, { id: 'token-security', title: 'Token Security' } ]},
-    'core-commands': { title: 'Core Commands', content: () => import('./content/core-commands.js').then(m => m.renderCoreCommands()), toc: [ { id: 'core-commands', title: 'Core Commands' }, { id: 'network-commands', title: 'Network Commands' }, { id: 'local-generation', title: 'Local Generation' }, { id: 'configuration', title: 'Configuration' } ]},
-    'contributing': { title: 'Contributing Data', content: () => import('./content/contributing.js').then(m => m.renderContributing()), toc: [ { id: 'contributing-data', title: 'Contributing Data' }, { id: 'the-contribution-process', title: 'The Contribution Process' }, { id: 'what-to-contribute', title: 'What to Contribute' } ]},
-    'valuation': { title: 'The Valuation Engine', content: () => import('./content/valuation.js').then(m => m.renderValuation()), toc: [ { id: 'valuation-engine', title: 'The Valuation Engine' }, { id: 'phase-one-uniqueness', title: 'Phase 1: Uniqueness' }, { id: 'phase-two-quantitative-analysis', title: 'Phase 2: Quantitative Analysis' }, { id: 'phase-three-qualitative-analysis', title: 'Phase 3: Qualitative Analysis' }, { id: 'phase-four-reward-calculation', title: 'Phase 4: Reward Calculation' } ]},
-    'security': { title: 'Security', content: () => import('./content/security.js').then(m => m.renderSecurity()), toc: [ { id: 'security-by-design', title: 'Security by Design' }, { id: 'cli-security', title: 'CLI & Local-First Processing' }, { id: 'platform-security', title: 'Platform Security' }, { id: 'api-security', title: 'API Security' }, { id: 'on-chain-security', title: 'On-Chain Security' } ]},
-    'tokenomics': { title: 'Tokenomics', content: () => import('./content/tokenomics.js').then(m => m.renderTokenomics()), toc: [ { id: 'tokenomics', title: '$LUM Tokenomics' }, { id: 'core-utility', title: 'Core Utility' }, { id: 'deployment-on-solana', title: 'Deployment on Solana' }, { id: 'supply-and-emission', 'title': 'Supply & Emission' } ]},
-    'governance': { title: 'Governance', content: () => import('./content/governance.js').then(m => m.renderGovernance()), toc: [ { id: 'governance', title: 'Protocol Governance' }, { id: 'lumen-improvement-proposals', title: 'LIPs' }, { id: 'progressive-decentralization', title: 'Decentralization' } ]},
-    'roadmap': { title: 'Roadmap', content: () => import('./content/roadmap.js').then(m => m.renderRoadmap()), toc: [ { id: 'roadmap', title: 'Roadmap' } ]},
-    'faq': { title: 'FAQ', content: () => import('./content/faq.js').then(m => m.renderFaq()), toc: [ { id: 'faq', title: 'FAQ' }, { id: 'faq-security', title: 'Security & Privacy' }, { id: 'faq-rewards', title: 'Rewards & Value' } ]},
+    'introduction': { 
+        title: 'Introduction', 
+        content: () => import('./content/getting-started/introduction.js').then(m => m.renderIntroduction()), 
+        toc: [ { id: 'introduction', title: 'Introduction' }, { id: 'the-data-imperative', title: 'The Data Imperative' }, { id: 'the-lumen-solution', title: 'The Lumen Solution' } ]
+    },
+    'why-lumen': { 
+        title: 'Why Lumen?', 
+        content: () => import('./content/getting-started/why-lumen.js').then(m => m.renderWhyLumen()), 
+        toc: [ { id: 'why-lumen', title: 'The Lumen Advantage' }, { id: 'for-developers', title: 'For Developers' }, { id: 'for-the-ai-ecosystem', title: 'For the AI Ecosystem' } ]
+    },
+    'installation': { 
+        title: 'Installation', 
+        content: () => import('./content/cli-guide/installation.js').then(m => m.renderInstallation()), 
+        toc: [ { id: 'installation', title: 'Installation' }, { id: 'prerequisites', title: 'Prerequisites' }, { id: 'install-with-pip', title: 'Standard Installation' }, { id: 'verifying', title: 'Verifying' }, { id: 'troubleshooting', title: 'Troubleshooting' } ]
+    },
+    'authentication': { 
+        title: 'Authentication', 
+        content: () => import('./content/cli-guide/authentication.js').then(m => m.renderAuthentication()), 
+        toc: [ { id: 'authentication', title: 'CLI Authentication' }, { id: 'the-process', title: 'The Device Authorization Flow' }, { id: 'token-security', title: 'Token Security' } ]
+    },
+    'core-commands': { 
+        title: 'Core Commands', 
+        content: () => import('./content/cli-guide/core-commands.js').then(m => m.renderCoreCommands()), 
+        toc: [ { id: 'core-commands', title: 'Core Commands' }, { id: 'network-commands', title: 'Network Commands' }, { id: 'local-generation', title: 'Local Generation' }, { id: 'configuration', title: 'Configuration' } ]
+    },
+    'configuration': {
+        title: 'Configuration',
+        content: () => import('./content/cli-guide/configuration.js').then(m => m.renderConfiguration()),
+        toc: [ { id: 'configuration', title: 'Customizing the CLI' }, { id: 'config-file-location', title: 'Config File Location' }, { id: 'default-configuration', title: 'Default Configuration' }, { id: 'key-settings', title: 'Customization Options' } ]
+    },
+    'contributing': { 
+        title: 'Contributing Data', 
+        content: () => import('./content/protocol/contributing.js').then(m => m.renderContributing()), 
+        toc: [ { id: 'contributing-data', title: 'Contributing Data' }, { id: 'the-contribution-process', title: 'The Contribution Process' }, { id: 'what-to-contribute', title: 'What to Contribute' } ]
+    },
+    'valuation': { 
+        title: 'The Valuation Engine', 
+        content: () => import('./content/protocol/valuation.js').then(m => m.renderValuation()), 
+        toc: [ { id: 'valuation-engine', title: 'The Valuation Engine' }, { id: 'phase-one-uniqueness', title: 'Phase 1: Uniqueness' }, { id: 'phase-two-quantitative-analysis', title: 'Phase 2: Quantitative Analysis' }, { id: 'phase-three-qualitative-analysis', title: 'Phase 3: Qualitative Analysis' }, { id: 'phase-four-reward-calculation', title: 'Phase 4: Reward Calculation' } ]
+    },
+    'security': { 
+        title: 'Security', 
+        content: () => import('./content/protocol/security.js').then(m => m.renderSecurity()), 
+        toc: [ { id: 'security-by-design', title: 'Security by Design' }, { id: 'cli-security', title: 'CLI & Local-First Processing' }, { id: 'platform-security', title: 'Platform Security' }, { id: 'api-security', title: 'API Security' }, { id: 'on-chain-security', title: 'On-Chain Security' } ]
+    },
+    'tokenomics': { 
+        title: 'Tokenomics', 
+        content: () => import('./content/protocol/tokenomics.js').then(m => m.renderTokenomics()), 
+        toc: [ { id: 'tokenomics', title: '$LUM Tokenomics' }, { id: 'core-utility', title: 'Core Utility' }, { id: 'deployment-on-solana', title: 'Deployment on Solana' }, { id: 'supply-and-emission', 'title': 'Supply & Emission' } ]
+    },
+    'governance': { 
+        title: 'Governance', 
+        content: () => import('./content/protocol/governance.js').then(m => m.renderGovernance()), 
+        toc: [ { id: 'governance', title: 'Protocol Governance' }, { id: 'lumen-improvement-proposals', title: 'LIPs' }, { id: 'progressive-decentralization', title: 'Decentralization' } ]
+    },
+    'roadmap': { 
+        title: 'Roadmap', 
+        content: () => import('./content/community/roadmap.js').then(m => m.renderRoadmap()), 
+        toc: [ { id: 'roadmap', title: 'Roadmap' } ]
+    },
+    'faq': { 
+        title: 'FAQ', 
+        content: () => import('./content/community/faq.js').then(m => m.renderFaq()), 
+        toc: [ { id: 'faq', title: 'FAQ' }, { id: 'faq-security', title: 'Security & Privacy' }, { id: 'faq-rewards', title: 'Rewards & Value' } ]
+    },
+    'terms': {
+        title: 'Terms and Conditions',
+        content: () => import('./content/legal/terms.js').then(m => m.renderTermsAndConditions()),
+        toc: [ { id: 'terms-and-conditions', title: 'Terms and Conditions' } ]
+    },
+    'privacy-policy': {
+        title: 'Privacy Policy',
+        content: () => import('./content/legal/privacy-policy.js').then(m => m.renderPrivacyPolicy()),
+        toc: [ { id: 'privacy-policy', title: 'Privacy Policy' } ]
+    },
+    'contributor-agreement': {
+        title: 'Contributor License Agreement',
+        content: () => import('./content/legal/contributor-agreement.js').then(m => m.renderContributorAgreement()),
+        toc: [ { id: 'contributor-license-agreement', title: 'Contributor License Agreement' } ]
+    },
+    'disclaimer': {
+        title: 'Disclaimer',
+        content: () => import('./content/legal/disclaimer.js').then(m => m.renderDisclaimer()),
+        toc: [ { id: 'disclaimer', title: 'Disclaimer' } ]
+    }
 };
 
 const orderedDocKeys = Object.keys(docPages);
@@ -41,10 +114,11 @@ function renderSidebarContent(activePage) {
                     ${navLink('installation', 'Installation')}
                     ${navLink('authentication', 'Authentication')}
                     ${navLink('core-commands', 'Core Commands')}
+                    ${navLink('configuration', 'Configuration')}
                 </div>
             </div>
              <div>
-                <h4 class="px-3 text-xs font-bold uppercase text-subtle tracking-wider mb-2">Protocol Deep Dive</h4>
+                <h4 class="px-3 text-xs font-bold uppercase text-subtle tracking-wider mb-2">Protocol</h4>
                 <div class="space-y-1">
                     ${navLink('contributing', 'Contributing Data')}
                     ${navLink('valuation', 'The Valuation Engine')}
@@ -58,6 +132,15 @@ function renderSidebarContent(activePage) {
                 <div class="space-y-1">
                     ${navLink('roadmap', 'Roadmap')}
                     ${navLink('faq', 'FAQ')}
+                </div>
+            </div>
+            <div>
+                <h4 class="px-3 text-xs font-bold uppercase text-subtle tracking-wider mb-2">Legal</h4>
+                <div class="space-y-1">
+                    ${navLink('terms', 'Terms & Conditions')}
+                    ${navLink('privacy-policy', 'Privacy Policy')}
+                    ${navLink('contributor-agreement', 'Contributor Agreement')}
+                    ${navLink('disclaimer', 'Disclaimer')}
                 </div>
             </div>
         </nav>
@@ -160,7 +243,7 @@ export async function renderDocsLayout(pageId) {
             <div class="container mx-auto px-6">
                 <div class="relative flex lg:gap-8">
                     <aside class="hidden lg:block w-64 flex-shrink-0 pr-8">
-                        <div class="sticky top-20 h-[calc(100vh-5rem)] overflow-y-auto py-10">
+                        <div class="sticky top-20 h-[calc(100vh-5rem)] overflow-y-auto py-10 independent-scroll">
                             ${renderSidebarContent(pageKey)}
                         </div>
                     </aside>
@@ -171,7 +254,7 @@ export async function renderDocsLayout(pageId) {
                     </article>
 
                     <aside class="hidden xl:block w-64 flex-shrink-0 pl-8">
-                        <div class="sticky top-20 h-[calc(100vh-5rem)] overflow-y-auto py-10">
+                        <div class="sticky top-20 h-[calc(100vh-5rem)] overflow-y-auto py-10 independent-scroll">
                             ${renderOnPageNavContent(pageKey)}
                         </div>
                     </aside>

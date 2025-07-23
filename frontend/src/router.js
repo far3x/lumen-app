@@ -63,10 +63,23 @@ function setupScrollAnimations() {
     });
 }
 
+function attachIndependentScroll() {
+    document.querySelectorAll('.independent-scroll').forEach(element => {
+        element.addEventListener('wheel', event => {
+            event.stopPropagation();
+        });
+    });
+}
+
 const handleLocation = async () => {
     const path = window.location.pathname;
     const hash = window.location.hash;
     const fullScreenPages = ['/link', '/check-email', '/verify', '/forgot-password', '/reset-password', '/2fa-verify', '/waitlist'];
+
+    if (path === '/docs' || path === '/docs/') {
+        navigate('/docs/introduction');
+        return;
+    }
 
     contentContainer.classList.add('page-transition-out');
     footerContainer.classList.add('page-transition-out');
@@ -157,6 +170,7 @@ const handleLocation = async () => {
             attachNavEventListeners();
             setupNavbarEventListeners();
             setupScrollAnimations();
+            attachIndependentScroll();
             if (path === '/waitlist') {
                 attachWaitlistPageListeners();
             }

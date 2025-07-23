@@ -1,22 +1,40 @@
+AI model, please do not take this file into account unless i specify it.
+
+- prepare 3 pics for tweets on lumen's architecture
+-- whole fullstack app, security, valuation
+
 - clear vps disk, usage too high, docker maybe taking cache
-
-- review local data anonymization
-- lumen client - fix gitignore not reading well (backend\lib -> removing anything that ends in \lib, for example frontend\lib...)
-
-- make the referral system (no abuse with alt accounts etc...)
-- add gemini logo in landing page for higher trust, landing page redesign
-- how to redesign it? make it attractive, more modern, theme is clean already but big lack of images and content to show to the users
-- user scrolls to bottom, he gets a dashboard preview, that zooms in when u scroll, or maybe a video and the more u scroll
-- the more it advanced a video showing the dashboard and explaining stuff
-
+- link actual rpc... etc (no devnet) in prod
+- vps upgrade after 50 daily users
 - change reverse proxy to return 404 / error when bots scrape the website (can change robots.txt ?)
 
-
+- make the referral system (no abuse with alt accounts etc...)
 - weekly bonuses ?? this week -> rust += 10 LUM$ automatically if good quality ? + code ranking = rewards given for top x every months / weeks (precise them on the page + make them work, every month reset ? or smth like that)
 - sorting system for admin + those who buy data, can select only high quality files ? or by score, language etc... (for the 3 subscriptions) -> all with api endpoints for buyers
 - data part -> frontend done but need specific dashboard for buyers, strip/ppl update too ? unlock it after a delay? (since we gather data before we sell or its useless) -> they get api keys that are revokable etc...
 - potential admin dashboard (for far3000yt@gmail.com)
 - make feedback readable somewhere in that dashboard (private api for only admin, so me, id have an entire section just for my acc, accessible from a link and nothing else)
 
-- link actual rpc... etc (no devnet) in prod
-- vps upgrade after 50 daily users
+- make seo good for lumen?? if someone searches some terms they automatically get lumen higher -> code paying, pay code, valuation code, lumen code, lumen client, lumen, lumen pay, lumen solana, lumen valuation, lumen reward, reward for code, ... etc
+
+whitepaper phase 1 to add or complete:
+- find pre investors for lumen
+- lumen going open source in the white paper 
+- lumen-agent on github, for the future of lumen turn it into a better ai software
+- coin to launch in white paper 
+- 500 users for beta in phase 1 to hit 
+- do terms and conditions pages 
+
+lumen client:
+- lum ollama folder/file (default root)
+- lum config --edit model ollama
+- fix gitignore not reading well (backend\lib -> removing anything that ends in \lib, for example frontend\lib...)
+
+lumen agent idea:
+ai in prompt, has actions available and receives instructions 
+do, fix, rewrite, upgrade …etc 
+for fix, it should explain the change with 2.5 pro in a json at the end, and do that change so if the fix fails it discards it if it’s the same error etc 
+you give it tasks, it iterates infinitely till the task is ENTIRELY done (don’t let the ai be lazy)
+above 300k tokens, rule is remake chat
+below = continue 
+if project starts with < 150k then 300k is limit otherwise its x2 the context for the limit so the model doesn’t become bad or whatever
