@@ -1,7 +1,7 @@
 export const patchNotes = {
     '2025_07_23': { 
         title: 'The Legal Framework & Docs Reorganization Update', 
-        date: 'July 16, 2025',
+        date: 'July 23, 2025',
         content: () => import('./content/2025_07_23.js').then(m => m.renderContent()) 
     },
     '2025_07_15': { 
