@@ -92,4 +92,12 @@
     <loc>https://lumen.onl/docs/disclaimer</loc>
     <priority>0.50</priority>
   </url>
+  <url>
+    <loc>https://lumen.onl/forgot-password</loc>
+    <priority>0.40</priority>
+  </url>
+  <url>
+    <loc>https://lumen.onl/waitlist</loc>
+    <priority>0.50</priority>
+  </url>
 </urlset>
