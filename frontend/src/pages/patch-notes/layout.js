@@ -1,4 +1,9 @@
 export const patchNotes = {
+    '2025_07_24': { 
+        title: 'The Visibility Update: Major SEO & Social Sharing Enhancements', 
+        date: 'July 24, 2025',
+        content: () => import('./content/2025_07_24.js').then(m => m.renderContent()) 
+    },
     '2025_07_23': { 
         title: 'The Legal Framework & Docs Reorganization Update', 
         date: 'July 23, 2025',

@@ -26,7 +26,7 @@ whitepaper phase 1 to add or complete:
 - do terms and conditions pages 
 
 lumen client:
-- lum ollama folder/file (default root)
+- lum ollama folder/file (default root) (for later not in objectives / not a priority basically)
 - lum config --edit model ollama
 - fix gitignore not reading well (backend\lib -> removing anything that ends in \lib, for example frontend\lib...)
 
