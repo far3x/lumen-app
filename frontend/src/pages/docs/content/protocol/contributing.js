@@ -36,7 +36,7 @@ export const renderContributing = () => `
     <p>To maximize your <code>$LUM</code> earnings, focus on contributing code that embodies the qualities the valuation engine is designed to reward:</p>
     <ol>
         <li><strong>Proprietary & Private Projects:</strong> Your personal or professional projects that are not public on GitHub are the most valuable data source on the planet. They are guaranteed to be unique and contain novel logic.</li>
-        <li><strong>Complex, Domain-Specific Logic:</strong> A custom physics engine, a financial modeling tool, a specialized data processing pipeline—this type of code contains the non-obvious patterns that AI models need to learn true reasoning.</li>
+        <li><strong>Complex, Domain-Specific Logic:</strong> A custom physics engine, a financial modeling tool, a specialized data processing pipeline, this type of code contains the non-obvious patterns that AI models need to learn true reasoning.</li>
         <li><strong>Well-Structured and Mature Codebases:</strong> Projects that demonstrate clear architecture, good design patterns, and thoughtful structure provide higher-quality training data than monolithic scripts.</li>
         <li><strong>Updates and Iterations:</strong> The protocol is designed to reward innovation. Contributing updates to your existing projects is a fantastic way to earn, as the engine specifically values the new, complex code you've added since the last submission.</li>
     </ol>
