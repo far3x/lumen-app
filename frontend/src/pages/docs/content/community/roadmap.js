@@ -10,12 +10,12 @@ export const renderRoadmap = () => `
             <h3 id="phase-one" class="text-xl font-bold mt-1">Bootstrap the Data Economy</h3>
             <p class="text-text-secondary mt-1">Focus: Build the core product, prove the model, and bootstrap the supply-side of the network with the world's most valuable proprietary code.</p>
             <ul class="list-none text-text-secondary mt-2 space-y-2">
-                <li class="flex items-center gap-3"><span>✅</span><span class="text-green-400"><strong>Core Protocol Deployed:</strong> Launched the hybrid valuation engine, scalable backend infrastructure with pgvector, and secure API.</span></li>
-                <li class="flex items-center gap-3"><span>✅</span><span class="text-green-400"><strong>Contributor Platform Live:</strong> Developed the full-featured web application, including the real-time user dashboard, settings, and authentication systems.</span></li>
-                <li class="flex items-center gap-3"><span>✅</span><span class="text-green-400"><strong>Secure CLI Tooling:</strong> Released the open-source <code class="cli-name">pylumen</code> CLI with local-first anonymization and secure device authorization.</span></li>
-                <li class="flex items-center gap-3"><span>✅</span><span class="text-green-400"><strong>Legal Framework:</strong> Establish a full legal framework to protect developers and the protocol.</span></li>
-                <li class="flex items-center gap-3"><span>▶️</span><span class="text-yellow-400">Onboard 500 Genesis Contributors via the limited Beta Program.</span></li>
-                <li class="flex items-center gap-3"><span>▶️</span><span class="text-yellow-400">Secure pre-seed investment from strategic partners.</span></li>
+                <li class="flex items-start gap-3"><span>✅</span><span class="text-green-400"><strong>Core Protocol Deployed:</strong> Launched the hybrid valuation engine, scalable backend infrastructure with pgvector, and secure API.</span></li>
+                <li class="flex items-start gap-3"><span>✅</span><span class="text-green-400"><strong>Contributor Platform Live:</strong> Developed the full-featured web application, including the real-time user dashboard, settings, and authentication systems.</span></li>
+                <li class="flex items-start gap-3"><span>✅</span><span class="text-green-400"><strong>Secure CLI Tooling:</strong> Released the open-source <code class="cli-name">pylumen</code> CLI with local-first anonymization and secure device authorization.</span></li>
+                <li class="flex items-start gap-3"><span>✅</span><span class="text-green-400"><strong>Legal Framework:</strong> Establish a full legal framework to protect developers and the protocol.</span></li>
+                <li class="flex items-start gap-3"><span>▶️</span><span class="text-yellow-400">Onboard 500 Genesis Contributors via the limited Beta Program.</span></li>
+                <li class="flex items-start gap-3"><span>▶️</span><span class="text-yellow-400">Secure pre-seed investment from strategic partners.</span></li>
             </ul>
         </div>
         <!-- Phase 2 -->
@@ -25,11 +25,11 @@ export const renderRoadmap = () => `
             <h3 id="phase-two" class="text-xl font-bold mt-1">Activate the Marketplace</h3>
             <p class="text-text-secondary mt-1">Focus: Activate the demand-side of the network and enhance the developer experience.</p>
             <ul class="list-none text-text-secondary mt-2 space-y-2">
-                <li class="flex items-center gap-3"><span class="text-subtle">●</span><span>Initiate the public launch of the $LUM token, enabling on-chain reward claims.</span></li>
-                <li class="flex items-center gap-3"><span class="text-subtle">●</span><span>Launch the Data Marketplace v1.0, a self-serve API and portal for data consumers.</span></li>
-                <li class="flex items-center gap-3"><span class="text-subtle">●</span><span>Release official VS Code and JetBrains extensions for one-click contributions.</span></li>
-                <li class="flex items-center gap-3"><span class="text-subtle">●</span><span>Begin progressive open-sourcing of core protocol components post-launch.</span></li>
-                <li class="flex items-center gap-3"><span class="text-subtle">●</span><span>Launch the Lumen Governance Forum for community-led protocol discussions.</span></li>
+                <li class="flex items-start gap-3"><span class="text-subtle">●</span><span>Initiate the public launch of the $LUM token, enabling on-chain reward claims.</span></li>
+                <li class="flex items-start gap-3"><span class="text-subtle">●</span><span>Launch the Data Marketplace v1.0, a self-serve API and portal for data consumers.</span></li>
+                <li class="flex items-start gap-3"><span class="text-subtle">●</span><span>Release official VS Code and JetBrains extensions for one-click contributions.</span></li>
+                <li class="flex items-start gap-3"><span class="text-subtle">●</span><span>Begin progressive open-sourcing of core protocol components post-launch.</span></li>
+                <li class="flex items-start gap-3"><span class="text-subtle">●</span><span>Launch the Lumen Governance Forum for community-led protocol discussions.</span></li>
             </ul>
         </div>
         <!-- The Future -->
