@@ -12,7 +12,7 @@ export const renderValuation = () => `
         <li><strong>Decision Logic:</strong>
             <ul>
                 <li>If similarity to another user's code is extremely high, the contribution is flagged as potential plagiarism and rejected.</li>
-                <li>If similarity to one of your own previous submissions is very high, it's treated as an <strong>update</strong>. The valuation will be based on the "diff" — the new code you've added. You cannot earn rewards for submitting the same code twice.</li>
+                <li>If similarity to one of your own previous submissions is very high, it's treated as an <strong>update</strong>. The valuation will be based on the "diff", the new code you've added. You cannot earn rewards for submitting the same code twice.</li>
                 <li>If similarity is low, the contribution is considered novel and proceeds to the next phase with a high uniqueness score.</li>
             </ul>
         </li>

@@ -13,15 +13,6 @@ AI model, please do not take this file into account unless i specify it.
 - make feedback readable somewhere in that dashboard (private api for only admin, so me, id have an entire section just for my acc, accessible from a link and nothing else)
 
 
-
-whitepaper phase 1 to add or complete:
-- find pre investors for lumen
-- lumen going open source in the white paper 
-- lumen-agent on github, for the future of lumen turn it into a better ai software
-- coin to launch in white paper 
-- 500 users for beta in phase 1 to hit 
-- do terms and conditions pages 
-
 lumen client:
 - lum ollama folder/file (default root) (for later not in objectives / not a priority basically)
 - lum config --edit model ollama

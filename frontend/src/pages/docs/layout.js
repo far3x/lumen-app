@@ -1,13 +1,13 @@
 const docPages = {
     'introduction': { 
-        title: 'Introduction', 
+        title: 'Introduction: The Data Layer for Intelligent AI', 
         content: () => import('./content/getting-started/introduction.js').then(m => m.renderIntroduction()), 
-        toc: [ { id: 'introduction', title: 'Introduction' }, { id: 'the-data-imperative', title: 'The Data Imperative' }, { id: 'the-lumen-solution', title: 'The Lumen Solution' } ]
+        toc: [ { id: 'introduction', title: 'Introduction' }, { id: 'the-genesis', title: 'The Genesis: From Idea to Inception' }, { id: 'phase-one', title: 'Phase 1: The Foundation (Now)' } ]
     },
     'why-lumen': { 
-        title: 'Why Lumen?', 
+        title: 'The Lumen Advantage', 
         content: () => import('./content/getting-started/why-lumen.js').then(m => m.renderWhyLumen()), 
-        toc: [ { id: 'why-lumen', title: 'The Lumen Advantage' }, { id: 'for-developers', title: 'For Developers' }, { id: 'for-the-ai-ecosystem', title: 'For the AI Ecosystem' } ]
+        toc: [ { id: 'the-lumen-advantage', title: 'The Lumen Advantage' }, { id: 'for-developers', title: 'For Developers' }, { id: 'for-data-consumers', title: 'For Data Consumers & Investors' } ]
     },
     'installation': { 
         title: 'Installation', 
@@ -45,9 +45,9 @@ const docPages = {
         toc: [ { id: 'security-by-design', title: 'Security by Design' }, { id: 'cli-security', title: 'CLI & Local-First Processing' }, { id: 'platform-security', title: 'Platform Security' }, { id: 'api-security', title: 'API Security' }, { id: 'on-chain-security', title: 'On-Chain Security' } ]
     },
     'tokenomics': { 
-        title: 'Tokenomics', 
+        title: 'The $LUM Reward Token', 
         content: () => import('./content/protocol/tokenomics.js').then(m => m.renderTokenomics()), 
-        toc: [ { id: 'tokenomics', title: '$LUM Tokenomics' }, { id: 'core-utility', title: 'Core Utility' }, { id: 'deployment-on-solana', title: 'Deployment on Solana' }, { id: 'supply-and-emission', 'title': 'Supply & Emission' } ]
+        toc: [ { id: 'the-lum-token', title: 'The $LUM Reward Token' }, { id: 'utility-for-developers', title: 'Utility for Developers' }, { id: 'the-economic-loop', title: 'The Economic Loop' } ]
     },
     'governance': { 
         title: 'Governance', 
@@ -55,9 +55,9 @@ const docPages = {
         toc: [ { id: 'governance', title: 'Protocol Governance' }, { id: 'lumen-improvement-proposals', title: 'LIPs' }, { id: 'progressive-decentralization', title: 'Decentralization' } ]
     },
     'roadmap': { 
-        title: 'Roadmap', 
+        title: 'Roadmap & Vision', 
         content: () => import('./content/community/roadmap.js').then(m => m.renderRoadmap()), 
-        toc: [ { id: 'roadmap', title: 'Roadmap' } ]
+        toc: [ { id: 'roadmap-and-vision', title: 'Roadmap & Vision' }, { id: 'phase-one', title: 'Phase 1: The Foundation (Now)' }, { id: 'phase-two', title: 'Phase 2: The Ecosystem (Future)' }, { id: 'the-lumen-agent', title: 'The Future: The Lumen Agent' } ]
     },
     'faq': { 
         title: 'FAQ', 
@@ -123,14 +123,14 @@ function renderSidebarContent(activePage) {
                     ${navLink('contributing', 'Contributing Data')}
                     ${navLink('valuation', 'The Valuation Engine')}
                     ${navLink('security', 'Security')}
-                    ${navLink('tokenomics', 'Tokenomics')}
+                    ${navLink('tokenomics', 'The $LUM Token')}
                     ${navLink('governance', 'Governance')}
                 </div>
             </div>
             <div>
                 <h4 class="px-3 text-xs font-bold uppercase text-subtle tracking-wider mb-2">Community & Ecosystem</h4>
                 <div class="space-y-1">
-                    ${navLink('roadmap', 'Roadmap')}
+                    ${navLink('roadmap', 'Roadmap & Vision')}
                     ${navLink('faq', 'FAQ')}
                 </div>
             </div>
