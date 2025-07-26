@@ -220,8 +220,8 @@ function renderLoginForm(successMessage = '') {
                 </div>
                 <div class="flex items-center justify-between text-sm">
                     <div class="flex items-center">
-                        <input id="remember-me" name="remember-me" type="checkbox" class="h-4 w-4 rounded bg-primary border-subtle text-accent-purple focus:ring-accent-purple focus:ring-offset-0">
-                        <label for="remember-me" class="ml-2 block text-text-secondary">Remember me</label>
+                        <input id="remember-me" name="remember-me" type="checkbox" class="custom-checkbox">
+                        <label for="remember-me" class="ml-3 block text-text-secondary cursor-pointer">Remember me</label>
                     </div>
                     <a href="/forgot-password" class="font-medium text-accent-cyan hover:underline">Forgot password?</a>
                 </div>
