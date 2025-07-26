@@ -7,6 +7,9 @@ doppler run -- docker compose down
 ssh -L 63333:localhost:5432 root@69.62.107.41 -N
 then dbeaver login
 
+to access the db locally:
+podman compose -f docker-compose.dev.yml exec db psql -U lumen_user -d lumen_exchange
+
 AI INSTRUCTIONS - PLEASE READ !!
 
 little info if you are reading this as an ai model, the prod environment runs using doppler
