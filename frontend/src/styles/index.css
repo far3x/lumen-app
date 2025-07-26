@@ -26,6 +26,11 @@
         @apply opacity-0 transform -translate-y-4;
     }
 
+    [class*="animate-fade-in"],
+    [class*="animate-zoom-in"] {
+        opacity: 0;
+    }
+
     .scroll-animate {
         @apply opacity-0 transition-all duration-700 ease-out;
     }
@@ -209,6 +214,19 @@
           transform: scale(1);
           box-shadow: 0 0 15px -5px rgba(138, 43, 226, 0.5);
       }
+  }
+
+  .custom-checkbox {
+    @apply appearance-none w-5 h-5 bg-primary border-2 border-subtle rounded-md cursor-pointer transition-all duration-200 shrink-0;
+    @apply relative checked:bg-accent-purple checked:border-accent-purple;
+    @apply focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-surface focus:ring-accent-purple;
+  }
+
+  .custom-checkbox:checked::after {
+    content: '';
+    @apply absolute top-1/2 left-1/2 block w-1.5 h-3;
+    @apply border-solid border-white border-r-[2px] border-b-[2px];
+    transform: translate(-50%, -60%) rotate(45deg);
   }
 
 }
