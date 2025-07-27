@@ -19,6 +19,24 @@ lumen client:
 - fix gitignore not reading well (backend\lib -> removing anything that ends in \lib, for example frontend\lib...)
 - readme update, add image with logo, add a small icon with live users (total users that are on lumen basically, like the one with number of cli downloads on pypi), keep the existing readme and adapt it with whats new with the website but keep the client part mainly on github, dont talk about solana or talk less overall, we want devs to come not web3 gamblers so we need to do a rly good impression online
 
+
+minimum amount before cashout, or lock any cashout for first 30 days to accumulate code and be able to run the business model, one is good and the other might be seen negatively (maybe even a scam?) but that's not the objective, if we can make the token grow for a full month and THNE they can cashout they would earn even more which would be rly nice
+
+argument for lumen: the dataset evolves and is continuously growing, it has an ai summary, could search by keywords... etc we are legal free, like legally we make the datasets usable
+can provide strategic datasets that are sold to only one specific company ?
+need to make sure when a user updates a project it removes the old to replace with the new ? (and don't allow the opposite to happen, like someone reducing the size of its project, like in the db I mean, find a potential solution)
+
+bounty projects, if a user thinks the project is so good it deserves a 10, we give double the score (manual processing through gemini 2.5 pro or a separate queue to rly value it differently and validate?)
+
+intuitive installation page, goes steps through steps with even debug, for example -> install lumen client, u click next it says do this, do that... etc till you arrive to your first contribution (with videos or potential animations of cmd typing the commands... etc), choice of the os, debug... etc, in one single motion
+
+add subtle animations on clicks / hover, where the user interacts the most (landing page, saas page and dashboard, all sections, should feel like alive)
+
+linkedin for lumen, + ceo on mine + dox myself before launch
+
+remove protocol part from footer, add patch notes in developers part so footer is same size and lighter overall
+
+
 lumen agent idea:
 ai in prompt, has actions available and receives instructions 
 do, fix, rewrite, upgrade …etc 
