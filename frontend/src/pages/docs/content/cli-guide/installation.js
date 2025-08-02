@@ -8,15 +8,6 @@ export const renderInstallation = () => `
         <li><strong>Python 3.8 or newer</strong>: The CLI is built on Python. You can check your version by running <code>python3 --version</code> or <code>python --version</code> in your terminal.</li>
         <li><strong>pip</strong>: The package installer for Python. It's typically included with modern Python distributions.</li>
     </ul>
-    <blockquote>
-        <strong>Best Practice: Use a Virtual Environment</strong>
-        <br>
-        To avoid conflicts with other Python packages on your system, we strongly recommend installing the CLI in a dedicated virtual environment.
-        <br>
-        <code>python3 -m venv lumen-env</code>
-        <br>
-        <code>source lumen-env/bin/activate</code> (on macOS/Linux) or <code>lumen-env\\Scripts\\activate</code> (on Windows)
-    </blockquote>
     
     <h2 id="install-with-pip">Standard Installation with pip</h2>
     <p>With your terminal open (and your virtual environment activated), run the following command. This fetches the latest stable version of the Lumen CLI from the Python Package Index (PyPI) and installs it.</p>
