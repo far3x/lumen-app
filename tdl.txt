@@ -1,66 +1,77 @@
 AI model, please do not take this file into account unless i specify it.
 
-main goal, do the whitepaper before any fund raising part and rework on the roadmap with the objectives below potentially (like even upgrading infra... etc after launch would be crazy if lumen succeeds!)
-
+after launch :
 - clear vps disk, usage too high, docker maybe taking cache
 - link actual rpc... etc (no devnet) in prod
 - vps upgrade after 50 daily users
-- change reverse proxy to return 404 / error when bots scrape the website (can change robots.txt ?)
+- from uvicorn to gunicorn asap
+- make sure when we restart doppler / docker / podman it doesnt reset rate limits (esp for contributions, bcs many updates ongoing on prod usually)
+- 0 downtime updates ? for prod when I git pull for example
 
-- make the referral system (no abuse with alt accounts etc...)
+not a priority :
 - weekly bonuses ?? this week -> rust += 10 LUM$ automatically if good quality ? + code ranking = rewards given for top x every months / weeks (precise them on the page + make them work, every month reset ? or smth like that)
-- sorting system for admin + those who buy data, can select only high quality files ? or by score, language etc... (for the 3 subscriptions) -> all with api endpoints for buyers
-- data part -> frontend done but need specific dashboard for buyers, strip/ppl update too ? unlock it after a delay? (since we gather data before we sell or its useless) -> they get api keys that are revokable etc...
-- potential admin dashboard (for far3000yt@gmail.com)
+- make the referral system (no abuse with alt accounts etc... or then forget abt the idea, rly not a priority)
+- bounty projects, if a user thinks the project is so good it deserves a 10, we give double the score (manual processing through gemini 2.5 pro or a separate queue to rly value it differently and validate?)
+- bounty projects 2, top 3 best contributions each week (like literal lum contribute) = more rewards, fixed amount
 - make feedback readable somewhere in that dashboard (private api for only admin, so me, id have an entire section just for my acc, accessible from a link and nothing else)
 - status.lumen.onl with some live status like google or idk
+- --- cli --- lum ollama folder/file (default root) (for later not in objectives / not a priority basically)
+- --- cli --- lum config --edit model ollama
 
-lumen client:
-- lum ollama folder/file (default root) (for later not in objectives / not a priority basically)
-- lum config --edit model ollama
+
+socials :
+- linkedin for lumen, + ceo on mine + dox myself before launch
+- show that we had 5k downloads on our cli tool, stars on GitHub (62 for now), generated thousands of views through reddit posts (10k +), thousand through twitter (5k+) and linkedin soon ?
+- argument for lumen: the dataset evolves and is continuously growing, it has an ai summary, could search by keywords... etc we are legal free, like legally we make the datasets usable
+- can provide strategic datasets that are sold to only one specific company for way higher prices? private datasets
+
+fund raising / companies / money involved :
+- need to validate with ai companies or any group, how much 1B token is worth on each quality level, and what is each quality level in details
+- minimum amount before cashout, or lock any cashout for first 30 days to accumulate code and be able to run the business model, one is good and the other might be seen negatively (maybe even a scam?) but that's not the objective, if we can make the token grow for a full month and THNE they can cashout they would earn even more which would be rly nice
+- for initial reward 500 users, then 2k... etc etc, so after contribution, they get a dollar equivalent of like a pourcentage of what we can potentially raise, then we raise again and go to 2k beta users and so on and so on
+- whitepaper before any fund raising part
+
+FIXES / THINGS TO ADD :
+easy :
+- check if genesis reward claimed != beta and that its specified somewhere in docs or landing page that there is the first 500 contributor thing with 1k lum and the other that is for everyone as a first time thing ?
+- check that if 10 ppl contribute exactly theoritically at the same time, the process queue works well ? any way to check that it wont crash since i never tried it?
+- remove protocol part from footer, add patch notes in developers part so footer is same size and lighter overall
+- clean terminal images on docs for terminal usage at any point where the terminal is involved
+- fix verify link still being stored even after hours or when the person just wont interact, maybe add a cross on the link page to manually remove from the local storage to make sure it never shows more than once and actually expire it after x horus even if user offline (for example i logged out or idk, login and it goes to /verify maybe because i closed my verify instance or idk, make the verify page ONLY show after login AFTER u went through the verify page (even when logged out, u should have gone through verify to go through it its buggy))
+- --version flag, shows "pylumen, version 1.0.0"
+- push to prod on pypi when done before launch
+- change reverse proxy to return 404 / error when bots scrape the website (can change robots.txt ?)
+- lumen ssr (server side rendering) plugin for vite js, so we get good seo on google and not shit one like it is now, do robots.txt
+
+medium :
+- add subtle animations on clicks / hover, where the user interacts the most (landing page, saas page and dashboard, all sections, should feel like alive)
+- intuitive installation page, goes steps through steps with even debug, for example -> install lumen client, u click next it says do this, do that... etc till you arrive to your first contribution (with videos or potential animations of cmd typing the commands... etc), choice of the os, debug... etc, in one single motion
+- allow 3 contributions a day, find a way to not limit these 3 if its failed contributions (like if ai gives 0 or idk)
 - fix gitignore not reading well (backend\lib -> removing anything that ends in \lib, for example frontend\lib...)
 - readme update, add image with logo, add a small icon with live users (total users that are on lumen basically, like the one with number of cli downloads on pypi), keep the existing readme and adapt it with whats new with the website but keep the client part mainly on github, dont talk about solana or talk less overall, we want devs to come not web3 gamblers so we need to do a rly good impression online
+- move lumen.onl/docs to docs.lumen.onl and this would show docs.lumen.onl/installation for example instead of /docs/installation
 
-lumen fix verify link still being stored even after hours or when the person just wont interact, maybe add a cross on the link page to manually remove from the local storage to make sure it never shows more than once and actually expire it after x horus even if user offline (for example i logged out or idk, login and it goes to /verify maybe because i closed my verify instance or idk, make the verify page ONLY show after login AFTER u went through the verify page (even when logged out, u should have gone through verify to go through it its buggy))
+hard :
+- (after business.lumen.onl dashboard etc) -> make sure if ai gives 0, we still get that in our base (if the code is non secure), because storing code isn't dangerous, its using it that is (and we could get a category on that, "dangerous" where data buyers could also be interested in getting)
+- need to make sure when a user updates a project it removes the old to replace with the new ? (and don't allow the opposite to happen, like someone reducing the size of its project, like in the db I mean, find a potential solution)
+- (so like if someone contributes an old project, if it was sold to a company for example or taken privately, find a way to give them an update or then change ?? or idk, its complex maybe not do this at all ?)
 
-allow 2 contributions a day, find a way to not limit these 2 if its failed contributions (like ai gives 0 or idk)
-
-make sure if ai gives 0, we still get that in our base (if the code is non secure), because storing code isn't dangerous, its using it that is (and we could get a category on that, "dangerous" where data buyers could also be interested in getting)
-
-show that we had 5k downloads on our cli tool, stars on GitHub (62 for now), generated thousands of views through reddit posts (10k +), thousand through twitter (5k+) and linkedin soon ?
-
-need to validate with ai companies or any group, how much 1B token is worth on each quality level, and what is each quality level in details
-
-for initial reward 500 users, then 2k... etc etc, so after contribution, they get a dollar equivalent of like a pourcentage of what we can potentially raise, then we raise again and go to 2k beta users and so on and so on
-
-minimum amount before cashout, or lock any cashout for first 30 days to accumulate code and be able to run the business model, one is good and the other might be seen negatively (maybe even a scam?) but that's not the objective, if we can make the token grow for a full month and THNE they can cashout they would earn even more which would be rly nice
-
-argument for lumen: the dataset evolves and is continuously growing, it has an ai summary, could search by keywords... etc we are legal free, like legally we make the datasets usable
-can provide strategic datasets that are sold to only one specific company ?
-need to make sure when a user updates a project it removes the old to replace with the new ? (and don't allow the opposite to happen, like someone reducing the size of its project, like in the db I mean, find a potential solution)
-
-bounty projects, if a user thinks the project is so good it deserves a 10, we give double the score (manual processing through gemini 2.5 pro or a separate queue to rly value it differently and validate?)
-bounty projects 2, top 3 best contributions each week (like literal lum contribute) = more rewards, fixed amount
-
-intuitive installation page, goes steps through steps with even debug, for example -> install lumen client, u click next it says do this, do that... etc till you arrive to your first contribution (with videos or potential animations of cmd typing the commands... etc), choice of the os, debug... etc, in one single motion
-
-add subtle animations on clicks / hover, where the user interacts the most (landing page, saas page and dashboard, all sections, should feel like alive)
-
-linkedin for lumen, + ceo on mine + dox myself before launch
-
-remove protocol part from footer, add patch notes in developers part so footer is same size and lighter overall
-
-clean terminal images on docs for terminal usage at any point where the terminal is involved
-
-client: --version flag, shows "pylumen, version 1.0.0" and remove from docs the part that says to go venv ???
-
-lumen agent idea:
-many modes: web mode, code mode... etc ?
-exit as an option
-ai in prompt, has actions available and receives instructions 
-do, fix, rewrite, upgrade …etc 
-for fix, it should explain the change with 2.5 pro in a json at the end, and do that change so if the fix fails it discards it if it’s the same error etc 
-you give it tasks, it iterates infinitely till the task is ENTIRELY done (don’t let the ai be lazy)
-above 300k tokens, rule is remake chat
-below = continue 
-if project starts with < 150k then 300k is limit otherwise its x2 the context for the limit so the model doesn’t become bad or whatever
+data part (saas part):
+- on business.lumen.onl
+- seperate the whole website in 2 parts, pro part and user part, find a way to make ppl that look for business find the business.lumen.onl website easily from the main website, but dont make it intrusive ofc
+- signup / login system completely seperate from normal lumen ONLY for data buyers
+- they have a dashboard (rly abstract) -> they can generate / revoke api keys from there, have some graphs with stats like users but for token usage on their api key one by one or all api keys ?
+- they can see the left tokens they can use
+- they have a doc to use the api we will make (so they enter their api key as a header or idk in that, and they would use this api key to then take the data in certain formats)
+- physical marketplace for them too, so they can see the code physically ? they can rank by score, quality etc (do a search that is initially empty, that would consume their tokens, cant go below 0 and id give these users the tokens they can use since its a one by one thing)
+- from my admin dashboard i can manage saas users, give them tokens etc ? or just give them plans or whatever
+- in that search marketplace, theyd have many things, they can use the 3 ai scores we have from 0 to 10, they can look for a range too (from 0 to 5 for example)
+- maybe instead of a token system, make more like a price system, each code quality differs and has a price, so 0 is not free but almost worthless... etc etc and they would have a balance that they can topup? 250€ = 250000 of a currency for example to then get the datasets
+- signup page for saas with new fields, more pro etc... only one account per company, but can make many api keys that can just be renamed and that have more or less permissions (permissions idea might be useless, need to see if i do it)
+- maybe team management, so a user can invite other users to his account but he would be only the admin, only him, so they wouldnt have to share a password for many users etc
+- data sandbox / explorer (marketplace) as we talked about, physical one that is limited but free then? or idk, api part would be paid, free data part would always show the same data anyways and wouldnt be worthless but overall make it not take from our data, but show enough data
+- remove data hub page from lumen, business.lumen.onl would be seperate frontend (home page for business, signup, login, pricing, dashboard, docs = all pages), but would still use lumens backend
+- sorting system for admin + those who buy data, can select only high quality files ? or by score, language etc... (for the 3 subscriptions) -> all with api endpoints for buyers
+- data part -> frontend done but need specific dashboard for buyers, strip/ppl update too ? unlock it after a delay? (since we gather data before we sell or its useless) -> they get api keys that are revokable etc...
+- potential admin dashboard (for far3000yt@gmail.com / password)
+- saas part has its own branding, should be way higher quality than what we've done so far, we attract buyers not ppl that want to gain !! they provide the money they are the reason lumen will be alive
