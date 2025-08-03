@@ -179,27 +179,30 @@ def process_contribution(self, user_id: int, codebase: str, contribution_db_id: 
         contribution_record.valuation_results = json.dumps(valuation_details)
         
         if base_reward > 0:
-            total_reward_given = crud.apply_reward_to_user(db, user, base_reward)
-            
+            total_reward_for_contribution = base_reward
+            bonus_reward = 0.0
+
             if settings.BETA_MODE_ENABLED and user.id <= settings.BETA_MAX_USERS and not user.is_beta_bonus_claimed:
-                bonus_reward = crud.apply_reward_to_user(db, user, settings.BETA_GENESIS_BONUS)
-                total_reward_given += bonus_reward
+                bonus_reward = settings.BETA_GENESIS_BONUS
+                total_reward_for_contribution += bonus_reward
                 user.is_beta_bonus_claimed = True
                 db.add(user)
                 logger.info(f"[REWARD] Awarded Genesis Bonus of {settings.BETA_GENESIS_BONUS} LUM to user {user_id}.")
 
+            crud.apply_reward_to_user(db, user, total_reward_for_contribution)
+            
             avg_complexity = valuation_details.get("avg_complexity", 0.0)
             if avg_complexity > 0 :
-                crud.update_network_stats(db, avg_complexity, total_reward_given)
+                crud.update_network_stats(db, avg_complexity, total_reward_for_contribution)
             
-            contribution_record.reward_amount = total_reward_given - (bonus_reward if 'bonus_reward' in locals() else 0)
+            contribution_record.reward_amount = base_reward
             contribution_record.content_embedding = new_embedding
             contribution_record.status = "PROCESSED"
             
             db.add(contribution_record)
             db.commit()
             
-            logger.info(f"[REWARD] Successfully processed and rewarded {total_reward_given:.4f} LUM for user {user_id} (Contribution {contribution_db_id}).")
+            logger.info(f"[REWARD] Successfully processed and rewarded {total_reward_for_contribution:.4f} LUM for user {user_id} (Contribution {contribution_db_id}).")
         else:
             contribution_record.reward_amount = 0.0
             contribution_record.content_embedding = new_embedding

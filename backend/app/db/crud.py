@@ -160,23 +160,16 @@ def apply_reward_to_user(db: Session, user: models.User, reward_amount: float):
     account = user.account
     if not account: return 0.0
     
-    total_reward = reward_amount
-    user_count = get_total_user_count(db)
-
-    if user_count <= 500 and not user.is_genesis_reward_claimed:
-        total_reward += 500.0
-        user.is_genesis_reward_claimed = True
-        
     if account.total_lum_earned is None:
         account.total_lum_earned = 0.0
 
-    account.lum_balance += total_reward
-    account.total_lum_earned += total_reward
+    account.lum_balance += reward_amount
+    account.total_lum_earned += reward_amount
 
     db.add(user)
     db.add(account)
     db.commit()
-    return total_reward
+    return reward_amount
 
 def get_nearest_neighbors(db: Session, embedding, limit: int = 5):
     """
