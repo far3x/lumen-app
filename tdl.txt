@@ -26,6 +26,7 @@ socials :
 - can provide strategic datasets that are sold to only one specific company for way higher prices? private datasets
 
 fund raising / companies / money involved :
+- need to establish business model at some point
 - need to validate with ai companies or any group, how much 1B token is worth on each quality level, and what is each quality level in details
 - minimum amount before cashout, or lock any cashout for first 30 days to accumulate code and be able to run the business model, one is good and the other might be seen negatively (maybe even a scam?) but that's not the objective, if we can make the token grow for a full month and THNE they can cashout they would earn even more which would be rly nice
 - for initial reward 500 users, then 2k... etc etc, so after contribution, they get a dollar equivalent of like a pourcentage of what we can potentially raise, then we raise again and go to 2k beta users and so on and so on
@@ -55,6 +56,7 @@ hard :
 - (after business.lumen.onl dashboard etc) -> make sure if ai gives 0, we still get that in our base (if the code is non secure), because storing code isn't dangerous, its using it that is (and we could get a category on that, "dangerous" where data buyers could also be interested in getting)
 - need to make sure when a user updates a project it removes the old to replace with the new ? (and don't allow the opposite to happen, like someone reducing the size of its project, like in the db I mean, find a potential solution)
 - (so like if someone contributes an old project, if it was sold to a company for example or taken privately, find a way to give them an update or then change ?? or idk, its complex maybe not do this at all ?)
+
 
 data part (saas part):
 - on business.lumen.onl
