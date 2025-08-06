@@ -62,23 +62,27 @@ function triggerContextualFeedback() {
 }
 
 function renderProTipsSection() {
-    const tips = [
-        { icon: '💡', title: 'Uniqueness is King', text: 'Code from private, proprietary projects is far more valuable than public, open-source code.' },
-        { icon: '💎', title: 'Complexity is Rewarded', text: 'Projects with intricate logic and novel algorithms are valued more highly than simple scripts.' },
-        { icon: '🎯', title: 'Code with Intent', text: 'Well-structured, documented, and high-signal code provides the best data for training next-gen AI.' },
+    const principles = [
+        { number: '01', title: 'Prioritize Novelty', text: 'The protocol rewards what AI has not seen. Your unique solutions, personal projects, or unpublished work are the most valuable assets for training.' },
+        { number: '02', title: 'Focus on Quality', text: 'Value is tied to substance. Well-structured applications, thoughtful architectural patterns, and clean, efficient code earn more than simple scripts.' },
+        { number: '03', title: 'Iterate and Update', text: 'The engine rewards progress. Regularly contributing updates to your active projects is a great way to earn, as the protocol values the new logic you add over time.' },
     ];
 
     return `
     <div class="mt-12">
-        <h3 class="font-bold text-lg text-text-main mb-4">Pro Tips for Maximizing Rewards</h3>
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-        ${tips.map(tip => `
-            <div class="bg-surface p-5 rounded-xl border border-primary hover:border-accent-purple/50 transition-colors">
-                <p class="text-xl mb-2">${tip.icon}</p>
-                <h4 class="font-bold text-text-main">${tip.title}</h4>
-                <p class="text-sm text-text-secondary mt-1">${tip.text}</p>
+        <h3 class="font-bold text-lg text-text-main mb-4">Principles of Value</h3>
+        <div class="relative bg-surface rounded-xl border border-primary overflow-hidden">
+            <div class="flex flex-col md:flex-row">
+            ${principles.map((principle, index) => `
+                <div class="flex-1 p-6 relative ${index > 0 ? 'md:border-l md:border-primary' : ''}">
+                    <span class="absolute top-4 right-4 text-5xl font-bold gradient-text opacity-10">${principle.number}</span>
+                    <div class="relative">
+                        <h4 class="font-bold text-text-main">${principle.title}</h4>
+                        <p class="text-sm text-text-secondary mt-1">${principle.text}</p>
+                    </div>
+                </div>
+            `).join('')}
             </div>
-        `).join('')}
         </div>
     </div>
     `;
