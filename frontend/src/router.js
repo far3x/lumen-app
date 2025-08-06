@@ -148,7 +148,7 @@ const handleLocation = async () => {
 
         if (!fullScreenPages.includes(path)) {
             navbarContainer.innerHTML = renderNavbar(path);
-            footerContainer.innerHTML = renderFooter();
+            footerContainer.innerHTML = renderFooter(path);
         }
 
         if (lenis) {

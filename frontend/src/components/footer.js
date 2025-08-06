@@ -1,15 +1,19 @@
 import { isAuthenticated } from '../lib/auth.js';
 
-export function renderFooter() {
+export function renderFooter(currentPath) {
     const year = new Date().getFullYear();
     const authed = isAuthenticated();
+    const onDashboard = currentPath && currentPath.startsWith('/app/dashboard');
+    const onAuthPage = currentPath === '/login' || currentPath === '/signup';
     const socialIconClasses = "w-6 h-6 text-text-secondary hover:text-text-main transition-colors";
     const externalLinkIcon = `<svg xmlns="http://www.w3.org/2000/svg" class="inline-block h-4 w-4 ml-1 opacity-70 group-hover:opacity-100 transition-opacity" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
         <path stroke-linecap="round" stroke-linejoin="round" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
     </svg>`;
     
     const ctaSection = authed
-        ? `
+        ? (onDashboard
+            ? ''
+            : `
             <div class="text-center mb-20 scroll-animate">
                 <h2 class="text-3xl md:text-4xl font-bold">Ready to Contribute More?</h2>
                 <p class="text-text-secondary mt-4 max-w-xl mx-auto">Head back to your dashboard to view your progress and see the latest network activity.</p>
@@ -17,8 +21,10 @@ export function renderFooter() {
                     Go to Dashboard
                 </a>
             </div>
-        `
-        : `
+        `)
+        : (onAuthPage
+            ? ''
+            : `
             <div class="text-center mb-20 scroll-animate">
                 <h2 class="text-3xl md:text-4xl font-bold">Ready to Join the Data Economy?</h2>
                 <p class="text-text-secondary mt-4 max-w-xl mx-auto">Start contributing your anonymized code in minutes and get rewarded with $LUM tokens.</p>
@@ -26,7 +32,7 @@ export function renderFooter() {
                     Get Started Now
                 </a>
             </div>
-        `;
+        `);
 
     return `
     <div class="transition-all duration-200 ease-in-out">
