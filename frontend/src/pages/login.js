@@ -14,10 +14,21 @@ async function onLoginSuccess() {
     }
 
     await fetchAndStoreAccount();
-    const redirectPath = localStorage.getItem('post_login_redirect');
-    console.log('Post-login redirect path found in localStorage:', redirectPath);
-    if (redirectPath) {
+
+    const redirectItem = localStorage.getItem('post_login_redirect');
+    let redirectPath = null;
+    if (redirectItem) {
+        try {
+            const redirectData = JSON.parse(redirectItem);
+            if (redirectData.expires > Date.now()) {
+                redirectPath = redirectData.path;
+            }
+        } catch(e) { /* Ignore parsing errors */ }
         localStorage.removeItem('post_login_redirect');
+    }
+    
+    console.log('Post-login redirect path determined:', redirectPath);
+    if (redirectPath) {
         navigate(redirectPath);
     } else {
         navigate('/app/dashboard');
@@ -40,7 +51,18 @@ function setupEventListeners() {
     document.querySelectorAll('.oauth-button').forEach(button => {
         button.addEventListener('click', (e) => {
             const provider = e.currentTarget.dataset.provider;
-            const redirectPath = localStorage.getItem('post_login_redirect') || '/app/dashboard';
+            
+            const redirectItem = localStorage.getItem('post_login_redirect');
+            let redirectPath = '/app/dashboard';
+            if(redirectItem) {
+                try {
+                    const redirectData = JSON.parse(redirectItem);
+                    if (redirectData.expires > Date.now()) {
+                        redirectPath = redirectData.path;
+                    }
+                } catch(e) {}
+            }
+
             const state = btoa(JSON.stringify({ redirect_path: redirectPath }));
             const baseUrl = import.meta.env.VITE_API_URL || 'http://localhost:8000';
             window.location.href = `${baseUrl}/api/v1/auth/login/${provider}?state=${state}`;
