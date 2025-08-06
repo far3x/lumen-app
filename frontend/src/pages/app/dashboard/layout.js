@@ -85,23 +85,7 @@ async function handleClaim(claimButton, user) {
     claimButton.innerHTML = `<span class="animate-spin inline-block w-5 h-5 border-2 border-transparent border-t-white rounded-full"></span> Claiming...`;
 
     try {
-        const response = await authApi.post('/rewards/claim');
-        await fetchAndStoreAccount();
-        dashboardState.account = getAccount();
-
-        const txLink = `https://solscan.io/tx/${response.data.transaction_hash}?cluster=devnet`;
-        const modalContent = `
-            <div class="text-center">
-                <div class="w-16 h-16 mx-auto mb-4 bg-green-900/50 text-green-300 rounded-full flex items-center justify-center">
-                    <svg class="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
-                </div>
-                <h3 class="font-bold text-lg text-white">Claim Successful!</h3>
-                <p class="text-text-secondary mt-2 mb-4">${response.data.message}</p>
-                <a href="${txLink}" target="_blank" rel="noopener noreferrer" class="font-medium text-accent-cyan hover:underline">View Transaction</a>
-            </div>
-        `;
-        renderModal('Rewards Claimed', modalContent);
-
+        await authApi.post('/rewards/claim');
     } catch (error) {
         const errorMessage = error.response?.data?.detail || "An unknown error occurred.";
         const errorContent = `
@@ -109,13 +93,13 @@ async function handleClaim(claimButton, user) {
                 <div class="w-16 h-16 mx-auto mb-4 bg-red-900/50 text-red-300 rounded-full flex items-center justify-center">
                     <svg class="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
                 </div>
-                <h3 class="font-bold text-lg text-white">Claim Failed</h3>
+                <h3 class="font-bold text-lg text-white">Claim Request Failed</h3>
                 <p class="text-text-secondary mt-2">${errorMessage}</p>
             </div>
         `;
         renderModal('Error', errorContent);
-    } finally {
-        updateBalancesInUI();
+        claimButton.disabled = false;
+        claimButton.innerHTML = 'Claim Rewards';
     }
 }
 
@@ -181,7 +165,7 @@ function connectUserWebSocket() {
         }, 30000);
     };
 
-    userWebSocket.onmessage = (event) => {
+    userWebSocket.onmessage = async (event) => {
         const data = JSON.parse(event.data);
 
         if (data.type === 'pong') return;
@@ -195,6 +179,43 @@ function connectUserWebSocket() {
             document.dispatchEvent(new CustomEvent('contributionUpdate', { detail: data.payload.contribution }));
             if (data.payload.contribution.status === 'PROCESSED' || data.payload.contribution.status === 'REJECTED_NO_NEW_CODE') {
                 refreshDashboardData();
+            }
+        } else if (data.type === 'claim_success') {
+            await fetchAndStoreAccount();
+            updateBalancesInUI();
+            const txLink = `https://solscan.io/tx/${data.payload.transaction_hash}?cluster=devnet`;
+            const modalContent = `
+                <div class="text-center">
+                    <div class="w-16 h-16 mx-auto mb-4 bg-green-900/50 text-green-300 rounded-full flex items-center justify-center">
+                        <svg class="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+                    </div>
+                    <h3 class="font-bold text-lg text-white">Claim Successful!</h3>
+                    <p class="text-text-secondary mt-2 mb-4">${data.payload.message}</p>
+                    <a href="${txLink}" target="_blank" rel="noopener noreferrer" class="font-medium text-accent-cyan hover:underline">View Transaction</a>
+                </div>
+            `;
+            renderModal('Rewards Claimed', modalContent);
+            const claimButton = document.getElementById('claim-rewards-btn');
+            if (claimButton) {
+                claimButton.disabled = false;
+                claimButton.innerHTML = 'Claim Rewards';
+            }
+        } else if (data.type === 'claim_failed') {
+            updateBalancesInUI();
+            const modalContent = `
+                 <div class="text-center">
+                    <div class="w-16 h-16 mx-auto mb-4 bg-red-900/50 text-red-300 rounded-full flex items-center justify-center">
+                        <svg class="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                    </div>
+                    <h3 class="font-bold text-lg text-white">Claim Failed</h3>
+                    <p class="text-text-secondary mt-2">${data.payload.message}</p>
+                </div>
+            `;
+            renderModal('Error', modalContent);
+            const claimButton = document.getElementById('claim-rewards-btn');
+            if (claimButton) {
+                claimButton.disabled = false;
+                claimButton.innerHTML = 'Claim Rewards';
             }
         }
     };
