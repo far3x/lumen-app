@@ -38,6 +38,7 @@ fund raising / companies / money involved :
 
 FIXES / THINGS TO ADD :
 easy :
+- make algo give accurate rewards, scale with business model per tokens, give 20% to user, take 80% for ONE sell (meaning we can sell their code MULTIPLE times, unless contract that makes us sell code for higher price but makes it private)
 - clean terminal images on docs for terminal usage at any point where the terminal is involved
 - fix verify link still being stored even after hours or when the person just wont interact, maybe add a cross on the link page to manually remove from the local storage to make sure it never shows more than once and actually expire it after x horus even if user offline (for example i logged out or idk, login and it goes to /verify maybe because i closed my verify instance or idk, make the verify page ONLY show after login AFTER u went through the verify page (even when logged out, u should have gone through verify to go through it its buggy))
 - --version flag, shows "pylumen, version 1.0.0"
