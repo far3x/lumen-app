@@ -21,6 +21,7 @@ class HybridValuationService:
     INITIAL_LUM_USD_PRICE = 0.001
     PRICE_GROWTH_FACTOR = 0.000001
     BASE_USD_VALUE_PER_POINT = 0.01
+    TOKEN_TO_POINT_FACTOR = 0.02
 
     def __init__(self):
         if settings.GEMINI_API_KEY:
@@ -332,10 +333,10 @@ class HybridValuationService:
                 z_score = (current_metrics['avg_complexity'] - stats.mean_complexity) / stats.std_dev_complexity
                 rarity_multiplier = 1.0 + math.tanh(z_score)
 
-        base_value = (tokens_for_reward ** 0.6) * 0.1
-        ai_weighted_multiplier = (clarity * 0.5) + (architecture * 0.3) + (code_quality * 0.2)
+        ai_weighted_multiplier = (clarity * 0.5) + (architecture * 0.2) + (code_quality * 0.3)
         
-        contribution_quality_score = base_value * rarity_multiplier * ai_weighted_multiplier
+        contribution_quality_score = (tokens_for_reward * self.TOKEN_TO_POINT_FACTOR) * ai_weighted_multiplier * rarity_multiplier
+        
         target_usd_reward = self.BASE_USD_VALUE_PER_POINT * contribution_quality_score
 
         total_lum_distributed = stats.total_lum_distributed if stats else 0

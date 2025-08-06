@@ -24,6 +24,9 @@ socials :
 - show that we had 5k downloads on our cli tool, stars on GitHub (62 for now), generated thousands of views through reddit posts (10k +), thousand through twitter (5k+) and linkedin soon ?
 - argument for lumen: the dataset evolves and is continuously growing, it has an ai summary, could search by keywords... etc we are legal free, like legally we make the datasets usable
 - can provide strategic datasets that are sold to only one specific company for way higher prices? private datasets
+- companies will not only buy raw data, but actually pre-processed data, clean data with no duplicates, no comments, atcual metrics and most importantly scores that can make datasets go from low quality and not worth anything, to high quality in high quantity and worth WAY more than anything
+- add whitepaper / roadmap with datasets objectives, for example in a month, 10M tokens collected or idk
+- make the discord embed / twt / etc look better, redesign on the image and add texts to it
 
 fund raising / companies / money involved :
 - need to establish business model at some point
@@ -31,12 +34,10 @@ fund raising / companies / money involved :
 - minimum amount before cashout, or lock any cashout for first 30 days to accumulate code and be able to run the business model, one is good and the other might be seen negatively (maybe even a scam?) but that's not the objective, if we can make the token grow for a full month and THNE they can cashout they would earn even more which would be rly nice
 - for initial reward 500 users, then 2k... etc etc, so after contribution, they get a dollar equivalent of like a pourcentage of what we can potentially raise, then we raise again and go to 2k beta users and so on and so on
 - whitepaper before any fund raising part
+- transform value on dashboard from $LUM to dollars ? so we get some value, then we go from dollars, convert into lumens and make the transfer process work well basically over that lumen price
 
 FIXES / THINGS TO ADD :
 easy :
-- check if genesis reward claimed != beta and that its specified somewhere in docs or landing page that there is the first 500 contributor thing with 1k lum and the other that is for everyone as a first time thing ?
-- check that if 10 ppl contribute exactly theoritically at the same time, the process queue works well ? any way to check that it wont crash since i never tried it?
-- remove protocol part from footer, add patch notes in developers part so footer is same size and lighter overall
 - clean terminal images on docs for terminal usage at any point where the terminal is involved
 - fix verify link still being stored even after hours or when the person just wont interact, maybe add a cross on the link page to manually remove from the local storage to make sure it never shows more than once and actually expire it after x horus even if user offline (for example i logged out or idk, login and it goes to /verify maybe because i closed my verify instance or idk, make the verify page ONLY show after login AFTER u went through the verify page (even when logged out, u should have gone through verify to go through it its buggy))
 - --version flag, shows "pylumen, version 1.0.0"
