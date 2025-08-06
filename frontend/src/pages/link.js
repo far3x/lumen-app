@@ -1,8 +1,15 @@
 import { api } from '../lib/auth.js';
+import { navigate } from '../router.js';
 
 function setupEventListeners() {
     const form = document.getElementById('link-form');
     if (!form) return;
+
+    const closeButton = document.getElementById('close-link-page');
+    closeButton?.addEventListener('click', () => {
+        localStorage.removeItem('post_login_redirect');
+        navigate('/app/dashboard');
+    });
 
     form.addEventListener('submit', async (e) => {
         e.preventDefault();
@@ -31,12 +38,13 @@ function setupEventListeners() {
             
             formContainer.classList.add('hidden');
             successMessageElement.classList.remove('hidden');
+            localStorage.removeItem('post_login_redirect');
 
             const countdownElement = document.getElementById('countdown-message');
             let secondsLeft = 5;
 
             const updateCountdown = () => {
-                countdownElement.textContent = `This window will close in ${secondsLeft} seconds...`;
+                countdownElement.textContent = `You will be redirected to the dashboard in ${secondsLeft} seconds...`;
             };
             
             updateCountdown();
@@ -50,7 +58,11 @@ function setupEventListeners() {
             }, 1000);
 
             setTimeout(() => {
-                window.close();
+                if (window.opener) {
+                    window.close();
+                } else {
+                    navigate('/app/dashboard');
+                }
             }, 5000);
 
         } catch (error) {
@@ -76,7 +88,11 @@ export function renderLinkPage() {
         <div class="absolute top-0 left-0 w-full h-full bg-black/50 -z-10"></div>
         
         <div class="w-full max-w-md mx-auto">
-            <div class="bg-surface/80 backdrop-blur-md p-8 rounded-xl border border-primary shadow-2xl shadow-black/20 text-center">
+            <div class="relative bg-surface/80 backdrop-blur-md p-8 rounded-xl border border-primary shadow-2xl shadow-black/20 text-center">
+                <button id="close-link-page" class="absolute top-3 right-3 p-2 text-text-secondary hover:text-text-main rounded-full hover:bg-primary transition-colors" aria-label="Close and go to dashboard">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                </button>
+
                 <a href="/" class="inline-flex items-center space-x-3 mb-6">
                     <img src="/logo.png" alt="Lumen Logo" class="h-10 w-10">
                     <span class="text-2xl font-bold text-text-main">Lumen Protocol</span>
@@ -109,6 +125,9 @@ export function renderLinkPage() {
                     <p class="text-text-secondary mt-2">You can now safely close this tab and return to your terminal.</p>
                     <p id="countdown-message" class="text-sm text-text-secondary mt-2"></p>
                 </div>
+                 <p class="mt-6 text-center text-sm">
+                    <a href="/app/dashboard" class="font-medium text-accent-cyan hover:underline">Back to Dashboard</a>
+                </p>
             </div>
         </div>
     </main>

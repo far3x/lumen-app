@@ -108,7 +108,21 @@ const handleLocation = async () => {
             return;
         }
 
-        const redirectPath = localStorage.getItem('post_login_redirect');
+        const redirectItem = localStorage.getItem('post_login_redirect');
+        let redirectPath = null;
+        if (redirectItem) {
+            try {
+                const redirectData = JSON.parse(redirectItem);
+                if (redirectData.expires > Date.now()) {
+                    redirectPath = redirectData.path;
+                } else {
+                    localStorage.removeItem('post_login_redirect');
+                }
+            } catch (e) {
+                localStorage.removeItem('post_login_redirect');
+            }
+        }
+        
         if (isAuthenticated() && (path === '/login' || path === '/signup')) {
             if (redirectPath) {
                 localStorage.removeItem('post_login_redirect');
@@ -120,7 +134,11 @@ const handleLocation = async () => {
         }
 
         if (!isAuthenticated() && (path.startsWith('/app') || path.startsWith('/link'))) {
-            localStorage.setItem('post_login_redirect', path);
+            const redirectData = {
+                path: path,
+                expires: Date.now() + 3600 * 1000 // Expires in 1 hour
+            };
+            localStorage.setItem('post_login_redirect', JSON.stringify(redirectData));
             navigate('/login');
             return;
         }
