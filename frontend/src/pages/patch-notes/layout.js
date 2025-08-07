@@ -1,4 +1,9 @@
 export const patchNotes = {
+    '2025_08_07': { 
+        title: 'The Genesis Update: A New Vision, A New Partner & A Wave of Enhancements', 
+        date: 'August 7, 2025',
+        content: () => import('./content/2025_08_07.js').then(m => m.renderContent()) 
+    },
     '2025_07_24': { 
         title: 'The Visibility Update: Major SEO & Social Sharing Enhancements', 
         date: 'July 24, 2025',
