@@ -27,18 +27,17 @@ export const renderContributing = () => `
     <blockquote>
         <strong>Deep Dive: The Valuation Engine</strong>
         <br>
-        Curious about the intricate details of how we determine the value of your code? We've dedicated an entire page to explaining our multi-stage valuation process.
+        Curious about the intricate details of how we determine the value of your code? We've dedicated an entire page to explaining our multi stage valuation process.
         <br>
         <a href="/docs/valuation" class="text-accent-cyan hover:underline font-semibold mt-2 inline-block">Explore The Valuation Engine →</a>
     </blockquote>
 
     <h2 id="what-to-contribute">What to Contribute for Maximum Rewards</h2>
-    <p>To maximize your <code>$LUM</code> earnings, focus on contributing code that embodies the qualities the valuation engine is designed to reward:</p>
+    <p>To maximize your rewards, focus on contributing code that embodies the qualities the valuation engine is designed to value most highly. The protocol rewards the principles of good engineering, regardless of programming language.</p>
     <ol>
-        <li><strong>Proprietary & Private Projects:</strong> Your personal or professional projects that are not public on GitHub are the most valuable data source on the planet. They are guaranteed to be unique and contain novel logic.</li>
-        <li><strong>Complex, Domain-Specific Logic:</strong> A custom physics engine, a financial modeling tool, a specialized data processing pipeline, this type of code contains the non-obvious patterns that AI models need to learn true reasoning.</li>
-        <li><strong>Well-Structured and Mature Codebases:</strong> Projects that demonstrate clear architecture, good design patterns, and thoughtful structure provide higher-quality training data than monolithic scripts.</li>
-        <li><strong>Updates and Iterations:</strong> The protocol is designed to reward innovation. Contributing updates to your existing projects is a fantastic way to earn, as the engine specifically values the new, complex code you've added since the last submission.</li>
+        <li><strong>Novelty and Uniqueness:</strong> The protocol's primary goal is to acquire data that AI models have not seen before. Your unique solutions, personal projects, or unpublished work are the most valuable assets you can contribute. The more distinct your code is from public repositories, the higher its value.</li>
+        <li><strong>Quality and Complexity:</strong> Value is tied to substance. A project with intricate logic, thoughtful architectural patterns, and clean, efficient code will always be valued more highly than simple scripts or boilerplate.</li>
+        <li><strong>Iteration and Progress:</strong> The protocol is designed to reward active development. Contributing updates to your projects is highly encouraged, as the engine specifically identifies and rewards the new value you have added since your last submission.</li>
     </ol>
     <p>In short, the more unique, complex, and thoughtful your code, the more valuable it is to the network, and the greater your reward will be.</p>
 `;

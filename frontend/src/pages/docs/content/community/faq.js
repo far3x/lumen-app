@@ -8,7 +8,7 @@ export const renderFaq = () => `
         <div class="grid grid-rows-[0fr] group-open:grid-rows-[1fr] transition-[grid-template-rows] duration-500 ease-in-out">
             <div class="overflow-hidden">
                 <p class="text-text-secondary px-6 pb-6">
-                    Lumen is a platform that pays developers with crypto tokens ($LUM) for contributing their code. This code is then safely anonymized and used to create high-quality datasets for training better Artificial Intelligence models. It's a way for you to turn your private coding projects into a valuable, reward-earning asset.
+                    Lumen is a platform that rewards developers for contributing their code. This code is then safely anonymized and used to create high-quality datasets for training better Artificial Intelligence models. It's a way for you to turn your unique coding projects into a valuable, reward-earning asset.
                 </p>
             </div>
         </div>
@@ -34,7 +34,7 @@ export const renderFaq = () => `
         <div class="grid grid-rows-[0fr] group-open:grid-rows-[1fr] transition-[grid-template-rows] duration-500 ease-in-out">
             <div class="overflow-hidden">
                 <p class="text-text-secondary px-6 pb-6">
-                    To bootstrap the network and reward our earliest supporters, the protocol is in a limited beta phase. The first 500 developers to make a successful contribution will receive an exclusive, one-time reward of <strong>1,000 $LUM</strong>. Users who register after the beta is full are placed on a waitlist and will be granted access in batches.
+                    To bootstrap the network and reward our earliest supporters, the protocol is in a limited beta phase. The first 500 developers to make a successful contribution will receive an exclusive, one-time reward of <strong>1,000 LUM</strong>. Users who register after the beta is full are placed on a waitlist and will be granted access in batches.
                 </p>
             </div>
         </div>
@@ -42,11 +42,11 @@ export const renderFaq = () => `
 
     <h2 id="faq-rewards">Rewards & Value</h2>
     <details class="group bg-surface border border-subtle/50 rounded-lg cursor-pointer my-4">
-        <summary class="flex items-center justify-between font-bold p-6">How does $LUM get its value?</summary>
+        <summary class="flex items-center justify-between font-bold p-6">How do my rewards get their value?</summary>
         <div class="grid grid-rows-[0fr] group-open:grid-rows-[1fr] transition-[grid-template-rows] duration-500 ease-in-out">
             <div class="overflow-hidden">
                 <p class="text-text-secondary px-6 pb-6">
-                   The value of $LUM is directly tied to the value of the data on the network. AI companies and researchers must purchase $LUM from the open market (e.g., a decentralized exchange) to pay for access to datasets. This creates a constant buy pressure. As the protocol's data becomes more valuable and sought-after, the demand for $LUM increases, which in turn increases its market value and the value of rewards for contributors.
+                   The value of the rewards is directly tied to the value of the data on the network. AI companies pay real-world currency to access our datasets. A significant portion of that revenue is then used to fund the protocol's reward pool. This creates a sustainable economic system where the value of developer rewards grows as the data becomes more valuable to the AI industry.
                 </p>
             </div>
         </div>
@@ -56,7 +56,7 @@ export const renderFaq = () => `
         <div class="grid grid-rows-[0fr] group-open:grid-rows-[1fr] transition-[grid-template-rows] duration-500 ease-in-out">
             <div class="overflow-hidden">
                 <p class="text-text-secondary px-6 pb-6">
-                    Value is determined by <strong>uniqueness and complexity</strong>, not a specific programming language. A proprietary, closed-source project with complex algorithms will be valued far more highly than a simple to-do list app from a public tutorial. The ideal contribution is a project you've built for a specific, niche purpose that isn't already available on GitHub.
+                    Value is determined by <strong>uniqueness and quality</strong>, not a specific programming language. A project with novel logic, a well-designed architecture, and clean implementation will be valued far more highly than a simple script from a public tutorial. The ideal contribution is a project you've built that solves a problem in a thoughtful way.
                 </p>
             </div>
         </div>
@@ -66,7 +66,7 @@ export const renderFaq = () => `
         <div class="grid grid-rows-[0fr] group-open:grid-rows-[1fr] transition-[grid-template-rows] duration-500 ease-in-out">
             <div class="overflow-hidden">
                 <p class="text-text-secondary px-6 pb-6">
-                    Yes, and this is encouraged for actively developed projects. The protocol's valuation engine is intelligent; it identifies your submission as an update and rewards you based on the <strong>new value you've added (the "diff")</strong>. You cannot earn rewards by repeatedly submitting the same unchanged code. We reward innovation, not repetition.
+                    Yes, and this is encouraged for actively developed projects. The protocol's valuation engine is intelligent; it identifies your submission as an update and rewards you based on the <strong>new value you've added (the "diff")</strong>. You cannot earn rewards by repeatedly submitting the same unchanged code. We reward innovation and progress, not repetition.
                 </p>
             </div>
         </div>
@@ -78,7 +78,7 @@ export const renderFaq = () => `
         <div class="grid grid-rows-[0fr] group-open:grid-rows-[1fr] transition-[grid-template-rows] duration-500 ease-in-out">
             <div class="overflow-hidden">
                 <p class="text-text-secondary px-6 pb-6">
-                    The entire process is designed for security. First, the Lumen CLI runs <strong>on your own computer</strong> to scan and remove sensitive information like API keys, passwords, and personal details. Only this clean, anonymized version of your code is sent to our servers. It is then added to our high-quality datasets that AI companies can purchase access to for training their models. Your original, raw code never leaves your machine.
+                    The entire process is designed for security. First, the Lumen CLI runs <strong>on your own computer</strong> to scan and remove sensitive information like API keys, passwords, and personal details. Only this clean, anonymized version of your source code is sent to our servers. It is then added to our high-quality datasets that AI companies can purchase access to for training their models. Your original, raw code never leaves your machine.
                 </p>
             </div>
         </div>
