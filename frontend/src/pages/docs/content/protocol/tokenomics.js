@@ -1,18 +1,17 @@
 export const renderTokenomics = () => `
-    <h1 id="the-lum-token">The $LUM Reward Token: Fueling the Ecosystem</h1>
-    <p class="lead text-xl text-text-secondary">The Lumen Protocol uses a native utility token, $LUM, as its internal unit of value. Think of it as <strong>Protocol Credits</strong> that represent a direct stake in the data economy you are helping to build.</p>
+    <h1 id="protocol-economy">The Protocol Economy</h1>
+    <p class="lead text-xl text-text-secondary">The Lumen Protocol is powered by a sustainable economic model designed to fairly reward developers for the value they create. The native protocol reward, LUM, functions as the internal unit of value and the mechanism for this exchange.</p>
 
-    <h2 id="utility-for-developers">Utility for Developers</h2>
-    <p>$LUM is the medium through which the value of your contribution is captured and transferred to you. You can track your earnings in real-time on your dashboard. Upon the token's public launch, you will be able to claim your rewards on-chain to a self-custody wallet.</p>
-    <blockquote>We utilize the Solana blockchain for its high speed and near-zero transaction fees, ensuring that when you claim your rewards, you keep what you have earned without losing significant value to network costs.</blockquote>
+    <h2 id="rewards-mechanism">The Rewards Mechanism for Developers</h2>
+    <p>LUM is the medium through which the value of a code contribution is captured and transferred to the developer. When you contribute, our valuation engine appraises your work and allocates a corresponding amount of LUM to your account. This system ensures that your compensation is directly tied to the quality and novelty of your contribution.</p>
+    <blockquote>We utilize the Solana blockchain for its high speed and near zero transaction fees. This ensures that when you claim your rewards to your personal wallet, you keep what you have earned without losing significant value to network costs.</blockquote>
     
-    <h2 id="the-economic-loop">The Economic Loop: A Sustainable Model</h2>
-    <p>Our tokenomics are designed for long-term sustainability, creating a powerful economic loop that benefits contributors directly, without requiring them to speculate on crypto markets.</p>
+    <h2 id="economic-loop">The Economic Loop: A Sustainable Business Model</h2>
+    <p>Our economy is designed for long term sustainability, creating a powerful "flywheel" that benefits contributors directly, driven by real world business revenue.</p>
     <ol>
-        <li><strong>Revenue Generation:</strong> AI companies and data consumers purchase access to Lumen's proprietary datasets using traditional currency (e.g., USD).</li>
-        <li><strong>Market Buy-Back:</strong> Lumen Protocol uses a significant portion of this real-world revenue to buy $LUM tokens from the open market (e.g., from a decentralized exchange).</li>
-        <li><strong>Reward Pool Funding:</strong> These purchased tokens are then deposited into the protocol's dedicated reward pool.</li>
-        <li><strong>Contributor Rewards:</strong> The reward pool is used to distribute $LUM to developers for their valuable code contributions.</li>
+        <li><strong>Enterprise Revenue:</strong> AI companies and data consumers purchase access to Lumen's premium, proprietary datasets using traditional currency (e.g., USD). This real world revenue is the engine of the entire system.</li>
+        <li><strong>Funding the Reward Pool:</strong> A significant portion of that revenue is used to acquire LUM from the open market or directly fund the protocol's dedicated reward pool.</li>
+        <li><strong>Contributor Rewards:</strong> This pool is then used to distribute LUM to developers for their valuable code contributions, incentivizing the creation of more high quality data.</li>
     </ol>
-    <p>This model creates constant, sustainable buy pressure on the token that is directly linked to the commercial success and demand for the data on the network. The more valuable our data becomes to AI companies, the more valuable the rewards become for our community of contributors. The value is driven by utility, not speculation.</p>
+    <p>This model creates constant, sustainable demand for the protocol's rewards that is directly linked to the commercial success of the data marketplace. The more valuable our data becomes to AI companies, the more robust the reward system becomes for our community of contributors. The value is driven by utility, not speculation.</p>
 `;

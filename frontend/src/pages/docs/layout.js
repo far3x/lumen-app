@@ -45,19 +45,31 @@ const docPages = {
         toc: [ { id: 'security-by-design', title: 'Security by Design' }, { id: 'cli-security', title: 'CLI & Local-First Processing' }, { id: 'platform-security', title: 'Platform Security' }, { id: 'api-security', title: 'API Security' }, { id: 'on-chain-security', title: 'On-Chain Security' } ]
     },
     'tokenomics': { 
-        title: 'The $LUM Reward Token', 
+        title: 'Protocol Economy', 
         content: () => import('./content/protocol/tokenomics.js').then(m => m.renderTokenomics()), 
-        toc: [ { id: 'the-lum-token', title: 'The $LUM Reward Token' }, { id: 'utility-for-developers', title: 'Utility for Developers' }, { id: 'the-economic-loop', title: 'The Economic Loop' } ]
+        toc: [ { id: 'protocol-economy', title: 'The Protocol Economy' }, { id: 'rewards-mechanism', title: 'The Rewards Mechanism' }, { id: 'economic-loop', title: 'The Economic Loop' } ]
     },
     'governance': { 
         title: 'Governance', 
         content: () => import('./content/protocol/governance.js').then(m => m.renderGovernance()), 
         toc: [ { id: 'governance', title: 'Protocol Governance' }, { id: 'lumen-improvement-proposals', title: 'LIPs' }, { id: 'progressive-decentralization', title: 'Decentralization' } ]
     },
+    'whitepaper': { 
+        title: 'Whitepaper: The Data Layer for the AI Revolution', 
+        content: () => import('./content/protocol/whitepaper.js').then(m => m.renderWhitepaper()), 
+        toc: [ 
+            { id: 'abstract', title: 'Abstract' }, 
+            { id: 'chapter-1', title: 'Chapter 1: The Data Quality Crisis' }, 
+            { id: 'chapter-2', title: 'Chapter 2: The Lumen Solution' },
+            { id: 'chapter-3', title: 'Chapter 3: The Technology Stack' },
+            { id: 'chapter-4', title: 'Chapter 4: Business Model' },
+            { id: 'chapter-5', title: 'Chapter 5: The Vision' }
+        ]
+    },
     'roadmap': { 
         title: 'Roadmap & Vision', 
         content: () => import('./content/community/roadmap.js').then(m => m.renderRoadmap()), 
-        toc: [ { id: 'roadmap-and-vision', title: 'Roadmap & Vision' }, { id: 'phase-one', title: 'Phase 1: The Foundation (Now)' }, { id: 'phase-two', title: 'Phase 2: The Ecosystem (Future)' }, { id: 'the-lumen-agent', title: 'The Future: The Lumen Agent' } ]
+        toc: [ { id: 'roadmap-and-vision', title: 'Roadmap & Vision' }, { id: 'phase-one', title: 'Phase 1: Launch & Market Validation' }, { id: 'phase-two', title: 'Phase 2: Scale & Ecosystem Growth' }, { id: 'the-lumen-agent', title: 'Phase 3: The Lumen Agent' } ]
     },
     'faq': { 
         title: 'FAQ', 
@@ -123,8 +135,9 @@ function renderSidebarContent(activePage) {
                     ${navLink('contributing', 'Contributing Data')}
                     ${navLink('valuation', 'The Valuation Engine')}
                     ${navLink('security', 'Security')}
-                    ${navLink('tokenomics', 'The $LUM Token')}
+                    ${navLink('tokenomics', 'Protocol Economy')}
                     ${navLink('governance', 'Governance')}
+                    ${navLink('whitepaper', 'Whitepaper')}
                 </div>
             </div>
             <div>
@@ -200,17 +213,15 @@ function renderDocsNavigationButtons(pageKey) {
     const prevButton = prevKey ? `
         <a href="/docs/${prevKey}" class="group flex items-center gap-4 p-4 rounded-lg bg-surface border border-primary hover:border-subtle/80 transition-colors text-left">
             <svg class="w-6 h-6 shrink-0" fill="none" viewBox="0 0 24 24" stroke="url(#dashboard-icon-gradient)" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7" /></svg>
-            <div>
-                <p class="text-sm text-text-secondary">Previous</p>
-                <p class="font-semibold text-text-main">${docPages[prevKey].title}</p>
+            <div class="flex-grow min-w-0">
+                <p class="truncate text-sm"><span class="text-text-secondary">Previous:</span> <span class="font-semibold text-text-main">${docPages[prevKey].title}</span></p>
             </div>
         </a>` : '<div></div>';
 
     const nextButton = nextKey ? `
         <a href="/docs/${nextKey}" class="group flex items-center justify-end gap-4 p-4 rounded-lg bg-surface border border-primary hover:border-subtle/80 transition-colors text-right">
-             <div>
-                <p class="text-sm text-text-secondary">Next</p>
-                <p class="font-semibold text-text-main">${docPages[nextKey].title}</p>
+             <div class="flex-grow min-w-0">
+                <p class="truncate text-sm"><span class="text-text-secondary">Next:</span> <span class="font-semibold text-text-main">${docPages[nextKey].title}</span></p>
             </div>
             <svg class="w-6 h-6 shrink-0" fill="none" viewBox="0 0 24 24" stroke="url(#dashboard-icon-gradient)" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" /></svg>
         </a>` : '<div></div>';
