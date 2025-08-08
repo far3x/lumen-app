@@ -2,8 +2,8 @@ export const renderContent = () => `
     <h2>The Genesis Update: A New Vision, A New Partner & A Wave of Enhancements</h2>
     <p>This is a pivotal moment for Lumen. Today's update is more than just a set of new features; it represents a major leap forward in our mission to build the definitive data layer for the AI revolution. We are thrilled to announce a strategic partnership, release our official Whitepaper, and roll out a host of platform enhancements that refine our long-term vision.</p>
     
-    <h3>A Strategic Partnership with Believe</h3>
-    <p>To accelerate our launch and reach a global community of developers from day one, we are incredibly excited to announce our strategic partnership with <strong>Believe</strong>. This collaboration will amplify our reach, help bootstrap our foundational dataset with high-quality contributions, and validate our mission within the broader developer ecosystem. We are excited to build the future of AI data together.</p>
+    <h3>A Strategic Partnership with ***</h3>
+    <p>To accelerate our launch and reach a global community of developers from day one, we are incredibly excited to announce our strategic partnership with <strong>***</strong>. This collaboration will amplify our reach, help bootstrap our foundational dataset with high-quality contributions, and validate our mission within the broader developer ecosystem. We are excited to build the future of AI data together.</p>
 
     <h3>Our Vision, Refined: The Official Lumen Whitepaper</h3>
     <p>We've always been more than just a protocol. Today, we're making it official. We have published the first version of the <strong>Lumen Protocol Whitepaper</strong>, which is now available in our documentation.</p>
