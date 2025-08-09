@@ -44,6 +44,7 @@ prod.env
 /frontend/yarn-debug.log*
 /frontend/yarn-error.log*
 /frontend/pnpm-debug.log*
+/frontend/package-lock.json
 
 # --- IDE / Editor specific ---
 .idea/
