@@ -36,7 +36,7 @@ export const renderInstallation = () => `
             <div class="flex-grow text-center text-xs font-mono">bash</div>
         </div>
         <div class="code-block-content">
-            <p><span class="command">lum --version</span></p>
+            <p><span class="command">lum version</span></p>
             <p><span class="output">pylumen, version 1.0.0</span></p>
         </div>
     </div>
@@ -46,7 +46,7 @@ export const renderInstallation = () => `
     <p><strong>Error: <code>command not found: lum</code></strong></p>
     <p>This is the most frequent issue and it almost always means that the directory where pip installs command-line scripts is not in your system's PATH variable.</p>
     <ul>
-        <li><strong>The Quick Fix:</strong> Try running the command as a Python module: <code>python3 -m lum --version</code>. If this works, you can use <code>python3 -m lum</code> as a permanent alias for <code>lum</code>.</li>
+        <li><strong>The Quick Fix:</strong> Try running the command as a Python module: <code>python3 -m lum version</code>. If this works, you can use <code>python3 -m lum</code> as a permanent alias for <code>lum</code>.</li>
         <li><strong>The Permanent Fix (Recommended):</strong> You need to add Python's user script directory to your shell's PATH.
             <ul>
                 <li>On <strong>macOS</strong>, it's often <code>~/Library/Python/3.X/bin</code>. Add <code>export PATH="$HOME/Library/Python/3.X/bin:$PATH"</code> to your <code>~/.zshrc</code> or <code>~/.bash_profile</code>.</li>

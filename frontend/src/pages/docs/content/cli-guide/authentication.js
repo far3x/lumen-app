@@ -15,8 +15,8 @@ export const renderAuthentication = () => `
         </div>
         <div class="code-block-content">
             <p><span class="command">lum login</span></p>
-            <p class="mt-2"><span class="output">[Lumen] To link this device, please complete the following steps:</span></p>
-            <p><span class="output">1. Open your browser and go to: <strong class="text-accent-cyan">https://lumen.exchange/link</strong></span></p>
+            <p class="mt-2"><span class="output">To link this device, please complete the following steps:</span></p>
+            <p><span class="output">1. Open your browser and go to: <strong class="text-accent-cyan">https://lumen.onl/link</strong></span></p>
             <p><span class="output">2. Enter this one-time code: <strong class="text-accent-cyan">ABCD-EFGH</strong></span></p>
             <p><span class="output">Waiting for authorization...</span></p>
         </div>
@@ -24,7 +24,7 @@ export const renderAuthentication = () => `
     <p>The CLI generates a unique, single-use code and begins polling the Lumen servers for authorization. This code is valid for 10 minutes.</p>
 
     <h3>Step 2: Authorize in Your Browser</h3>
-    <p>Navigate to the provided URL (<code>lumen.exchange/link</code>) in your web browser. You will be prompted to log into your Lumen account if you aren't already. Then, you'll see a screen to enter the one-time code from your terminal.</p>
+    <p>Navigate to the provided URL (<code>lumen.onl/link</code>) in your web browser. You will be prompted to log into your Lumen account if you aren't already. Then, you'll see a screen to enter the one-time code from your terminal.</p>
     <p>After entering the code, you will be asked to approve the new device (e.g., "Lumen CLI on MacBook Pro"). By approving, you are explicitly authorizing this specific CLI instance to submit contributions on your behalf.</p>
 
     <h3>Step 3: Confirmation and Token Issuance</h3>
@@ -35,7 +35,7 @@ export const renderAuthentication = () => `
             <div class="flex-grow text-center text-xs font-mono">bash</div>
         </div>
         <div class="code-block-content">
-             <p><span class="output text-green-400">✔ Success! Device authorized. You can now use 'lum contribute'.</span></p>
+             <p><span class="output text-green-400">✅ Success! Device authorized. You can now use 'lum contribute'.</span></p>
         </div>
     </div>
     <p>The CLI securely stores the issued Personal Access Token (PAT) in its local configuration. This token will be used for all future contributions from this device, until you explicitly log out.</p>

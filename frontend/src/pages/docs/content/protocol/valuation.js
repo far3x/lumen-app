@@ -1,50 +1,56 @@
 export const renderValuation = () => `
-    <h1 id="valuation-engine">The Valuation Engine: How Your Code Gets Priced</h1>
-    <p class="lead text-xl text-text-secondary">At the heart of Lumen is a sophisticated, hybrid valuation engine that appraises the objective value of your code as training data. This multi-stage process goes far beyond simple line counting to ensure that high-quality, unique, and complex contributions receive the highest rewards.</p>
+    <h1 id="valuation-engine">The Valuation Engine: How Your Code is Priced</h1>
+    <p class="lead text-xl text-text-secondary">At the heart of Lumen is a sophisticated, hybrid valuation engine that appraises the objective value of your code as a training asset. This multi-stage process goes far beyond simple line-counting to ensure that high-quality, unique, and complex contributions receive the highest rewards.</p>
 
-    <blockquote>This engine is the core of our protocol's intelligence, ensuring a fair and meritocratic distribution of rewards. Your reward is not arbitrary; it's the output of a rigorous analysis.</blockquote>
-    
+    <blockquote>
+        <strong>Our Commitment to Fair Value</strong>
+        <br>
+        This engine is the core of our protocol's intelligence. Your reward is not arbitrary; it's the output of a rigorous, multi-faceted analysis designed to be fair, transparent in its principles, and meritocratic in its results.
+    </blockquote>
+
     <h2 id="phase-one-uniqueness">Phase 1: The Uniqueness & Novelty Engine</h2>
-    <p>This is the most critical phase. The protocol's primary goal is to acquire novel data that isn't already available. We use advanced machine learning techniques to achieve this.</p>
+    <p>The protocol's primary goal is to acquire novel data that AI models have not seen before. This is the most critical phase, where we determine if your contribution adds new, valuable information to the network.</p>
     <ol>
-        <li><strong>Semantic Embedding:</strong> Your entire codebase is converted into a high-dimensional vector representation using a sentence-transformer model. This "embedding" captures the semantic meaning and logical intent of your code, not just its keywords.</li>
-        <li><strong>Cosine Similarity Search:</strong> This new embedding is then compared against a vector database containing the embeddings of all previously contributed code on the network. We calculate the cosine similarity to find the most similar existing contribution.</li>
+        <li><strong>Semantic Fingerprinting:</strong> Your entire codebase is processed through an advanced semantic analysis model. This creates a high-dimensional vector, a unique "fingerprint", that captures the logical intent and meaning of your code, not just its keywords.</li>
+        <li><strong>Proprietary Uniqueness Search:</strong> This fingerprint is then cross-referenced against our high-performance vector index, which contains the fingerprints of all previously contributed code on the network.</li>
         <li><strong>Decision Logic:</strong>
             <ul>
                 <li>If similarity to another user's code is extremely high, the contribution is flagged as potential plagiarism and rejected.</li>
-                <li>If similarity to one of your own previous submissions is very high, it's treated as an <strong>update</strong>. The valuation will be based on the "diff", the new code you've added. You cannot earn rewards for submitting the same code twice.</li>
+                <li>If similarity to one of your own previous submissions is very high, it's treated as an <strong>update</strong>. The valuation will be based on the "diff", the new code you've added. You cannot earn rewards for submitting the same unchanged code.</li>
                 <li>If similarity is low, the contribution is considered novel and proceeds to the next phase with a high uniqueness score.</li>
             </ul>
         </li>
     </ol>
+    
+    <div class="my-8 p-6 bg-surface border border-primary rounded-lg">
+        <h3 class="font-bold text-lg text-text-main mb-2">Our Key Differentiator: Holistic Context Analysis</h3>
+        <p class="text-text-secondary">Unlike systems that rely on fragmented data chunks or retrieval-augmented generation (RAG), our AI review engine is provided with the <strong>entire context</strong> of your contribution. This allows for a much deeper and more accurate understanding of architectural quality, project clarity, and overall code excellence, resulting in a valuation that is fundamentally fairer and more precise.</p>
+    </div>
 
     <h2 id="phase-two-quantitative-analysis">Phase 2: Quantitative Analysis (Code Metrics)</h2>
-    <p>Once uniqueness is established, we perform a deep, language-agnostic analysis of the code's structure and content using the powerful <code>scc</code> (Sloc, Cloc and Code) tool and other metrics.</p>
+    <p>Once uniqueness is established, we perform a deep, language-agnostic analysis of the code's structure and content to establish an objective baseline of its substance.</p>
     <ul>
-        <li><strong>Logical Lines of Code (LLOC):</strong> We measure the number of actual lines of executable code, ignoring whitespace and comments.</li>
-        <li><strong>Token Count:</strong> We use a high-performance tokenizer (<code>tiktoken</code>) to get an accurate count of the tokens in your submission, which serves as a baseline for its size.</li>
-        <li><strong>Cyclomatic Complexity:</strong> We measure the structural complexity of your code. A project with intricate functions, nested loops, and conditional logic will have a higher complexity score than simple, linear scripts.</li>
-        <li><strong>Language Breakdown:</strong> We identify the languages used and their prevalence, which can factor into rarity multipliers.</li>
-        <li><strong>Compression Ratio:</strong> As a guardrail against low-effort or "garbage" data, we measure the code's entropy via zlib compression. Highly repetitive code compresses very well and is assigned a low value.</li>
+        <li><strong>Logical Lines of Code (LLOC):</strong> We measure the actual lines of executable code, ignoring whitespace and comments, to gauge the project's density.</li>
+        <li><strong>Token Count:</strong> We get an accurate count of the tokens in your submission, which serves as a baseline for its size and complexity.</li>
+        <li><strong>Structural Complexity:</strong> We measure the architectural complexity of your code. A project with intricate functions and logic will have a higher complexity score than simple, linear scripts.</li>
+        <li><strong>Code Entropy:</strong> As a guardrail against low-effort data, we measure the code's entropy. Highly repetitive, boilerplate code is assigned a lower value.</li>
     </ul>
 
     <h2 id="phase-three-qualitative-analysis">Phase 3: Qualitative Analysis (AI Review)</h2>
-    <p>Metrics alone don't tell the whole story. To understand the <em>quality</em> of the code's design, we use a fine-tuned Large Language Model as an expert reviewer. The LLM is given the code and the metrics from Phase 2, and is tasked with providing scores on a 0.0 to 1.0 scale for:</p>
+    <p>Metrics alone don't tell the whole story. To understand the <em>quality</em> of the code's design, we leverage a fine-tuned Large Language Model as an expert reviewer. The LLM assesses the code on three key qualitative axes:</p>
     <ul>
-        <li><strong>Project Clarity Score:</strong> How original and non-generic is the project's purpose? A simple to-do app is rated low, while a specialized, domain-specific tool is rated high.</li>
-        <li><strong>Architectural Quality Score:</strong> How well is the code structured? Does it follow good design patterns? A single monolithic file is rated low, while a well-organized, modular project is rated high.</li>
-        <li><strong>Code Quality Score:</strong> How clean is the code itself? This assesses variable names, readability, and potential for bugs. Clean, maintainable code is rated high.</li>
+        <li><strong>Project Clarity:</strong> How original and non-generic is the project's purpose? A unique, domain-specific tool is rated higher than a common tutorial project.</li>
+        <li><strong>Architectural Quality:</strong> How well is the code structured? A well-organized, modular project is rated higher than a single monolithic file.</li>
+        <li><strong>Code Quality:</strong> How clean and maintainable is the code itself? This assesses readability, variable names, and best practices.</li>
     </ul>
-    <p>The AI's summary and scores are passed to the final reward calculation, providing a crucial qualitative dimension to the valuation.</p>
-    
+
     <h2 id="phase-four-reward-calculation">Phase 4: The Final Reward Calculation</h2>
-    <p>The final reward is a synthesis of all previous stages, combined with network-wide factors:</p>
-    <p><code>Final Reward = (Base Value * Quality Multiplier * Rarity Multiplier) * Network Growth Multiplier</code></p>
+    <p>The final reward is a sophisticated synthesis of all previous stages, combined with network-wide factors. Instead of a rigid formula, the reward is determined by a model that weighs these key inputs:</p>
     <ul>
-        <li><strong>Base Value:</strong> Derived primarily from the token count of the novel code contributed.</li>
-        <li><strong>Quality Multiplier:</strong> A weighted average of the AI's qualitative scores (Clarity, Architecture, Quality).</li>
-        <li><strong>Rarity Multiplier:</strong> If your contribution's complexity is statistically rare compared to the network average, you receive a bonus multiplier.</li>
-        <li><strong>Network Growth Multiplier:</strong> To incentivize early adoption, contributions made when the network is young receive a significant bonus multiplier. This multiplier decreases as the network matures.</li>
+        <li><strong>The Base Value:</strong> Derived from the token count of the novel code contributed.</li>
+        <li><strong>The Quality Multiplier:</strong> A weighted score from the AI's qualitative analysis (Clarity, Architecture, Quality).</li>
+        <li><strong>The Rarity Multiplier:</strong> A bonus applied if your contribution's complexity is statistically rare compared to the network average.</li>
+        <li><strong>The Network Growth Multiplier:</strong> A significant bonus for early contributors that decreases as the network matures, ensuring our foundational community is rewarded for their vision.</li>
     </ul>
-    <p>This comprehensive process ensures that Lumen rewards are not just a measure of quantity, but a true reflection of the quality, novelty, and complexity of the data you provide to the network.</p>
+    <p>This comprehensive process ensures that Lumen rewards are not just a measure of quantity, but a true reflection of the quality, novelty, and engineering skill embodied in the data you provide to the network.</p>
 `;
