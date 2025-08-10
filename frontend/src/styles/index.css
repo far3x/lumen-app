@@ -228,10 +228,6 @@
     @apply border-solid border-white border-r-[2px] border-b-[2px];
     transform: translate(-50%, -60%) rotate(45deg);
   }
-
-  .doc-image-showcase {
-    @apply my-8 overflow-hidden rounded-xl border border-primary shadow-2xl shadow-black/50;
-  }
 }
 
 @font-face {
