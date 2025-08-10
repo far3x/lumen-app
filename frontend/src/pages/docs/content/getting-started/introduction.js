@@ -10,7 +10,12 @@ export const renderIntroduction = () => `
     <p>The new reserve of high-quality data is sitting on your local machine. Every developer's codebase is a perfect blueprint of human reasoning: pure structure, intent, and problem-solving. This is about <strong>signal versus noise</strong>. The most valuable contributions are thoughtfully constructed. A unique algorithm, a well-designed personal project, or a battle-tested microservice, these are the assets that contain true intellectual value.</p>
     <p>This is the exact data needed to teach an AI how to <em>think</em>, not just mimic. Until now, this data has been inaccessible and fundamentally undervalued. We built Lumen to fix this.</p>
 
-    <h2 id="lumen-the-strategic-solution">Lumen: The Strategic Solution</h2>
+    <h2 id="lumen-the-strategic-solution">The Strategic Solution: Lumen</h2>
+
+    <div class="my-8">
+        <img src="/docs/lumen-banner.png" alt="Lumen Protocol Banner" class="w-full rounded-xl ring-1 ring-white/10 shadow-2xl shadow-black/50">
+    </div>
+
     <p>Lumen is not another marketplace; we are core infrastructure for the future of AI, built on three foundational pillars that you can verify and use today.</p>
     <ul>
         <li>
