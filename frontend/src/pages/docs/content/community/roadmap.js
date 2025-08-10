@@ -2,10 +2,11 @@ export const renderRoadmap = () => `
     <h1 id="roadmap-and-vision">Roadmap & Vision</h1>
     <p class="lead text-xl text-text-secondary">Our vision is to build the definitive data layer for the next generation of AI. This document outlines our clear, phased strategy to evolve from a foundational data network into an intelligent, indispensable development ecosystem for developers and AI companies alike.</p>
     
-    <div class="mt-8 space-y-12 relative border-l-2 border-primary pl-8">
-        <!-- Phase 1 -->
-        <div class="relative">
-            <div class="absolute -left-10 top-1 w-4 h-4 rounded-full bg-accent-purple border-2 border-background ring-4 ring-accent-purple/30 animate-pulse"></div>
+    <div class="mt-12 space-y-16">
+        <div class="relative pl-12">
+            <div class="absolute left-4 top-1 h-full w-0.5 bg-primary -translate-x-1/2" aria-hidden="true"></div>
+            <div class="absolute left-4 top-1 w-4 h-4 rounded-full bg-accent-purple border-2 border-background ring-4 ring-accent-purple/30 animate-pulse -translate-x-1/2"></div>
+            
             <p class="text-sm font-bold text-accent-purple">PHASE 1: LAUNCH & MARKET VALIDATION (CURRENT FOCUS)</p>
             <h3 id="phase-one" class="text-xl font-bold mt-1">Bootstrap the Data Economy & Prove the Model</h3>
             <p class="text-text-secondary mt-1">Focus: Execute a rapid launch, validate both the supply (developer contributions) and demand (AI company interest) sides of the marketplace, and secure pre-seed funding to accelerate growth.</p>
@@ -20,9 +21,11 @@ export const renderRoadmap = () => `
                 <li class="flex items-start gap-3"><span>▶️</span><span class="text-yellow-400"><strong>Secure First Data Partnerships:</strong> Convert our pipeline of interested AI companies into our first signed Letters of Intent (LOIs), providing concrete validation of market demand for our proprietary data.</span></li>
             </ul>
         </div>
-        <!-- Phase 2 -->
-        <div class="relative">
-            <div class="absolute -left-10 top-1 w-4 h-4 rounded-full bg-accent-pink border-2 border-background"></div>
+        
+        <div class="relative pl-12">
+            <div class="absolute left-4 top-1 h-full w-0.5 bg-primary -translate-x-1/2" aria-hidden="true"></div>
+            <div class="absolute left-4 top-1 w-4 h-4 rounded-full bg-accent-pink border-2 border-background ring-4 ring-accent-pink/30 -translate-x-1/2"></div>
+
             <p class="text-sm font-bold text-accent-pink">PHASE 2: SCALE & ECOSYSTEM GROWTH (POST-FUNDING)</p>
             <h3 id="phase-two" class="text-xl font-bold mt-1">Activate the Marketplace & Expand the Toolchain</h3>
             <p class="text-text-secondary mt-1">Focus: Following a successful funding round, aggressively scale the team, launch the commercial data marketplace, and deeply integrate Lumen into the developer workflow.</p>
@@ -34,9 +37,10 @@ export const renderRoadmap = () => `
                 <li class="flex items-start gap-3"><span class="text-subtle">●</span><span><strong>Governance V1:</strong> Launch the Lumen Governance Forum and introduce the Lumen Improvement Proposal (LIP) framework, empowering the community to shape the future of the protocol.</span></li>
             </ul>
         </div>
-        <!-- Phase 3 -->
-        <div class="relative">
-            <div class="absolute -left-10 top-1 w-4 h-4 rounded-full bg-accent-cyan border-2 border-background"></div>
+        
+        <div class="relative pl-12">
+            <div class="absolute left-4 top-1 w-4 h-4 rounded-full bg-accent-cyan border-2 border-background ring-4 ring-accent-cyan/30 -translate-x-1/2"></div>
+            
             <p class="text-sm font-bold text-accent-cyan">PHASE 3: INTELLIGENCE & DECENTRALIZATION (LONG-TERM VISION)</p>
             <h3 id="the-lumen-agent" class="text-xl font-bold mt-1">The Lumen Agent: An Autonomous Software Engineer</h3>
             <p class="text-text-secondary mt-1">Focus: Leverage our unique dataset to build a category-defining AI tool that goes beyond code completion, while progressively handing over protocol control to the community.</p>

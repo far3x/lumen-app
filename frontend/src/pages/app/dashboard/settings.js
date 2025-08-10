@@ -495,7 +495,7 @@ async function handleDeleteAccount(user) {
                 <li>Your email, display name, and social account links will be permanently deleted.</li>
                 <li>Your account balance and rewards will be forfeited.</li>
                 <li>All login sessions and access tokens will be invalidated.</li>
-                <li>Your past contributions will be retained but fully dissociated from you. To request deletion of contribution data, you must contact <a href="mailto:support@lumen.exchange" class="text-accent-cyan hover:underline">support@lumen.exchange</a>.</li>
+                <li>Your past contributions will be retained but fully dissociated from you. To request deletion of contribution data, you must contact <a href="mailto:contact@lumen.onl" class="text-accent-cyan hover:underline">contact@lumen.onl</a>.</li>
             </ul>
             <div id="delete-account-message" class="hidden text-sm p-3 rounded-md bg-red-900/50 text-red-300 my-4 text-center"></div>
     `;

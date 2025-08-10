@@ -13,9 +13,9 @@ export const renderWhyLumen = () => `
     <h2 id="for-data-consumers">For Data Consumers & Investors: The Proprietary Data Advantage</h2>
     <p>Lumen is the definitive data pipeline for AI companies and researchers, providing a strategic advantage in the race for superior model performance.</p>
     <ul>
-        <li><strong>Proprietary Data Source:</strong> Lumen provides access to a growing dataset of high-quality source code, data that is not available on the public internet. This is the key to training models that can outperform those trained on generic, scraped data.</li>
+        <li><strong>A Truly Proprietary Data Source:</strong> Lumen provides access to a growing dataset of high-quality source code—data that is not available on the public internet. This is the key to training models that can outperform those trained on generic, scraped data.</li>
         <li><strong>Human-Generated Ground Truth:</strong> Our dataset breaks the cycle of "AI eating itself." Every line of code is verified human-written, providing the high-signal ground truth needed to teach models genuine reasoning instead of memorization.</li>
-        <li><strong>Precision Filtering:</strong> Our data is not a monolith. Data consumers will have API access to filter datasets by language, our proprietary quality score, and AI-generated summaries with keywords, allowing for the creation of perfectly tailored, high-value training sets.</li>
+        <li><strong>Precision Filtering:</strong> Our data is not a monolith. Data consumers will have API access to filter datasets by language, our proprietary quality score, and AI-generated summaries, allowing for the creation of perfectly tailored, high-value training sets.</li>
         <li><strong>Ethical & Legally Sound:</strong> All data is ethically sourced with explicit consent from contributors via our Contributor License Agreement, mitigating the significant copyright and privacy risks associated with web scraping.</li>
     </ul>
 `;

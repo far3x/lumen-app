@@ -37,18 +37,13 @@ IF FUNDING - for initial reward 500 users, then 2k... etc etc, so after contribu
 FIXES / THINGS TO ADD :
 easy :
 - make algo give accurate rewards, scale with business model per tokens, give 20% to user, take 80% for ONE sell (meaning we can sell their code MULTIPLE times, unless contract that makes us sell code for higher price but makes it private)
-- clean terminal images on docs for terminal usage at any point where the terminal is involved
-- --version flag, shows "pylumen, version 1.0.0"
 - push to prod on pypi when done before launch
 - change reverse proxy to return 404 / error when bots scrape the website (can change robots.txt ?)
 - lumen ssr (server side rendering) plugin for vite js, so we get good seo on google and not shit one like it is now, do robots.txt
 
 medium :
-- add subtle animations on clicks / hover, where the user interacts the most (landing page, saas page and dashboard, all sections, should feel like alive)
-- intuitive installation page, goes steps through steps with even debug, for example -> install lumen client, u click next it says do this, do that... etc till you arrive to your first contribution (with videos or potential animations of cmd typing the commands... etc), choice of the os, debug... etc, in one single motion
 - allow 3 contributions a day, find a way to not limit these 3 if its failed contributions (like if ai gives 0 or idk)
 - fix gitignore not reading well (backend\lib -> removing anything that ends in \lib, for example frontend\lib...)
-- readme update, add image with logo, add a small icon with live users (total users that are on lumen basically, like the one with number of cli downloads on pypi), keep the existing readme and adapt it with whats new with the website but keep the client part mainly on github, dont talk about solana or talk less overall, we want devs to come not web3 gamblers so we need to do a rly good impression online
 - move lumen.onl/docs to docs.lumen.onl and this would show docs.lumen.onl/installation for example instead of /docs/installation
 
 hard :

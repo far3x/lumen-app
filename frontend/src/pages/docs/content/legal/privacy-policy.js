@@ -25,19 +25,19 @@ export const renderPrivacyPolicy = () => `
     <div class="my-8 p-6 bg-surface border border-primary rounded-lg">
         <h3 class="font-bold text-lg text-text-main mb-4">Table of Contents</h3>
         <ol class="list-decimal list-inside space-y-2 text-accent-cyan">
-            <li><a href="#what-info" class="hover:underline">1. What Information Do We Collect?</a></li>
-            <li><a href="#how-info" class="hover:underline">2. How Do We Process Your Information?</a></li>
-            <li><a href="#legal-bases" class="hover:underline">3. What Legal Bases Do We Rely On to Process Your Information?</a></li>
-            <li><a href="#share-info" class="hover:underline">4. When and With Whom Do We Share Your Personal Information?</a></li>
-            <li><a href="#cookies" class="hover:underline">5. Do We Use Cookies and Other Tracking Technologies?</a></li>
-            <li><a href="#keep-info" class="hover:underline">6. How Long Do We Keep Your Information?</a></li>
-            <li><a href="#safe-info" class="hover:underline">7. How Do We Keep Your Information Safe?</a></li>
-            <li><a href="#minors-info" class="hover:underline">8. Do We Collect Information From Minors?</a></li>
-            <li><a href="#rights-info" class="hover:underline">9. What Are Your Privacy Rights?</a></li>
-            <li><a href="#dnt" class="hover:underline">10. Controls for Do-Not-Track Features</a></li>
-            <li><a href="#california-rights" class="hover:underline">11. Do California Residents Have Specific Privacy Rights?</a></li>
-            <li><a href="#updates-info" class="hover:underline">12. Do We Make Updates to This Notice?</a></li>
-            <li><a href="#contact-info" class="hover:underline">13. How Can You Contact Us About This Notice?</a></li>
+            <li><a href="#what-info" class="hover:underline">What Information Do We Collect?</a></li>
+            <li><a href="#how-info" class="hover:underline">How Do We Process Your Information?</a></li>
+            <li><a href="#legal-bases" class="hover:underline">What Legal Bases Do We Rely On to Process Your Information?</a></li>
+            <li><a href="#share-info" class="hover:underline">When and With Whom Do We Share Your Personal Information?</a></li>
+            <li><a href="#cookies" class="hover:underline">Do We Use Cookies and Other Tracking Technologies?</a></li>
+            <li><a href="#keep-info" class="hover:underline">How Long Do We Keep Your Information?</a></li>
+            <li><a href="#safe-info" class="hover:underline">How Do We Keep Your Information Safe?</a></li>
+            <li><a href="#minors-info" class="hover:underline">Do We Collect Information From Minors?</a></li>
+            <li><a href="#rights-info" class="hover:underline">What Are Your Privacy Rights?</a></li>
+            <li><a href="#dnt" class="hover:underline">Controls for Do-Not-Track Features</a></li>
+            <li><a href="#california-rights" class="hover:underline">Do California Residents Have Specific Privacy Rights?</a></li>
+            <li><a href="#updates-info" class="hover:underline">Do We Make Updates to This Notice?</a></li>
+            <li><a href="#contact-info" class="hover:underline">How Can You Contact Us About This Notice?</a></li>
         </ol>
     </div>
 
