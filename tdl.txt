@@ -40,8 +40,6 @@ easy :
 - push to prod on pypi when done before launch
 - change reverse proxy to return 404 / error when bots scrape the website (can change robots.txt ?)
 - lumen ssr (server side rendering) plugin for vite js, so we get good seo on google and not shit one like it is now, do robots.txt
-- make landing page better on mobile, smaller stuff overall and dont feel condensed like it is
-- rework landing page part 2 (issue / solution) rly bad design overall, for a first scroll content it feels badly designed and doesnt fit with the website aesthethic overall
 - complete default config lumen client
 
 medium :
