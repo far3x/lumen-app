@@ -8,7 +8,7 @@ export function renderLandingPage() {
         }
     };
 
-    const logos = ['doppler.png', 'hugging-face.png', 'fastapi.png', 'pytorch.png', 'javascript.png', 'redis.png', 'docker.png', 'vite.png', 'solana.png', 'python.png', 'golang.png', 'nodejs.png', 'nginx.png', 'postgresql.png', 'gemini.png', 'aws.png', 'gcp.png'];
+    const logos = ['doppler.png', 'hugging-face.png', 'fastapi.png', 'pytorch.png', 'javascript.png', 'redis.png', 'docker.png', 'vite.png', 'solana.png', 'python.png', 'golang.png', 'nginx.png', 'postgresql.png', 'gemini.png', 'aws.png', 'gcp.png'];
     
     const logoItems = logos.map(logo => `
         <li class="flex-shrink-0">
@@ -35,8 +35,8 @@ export function renderLandingPage() {
     <section class="py-20 md:py-32 bg-abyss-dark">
         <div class="container mx-auto px-8 text-center max-w-3xl">
             <div class="scroll-animate animate-zoom-in">
-                <h2 class="text-4xl font-bold text-text-main">Your Code is a <span class="trapped-text">Trapped Asset</span></h2>
-                <p class="mt-4 text-lg text-text-secondary">
+                <h2 class="text-3xl md:text-4xl font-bold text-text-main">Your Code is a <span class="trapped-text">Trapped Asset</span></h2>
+                <p class="mt-4 text-base sm:text-lg text-text-secondary">
                     Billions of lines of high-signal, human-written code are locked away in private repositories. This is a vast, untapped reservoir of value. Until now.
                 </p>
                 <div class="mt-10 grid sm:grid-cols-3 gap-8 text-left">
@@ -69,8 +69,8 @@ export function renderLandingPage() {
     <section class="pb-20 md:pb-32 bg-abyss-dark">
         <div class="container mx-auto px-8 text-center max-w-3xl">
             <div class="scroll-animate animate-zoom-in">
-                <h2 class="text-4xl font-bold gradient-text">Lumen Sets It Free.</h2>
-                <p class="mt-4 text-lg text-text-secondary">
+                <h2 class="text-3xl md:text-4xl font-bold gradient-text">Lumen Sets It Free.</h2>
+                <p class="mt-4 text-base sm:text-lg text-text-secondary">
                     We provide the bridge between your private work and the new data economy, transforming your code into a secure, high-value, and reward-generating asset.
                 </p>
                 <div class="mt-10 grid sm:grid-cols-3 gap-8 text-left">
@@ -136,14 +136,18 @@ export function renderLandingPage() {
     <section class="bg-abyss-dark pt-0 pb-20 md:pb-32">
         <div class="container mx-auto px-6">
             <div class="max-w-5xl mx-auto scroll-animate animate-zoom-in">
-                <div class="interactive-card bg-surface rounded-2xl p-8 md:p-12 grid md:grid-cols-2 gap-8 md:gap-12 items-center border border-primary">
-                    <div class="text-center md:text-left">
-                        <h3 class="text-3xl font-bold">State-of-the-Art Valuation</h3>
-                        <p class="text-text-secondary mt-4">Our valuation engine leverages Google's Gemini models for fair and accurate rewards based on code quality, complexity, and architectural design.</p>
-                        <a href="/docs/valuation" class="inline-block mt-6 font-semibold text-accent-cyan hover:underline">Learn about our Valuation Engine →</a>
-                    </div>
-                    <div class="flex justify-center items-center bg-abyss-dark rounded-xl overflow-hidden h-40">
-                        <img src="/gemini.png" alt="Google Gemini Logo" class="w-full h-auto object-contain transform scale-125" />
+                <div class="gemini-card-container relative group">
+                    <div class="bg-surface rounded-2xl p-8 md:p-12 grid md:grid-cols-2 gap-8 md:gap-12 items-center border border-primary relative z-10 overflow-hidden transition-transform duration-300 group-hover:scale-[1.02]">
+                        <div class="text-center md:text-left">
+                            <span class="text-sm font-bold text-subtle uppercase tracking-wider">Powered By</span>
+                            <h3 class="text-3xl font-bold gradient-text">State-of-the-Art Valuation</h3>
+                            <p class="text-text-secondary mt-4">Our valuation engine leverages Google's Gemini models for fair and accurate rewards based on code quality, complexity, and architectural design.</p>
+                            <a href="/docs/valuation" class="inline-block mt-6 font-semibold text-accent-cyan hover:underline">Learn about our Valuation Engine →</a>
+                        </div>
+                        <div class="relative flex justify-center items-center bg-abyss-dark rounded-xl overflow-hidden h-40">
+                            <div class="gemini-logo-bg absolute inset-0 z-0"></div>
+                            <img src="/gemini.png" alt="Google Gemini Logo" class="relative z-10 w-full h-auto object-contain transform scale-125" />
+                        </div>
                     </div>
                 </div>
             </div>
@@ -158,8 +162,8 @@ export function renderLandingPage() {
                 <img src="/dashboard.png" alt="Lumen Dashboard" class="w-full md:rounded-r-2xl shadow-2xl shadow-black/30 border-y-2 border-r-2 border-primary" />
             </div>
             <div class="md:col-span-2 scroll-animate animate-fade-in-right px-8" style="transition-delay: 150ms;">
-                <h2 class="text-3xl font-bold">Your Mission Control</h2>
-                <p class="mt-4 text-text-secondary text-lg">The dashboard provides a complete overview of your journey with Lumen. Track your lifetime earnings, global rank, and total contributions at a glance.</p>
+                <h2 class="text-2xl md:text-3xl font-bold">Your Mission Control</h2>
+                <p class="mt-4 text-text-secondary text-base md:text-lg">The dashboard provides a complete overview of your journey with Lumen. Track your lifetime earnings, global rank, and total contributions at a glance.</p>
             </div>
         </div>
         <div class="grid md:grid-cols-5 gap-8 md:gap-12 items-center">
@@ -167,8 +171,8 @@ export function renderLandingPage() {
                 <img src="/dashboard2.png" alt="Contribution Detail Modal" class="w-full md:rounded-l-2xl shadow-2xl shadow-black/30 border-y-2 border-l-2 border-primary" />
             </div>
             <div class="md:col-span-2 md:order-1 scroll-animate animate-fade-in-left px-8" style="transition-delay: 150ms;">
-                <h2 class="text-3xl font-bold">Transparent Valuation</h2>
-                <p class="mt-4 text-text-secondary text-lg">We believe in radical transparency. Drill down into any contribution to see exactly how its value was calculated by our hybrid AI and metric-based engine.</p>
+                <h2 class="text-2xl md:text-3xl font-bold">Transparent Valuation</h2>
+                <p class="mt-4 text-text-secondary text-base md:text-lg">We believe in radical transparency. Drill down into any contribution to see exactly how its value was calculated by our hybrid AI and metric-based engine.</p>
             </div>
         </div>
     </section>
@@ -178,8 +182,8 @@ export function renderLandingPage() {
     <section class="pt-20 pb-20 bg-abyss-dark scroll-animate animate-reveal-in" style="transition-delay: 300ms;">
         <div class="container mx-auto px-6 max-w-4xl text-center">
             <h2 class="text-3xl md:text-4xl font-bold">Become a <span class="gradient-text">Genesis Contributor</span></h2>
-            <p class="mt-4 max-w-2xl mx-auto text-lg leading-relaxed text-text-secondary">The Lumen beta is live. Be one of the first 500 to contribute successfully and get an exclusive reward.</p>
-            <p class="mt-6 text-5xl font-bold text-white">1,000 <span class="gradient-text">LUM</span> Bonus</p>
+            <p class="mt-4 max-w-2xl mx-auto text-base sm:text-lg leading-relaxed text-text-secondary">The Lumen beta is live. Be one of the first 500 to contribute successfully and get an exclusive reward.</p>
+            <p class="mt-6 text-4xl sm:text-5xl font-bold text-white">1,000 <span class="gradient-text">LUM</span> Bonus</p>
             <p class="text-sm text-text-secondary mt-1">Awarded on top of your standard contribution reward.</p>
             <div class="mt-8">
                 <a href="/signup" class="animate-claim-spot-button px-8 py-3 font-bold bg-gradient-to-r from-accent-purple to-accent-pink text-white rounded-lg">
@@ -238,17 +242,17 @@ export function renderLandingPage() {
             ></video>
             <div class="absolute top-0 left-0 w-full h-full bg-black/50 -z-10"></div>
             <div class="container mx-auto px-6 relative z-10">
-                <h1 class="text-4xl md:text-6xl lg:text-7xl font-bold tracking-tighter scroll-animate animate-fade-in-up" style="transition-delay: 100ms;">
+                <h1 class="text-3xl sm:text-4xl md:text-6xl lg:text-7xl font-bold tracking-tighter scroll-animate animate-fade-in-up" style="transition-delay: 100ms;">
                     Monetize Your Code.
                     <br>
                     <span class="pulse-text block">Power the Future of AI.</span>
                 </h1>
-                <p class="max-w-3xl mx-auto mt-6 text-lg md:text-xl text-text-secondary scroll-animate animate-fade-in-up" style="transition-delay: 300ms;">
+                <p class="max-w-3xl mx-auto mt-6 text-base sm:text-lg md:text-xl text-text-secondary scroll-animate animate-fade-in-up" style="transition-delay: 300ms;">
                     The code on your local machine is one of the most valuable datasets on the planet. Stop letting it sit there. Start earning what it's worth.
                 </p>
-                <div class="mt-10 flex justify-center items-center gap-4 scroll-animate animate-fade-in-up" style="transition-delay: 500ms;">
-                    <a href="/signup" class="px-8 py-3 font-bold bg-gradient-to-r from-accent-purple to-accent-pink text-white rounded-lg transition-all duration-300 hover:scale-105 hover:shadow-lg hover:shadow-accent-purple/30 hover:brightness-110">Start Earning Now</a>
-                    <a href="/docs/introduction" class="px-8 py-3 font-bold bg-primary text-text-main rounded-lg transition-all duration-300 hover:bg-subtle/80 hover:-translate-y-1">Read the Docs</a>
+                <div class="mt-10 flex flex-col sm:flex-row justify-center items-center gap-4 scroll-animate animate-fade-in-up" style="transition-delay: 500ms;">
+                    <a href="/signup" class="w-full sm:w-auto px-6 sm:px-8 py-3 font-bold bg-gradient-to-r from-accent-purple to-accent-pink text-white rounded-lg transition-all duration-300 hover:scale-105 hover:shadow-lg hover:shadow-accent-purple/30 hover:brightness-110">Start Earning Now</a>
+                    <a href="/docs/introduction" class="w-full sm:w-auto px-6 sm:px-8 py-3 font-bold bg-primary text-text-main rounded-lg transition-all duration-300 hover:bg-subtle/80 hover:-translate-y-1">Read the Docs</a>
                 </div>
             </div>
         </section>
