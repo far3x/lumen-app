@@ -17,12 +17,12 @@ export function renderLandingPage() {
     `).join('');
 
     const techLogosSection = `
-    <div class="py-16 bg-abyss-dark">
+    <div class="py-20 md:py-24 bg-abyss-dark">
         <div class="container mx-auto px-8">
-            <p class="text-center text-sm font-bold text-subtle uppercase tracking-widest">
+            <h2 class="text-center text-2xl md:text-3xl font-bold text-text-main tracking-tight">
                 Built on a Foundation of World-Class Technology
-            </p>
-            <div class="mt-12 w-full overflow-hidden [mask-image:_linear-gradient(to_right,transparent_0,_black_128px,_black_calc(100%-200px),transparent_100%)]">
+            </h2>
+            <div class="mt-16 w-full overflow-hidden [mask-image:_linear-gradient(to_right,transparent_0,_black_128px,_black_calc(100%-200px),transparent_100%)]">
                 <ul id="logo-carousel" class="flex w-max">
                     ${logoItems}
                 </ul>
@@ -33,32 +33,32 @@ export function renderLandingPage() {
 
     const problemPromiseSection = `
     <section class="py-20 md:py-32 bg-abyss-dark">
-        <div class="container mx-auto px-8 text-center max-w-3xl">
+        <div class="container mx-auto px-8 text-center max-w-4xl">
             <div class="scroll-animate animate-zoom-in">
-                <h2 class="text-3xl md:text-4xl font-bold text-text-main">Your Code is a <span class="trapped-text">Trapped Asset</span></h2>
-                <p class="mt-4 text-base sm:text-lg text-text-secondary">
+                <h2 class="text-4xl md:text-5xl font-bold text-text-main">Your Code is a <span class="trapped-text">Trapped Asset</span></h2>
+                <p class="mt-6 text-lg md:text-xl text-text-secondary max-w-3xl mx-auto">
                     Billions of lines of high-signal, human-written code are locked away in private repositories. This is a vast, untapped reservoir of value. Until now.
                 </p>
-                <div class="mt-10 grid sm:grid-cols-3 gap-8 text-left">
+                <div class="mt-12 grid sm:grid-cols-3 gap-8 text-left">
                     <div class="scroll-animate animate-fade-in-up flex items-start gap-4" style="animation-delay: 100ms;">
-                        <svg class="w-7 h-7 text-subtle shrink-0" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M16.5 10.5V6.75a4.5 4.5 0 10-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 002.25-2.25v-6.75a2.25 2.25 0 00-2.25-2.25H6.75a2.25 2.25 0 00-2.25 2.25v6.75a2.25 2.25 0 002.25 2.25z" /></svg>
+                        <svg class="w-8 h-8 text-subtle shrink-0" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M16.5 10.5V6.75a4.5 4.5 0 10-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 002.25-2.25v-6.75a2.25 2.25 0 00-2.25-2.25H6.75a2.25 2.25 0 00-2.25 2.25v6.75a2.25 2.25 0 002.25 2.25z" /></svg>
                         <div>
-                            <h3 class="font-bold text-text-main">Sitting Idle</h3>
-                            <p class="text-sm text-text-secondary">Generating zero value for you or the ecosystem.</p>
+                            <h3 class="font-bold text-xl text-text-main">Sitting Idle</h3>
+                            <p class="text-base text-text-secondary">Generating zero value for you or the ecosystem.</p>
                         </div>
                     </div>
                     <div class="scroll-animate animate-fade-in-up flex items-start gap-4" style="animation-delay: 200ms;">
-                        <svg class="w-7 h-7 text-subtle shrink-0" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M16.5 10.5V6.75a4.5 4.5 0 10-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 002.25-2.25v-6.75a2.25 2.25 0 00-2.25-2.25H6.75a2.25 2.25 0 00-2.25 2.25v6.75a2.25 2.25 0 002.25 2.25z" /></svg>
+                        <svg class="w-8 h-8 text-subtle shrink-0" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M16.5 10.5V6.75a4.5 4.5 0 10-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 002.25-2.25v-6.75a2.25 2.25 0 00-2.25-2.25H6.75a2.25 2.25 0 00-2.25 2.25v6.75a2.25 2.25 0 002.25 2.25z" /></svg>
                         <div>
-                            <h3 class="font-bold text-text-main">At Risk</h3>
-                            <p class="text-sm text-text-secondary">Exposed to being scraped without credit or compensation.</p>
+                            <h3 class="font-bold text-xl text-text-main">At Risk</h3>
+                            <p class="text-base text-text-secondary">Exposed to being scraped without credit or compensation.</p>
                         </div>
                     </div>
                     <div class="scroll-animate animate-fade-in-up flex items-start gap-4" style="animation-delay: 300ms;">
-                        <svg class="w-7 h-7 text-subtle shrink-0" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M16.5 10.5V6.75a4.5 4.5 0 10-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 002.25-2.25v-6.75a2.25 2.25 0 00-2.25-2.25H6.75a2.25 2.25 0 00-2.25 2.25v6.75a2.25 2.25 0 002.25 2.25z" /></svg>
+                        <svg class="w-8 h-8 text-subtle shrink-0" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M16.5 10.5V6.75a4.5 4.5 0 10-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 002.25-2.25v-6.75a2.25 2.25 0 00-2.25-2.25H6.75a2.25 2.25 0 00-2.25 2.25v6.75a2.25 2.25 0 002.25 2.25z" /></svg>
                         <div>
-                            <h3 class="font-bold text-text-main">Undervalued</h3>
-                            <p class="text-sm text-text-secondary">Fundamentally mispriced by the entire AI market.</p>
+                            <h3 class="font-bold text-xl text-text-main">Undervalued</h3>
+                            <p class="text-base text-text-secondary">Fundamentally mispriced by the entire AI market.</p>
                         </div>
                     </div>
                 </div>
@@ -67,32 +67,32 @@ export function renderLandingPage() {
     </section>
 
     <section class="pb-20 md:pb-32 bg-abyss-dark">
-        <div class="container mx-auto px-8 text-center max-w-3xl">
+        <div class="container mx-auto px-8 text-center max-w-4xl">
             <div class="scroll-animate animate-zoom-in">
-                <h2 class="text-3xl md:text-4xl font-bold gradient-text">Lumen Sets It Free.</h2>
-                <p class="mt-4 text-base sm:text-lg text-text-secondary">
+                <h2 class="text-4xl md:text-5xl font-bold gradient-text">Lumen Sets It Free.</h2>
+                <p class="mt-6 text-lg md:text-xl text-text-secondary max-w-3xl mx-auto">
                     We provide the bridge between your private work and the new data economy, transforming your code into a secure, high-value, and reward-generating asset.
                 </p>
-                <div class="mt-10 grid sm:grid-cols-3 gap-8 text-left">
+                <div class="mt-12 grid sm:grid-cols-3 gap-8 text-left">
                     <div class="scroll-animate animate-fade-in-up flex items-start gap-4" style="animation-delay: 100ms;">
-                        <svg class="w-7 h-7 shrink-0" viewBox="0 0 24 24" fill="none" stroke="url(#icon-gradient)" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 17.25v1.007a3 3 0 01-.879 2.122L7.5 21h9l-1.621-.621A3 3 0 0115 18.257V17.25m6-12V15a2.25 2.25 0 01-2.25 2.25H5.25A2.25 2.25 0 013 15V5.25A2.25 2.25 0 015.25 3h13.5A2.25 2.25 0 0121 5.25z" /></svg>
+                        <svg class="w-8 h-8 shrink-0" viewBox="0 0 24 24" fill="none" stroke="url(#icon-gradient)" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 17.25v1.007a3 3 0 01-.879 2.122L7.5 21h9l-1.621-.621A3 3 0 0115 18.257V17.25m6-12V15a2.25 2.25 0 01-2.25 2.25H5.25A2.25 2.25 0 013 15V5.25A2.25 2.25 0 015.25 3h13.5A2.25 2.25 0 0121 5.25z" /></svg>
                         <div>
-                            <h3 class="font-bold text-text-main">Anonymized Locally</h3>
-                            <p class="text-sm text-text-secondary">Your raw code and secrets never leave your machine.</p>
+                            <h3 class="font-bold text-xl text-text-main">Anonymized Locally</h3>
+                            <p class="text-base text-text-secondary">Your raw code and secrets never leave your machine.</p>
                         </div>
                     </div>
                     <div class="scroll-animate animate-fade-in-up flex items-start gap-4" style="animation-delay: 200ms;">
-                        <svg class="w-7 h-7 shrink-0" viewBox="0 0 24 24" fill="none" stroke="url(#icon-gradient)" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M3 13.125C3 12.504 3.504 12 4.125 12h2.25c.621 0 1.125.504 1.125 1.125v6.75C7.5 20.496 6.996 21 6.375 21h-2.25A1.125 1.125 0 013 19.875v-6.75zM9.75 8.625c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125v11.25c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V8.625zM16.5 4.125c0-.621.504-1.125 1.125-1.125h2.25C20.496 3 21 3.504 21 4.125v15.75c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V4.125z" /></svg>
+                        <svg class="w-8 h-8 shrink-0" viewBox="0 0 24 24" fill="none" stroke="url(#icon-gradient)" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M3 13.125C3 12.504 3.504 12 4.125 12h2.25c.621 0 1.125.504 1.125 1.125v6.75C7.5 20.496 6.996 21 6.375 21h-2.25A1.125 1.125 0 013 19.875v-6.75zM9.75 8.625c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125v11.25c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V8.625zM16.5 4.125c0-.621.504-1.125 1.125-1.125h2.25C20.496 3 21 3.504 21 4.125v15.75c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V4.125z" /></svg>
                         <div>
-                            <h3 class="font-bold text-text-main">Valued Transparently</h3>
-                            <p class="text-sm text-text-secondary">Our engine ensures fair rewards based on quality.</p>
+                            <h3 class="font-bold text-xl text-text-main">Valued Transparently</h3>
+                            <p class="text-base text-text-secondary">Our engine ensures fair rewards based on quality.</p>
                         </div>
                     </div>
                     <div class="scroll-animate animate-fade-in-up flex items-start gap-4" style="animation-delay: 300ms;">
-                        <svg class="w-7 h-7 shrink-0" viewBox="0 0 24 24" fill="none" stroke="url(#icon-gradient)" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M21 7.5l-9-5.25L3 7.5m18 0l-9 5.25m9-5.25v9l-9 5.25M3 7.5l9 5.25M3 7.5v9l9 5.25m0-9v9" /></svg>
+                        <svg class="w-8 h-8 shrink-0" viewBox="0 0 24 24" fill="none" stroke="url(#icon-gradient)" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M21 7.5l-9-5.25L3 7.5m18 0l-9 5.25m9-5.25v9l-9 5.25M3 7.5l9 5.25M3 7.5v9l9 5.25m0-9v9" /></svg>
                         <div>
-                            <h3 class="font-bold text-text-main">Rewarded On-Chain</h3>
-                            <p class="text-sm text-text-secondary">You own your rewards on a public, decentralized network.</p>
+                            <h3 class="font-bold text-xl text-text-main">Rewarded On-Chain</h3>
+                            <p class="text-base text-text-secondary">You own your rewards on a public, decentralized network.</p>
                         </div>
                     </div>
                 </div>
