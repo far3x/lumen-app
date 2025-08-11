@@ -40,6 +40,9 @@ easy :
 - push to prod on pypi when done before launch
 - change reverse proxy to return 404 / error when bots scrape the website (can change robots.txt ?)
 - lumen ssr (server side rendering) plugin for vite js, so we get good seo on google and not shit one like it is now, do robots.txt
+- make landing page better on mobile, smaller stuff overall and dont feel condensed like it is
+- rework landing page part 2 (issue / solution) rly bad design overall, for a first scroll content it feels badly designed and doesnt fit with the website aesthethic overall
+- complete default config lumen client
 
 medium :
 - allow 3 contributions a day, find a way to not limit these 3 if its failed contributions (like if ai gives 0 or idk)
@@ -50,7 +53,6 @@ hard :
 - (after business.lumen.onl dashboard etc) -> make sure if ai gives 0, we still get that in our base (if the code is non secure), because storing code isn't dangerous, its using it that is (and we could get a category on that, "dangerous" where data buyers could also be interested in getting)
 - need to make sure when a user updates a project it removes the old to replace with the new ? (and don't allow the opposite to happen, like someone reducing the size of its project, like in the db I mean, find a potential solution)
 - (so like if someone contributes an old project, if it was sold to a company for example or taken privately, find a way to give them an update or then change ?? or idk, its complex maybe not do this at all ?)
-
 
 data part (saas part):
 - on business.lumen.onl
