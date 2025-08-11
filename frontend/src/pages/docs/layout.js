@@ -2,57 +2,113 @@ const docPages = {
     'introduction': { 
         title: 'Introduction: The Data Layer for Intelligent AI', 
         content: () => import('./content/getting-started/introduction.js').then(m => m.renderIntroduction()), 
-        toc: [ { id: 'introduction', title: 'Introduction' }, { id: 'the-genesis', title: 'The Genesis: From Idea to Inception' }, { id: 'phase-one', title: 'Phase 1: The Foundation (Now)' } ]
+        toc: [
+            { id: 'introduction', title: 'Introduction' },
+            { id: 'the-data-crisis', title: 'The Data Crisis' },
+            { id: 'the-untapped-reservoir', title: 'The Untapped Reservoir' },
+            { id: 'lumen-the-strategic-solution', title: 'The Strategic Solution' },
+            { id: 'the-vision', title: 'The Vision' }
+        ]
     },
     'why-lumen': { 
         title: 'The Lumen Advantage', 
         content: () => import('./content/getting-started/why-lumen.js').then(m => m.renderWhyLumen()), 
-        toc: [ { id: 'the-lumen-advantage', title: 'The Lumen Advantage' }, { id: 'for-developers', title: 'For Developers' }, { id: 'for-data-consumers', title: 'For Data Consumers & Investors' } ]
+        toc: [
+            { id: 'the-lumen-advantage', title: 'The Lumen Advantage' },
+            { id: 'for-developers', title: 'For Developers' },
+            { id: 'for-data-consumers', title: 'For Data Consumers' }
+        ]
     },
     'installation': { 
         title: 'Installation', 
         content: () => import('./content/cli-guide/installation.js').then(m => m.renderInstallation()), 
-        toc: [ { id: 'installation', title: 'Installation' }, { id: 'prerequisites', title: 'Prerequisites' }, { id: 'install-with-pip', title: 'Standard Installation' }, { id: 'verifying', title: 'Verifying' }, { id: 'troubleshooting', title: 'Troubleshooting' } ]
+        toc: [
+            { id: 'installation', title: 'Installation' },
+            { id: 'prerequisites', title: 'Prerequisites' },
+            { id: 'install-with-pip', title: 'Standard Installation' },
+            { id: 'verifying', title: 'Verifying Installation' },
+            { id: 'troubleshooting', title: 'Troubleshooting' }
+        ]
     },
     'authentication': { 
         title: 'Authentication', 
         content: () => import('./content/cli-guide/authentication.js').then(m => m.renderAuthentication()), 
-        toc: [ { id: 'authentication', title: 'CLI Authentication' }, { id: 'the-process', title: 'The Device Authorization Flow' }, { id: 'token-security', title: 'Token Security' } ]
+        toc: [
+            { id: 'authentication', title: 'CLI Authentication' },
+            { id: 'the-process', title: 'The Device Authorization Flow' },
+            { id: 'token-security', title: 'Token Security' }
+        ]
     },
     'core-commands': { 
         title: 'Core Commands', 
         content: () => import('./content/cli-guide/core-commands.js').then(m => m.renderCoreCommands()), 
-        toc: [ { id: 'core-commands', title: 'Core Commands' }, { id: 'network-commands', title: 'Network Commands' }, { id: 'local-generation', title: 'Local Generation' }, { id: 'configuration', title: 'Configuration' } ]
+        toc: [
+            { id: 'core-commands', title: 'Core Commands' },
+            { id: 'network-commands', title: 'Network Commands' },
+            { id: 'local-generation', title: 'Local Prompt Generation' },
+            { id: 'configuration', title: 'Configuration' }
+        ]
     },
     'configuration': {
         title: 'Configuration',
         content: () => import('./content/cli-guide/configuration.js').then(m => m.renderConfiguration()),
-        toc: [ { id: 'configuration', title: 'Customizing the CLI' }, { id: 'config-file-location', title: 'Config File Location' }, { id: 'default-configuration', title: 'Default Configuration' }, { id: 'key-settings', title: 'Customization Options' } ]
+        toc: [
+            { id: 'configuration', title: 'Customizing the CLI' },
+            { id: 'config-file-location', title: 'Config File Location' },
+            { id: 'default-configuration', title: 'Default Configuration' },
+            { id: 'key-settings', title: 'Customization Options' }
+        ]
     },
     'contributing': { 
         title: 'Contributing Data', 
         content: () => import('./content/protocol/contributing.js').then(m => m.renderContributing()), 
-        toc: [ { id: 'contributing-data', title: 'Contributing Data' }, { id: 'the-contribution-process', title: 'The Contribution Process' }, { id: 'what-to-contribute', title: 'What to Contribute' } ]
+        toc: [
+            { id: 'contributing-data', title: 'Contributing Data' },
+            { id: 'the-contribution-process', title: 'The Contribution Process' },
+            { id: 'contribution-guidelines', title: 'Contribution Guidelines' },
+            { id: 'what-to-contribute', title: 'What to Contribute' }
+        ]
     },
     'valuation': { 
         title: 'The Valuation Engine', 
         content: () => import('./content/protocol/valuation.js').then(m => m.renderValuation()), 
-        toc: [ { id: 'valuation-engine', title: 'The Valuation Engine' }, { id: 'phase-one-uniqueness', title: 'Phase 1: Uniqueness' }, { id: 'phase-two-quantitative-analysis', title: 'Phase 2: Quantitative Analysis' }, { id: 'phase-three-qualitative-analysis', title: 'Phase 3: Qualitative Analysis' }, { id: 'phase-four-reward-calculation', title: 'Phase 4: Reward Calculation' } ]
+        toc: [
+            { id: 'valuation-engine', title: 'The Valuation Engine' },
+            { id: 'phase-one-uniqueness', title: 'Phase 1: Uniqueness' },
+            { id: 'phase-two-quantitative-analysis', title: 'Phase 2: Quantitative Analysis' },
+            { id: 'phase-three-qualitative-analysis', title: 'Phase 3: Qualitative Analysis' },
+            { id: 'phase-four-reward-calculation', title: 'Phase 4: Reward Calculation' }
+        ]
     },
     'security': { 
         title: 'Security', 
         content: () => import('./content/protocol/security.js').then(m => m.renderSecurity()), 
-        toc: [ { id: 'security-by-design', title: 'Security by Design' }, { id: 'cli-security', title: 'CLI & Local-First Processing' }, { id: 'platform-security', title: 'Platform Security' }, { id: 'api-security', title: 'API Security' }, { id: 'on-chain-security', title: 'On-Chain Security' } ]
+        toc: [
+            { id: 'security-by-design', title: 'Security by Design' },
+            { id: 'cli-security', title: 'CLI & Local-First Processing' },
+            { id: 'platform-security', title: 'Platform Security' },
+            { id: 'api-security', title: 'API Security' },
+            { id: 'on-chain-security', title: 'On-Chain Security' }
+        ]
     },
     'tokenomics': { 
         title: 'Protocol Economy', 
         content: () => import('./content/protocol/tokenomics.js').then(m => m.renderTokenomics()), 
-        toc: [ { id: 'protocol-economy', title: 'The Protocol Economy' }, { id: 'rewards-mechanism', title: 'The Rewards Mechanism' }, { id: 'economic-loop', title: 'The Economic Loop' } ]
+        toc: [
+            { id: 'protocol-economy', title: 'The Protocol Economy' },
+            { id: 'rewards-mechanism', title: 'The Rewards Mechanism' },
+            { id: 'economic-loop', title: 'The Economic Loop' }
+        ]
     },
     'governance': { 
         title: 'Governance', 
         content: () => import('./content/protocol/governance.js').then(m => m.renderGovernance()), 
-        toc: [ { id: 'governance', title: 'Protocol Governance' }, { id: 'lumen-improvement-proposals', title: 'LIPs' }, { id: 'progressive-decentralization', title: 'Decentralization' } ]
+        toc: [
+            { id: 'governance', title: 'Protocol Governance' },
+            { id: 'lumen-improvement-proposals', title: 'LIPs' },
+            { id: 'areas-of-governance', title: 'Areas of Governance' },
+            { id: 'progressive-decentralization', title: 'Progressive Decentralization' }
+        ]
     },
     'whitepaper': { 
         title: 'Whitepaper: The Data Layer for the AI Revolution', 
@@ -69,32 +125,90 @@ const docPages = {
     'roadmap': { 
         title: 'Roadmap & Vision', 
         content: () => import('./content/community/roadmap.js').then(m => m.renderRoadmap()), 
-        toc: [ { id: 'roadmap-and-vision', title: 'Roadmap & Vision' }, { id: 'phase-one', title: 'Phase 1: Launch & Market Validation' }, { id: 'phase-two', title: 'Phase 2: Scale & Ecosystem Growth' }, { id: 'the-lumen-agent', title: 'Phase 3: The Lumen Agent' } ]
+        toc: [
+            { id: 'roadmap-and-vision', title: 'Roadmap & Vision' },
+            { id: 'phase-one', title: 'Phase 1: Launch & Validation' },
+            { id: 'phase-two', title: 'Phase 2: Scale & Ecosystem' },
+            { id: 'the-lumen-agent', title: 'Phase 3: The Lumen Agent' }
+        ]
     },
     'faq': { 
         title: 'FAQ', 
         content: () => import('./content/community/faq.js').then(m => m.renderFaq()), 
-        toc: [ { id: 'faq', title: 'FAQ' }, { id: 'faq-security', title: 'Security & Privacy' }, { id: 'faq-rewards', title: 'Rewards & Value' } ]
+        toc: [
+            { id: 'faq', title: 'FAQ' },
+            { id: 'faq-general', title: 'Fundamental Questions' },
+            { id: 'faq-rewards', title: 'Rewards & Value' },
+            { id: 'faq-security', title: 'Security & Privacy' }
+        ]
     },
     'terms': {
         title: 'Terms and Conditions',
         content: () => import('./content/legal/terms.js').then(m => m.renderTermsAndConditions()),
-        toc: [ { id: 'terms-and-conditions', title: 'Terms and Conditions' } ]
+        toc: [
+            { id: 'agreement', title: '1. Agreement to Terms' },
+            { id: 'services', title: '2. Our Services' },
+            { id: 'ip', title: '3. Intellectual Property' },
+            { id: 'userreps', title: '4. User Representations' },
+            { id: 'userreg', title: '5. User Registration' },
+            { id: 'prohibited', title: '6. Prohibited Activities' },
+            { id: 'contributions', title: '7. Contributions' },
+            { id: 'license', title: '8. Contribution License' },
+            { id: 'sitemanage', title: '9. Services Management' },
+            { id: 'privacy', title: '10. Privacy Policy' },
+            { id: 'termination', title: '11. Term and Termination' },
+            { id: 'modifications', title: '12. Modifications' },
+            { id: 'law', title: '13. Governing Law' },
+            { id: 'disputes', title: '14. Dispute Resolution' },
+            { id: 'disclaimer', title: '15. Disclaimer' },
+            { id: 'liability', title: '16. Liability Limitations' },
+            { id: 'indemnification', title: '17. Indemnification' },
+            { id: 'userdata', title: '18. User Data' },
+            { id: 'protocol-terms', title: '19. Protocol-Specific Terms' },
+            { id: 'contact', title: '20. Contact Us' }
+        ]
     },
     'privacy-policy': {
         title: 'Privacy Policy',
         content: () => import('./content/legal/privacy-policy.js').then(m => m.renderPrivacyPolicy()),
-        toc: [ { id: 'privacy-policy', title: 'Privacy Policy' } ]
+        toc: [
+            { id: 'what-info', title: '1. What We Collect' },
+            { id: 'how-info', title: '2. How We Process' },
+            { id: 'legal-bases', title: '3. Legal Bases' },
+            { id: 'share-info', title: '4. When We Share' },
+            { id: 'cookies', title: '5. Cookies' },
+            { id: 'keep-info', title: '6. How Long We Keep' },
+            { id: 'safe-info', title: '7. How We Keep Safe' },
+            { id: 'minors-info', title: '8. Minors' },
+            { id: 'rights-info', title: '9. Your Rights' },
+            { id: 'dnt', title: '10. DNT Features' },
+            { id: 'california-rights', title: '11. California Rights' },
+            { id: 'updates-info', title: '12. Updates' },
+            { id: 'contact-info', title: '13. Contact Us' }
+        ]
     },
     'contributor-agreement': {
         title: 'Contributor License Agreement',
         content: () => import('./content/legal/contributor-agreement.js').then(m => m.renderContributorAgreement()),
-        toc: [ { id: 'contributor-license-agreement', title: 'Contributor License Agreement' } ]
+        toc: [
+            { id: 'definitions', title: '1. Definitions' },
+            { id: 'grant-of-copyright-license', title: '2. Copyright License' },
+            { id: 'grant-of-patent-license', title: '3. Patent License' },
+            { id: 'your-representations-and-warranties', title: '4. Your Representations' },
+            { id: 'no-obligation', title: '5. Our Rights' },
+            { id: 'no-support-obligation', title: '6. No Support Obligation' }
+        ]
     },
     'disclaimer': {
         title: 'Disclaimer',
         content: () => import('./content/legal/disclaimer.js').then(m => m.renderDisclaimer()),
-        toc: [ { id: 'disclaimer', title: 'Disclaimer' } ]
+        toc: [
+            { id: 'no-financial-advice', title: 'No Financial Advice' },
+            { id: 'cryptocurrency-and-token-risks', title: 'Token Risks' },
+            { id: 'as-is-service', title: 'As Is Service' },
+            { id: 'external-links-disclaimer', title: 'External Links' },
+            { id: 'personal-responsibility', title: 'Personal Responsibility' }
+        ]
     }
 };
 

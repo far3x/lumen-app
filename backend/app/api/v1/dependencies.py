@@ -83,10 +83,10 @@ async def get_current_user_from_ws(
 
 async def verify_contribution_signature(
     request: Request,
-    authorization: str = Header(..., description="The user's Personal Access Token, e.g., 'Bearer lum_pat_...'"),
-    x_lumen_challenge: str = Header(...),
+    authorization: str = Header(..., description="The user's Personal Access Token, e.g., 'Bearer lum_pat_'"),
     x_lumen_signature: str = Header(...),
-    x_lumen_timestamp: str = Header(...)
+    x_lumen_timestamp: str = Header(...),
+    db: Session = Depends(get_db)
 ):
     try:
         request_time = int(x_lumen_timestamp)
@@ -100,11 +100,24 @@ async def verify_contribution_signature(
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid authorization scheme. Must be 'Bearer'.")
     
     pat = authorization.split(" ")[1]
+    
+    user = crud.get_user_by_pat(db, pat=pat)
+    if not user:
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid Personal Access Token.")
+
+    challenge_key = f"challenge:{user.id}"
+    stored_challenge = redis_service.get(challenge_key)
+
+    if not stored_challenge:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Invalid or expired challenge. Please run 'lum handshake' again.")
+
+    redis_service.delete(challenge_key)
+
     body = await request.body()
     
     is_valid = security.verify_hmac_signature(
         signature=x_lumen_signature,
-        challenge=x_lumen_challenge,
+        challenge=stored_challenge,
         timestamp=x_lumen_timestamp,
         body=body,
         secret=pat

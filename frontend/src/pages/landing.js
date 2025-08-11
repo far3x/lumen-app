@@ -1,14 +1,14 @@
 export function renderLandingPage() {
     
     const initializeCarousel = () => {
-        const carousel = document.getElementById('logo-carousel');
+        const carousel = document.getElementById('logo-carousel');        
         if (carousel) {
             carousel.innerHTML += carousel.innerHTML;
             carousel.classList.add('animate-marquee-slow');
         }
     };
 
-    const logos = ['javascript.png', 'vite.png', 'docker.png', 'solana.png', 'python.png', 'golang.png', 'nodejs.png', 'fastapi.png', 'postgresql.png', 'gemini.png', 'aws.png', 'gcp.png'];
+    const logos = ['doppler.png', 'hugging-face.png', 'fastapi.png', 'pytorch.png', 'javascript.png', 'redis.png', 'docker.png', 'vite.png', 'solana.png', 'python.png', 'golang.png', 'nodejs.png', 'nginx.png', 'postgresql.png', 'gemini.png', 'aws.png', 'gcp.png'];
     
     const logoItems = logos.map(logo => `
         <li class="flex-shrink-0">
@@ -33,31 +33,80 @@ export function renderLandingPage() {
 
     const problemPromiseSection = `
     <section class="py-20 md:py-32 bg-abyss-dark">
-        <div class="container mx-auto px-8">
-            <div class="grid md:grid-cols-2 gap-16 items-center">
-                <div class="scroll-animate animate-fade-in-left">
-                    <h2 class="text-4xl font-bold"><span class="trapped-text">Your Code has Untapped Value.</span></h2>
-                    <p class="mt-4 text-lg text-text-secondary">For too long, the most valuable data on the planet, your unique source code, has been locked away. Its potential untapped, its value unrecognized.</p>
-                    <ul class="mt-8 space-y-4 text-text-secondary">
-                        <li class="flex items-start gap-3"><svg class="w-6 h-6 text-red-400/80 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg><span><strong class="text-text-main">Sitting idle on your machine,</strong> creating zero value for you.</span></li>
-                        <li class="flex items-start gap-3"><svg class="w-6 h-6 text-red-400/80 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg><span><strong class="text-text-main">At risk of being scraped</strong> without credit or compensation.</span></li>
-                        <li class="flex items-start gap-3"><svg class="w-6 h-6 text-red-400/80 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg><span><strong class="text-text-main">Fundamentally undervalued</strong> by the entire AI market.</span></li>
-                    </ul>
+        <div class="container mx-auto px-8 text-center max-w-3xl">
+            <div class="scroll-animate animate-zoom-in">
+                <h2 class="text-4xl font-bold text-text-main">Your Code is a <span class="trapped-text">Trapped Asset</span></h2>
+                <p class="mt-4 text-lg text-text-secondary">
+                    Billions of lines of high-signal, human-written code are locked away in private repositories. This is a vast, untapped reservoir of value. Until now.
+                </p>
+                <div class="mt-10 grid sm:grid-cols-3 gap-8 text-left">
+                    <div class="scroll-animate animate-fade-in-up flex items-start gap-4" style="animation-delay: 100ms;">
+                        <svg class="w-7 h-7 text-subtle shrink-0" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M16.5 10.5V6.75a4.5 4.5 0 10-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 002.25-2.25v-6.75a2.25 2.25 0 00-2.25-2.25H6.75a2.25 2.25 0 00-2.25 2.25v6.75a2.25 2.25 0 002.25 2.25z" /></svg>
+                        <div>
+                            <h3 class="font-bold text-text-main">Sitting Idle</h3>
+                            <p class="text-sm text-text-secondary">Generating zero value for you or the ecosystem.</p>
+                        </div>
+                    </div>
+                    <div class="scroll-animate animate-fade-in-up flex items-start gap-4" style="animation-delay: 200ms;">
+                        <svg class="w-7 h-7 text-subtle shrink-0" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M16.5 10.5V6.75a4.5 4.5 0 10-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 002.25-2.25v-6.75a2.25 2.25 0 00-2.25-2.25H6.75a2.25 2.25 0 00-2.25 2.25v6.75a2.25 2.25 0 002.25 2.25z" /></svg>
+                        <div>
+                            <h3 class="font-bold text-text-main">At Risk</h3>
+                            <p class="text-sm text-text-secondary">Exposed to being scraped without credit or compensation.</p>
+                        </div>
+                    </div>
+                    <div class="scroll-animate animate-fade-in-up flex items-start gap-4" style="animation-delay: 300ms;">
+                        <svg class="w-7 h-7 text-subtle shrink-0" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M16.5 10.5V6.75a4.5 4.5 0 10-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 002.25-2.25v-6.75a2.25 2.25 0 00-2.25-2.25H6.75a2.25 2.25 0 00-2.25 2.25v6.75a2.25 2.25 0 002.25 2.25z" /></svg>
+                        <div>
+                            <h3 class="font-bold text-text-main">Undervalued</h3>
+                            <p class="text-sm text-text-secondary">Fundamentally mispriced by the entire AI market.</p>
+                        </div>
+                    </div>
                 </div>
-                <div class="scroll-animate animate-fade-in-right">
-                    <h2 class="text-4xl font-bold gradient-text">Lumen Unlocks It.</h2>
-                    <p class="mt-4 text-lg text-text-secondary">We've built the system to fix this. Lumen provides the tools and the network to transform your code into a secure, high-value, and reward-generating asset.</p>
-                     <ul class="mt-8 space-y-4 text-text-secondary">
-                        <li class="flex items-start gap-3"><svg class="w-6 h-6 text-green-400 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg><span><strong class="text-text-main">Anonymized on your machine,</strong> never leaving in its raw form.</span></li>
-                        <li class="flex items-start gap-3"><svg class="w-6 h-6 text-green-400 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg><span><strong class="text-text-main">Valued by a transparent engine,</strong> ensuring fair rewards.</span></li>
-                        <li class="flex items-start gap-3"><svg class="w-6 h-6 text-green-400 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg><span><strong class="text-text-main">Rewarded on an open network,</strong> giving you full ownership.</span></li>
-                    </ul>
+            </div>
+        </div>
+    </section>
+
+    <section class="pb-20 md:pb-32 bg-abyss-dark">
+        <div class="container mx-auto px-8 text-center max-w-3xl">
+            <div class="scroll-animate animate-zoom-in">
+                <h2 class="text-4xl font-bold gradient-text">Lumen Sets It Free.</h2>
+                <p class="mt-4 text-lg text-text-secondary">
+                    We provide the bridge between your private work and the new data economy, transforming your code into a secure, high-value, and reward-generating asset.
+                </p>
+                <div class="mt-10 grid sm:grid-cols-3 gap-8 text-left">
+                    <div class="scroll-animate animate-fade-in-up flex items-start gap-4" style="animation-delay: 100ms;">
+                        <svg class="w-7 h-7 shrink-0" viewBox="0 0 24 24" fill="none" stroke="url(#icon-gradient)" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 17.25v1.007a3 3 0 01-.879 2.122L7.5 21h9l-1.621-.621A3 3 0 0115 18.257V17.25m6-12V15a2.25 2.25 0 01-2.25 2.25H5.25A2.25 2.25 0 013 15V5.25A2.25 2.25 0 015.25 3h13.5A2.25 2.25 0 0121 5.25z" /></svg>
+                        <div>
+                            <h3 class="font-bold text-text-main">Anonymized Locally</h3>
+                            <p class="text-sm text-text-secondary">Your raw code and secrets never leave your machine.</p>
+                        </div>
+                    </div>
+                    <div class="scroll-animate animate-fade-in-up flex items-start gap-4" style="animation-delay: 200ms;">
+                        <svg class="w-7 h-7 shrink-0" viewBox="0 0 24 24" fill="none" stroke="url(#icon-gradient)" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M3 13.125C3 12.504 3.504 12 4.125 12h2.25c.621 0 1.125.504 1.125 1.125v6.75C7.5 20.496 6.996 21 6.375 21h-2.25A1.125 1.125 0 013 19.875v-6.75zM9.75 8.625c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125v11.25c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V8.625zM16.5 4.125c0-.621.504-1.125 1.125-1.125h2.25C20.496 3 21 3.504 21 4.125v15.75c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V4.125z" /></svg>
+                        <div>
+                            <h3 class="font-bold text-text-main">Valued Transparently</h3>
+                            <p class="text-sm text-text-secondary">Our engine ensures fair rewards based on quality.</p>
+                        </div>
+                    </div>
+                    <div class="scroll-animate animate-fade-in-up flex items-start gap-4" style="animation-delay: 300ms;">
+                        <svg class="w-7 h-7 shrink-0" viewBox="0 0 24 24" fill="none" stroke="url(#icon-gradient)" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M21 7.5l-9-5.25L3 7.5m18 0l-9 5.25m9-5.25v9l-9 5.25M3 7.5l9 5.25M3 7.5v9l9 5.25m0-9v9" /></svg>
+                        <div>
+                            <h3 class="font-bold text-text-main">Rewarded On-Chain</h3>
+                            <p class="text-sm text-text-secondary">You own your rewards on a public, decentralized network.</p>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
     </section>
     `;
 
+    const howItWorksSteps = [
+        { number: '01', title: 'Install & Login', text: 'One command to install the CLI. A secure, browser-based login to link your account.' },
+        { number: '02', title: 'Contribute Your Code', text: "Run one command from your project's root. Our CLI anonymizes and submits your work locally." },
+        { number: '03', title: 'Get Rewarded', text: "Track your contribution's value and your total earnings in real-time on your dashboard." }
+    ];
+    
     const howItWorksSection = `
     <section class="relative bg-abyss-dark bg-grid-pattern bg-grid-size animate-grid-pan overflow-hidden py-20 md:py-32" style="z-index: 5;">
         <div class="absolute inset-0 bg-[radial-gradient(ellipse_at_center,transparent_20%,#08080A)]"></div>
@@ -66,21 +115,17 @@ export function renderLandingPage() {
                 <h2 class="text-3xl md:text-4xl font-bold md:whitespace-nowrap">Effortless Contribution. Tangible Rewards.</h2>
                 <p class="mt-4 text-text-secondary">We designed the process to be as simple as possible. Three steps. That's it.</p>
             </div>
-            <div class="mt-16 grid md:grid-cols-3 gap-8">
-                <div class="glow-card-hover border border-subtle/50 p-8 rounded-xl bg-surface/80 flex flex-col items-center text-center scroll-animate animate-fade-in-up" style="transition-delay: 100ms;">
-                    <div class="mx-auto w-16 h-16 p-[1px] rounded-lg bg-hero-gradient"><div class="w-full h-full bg-primary rounded-[7px] flex items-center justify-center"><p class="text-2xl font-bold">1</p></div></div>
-                    <h3 class="text-xl font-bold mt-6">Install & Login</h3>
-                    <p class="text-text-secondary mt-2 flex-grow">One command to install the CLI. A secure, browser-based login to link your account.</p>
-                </div>
-                <div class="glow-card-hover border border-subtle/50 p-8 rounded-xl bg-surface/80 flex flex-col items-center text-center scroll-animate animate-fade-in-up" style="transition-delay: 200ms;">
-                    <div class="mx-auto w-16 h-16 p-[1px] rounded-lg bg-hero-gradient"><div class="w-full h-full bg-primary rounded-[7px] flex items-center justify-center"><p class="text-2xl font-bold">2</p></div></div>
-                    <h3 class="text-xl font-bold mt-6">Contribute Your Code</h3>
-                    <p class="text-text-secondary mt-2 flex-grow">Run one command from your project's root. Our CLI anonymizes and submits your work locally.</p>
-                </div>
-                <div class="glow-card-hover border border-subtle/50 p-8 rounded-xl bg-surface/80 flex flex-col items-center text-center scroll-animate animate-fade-in-up" style="transition-delay: 300ms;">
-                    <div class="mx-auto w-16 h-16 p-[1px] rounded-lg bg-hero-gradient"><div class="w-full h-full bg-primary rounded-[7px] flex items-center justify-center"><p class="text-2xl font-bold">3</p></div></div>
-                    <h3 class="text-xl font-bold mt-6">Get Rewarded</h3>
-                    <p class="text-text-secondary mt-2 flex-grow">Track your contribution's value and your total earnings in real-time on your dashboard.</p>
+            <div class="mt-16 interactive-card relative bg-surface rounded-xl border border-primary overflow-hidden scroll-animate animate-fade-in-up" style="transition-delay: 200ms;">
+                <div class="flex flex-col md:flex-row">
+                    ${howItWorksSteps.map((step, index) => `
+                        <div class="flex-1 p-8 relative ${index > 0 ? 'md:border-l md:border-primary' : ''}">
+                            <span class="absolute top-4 right-6 text-6xl font-bold gradient-text opacity-10">${step.number}</span>
+                            <div class="relative">
+                                <h3 class="text-xl font-bold text-text-main">${step.title}</h3>
+                                <p class="text-text-secondary mt-2">${step.text}</p>
+                            </div>
+                        </div>
+                    `).join('')}
                 </div>
             </div>
         </div>
@@ -91,7 +136,7 @@ export function renderLandingPage() {
     <section class="bg-abyss-dark pt-0 pb-20 md:pb-32">
         <div class="container mx-auto px-6">
             <div class="max-w-5xl mx-auto scroll-animate animate-zoom-in">
-                <div class="glow-card-hover bg-surface rounded-2xl p-8 md:p-12 grid md:grid-cols-2 gap-8 md:gap-12 items-center border border-primary">
+                <div class="interactive-card bg-surface rounded-2xl p-8 md:p-12 grid md:grid-cols-2 gap-8 md:gap-12 items-center border border-primary">
                     <div class="text-center md:text-left">
                         <h3 class="text-3xl font-bold">State-of-the-Art Valuation</h3>
                         <p class="text-text-secondary mt-4">Our valuation engine leverages Google's Gemini models for fair and accurate rewards based on code quality, complexity, and architectural design.</p>

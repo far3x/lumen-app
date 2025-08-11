@@ -86,13 +86,6 @@
     opacity: var(--border-opacity, 0);
     transition: opacity 0.3s ease-in-out;
   }
-  
-  .glow-card-hover {
-    @apply transition-all duration-300;
-  }
-  .glow-card-hover:hover {
-    @apply shadow-[0_0_35px_5px] shadow-accent-purple/10;
-  }
 
   .gradient-divider {
      @apply w-full h-px border-0 bg-gradient-to-r from-accent-purple via-accent-pink to-accent-cyan opacity-40;
@@ -201,21 +194,6 @@
       filter: brightness(1.2);
   }
 
-  @keyframes pulse-glow-strong {
-      0% {
-          transform: scale(1);
-          box-shadow: 0 0 15px -5px rgba(138, 43, 226, 0.5);
-      }
-      50% {
-          transform: scale(1.05);
-          box-shadow: 0 0 35px 5px rgba(255, 105, 180, 0.3);
-      }
-      100% {
-          transform: scale(1);
-          box-shadow: 0 0 15px -5px rgba(138, 43, 226, 0.5);
-      }
-  }
-
   .custom-checkbox {
     @apply appearance-none w-5 h-5 bg-primary border-2 border-subtle rounded-md cursor-pointer transition-all duration-200 shrink-0;
     @apply relative checked:bg-accent-purple checked:border-accent-purple;
@@ -227,6 +205,13 @@
     @apply absolute top-1/2 left-1/2 block w-1.5 h-3;
     @apply border-solid border-white border-r-[2px] border-b-[2px];
     transform: translate(-50%, -60%) rotate(45deg);
+  }
+
+  .interactive-card {
+    @apply transition-all duration-300 ease-in-out;
+  }
+  .interactive-card:hover {
+    @apply transform scale-[1.02] shadow-[0_0_30px_rgba(255,255,255,0.07)];
   }
 }
 
@@ -366,6 +351,11 @@ details > summary::-webkit-details-marker {
 @keyframes marquee-slow {
     from { transform: translateX(0); }
     to { transform: translateX(-50%); }
+}
+
+@keyframes marquee-slow-reverse {
+    from { transform: translateX(-50%); }
+    to { transform: translateX(0); }
 }
 
 .animate-marquee-slow {
