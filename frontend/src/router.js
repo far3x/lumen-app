@@ -5,6 +5,8 @@ import { walletService } from './lib/wallet.js';
 import Lenis from 'lenis';
 import { renderFeedbackModal } from './pages/app/dashboard/utils.js';
 import { renderWaitlistPage, attachWaitlistPageListeners } from './pages/waitlist.js';
+import { docPages } from './pages/docs/layout.js';
+import { patchNotes } from './pages/patch-notes/layout.js';
 
 const app = document.getElementById('app');
 const navbarContainer = document.getElementById('navbar-container');
@@ -26,6 +28,52 @@ const routes = {
     '/2fa-verify': () => import('./pages/2fa-verify.js').then(m => m.render2FAVerifyPage()),
     '/app/dashboard': () => import('./pages/app/dashboard/layout.js').then(m => m.renderDashboardLayout()),
 };
+
+const routeMeta = {
+    '/': {
+        title: 'Lumen Protocol | Monetize Your Code, Power AI | Get Rewarded for Your Work',
+        description: 'Lumen Protocol rewards developers for their code. Use our secure CLI to contribute anonymized source code from your projects, earn rewards, and help power the next generation of AI.',
+    },
+    '/data': {
+        title: 'Lumen Protocol | Acquire Premium AI Training Data',
+        description: 'Access high-quality, anonymized source code datasets for AI training. Ethical, verifiable, and proprietary data to power your models.',
+    },
+    '/leaderboard': {
+        title: 'Lumen Protocol | Contributor Leaderboard',
+        description: 'See the top contributors powering the Lumen network and earning $LUM rewards.',
+    },
+    '/login': {
+        title: 'Lumen Protocol | Login',
+        description: 'Sign in to your Lumen account to access your dashboard and start contributing code.',
+    },
+    '/signup': {
+        title: 'Lumen Protocol | Sign Up',
+        description: 'Create a Lumen account to monetize your code and earn rewards.',
+    },
+    '/patch-notes': {
+        title: 'Lumen Protocol | Patch Notes',
+        description: 'Latest updates and changes to the Lumen Protocol CLI and platform.',
+    },
+};
+
+function updateHeadMeta(meta) {
+    const defaultMeta = routeMeta['/'];
+    const finalMeta = { ...defaultMeta, ...meta };
+
+    document.title = finalMeta.title;
+
+    document.querySelector('meta[name="description"]').content = finalMeta.description;
+    document.querySelector('meta[name="keywords"]').content = finalMeta.keywords || defaultMeta.keywords;
+    
+    document.getElementById('canonical-link').href = finalMeta.url;
+    document.getElementById('og-url-link').setAttribute('content', finalMeta.url);
+
+    document.querySelector('meta[property="og:title"]').content = finalMeta.ogTitle || finalMeta.title;
+    document.querySelector('meta[property="og:description"]').content = finalMeta.ogDescription || finalMeta.description;
+    
+    document.querySelector('meta[name="twitter:title"]').content = finalMeta.ogTitle || finalMeta.title;
+    document.querySelector('meta[name="twitter:description"]').content = finalMeta.ogDescription || finalMeta.description;
+}
 
 export const navigate = (path) => {
     if (window.location.pathname === path) return;
@@ -75,7 +123,7 @@ const handleLocation = async () => {
     const path = window.location.pathname;
     const hash = window.location.hash;
     const fullScreenPages = ['/link', '/check-email', '/verify', '/forgot-password', '/reset-password', '/2fa-verify', '/waitlist'];
-
+    
     if (path === '/docs' || path === '/docs/') {
         navigate('/docs/introduction');
         return;
@@ -146,11 +194,24 @@ const handleLocation = async () => {
         let renderPromise;
         if (path.startsWith('/docs/')) {
             const pageId = path.split('/docs/')[1] || 'introduction';
+            const pageMeta = docPages[pageId] || docPages['introduction'];
+            updateHeadMeta({
+                title: `Lumen Docs | ${pageMeta.title}`,
+                description: `Documentation for Lumen Protocol: ${pageMeta.title}.`,
+                url: `https://lumen.onl${path}`
+            });
             renderPromise = import('./pages/docs/layout.js').then(m => m.renderDocsLayout(pageId));
         } else if (path.startsWith('/patch-notes')) {
-            const noteId = path.split('/patch-notes/')[1] || Object.keys((await import('./pages/patch-notes/layout.js')).patchNotes || {})[0];
+             const noteId = path.split('/patch-notes/')[1] || Object.keys(patchNotes)[0];
+             const noteMeta = patchNotes[noteId] || patchNotes[Object.keys(patchNotes)[0]];
+             updateHeadMeta({
+                title: `Lumen Patch Notes | ${noteMeta.title}`,
+                description: `Release notes for ${noteMeta.date}: ${noteMeta.title}`,
+                url: `https://lumen.onl${path}`
+             });
             renderPromise = import('./pages/patch-notes/layout.js').then(m => m.renderPatchNotesLayout(noteId));
         } else {
+            updateHeadMeta({ ...routeMeta[path], url: `https://lumen.onl${path}` });
             const routeHandler = routes[path] || routes['/'];
             if (typeof routeHandler !== 'function') {
                 console.error(`No route handler found for path: ${path}. Defaulting to home.`);

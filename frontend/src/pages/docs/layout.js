@@ -1,4 +1,4 @@
-const docPages = {
+export const docPages = {
     'introduction': { 
         title: 'Introduction: The Data Layer for Intelligent AI', 
         content: () => import('./content/getting-started/introduction.js').then(m => m.renderIntroduction()), 
