@@ -76,16 +76,6 @@ const handleLocation = async () => {
     const hash = window.location.hash;
     const fullScreenPages = ['/link', '/check-email', '/verify', '/forgot-password', '/reset-password', '/2fa-verify', '/waitlist'];
 
-    const pageUrl = `https://lumen.onl${path}`;
-    const canonicalLink = document.getElementById('canonical-link');
-    if (canonicalLink) {
-        canonicalLink.href = pageUrl;
-    }
-    const ogUrlLink = document.getElementById('og-url-link');
-    if (ogUrlLink) {
-        ogUrlLink.setAttribute('content', pageUrl);
-    }
-
     if (path === '/docs' || path === '/docs/') {
         navigate('/docs/introduction');
         return;
