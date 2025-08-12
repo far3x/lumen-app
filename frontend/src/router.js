@@ -76,6 +76,12 @@ const handleLocation = async () => {
     const hash = window.location.hash;
     const fullScreenPages = ['/link', '/check-email', '/verify', '/forgot-password', '/reset-password', '/2fa-verify', '/waitlist'];
 
+    const canonicalURL = `https://lumen.onl${path}`;
+    const canonicalLink = document.getElementById('canonical-link');
+    if (canonicalLink) {
+        canonicalLink.href = canonicalURL;
+    }
+
     if (path === '/docs' || path === '/docs/') {
         navigate('/docs/introduction');
         return;
@@ -266,8 +272,6 @@ export const initializeRouter = async () => {
 
     walletService.autoConnect().catch(err => console.warn("Auto-connect failed:", err));
     
-    handleLocation();
-    
     try {
         await validateAndRefreshUserSession();
     } catch (error) {
@@ -310,5 +314,7 @@ export const initializeRouter = async () => {
                 navigate(targetUrl.pathname + targetUrl.search);
             }
         });
+        
+        handleLocation();
     }
 }
