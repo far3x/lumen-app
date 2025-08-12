@@ -76,6 +76,12 @@ const handleLocation = async () => {
     const hash = window.location.hash;
     const fullScreenPages = ['/link', '/check-email', '/verify', '/forgot-password', '/reset-password', '/2fa-verify', '/waitlist'];
 
+    const canonicalURL = `https://lumen.onl${path}`;
+    const canonicalLink = document.getElementById('canonical-link');
+    if (canonicalLink) {
+        canonicalLink.href = canonicalURL;
+    }
+
     if (path === '/docs' || path === '/docs/') {
         navigate('/docs/introduction');
         return;
@@ -136,7 +142,7 @@ const handleLocation = async () => {
         if (!isAuthenticated() && (path.startsWith('/app') || path.startsWith('/link'))) {
             const redirectData = {
                 path: path,
-                expires: Date.now() + 3600 * 1000 // Expires in 1 hour
+                expires: Date.now() + 3600 * 1000
             };
             localStorage.setItem('post_login_redirect', JSON.stringify(redirectData));
             navigate('/login');
