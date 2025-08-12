@@ -276,6 +276,8 @@ export const initializeRouter = async () => {
 
     walletService.autoConnect().catch(err => console.warn("Auto-connect failed:", err));
     
+    handleLocation();
+    
     try {
         await validateAndRefreshUserSession();
     } catch (error) {
@@ -318,7 +320,5 @@ export const initializeRouter = async () => {
                 navigate(targetUrl.pathname + targetUrl.search);
             }
         });
-        
-        handleLocation();
     }
 }
