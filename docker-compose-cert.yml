@@ -17,5 +17,4 @@ services:
     volumes:
       - ./certbot/conf:/etc/letsencrypt
       - ./certbot/www:/var/www/certbot
-    # IMPORTANT: Replace with your email and domain
-    command: certonly --webroot --webroot-path=/var/www/certbot --email far3000yt@gmail.com --agree-tos --no-eff-email --quiet -d lumen.onl -d www.lumen.onl
+    command: certonly --webroot --webroot-path=/var/www/certbot --email far3000yt@gmail.com --agree-tos --no-eff-email --quiet -d lumen.onl -d www.lumen.onl -d status.lumen.onl -d docs.lumen.onl
