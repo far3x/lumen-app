@@ -33,8 +33,6 @@ FIXES / THINGS TO ADD :
 easy :
 - make algo give accurate rewards, scale with business model per tokens, give 20% to user, take 80% for ONE sell (meaning we can sell their code MULTIPLE times, unless contract that makes us sell code for higher price but makes it private)
 - push to prod on pypi when done before launch (so also block rewards till we have enough to give)
-
-medium :
 - allow 3 contributions a day, find a way to not limit these 3 if its failed contributions (like if ai gives 0 or idk)
 
 hard :

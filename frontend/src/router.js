@@ -132,7 +132,7 @@ const handleLocation = async () => {
     const hostname = window.location.hostname;
     const fullScreenPages = ['/link', '/check-email', '/verify', '/forgot-password', '/reset-password', '/2fa-verify', '/waitlist'];
     
-    if (!hostname.startsWith('docs.') && path.startsWith('/docs')) {
+    if (hostname !== 'localhost' && !hostname.startsWith('docs.') && path.startsWith('/docs')) {
         window.location.href = `https://docs.lumen.onl${path.replace('/docs', '')}`;
         return;
     }

@@ -17,8 +17,7 @@ function renderWalletSection(user, account) {
         const cooldownEnd = DateTime.fromISO(user.cooldown_until);
         if (now < cooldownEnd) {
             isClaimDisabled = true;
-            const remaining = cooldownEnd.diff(now, ['days', 'hours']).normalize();
-            cooldownMessage = `New account cooldown. You can claim in ${remaining.toFormat("d 'days,' h 'hours'")}.`;
+            cooldownMessage = `Reward claims are disabled during the pre-launch beta phase.`;
         }
     }
 
@@ -175,10 +174,34 @@ export function attachChartButtonListeners(contributions, onRangeChangeCallback)
         button.classList.add('bg-primary', 'text-text-main');
         button.classList.remove('text-text-secondary');
     }
+    
+    const banner = document.getElementById('prelaunch-banner');
+    const closeBtn = document.getElementById('close-banner-btn');
+    if (closeBtn && banner) {
+        closeBtn.addEventListener('click', () => {
+            banner.style.display = 'none';
+            localStorage.setItem('lumen_prelaunch_banner_dismissed', 'true');
+        });
+    }
 }
 
 export function renderDashboardOverview(user, account, rank, totalContributions) {
+    const isBannerDismissed = localStorage.getItem('lumen_prelaunch_banner_dismissed') === 'true';
+
     return `
+        <div id="prelaunch-banner" class="relative bg-yellow-900/30 border border-yellow-500/30 text-yellow-200 px-6 py-4 rounded-lg mb-6 flex items-start gap-4 ${isBannerDismissed ? 'hidden' : ''}">
+            <div class="flex-shrink-0 mt-0.5">
+                <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>
+            </div>
+            <div class="flex-grow">
+                <h4 class="font-bold">Pre-Launch Technology Preview</h4>
+                <p class="text-sm text-yellow-300/80 mt-1">
+                    Welcome to the Lumen Protocol Beta! All rewards shown during this phase are for simulation and testing purposes only. All balances will be reset before the official token launch. Thank you for helping us build!
+                </p>
+            </div>
+            <button id="close-banner-btn" class="p-1 -mr-2 text-yellow-300/70 hover:text-yellow-200">&times;</button>
+        </div>
+
         <header class="animate-fade-in-up">
             <h1 class="text-3xl font-bold">Welcome, <span class="pulse-text">${user?.display_name ?? 'Contributor'}</span></h1>
             <p class="text-text-secondary">Here's your performance snapshot today.</p>
