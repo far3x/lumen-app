@@ -73,7 +73,7 @@ function updateHeadMeta(meta) {
             canonicalLink.href = `https://lumen.onl${window.location.pathname}`;
         }
     }
-    document.getElementById('og-url-link').setAttribute('content', finalMeta.url);
+    document.getElementById('og-url-link').setAttribute('content', canonicalLink.href);
 
     document.querySelector('meta[property="og:title"]').content = finalMeta.ogTitle || finalMeta.title;
     document.querySelector('meta[property="og:description"]').content = finalMeta.ogDescription || finalMeta.description;
@@ -129,10 +129,11 @@ function attachIndependentScroll() {
 const handleLocation = async () => {
     const path = window.location.pathname;
     const hash = window.location.hash;
+    const hostname = window.location.hostname;
     const fullScreenPages = ['/link', '/check-email', '/verify', '/forgot-password', '/reset-password', '/2fa-verify', '/waitlist'];
     
-    if (path === '/docs' || path === '/docs/') {
-        navigate('/docs/introduction');
+    if (hostname.startsWith('docs.') && path === '/') {
+        navigate('/introduction');
         return;
     }
 
@@ -199,13 +200,17 @@ const handleLocation = async () => {
         }
 
         let renderPromise;
-        if (path.startsWith('/docs/')) {
-            const pageId = path.split('/docs/')[1] || 'introduction';
+        if (hostname.startsWith('docs.') || path.startsWith('/docs/')) {
+            let pageId;
+            if (hostname.startsWith('docs.')) {
+                pageId = path.substring(1) || 'introduction';
+            } else {
+                pageId = path.split('/docs/')[1] || 'introduction';
+            }
             const pageMeta = docPages[pageId] || docPages['introduction'];
             updateHeadMeta({
                 title: `Lumen Docs | ${pageMeta.title}`,
                 description: `Documentation for Lumen Protocol: ${pageMeta.title}.`,
-                url: `https://lumen.onl${path}`
             });
             renderPromise = import('./pages/docs/layout.js').then(m => m.renderDocsLayout(pageId));
         } else if (path.startsWith('/patch-notes')) {
@@ -214,11 +219,10 @@ const handleLocation = async () => {
              updateHeadMeta({
                 title: `Lumen Patch Notes | ${noteMeta.title}`,
                 description: `Release notes for ${noteMeta.date}: ${noteMeta.title}`,
-                url: `https://lumen.onl${path}`
              });
             renderPromise = import('./pages/patch-notes/layout.js').then(m => m.renderPatchNotesLayout(noteId));
         } else {
-            updateHeadMeta({ ...routeMeta[path], url: `https://lumen.onl${path}` });
+            updateHeadMeta({ ...routeMeta[path] });
             const routeHandler = routes[path] || routes['/'];
             if (typeof routeHandler !== 'function') {
                 console.error(`No route handler found for path: ${path}. Defaulting to home.`);
