@@ -10,6 +10,13 @@ export function renderFooter(currentPath) {
         <path stroke-linecap="round" stroke-linejoin="round" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
     </svg>`;
     
+    const isDocsSubdomain = window.location.hostname.startsWith('docs.');
+    const mainSiteUrl = isDocsSubdomain ? 'https://lumen.onl' : '';
+    const logoUrl = `${mainSiteUrl || ''}/logo.png`;
+
+    const getDocPath = (path) => isDocsSubdomain ? `/${path}` : `/docs/${path}`;
+    const getMainPath = (path) => isDocsSubdomain ? `https://lumen.onl${path}` : path;
+    
     const ctaSection = authed
         ? (onDashboard
             ? ''
@@ -17,7 +24,7 @@ export function renderFooter(currentPath) {
             <div class="text-center mb-20 scroll-animate">
                 <h2 class="text-3xl md:text-4xl font-bold">Ready to Contribute More?</h2>
                 <p class="text-text-secondary mt-4 max-w-xl mx-auto">Head back to your dashboard to view your progress and see the latest network activity.</p>
-                <a href="/app/dashboard" class="mt-8 inline-block px-8 py-3 font-bold bg-gradient-to-r from-accent-purple to-accent-pink text-white rounded-lg transition-all duration-300 hover:scale-105 hover:shadow-lg hover:shadow-accent-purple/30 hover:brightness-110">
+                <a href="${getMainPath('/app/dashboard')}" class="mt-8 inline-block px-8 py-3 font-bold bg-gradient-to-r from-accent-purple to-accent-pink text-white rounded-lg transition-all duration-300 hover:scale-105 hover:shadow-lg hover:shadow-accent-purple/30 hover:brightness-110">
                     Go to Dashboard
                 </a>
             </div>
@@ -28,7 +35,7 @@ export function renderFooter(currentPath) {
             <div class="text-center mb-20 scroll-animate">
                 <h2 class="text-3xl md:text-4xl font-bold">Ready to Join the Data Economy?</h2>
                 <p class="text-text-secondary mt-4 max-w-xl mx-auto">Start contributing your anonymized code in minutes and get rewarded with $LUM tokens.</p>
-                <a href="/signup" class="mt-8 inline-block px-8 py-3 font-bold bg-gradient-to-r from-accent-purple to-accent-pink text-white rounded-lg transition-all duration-300 hover:scale-105 hover:shadow-lg hover:shadow-accent-purple/30 hover:brightness-110">
+                <a href="${getMainPath('/signup')}" class="mt-8 inline-block px-8 py-3 font-bold bg-gradient-to-r from-accent-purple to-accent-pink text-white rounded-lg transition-all duration-300 hover:scale-105 hover:shadow-lg hover:shadow-accent-purple/30 hover:brightness-110">
                     Get Started Now
                 </a>
             </div>
@@ -42,8 +49,8 @@ export function renderFooter(currentPath) {
 
                 <div class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-8 scroll-animate">
                     <div class="col-span-2">
-                        <a href="/" class="flex items-center space-x-2">
-                            <img src="/logo.png" alt="Lumen Logo" class="h-8 w-8">
+                        <a href="${getMainPath('/')}" class="flex items-center space-x-2">
+                            <img src="${logoUrl}" alt="Lumen Logo" class="h-8 w-8">
                             <span class="text-xl font-bold text-text-main">Lumen Protocol</span>
                         </a>
                         <p class="text-text-secondary mt-4 max-w-xs">The decentralized data exchange powering the next generation of artificial intelligence.</p>
@@ -51,10 +58,10 @@ export function renderFooter(currentPath) {
                     <div>
                         <h3 class="font-bold text-text-main tracking-wider uppercase">Developers</h3>
                         <ul class="mt-4 space-y-3">
-                            <li><a href="/docs/installation" class="text-text-secondary hover:text-text-main transition-colors">CLI Guide</a></li>
-                            <li><a href="/docs/faq" class="text-text-secondary hover:text-text-main transition-colors">FAQ</a></li>
-                            <li><a href="/docs/security" class="text-text-secondary hover:text-text-main transition-colors">Security</a></li>
-                            <li><a href="/patch-notes/" class="text-text-secondary hover:text-text-main transition-colors">Patch Notes</a></li>
+                            <li><a href="${getDocPath('installation')}" class="text-text-secondary hover:text-text-main transition-colors">CLI Guide</a></li>
+                            <li><a href="${getDocPath('faq')}" class="text-text-secondary hover:text-text-main transition-colors">FAQ</a></li>
+                            <li><a href="${getDocPath('security')}" class="text-text-secondary hover:text-text-main transition-colors">Security</a></li>
+                            <li><a href="${getMainPath('/patch-notes/')}" class="text-text-secondary hover:text-text-main transition-colors">Patch Notes</a></li>
                         </ul>
                     </div>
                     <div>
@@ -69,10 +76,10 @@ export function renderFooter(currentPath) {
                     <div>
                         <h3 class="font-bold text-text-main tracking-wider uppercase">Legal</h3>
                         <ul class="mt-4 space-y-3">
-                            <li><a href="/docs/terms" class="text-text-secondary hover:text-text-main transition-colors">Terms & Conditions</a></li>
-                            <li><a href="/docs/privacy-policy" class="text-text-secondary hover:text-text-main transition-colors">Privacy Policy</a></li>
-                            <li><a href="/docs/contributor-agreement" class="text-text-secondary hover:text-text-main transition-colors">Contributor Agreement</a></li>
-                            <li><a href="/docs/disclaimer" class="text-text-secondary hover:text-text-main transition-colors">Disclaimer</a></li>
+                            <li><a href="${getDocPath('terms')}" class="text-text-secondary hover:text-text-main transition-colors">Terms & Conditions</a></li>
+                            <li><a href="${getDocPath('privacy-policy')}" class="text-text-secondary hover:text-text-main transition-colors">Privacy Policy</a></li>
+                            <li><a href="${getDocPath('contributor-agreement')}" class="text-text-secondary hover:text-text-main transition-colors">Contributor Agreement</a></li>
+                            <li><a href="${getDocPath('disclaimer')}" class="text-text-secondary hover:text-text-main transition-colors">Disclaimer</a></li>
                         </ul>
                     </div>
                 </div>
