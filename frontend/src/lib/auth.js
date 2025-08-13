@@ -114,15 +114,21 @@ export const validateAndRefreshUserSession = async () => {
     }
 
     try {
-        const response = await api.get('/users/me');
-        const remoteUser = response.data;
-        const localUser = getUser();
+        const [userResponse, accountResponse] = await Promise.all([
+            api.get('/users/me'),
+            api.get('/users/me/balance')
+        ]);
 
-        if (!localUser || JSON.stringify(localUser) !== JSON.stringify(remoteUser)) {
-            user = remoteUser;
-            localStorage.setItem('lumen_user', JSON.stringify(remoteUser));
-            console.log("User session state synced with backend.");
-        }
+        const remoteUser = userResponse.data;
+        user = remoteUser;
+        localStorage.setItem('lumen_user', JSON.stringify(remoteUser));
+
+        const remoteAccount = accountResponse.data;
+        account = remoteAccount;
+        localStorage.setItem('lumen_account', JSON.stringify(remoteAccount));
+        
+        console.log("User and account session state synced with backend.");
+        
     } catch (error) {
         console.error("Session validation failed during startup. The API interceptor will handle logout.", error);
     }
