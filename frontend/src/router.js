@@ -347,6 +347,10 @@ export const initializeRouter = async () => {
         document.body.addEventListener('click', (e) => {
             let link = e.target.closest('a[href]');
 
+            if (link && (new URL(link.href).pathname.startsWith('/docs'))) {
+                return;
+            }
+
             if (e.target.closest('#feedback-button')) {
                 e.preventDefault();
                 renderFeedbackModal();
