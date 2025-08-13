@@ -22,6 +22,8 @@ import pyotp
 
 router = APIRouter(prefix="/auth", tags=["Authentication"])
 
+cookie_domain = "lumen.onl" if "localhost" not in config.settings.FRONTEND_URL else None
+
 mail_conf = ConnectionConfig(
     MAIL_USERNAME=config.settings.MAIL_USERNAME,
     MAIL_PASSWORD=config.settings.MAIL_PASSWORD,
@@ -233,8 +235,8 @@ async def login_for_access_token(request: Request, response: Response, form_data
     access_token_expires = timedelta(minutes=config.settings.ACCESS_TOKEN_EXPIRE_MINUTES)
     access_token = security.create_access_token(data={"sub": str(user.id)}, expires_delta=access_token_expires)
     
-    response.set_cookie(key="access_token", value=access_token, httponly=True, secure=True, samesite="lax", max_age=config.settings.ACCESS_TOKEN_EXPIRE_MINUTES * 60)
-    response.set_cookie(key="is_logged_in", value="true", httponly=False, secure=True, samesite="lax", max_age=config.settings.ACCESS_TOKEN_EXPIRE_MINUTES * 60)
+    response.set_cookie(key="access_token", value=access_token, httponly=True, secure=True, samesite="lax", max_age=config.settings.ACCESS_TOKEN_EXPIRE_MINUTES * 60, domain=cookie_domain)
+    response.set_cookie(key="is_logged_in", value="true", httponly=False, secure=True, samesite="lax", max_age=config.settings.ACCESS_TOKEN_EXPIRE_MINUTES * 60, domain=cookie_domain)
     return {"status": "success"}
 
 @router.post("/token/2fa")
@@ -262,8 +264,8 @@ async def login_2fa_verification(request: Request, response: Response, payload: 
         access_token_expires = timedelta(minutes=config.settings.ACCESS_TOKEN_EXPIRE_MINUTES)
         access_token = security.create_access_token(data={"sub": str(user.id)}, expires_delta=access_token_expires)
     
-        response.set_cookie(key="access_token", value=access_token, httponly=True, secure=True, samesite="lax", max_age=config.settings.ACCESS_TOKEN_EXPIRE_MINUTES * 60)
-        response.set_cookie(key="is_logged_in", value="true", httponly=False, secure=True, samesite="lax", max_age=config.settings.ACCESS_TOKEN_EXPIRE_MINUTES * 60)
+        response.set_cookie(key="access_token", value=access_token, httponly=True, secure=True, samesite="lax", max_age=config.settings.ACCESS_TOKEN_EXPIRE_MINUTES * 60, domain=cookie_domain)
+        response.set_cookie(key="is_logged_in", value="true", httponly=False, secure=True, samesite="lax", max_age=config.settings.ACCESS_TOKEN_EXPIRE_MINUTES * 60, domain=cookie_domain)
         return {"status": "success"}
 
     except JWTError:
@@ -297,8 +299,8 @@ async def login_2fa_backup_code(request: Request, response: Response, payload: T
         access_token_expires = timedelta(minutes=config.settings.ACCESS_TOKEN_EXPIRE_MINUTES)
         access_token = security.create_access_token(data={"sub": str(user.id)}, expires_delta=access_token_expires)
     
-        response.set_cookie(key="access_token", value=access_token, httponly=True, secure=True, samesite="lax", max_age=config.settings.ACCESS_TOKEN_EXPIRE_MINUTES * 60)
-        response.set_cookie(key="is_logged_in", value="true", httponly=False, secure=True, samesite="lax", max_age=config.settings.ACCESS_TOKEN_EXPIRE_MINUTES * 60)
+        response.set_cookie(key="access_token", value=access_token, httponly=True, secure=True, samesite="lax", max_age=config.settings.ACCESS_TOKEN_EXPIRE_MINUTES * 60, domain=cookie_domain)
+        response.set_cookie(key="is_logged_in", value="true", httponly=False, secure=True, samesite="lax", max_age=config.settings.ACCESS_TOKEN_EXPIRE_MINUTES * 60, domain=cookie_domain)
         return {"status": "success", "message": "Successfully logged in. A backup code was used."}
 
     except JWTError:
@@ -384,14 +386,14 @@ async def auth_callback(request: Request, provider: str, db: Session = Depends(d
     frontend_url = f"{config.settings.FRONTEND_URL}{redirect_path}"
     response = RedirectResponse(url=frontend_url)
     
-    response.set_cookie(key="access_token", value=access_token, httponly=True, secure=True, samesite="lax", max_age=config.settings.ACCESS_TOKEN_EXPIRE_MINUTES * 60)
-    response.set_cookie(key="is_logged_in", value="true", httponly=False, secure=True, samesite="lax", max_age=config.settings.ACCESS_TOKEN_EXPIRE_MINUTES * 60)
+    response.set_cookie(key="access_token", value=access_token, httponly=True, secure=True, samesite="lax", max_age=config.settings.ACCESS_TOKEN_EXPIRE_MINUTES * 60, domain=cookie_domain)
+    response.set_cookie(key="is_logged_in", value="true", httponly=False, secure=True, samesite="lax", max_age=config.settings.ACCESS_TOKEN_EXPIRE_MINUTES * 60, domain=cookie_domain)
     return response
 
 @router.post("/logout")
 async def logout(response: Response):
-    response.delete_cookie("access_token")
-    response.delete_cookie("is_logged_in")
+    response.delete_cookie("access_token", domain=cookie_domain)
+    response.delete_cookie("is_logged_in", domain=cookie_domain)
     return {"status": "success"}
 
 @router.post("/cli/approve-device", dependencies=[Depends(dependencies.verify_beta_access)])
