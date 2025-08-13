@@ -65,7 +65,14 @@ function updateHeadMeta(meta) {
     document.querySelector('meta[name="description"]').content = finalMeta.description;
     document.querySelector('meta[name="keywords"]').content = finalMeta.keywords || defaultMeta.keywords;
     
-    document.getElementById('canonical-link').href = finalMeta.url;
+    const canonicalLink = document.getElementById('canonical-link');
+    if (canonicalLink) {
+        if (window.location.hostname.startsWith('docs.')) {
+            canonicalLink.href = `https://docs.lumen.onl${window.location.pathname}`;
+        } else {
+            canonicalLink.href = `https://lumen.onl${window.location.pathname}`;
+        }
+    }
     document.getElementById('og-url-link').setAttribute('content', finalMeta.url);
 
     document.querySelector('meta[property="og:title"]').content = finalMeta.ogTitle || finalMeta.title;
