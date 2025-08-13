@@ -1,6 +1,11 @@
 export const patchNotes = {
+    '2025_08_14': { 
+        title: 'The Pre-Launch & Beta Refinement Update', 
+        date: 'August 14, 2025',
+        content: () => import('./content/2025_08_14.js').then(m => m.renderContent()) 
+    },
     '2025_08_07': { 
-        title: 'The Genesis Update: A New Vision, A New Partner & A Wave of Enhancements', 
+        title: 'The Genesis Update: A New Vision & A Wave of Enhancements', 
         date: 'August 7, 2025',
         content: () => import('./content/2025_08_07.js').then(m => m.renderContent()) 
     },
