@@ -1,4 +1,3 @@
-// frontend/src/components/navbar.js
 import { isAuthenticated, getUser, logout, getAccount, api as authApi, fetchAndStoreUser } from '../lib/auth.js';
 import { walletService } from '../lib/wallet.js';
 import { navigate } from '../router.js';
@@ -146,19 +145,28 @@ export function renderNavbar(currentPath) {
     const balance = account?.lum_balance ?? 0;
     const externalLinkIcon = `<svg xmlns="http://www.w3.org/2000/svg" class="inline-block h-4 w-4 ml-1.5 opacity-60 group-hover:opacity-100" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" /></svg>`;
 
+    const isDocsSubdomain = window.location.hostname.startsWith('docs.');
+
+    const homeUrl = isDocsSubdomain ? 'https://lumen.onl/' : '/';
+    const docsUrl = isDocsSubdomain ? '/introduction' : '/docs/introduction';
+    const leaderboardUrl = isDocsSubdomain ? 'https://lumen.onl/leaderboard' : '/leaderboard';
+    const roadmapUrl = isDocsSubdomain ? '/roadmap' : '/docs/roadmap';
+    const loginUrl = isDocsSubdomain ? 'https://lumen.onl/login' : '/login';
+    const signupUrl = isDocsSubdomain ? 'https://lumen.onl/signup' : '/signup';
+    const dashboardUrl = isDocsSubdomain ? 'https://lumen.onl/app/dashboard' : '/app/dashboard';
+    const logoUrl = 'https://lumen.onl/logo.png'; 
+
     const getNavLinkClasses = (path) => {
         const baseClasses = 'group px-4 py-2 text-text-secondary hover:text-text-main transition-colors duration-200 flex items-center';
-        const isActive = currentPath === path;
+        const isActive = currentPath === path || (currentPath.startsWith('/docs') && path.startsWith('/docs')) || (isDocsSubdomain && path.startsWith('/introduction'));
         return isActive ? `${baseClasses} text-text-main` : baseClasses;
     };
 
     const getMobileNavLinkClasses = (path) => {
         const baseClasses = `group block w-full text-left py-3 px-4 rounded-md text-sm text-text-secondary hover:bg-primary hover:text-text-main transition-colors flex items-center`;
-        const isActive = currentPath === path;
+        const isActive = currentPath === path || (currentPath.startsWith('/docs') && path.startsWith('/docs')) || (isDocsSubdomain && path.startsWith('/introduction'));
         return isActive ? `${baseClasses} bg-primary text-text-main` : baseClasses;
     };
-
-    const leaderboardLink = '/leaderboard';
 
     const mobileNavHTML = `
         <div id="mobile-menu-overlay" class="fixed inset-0 bg-black/60 z-40 hidden lg:hidden" aria-hidden="true"></div>
@@ -169,9 +177,9 @@ export function renderNavbar(currentPath) {
                     <button id="mobile-menu-close" type="button" class="p-2 text-text-secondary hover:text-text-main"><svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg></button>
                 </div>
                 <nav class="flex flex-col space-y-2">
-                    <a href="/docs/introduction" class="${getMobileNavLinkClasses('/docs/introduction')}">Docs</a>
-                    <a href="${leaderboardLink}" class="${getMobileNavLinkClasses('/leaderboard')}">Leaderboard</a>
-                    <a href="/docs/roadmap" class="${getMobileNavLinkClasses('/docs/roadmap')}">Roadmap</a>
+                    <a href="${docsUrl}" class="${getMobileNavLinkClasses('/docs/introduction')}">Docs</a>
+                    <a href="${leaderboardUrl}" class="${getMobileNavLinkClasses('/leaderboard')}">Leaderboard</a>
+                    <a href="${roadmapUrl}" class="${getMobileNavLinkClasses('/docs/roadmap')}">Roadmap</a>
                     <a href="https://github.com/Far3000-YT/lumen" target="_blank" rel="noopener" data-external="true" class="${getMobileNavLinkClasses('')}">GitHub ${externalLinkIcon}</a>
                 </nav>
                 <div class="mt-auto">
@@ -181,12 +189,12 @@ export function renderNavbar(currentPath) {
                                 <p class="text-xs text-text-secondary">Your Balance</p>
                                 <p class="font-mono text-lg gradient-text navbar-user-balance">${balance.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 4 })} $LUM</p>
                             </div>
-                            <a href="/app/dashboard" class="${getMobileNavLinkClasses('/app/dashboard')}">Dashboard</a>
+                            <a href="${dashboardUrl}" class="${getMobileNavLinkClasses('/app/dashboard')}">Dashboard</a>
                             <button id="logout-button-mobile" class="w-full text-left ${getMobileNavLinkClasses('')} text-red-400 hover:text-red-300">Log Out</button>
                         </div>` : `
                         <div class="space-y-3">
-                             <a href="/login" class="block w-full text-center h-11 flex items-center justify-center px-6 bg-primary rounded-full text-sm font-medium text-text-secondary hover:bg-subtle transition-colors">Log In</a>
-                            <a href="/signup" class="block w-full text-center h-11 flex items-center justify-center px-6 text-sm font-bold text-white rounded-full bg-gradient-to-r from-accent-purple to-accent-pink">Sign Up</a>
+                             <a href="${loginUrl}" class="block w-full text-center h-11 flex items-center justify-center px-6 bg-primary rounded-full text-sm font-medium text-text-secondary hover:bg-subtle transition-colors">Log In</a>
+                            <a href="${signupUrl}" class="block w-full text-center h-11 flex items-center justify-center px-6 text-sm font-bold text-white rounded-full bg-gradient-to-r from-accent-purple to-accent-pink">Sign Up</a>
                         </div>`}
                 </div>
             </div>
@@ -201,7 +209,7 @@ export function renderNavbar(currentPath) {
                 <svg class="w-5 h-5 text-text-secondary ml-1" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" /></svg>
             </button>
             <div id="user-menu-dropdown" class="absolute hidden top-full left-1/2 transform -translate-x-1/2 mt-2 w-56 origin-top bg-primary border border-subtle rounded-lg shadow-lg py-1 z-[60]">
-                <a href="/app/dashboard" class="w-full text-left block px-4 py-2 text-sm text-text-secondary hover:bg-surface hover:text-text-main">Dashboard</a>
+                <a href="${dashboardUrl}" class="w-full text-left block px-4 py-2 text-sm text-text-secondary hover:bg-surface hover:text-text-main">Dashboard</a>
                 <div class="my-1 h-px bg-subtle/50"></div>
                 <div id="wallet-dropdown-container"></div>
                 <div class="my-1 h-px bg-subtle/50"></div>
@@ -213,8 +221,8 @@ export function renderNavbar(currentPath) {
             <button id="mobile-menu-trigger" type="button" class="p-2 text-text-secondary hover:text-text-main"><svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path></svg></button>
         </div>` : `
         <div class="hidden lg:flex items-center h-11 p-1 bg-primary/50 border border-subtle/50 rounded-full">
-            <a href="/login" class="h-full flex items-center px-6 rounded-full text-sm font-medium text-text-secondary hover:bg-subtle/50 transition-colors">Log In</a>
-            <a href="/signup" class="h-full flex items-center px-6 text-sm font-bold text-white rounded-full bg-gradient-to-r from-accent-purple to-accent-pink">Sign Up</a>
+            <a href="${loginUrl}" class="h-full flex items-center px-6 rounded-full text-sm font-medium text-text-secondary hover:bg-subtle/50 transition-colors">Log In</a>
+            <a href="${signupUrl}" class="h-full flex items-center px-6 text-sm font-bold text-white rounded-full bg-gradient-to-r from-accent-purple to-accent-pink">Sign Up</a>
         </div>
         <button id="mobile-menu-trigger" type="button" class="p-2 text-text-secondary hover:text-text-main lg:hidden"><svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path></svg></button>`;
 
@@ -222,15 +230,15 @@ export function renderNavbar(currentPath) {
     <header class="fixed top-4 left-1/2 -translate-x-1/2 w-[95%] max-w-7xl z-50">
         <div class="relative w-full h-14 bg-surface/10 border border-white/10 backdrop-blur-xl rounded-full flex items-center justify-between px-2">
             <div class="flex-1 flex justify-start">
-                <a href="/" class="flex items-center gap-x-2" title="Lumen Home">
-                    <img src="/logo.png" alt="Lumen Logo" class="h-8 w-8">
+                <a href="${homeUrl}" class="flex items-center gap-x-2" title="Lumen Home">
+                    <img src="${logoUrl}" alt="Lumen Logo" class="h-8 w-8">
                     <span class="hidden sm:block text-xl font-bold text-text-main">Lumen</span>
                 </a>
             </div>
             <nav class="hidden lg:flex items-center justify-center text-sm font-medium">
-                <a href="/docs/introduction" class="${getNavLinkClasses('/docs/introduction')}">Docs</a>
-                <a href="${leaderboardLink}" class="${getNavLinkClasses('/leaderboard')}">Leaderboard</a>
-                <a href="/docs/roadmap" class="${getNavLinkClasses('/docs/roadmap')}">Roadmap</a>
+                <a href="${docsUrl}" class="${getNavLinkClasses('/docs/introduction')}">Docs</a>
+                <a href="${leaderboardUrl}" class="${getNavLinkClasses('/leaderboard')}">Leaderboard</a>
+                <a href="${roadmapUrl}" class="${getNavLinkClasses('/docs/roadmap')}">Roadmap</a>
                 <a href="https://github.com/Far3000-YT/lumen" target="_blank" rel="noopener noreferrer" data-external="true" class="${getNavLinkClasses('')}">GitHub ${externalLinkIcon}</a>
             </nav>
             <div class="flex-1 flex justify-end">

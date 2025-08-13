@@ -214,11 +214,18 @@ export const docPages = {
 
 const orderedDocKeys = Object.keys(docPages);
 
+const getDocPath = (id) => {
+    if (window.location.hostname.startsWith('docs.')) {
+        return `/${id}`;
+    }
+    return `/docs/${id}`;
+};
+
 function renderSidebarContent(activePage) {
     const navLink = (id, name) => {
         const isActive = id === activePage;
         return `
-            <a href="/docs/${id}" class="block py-2 px-3 rounded-md text-sm transition-colors 
+            <a href="${getDocPath(id)}" class="block py-2 px-3 rounded-md text-sm transition-colors 
                 ${isActive ? 'bg-primary font-bold text-accent-cyan' : 'text-text-secondary hover:bg-surface hover:text-text-main'}">
                 ${name}
             </a>
@@ -325,7 +332,7 @@ function renderDocsNavigationButtons(pageKey) {
     const nextKey = currentIndex < orderedDocKeys.length - 1 ? orderedDocKeys[currentIndex + 1] : null;
 
     const prevButton = prevKey ? `
-        <a href="/docs/${prevKey}" class="group flex items-center gap-4 p-4 rounded-lg bg-surface border border-primary hover:border-subtle/80 transition-colors text-left">
+        <a href="${getDocPath(prevKey)}" class="group flex items-center gap-4 p-4 rounded-lg bg-surface border border-primary hover:border-subtle/80 transition-colors text-left">
             <svg class="w-6 h-6 shrink-0" fill="none" viewBox="0 0 24 24" stroke="url(#dashboard-icon-gradient)" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7" /></svg>
             <div class="flex-grow min-w-0">
                 <p class="truncate text-sm"><span class="text-text-secondary">Previous:</span> <span class="font-semibold text-text-main">${docPages[prevKey].title}</span></p>
@@ -333,7 +340,7 @@ function renderDocsNavigationButtons(pageKey) {
         </a>` : '<div></div>';
 
     const nextButton = nextKey ? `
-        <a href="/docs/${nextKey}" class="group flex items-center justify-end gap-4 p-4 rounded-lg bg-surface border border-primary hover:border-subtle/80 transition-colors text-right">
+        <a href="${getDocPath(nextKey)}" class="group flex items-center justify-end gap-4 p-4 rounded-lg bg-surface border border-primary hover:border-subtle/80 transition-colors text-right">
              <div class="flex-grow min-w-0">
                 <p class="truncate text-sm"><span class="text-text-secondary">Next:</span> <span class="font-semibold text-text-main">${docPages[nextKey].title}</span></p>
             </div>
