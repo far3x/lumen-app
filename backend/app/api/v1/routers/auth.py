@@ -22,7 +22,7 @@ import pyotp
 
 router = APIRouter(prefix="/auth", tags=["Authentication"])
 
-cookie_domain = "lumen.onl" if "localhost" not in config.settings.FRONTEND_URL else None
+cookie_domain = ".lumen.onl" if "localhost" not in config.settings.FRONTEND_URL else None
 
 mail_conf = ConnectionConfig(
     MAIL_USERNAME=config.settings.MAIL_USERNAME,
