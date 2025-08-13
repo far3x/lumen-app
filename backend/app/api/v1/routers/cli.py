@@ -3,6 +3,7 @@ import hashlib
 import tiktoken
 from fastapi import APIRouter, Depends, HTTPException, status, Request
 from sqlalchemy.orm import Session
+from sqlalchemy import text
 from app.core import config
 from app.db import database, crud, models
 from app.db.database import SessionLocal
@@ -12,7 +13,7 @@ from app.api.v1 import dependencies
 from app.tasks import process_contribution
 from app.core.limiter import limiter
 from typing import List, Optional
-from datetime import datetime, timezone
+from datetime import datetime, timezone, timedelta
 
 router = APIRouter(prefix="/cli", tags=["CLI"])
 
@@ -75,7 +76,7 @@ except Exception:
     tokenizer = None
 
 @router.post("/contribute", status_code=status.HTTP_202_ACCEPTED)
-@limiter.limit("5/day", key_func=get_user_id_from_pat_for_rate_limit)
+@limiter.limit("8/hour", key_func=get_user_id_from_pat_for_rate_limit)
 async def contribute_data(
     request: Request,
     payload: ContributionCreate,
@@ -85,6 +86,19 @@ async def contribute_data(
 ):
     challenge_key = f"challenge:{current_user.id}"
     redis_service.delete(challenge_key)
+    
+    twenty_four_hours_ago = datetime.now(timezone.utc) - timedelta(hours=24)
+    successful_contributions_count = db.query(models.Contribution).filter(
+        models.Contribution.user_id == current_user.id,
+        models.Contribution.status == 'PROCESSED',
+        models.Contribution.created_at >= twenty_four_hours_ago
+    ).count()
+
+    if successful_contributions_count >= 3:
+        raise HTTPException(
+            status_code=status.HTTP_429_TOO_MANY_REQUESTS,
+            detail="You have reached your daily limit of 3 successful contributions. Please try again later."
+        )
 
     if tokenizer:
         token_count = len(tokenizer.encode(payload.codebase))
