@@ -128,6 +128,18 @@ class ContributionResponse(BaseModel):
             datetime: lambda v: v.isoformat(),
         }
 
+class PublicContributionResponse(BaseModel):
+    id: int
+    created_at: datetime
+    reward_amount: float
+    user_display_name: str
+
+    class Config:
+        from_attributes = True
+        json_encoders = {
+            datetime: lambda v: v.isoformat(),
+        }
+
 class ContributionStatus(BaseModel):
     status: str
     contribution_id: int

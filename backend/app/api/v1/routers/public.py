@@ -4,7 +4,7 @@ from sqlalchemy.orm import Session
 import json
 
 from app.db import crud, database, models
-from app.schemas import LeaderboardEntry, ContributionResponse, ValuationMetrics, AiAnalysis, LeaderboardResponse, FeedbackCreate
+from app.schemas import LeaderboardEntry, LeaderboardResponse, FeedbackCreate, PublicContributionResponse
 from app.api.v1 import dependencies
 from app.core.limiter import limiter
 from app.services.redis_service import redis_service
@@ -60,7 +60,7 @@ def get_leaderboard(
     return response_data
 
 
-@router.get("/recent-contributions", response_model=list[ContributionResponse])
+@router.get("/recent-contributions", response_model=list[PublicContributionResponse])
 @limiter.limit("60/minute")
 def get_recent_contributions(
     request: Request,
@@ -76,41 +76,10 @@ def get_recent_contributions(
     recent_contributions_data = crud.get_recent_processed_contributions(db, limit=limit)
     response_list = []
     for contrib, display_name in recent_contributions_data:
-        valuation_data = {}
-        if contrib.valuation_results:
-            data = contrib.valuation_results
-            if isinstance(data, str):
-                try: data = json.loads(data)
-                except (json.JSONDecodeError, TypeError): data = {}
-            if isinstance(data, str):
-                try: data = json.loads(data)
-                except (json.JSONDecodeError, TypeError): data = {}
-            if isinstance(data, dict):
-                valuation_data = data
-        
-        manual_metrics = ValuationMetrics(
-            total_lloc=valuation_data.get('total_lloc', 0),
-            total_tokens=valuation_data.get('total_tokens', 0),
-            avg_complexity=valuation_data.get('avg_complexity', 0.0),
-            compression_ratio=valuation_data.get('compression_ratio', 0.0),
-            language_breakdown=valuation_data.get('language_breakdown', {})
-        )
-        
-        ai_analysis = AiAnalysis(
-            project_clarity_score=valuation_data.get('project_clarity_score', 0.0),
-            architectural_quality_score=valuation_data.get('architectural_quality_score', 0.0),
-            code_quality_score=valuation_data.get('code_quality_score', 0.0),
-            analysis_summary=valuation_data.get('analysis_summary')
-        )
-
-        response_list.append(ContributionResponse(
+        response_list.append(PublicContributionResponse(
             id=contrib.id,
             created_at=contrib.created_at,
             reward_amount=contrib.reward_amount,
-            status=contrib.status,
-            valuation_details=valuation_data,
-            manual_metrics=manual_metrics,
-            ai_analysis=ai_analysis,
             user_display_name=display_name
         ))
 
