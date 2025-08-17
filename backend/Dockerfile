@@ -21,6 +21,9 @@ FROM python:3.11-slim
 
 WORKDIR /usr/src/app
 
+RUN apt-get update && apt-get install -y curl && \
+    rm -rf /var/lib/apt/lists/*
+
 COPY --from=builder /opt/venv /opt/venv
 COPY --from=builder /usr/local/bin/scc /usr/local/bin/scc
 
