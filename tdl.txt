@@ -32,8 +32,19 @@ socials :
 FIXES / THINGS TO ADD :
 easy :
 - make algo give accurate rewards, scale with business model per tokens, give 20% to user, take 80% for ONE sell (meaning we can sell their code MULTIPLE times, unless contract that makes us sell code for higher price but makes it private)
-- push to prod on pypi when done before launch (so also block rewards till we have enough to give)
-- allow 3 contributions a day, find a way to not limit these 3 if its failed contributions (like if ai gives 0 or idk)
+- launch video with facecam + mic, 3-4 small / medium videos showing the app
+- in big video, plan :
+ - introduce myself -> hi guys, my name is fares, also known as Far3000 and i'm the developer behind Lumen.
+ - show what i've been building starting from the landing page, explaining from here and then going on
+ - install, login, contribute (gitignore, scans only code files and skip useless files, then valuation system explain -> )
+   no garbage data allowed, u cant rly bypass the system since it goes through many things
+
+   embedding uniqueness search to not allow plagiarism... etc (rejected, allowed and updated)
+   manual metrics -> code complexity, number of lines, tokens contribute
+   ai analysis -> double checking all this with 3 scores -> project clarity (purpose), architectural quality and code quality
+
+ - roadmap -> marketplace, agent, expanding the ecosystem overall
+   try to allow to more ppl to use lumen on the technical part
 
 hard :
 - (after business.lumen.onl dashboard etc) -> make sure if ai gives 0, we still get that in our base (if the code is non secure), because storing code isn't dangerous, its using it that is (and we could get a category on that, "dangerous" where data buyers could also be interested in getting)
