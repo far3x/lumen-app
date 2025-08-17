@@ -69,7 +69,7 @@ function renderRecentActivityFeed(contributions) {
 
 function renderPageLayout(leaderboard, userRank, recentContributions) {
     const yourRankCard = (isAuthenticated() && userRank) ? `
-        <div class="max-w-7xl mx-auto mb-8 animate-fade-in-up" style="animation-delay: 200ms;">
+        <div class="max-w-7xl mx-auto animate-fade-in-up" style="animation-delay: 200ms;">
             <div class="bg-surface/30 backdrop-blur-md rounded-xl p-4 flex items-center justify-between gap-4 border border-primary">
                 <div class="flex items-center gap-4">
                     <span class="text-lg font-bold">Your Rank</span>
@@ -88,7 +88,7 @@ function renderPageLayout(leaderboard, userRank, recentContributions) {
 
     return `
         <div class="container mx-auto px-6 py-20 min-h-screen">
-            <div class="text-center max-w-3xl mx-auto animate-fade-in-up">
+            <div class="text-center max-w-3xl mx-auto animate-fade-in-up mb-16">
                 <h1 class="text-5xl md:text-6xl font-bold mb-4 pulse-text">Network Hub</h1>
                 <p class="mt-4 text-lg text-text-secondary">
                     The architects of the future of AI. Track top contributors and see the latest network activity live.
