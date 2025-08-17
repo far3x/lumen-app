@@ -5,15 +5,12 @@ fund raising / companies / money involved (not care) :
 NO FUNDING NEEDED FOR THIS - minimum amount before cashout, or lock any cashout for first 30 days to accumulate code and be able to run the business model, one is good and the other might be seen negatively (maybe even a scam?) but that's not the objective, if we can make the token grow for a full month and THNE they can cashout they would earn even more which would be rly nice
 IF FUNDING - for initial reward 500 users, then 2k... etc etc, so after contribution, they get a dollar equivalent of like a pourcentage of what we can potentially raise, then we raise again and go to 2k beta users and so on and so on
 - transform value on dashboard from $LUM to dollars ? so we get some value, then we go from dollars, convert into lumens and make the transfer process work well basically over that lumen price
-- show that we had 5k downloads on our cli tool, stars on GitHub (62 for now), generated thousands of views through reddit posts (10k +), thousand through twitter (5k+) and linkedin soon ?
+- show that we had 5k downloads on our cli tool, stars on GitHub (64 for now), generated thousands of views through reddit and x... etc (10k +)
 
 after launch :
-- clear vps disk, usage too high, docker maybe taking cache
 - link actual rpc... etc (no devnet) in prod
 - vps upgrade after 50 daily users
 - from uvicorn to gunicorn asap
-- make sure when we restart doppler / docker / podman it doesnt reset rate limits (esp for contributions, bcs many updates ongoing on prod usually)
-- 0 downtime updates ? for prod when I git pull for example
 
 not a priority :
 - daily bonuses ?? (we can call this the sniping leaderboard or idk, like 10 tasks daily that users can snipe) this day -> rust += x LUM$ automatically if good quality ? + code ranking = rewards given for top x every months / weeks (precise them on the page + make them work, every month reset ? or smth like that)
@@ -24,34 +21,19 @@ not a priority :
 
 
 socials :
-- linkedin for lumen, + ceo on mine + dox myself before launch
 - argument for lumen: the dataset evolves and is continuously growing, it has an ai summary, could search by keywords... etc we are legal free, like legally we make the datasets usable
 - can provide strategic datasets that are sold to only one specific company for way higher prices? private datasets
 - companies will not only buy raw data, but actually pre-processed data, clean data with no duplicates, no comments, atcual metrics and most importantly scores that can make datasets go from low quality and not worth anything, to high quality in high quantity and worth WAY more than anything
 
 FIXES / THINGS TO ADD :
-easy :
 - make algo give accurate rewards, scale with business model per tokens, give 20% to user, take 80% for ONE sell (meaning we can sell their code MULTIPLE times, unless contract that makes us sell code for higher price but makes it private)
-- launch video with facecam + mic, 3-4 small / medium videos showing the app
-- in big video, plan :
- - introduce myself -> hi guys, my name is fares, also known as Far3000 and i'm the developer behind Lumen.
- - show what i've been building starting from the landing page, explaining from here and then going on
- - install, login, contribute (gitignore, scans only code files and skip useless files, then valuation system explain -> )
-   no garbage data allowed, u cant rly bypass the system since it goes through many things
 
-   embedding uniqueness search to not allow plagiarism... etc (rejected, allowed and updated)
-   manual metrics -> code complexity, number of lines, tokens contribute
-   ai analysis -> double checking all this with 3 scores -> project clarity (purpose), architectural quality and code quality
 
- - roadmap -> marketplace, agent, expanding the ecosystem overall
-   try to allow to more ppl to use lumen on the technical part
-
-hard :
+TO DO SOON :
 - (after business.lumen.onl dashboard etc) -> make sure if ai gives 0, we still get that in our base (if the code is non secure), because storing code isn't dangerous, its using it that is (and we could get a category on that, "dangerous" where data buyers could also be interested in getting)
 - need to make sure when a user updates a project it removes the old to replace with the new ? (and don't allow the opposite to happen, like someone reducing the size of its project, like in the db I mean, find a potential solution)
 - (so like if someone contributes an old project, if it was sold to a company for example or taken privately, find a way to give them an update or then change ?? or idk, its complex maybe not do this at all ?)
-
-data part (saas part):
+- admin.lumen.onl -> my dashboard with only my account and password i made and hashed myself with db commands to simplify things -> from there can check : all feedback, all users with search, can do actions on users like restart their balance or idk, dont make it a priority the commands for users if its just sql commands, from there ability to manage contact sales demands too instead of mails ? (ofc they receive an auto mail but id be managing mails from there)
 - on business.lumen.onl
 - seperate the whole website in 2 parts, pro part and user part, find a way to make ppl that look for business find the business.lumen.onl website easily from the main website, but dont make it intrusive ofc
 - signup / login system completely seperate from normal lumen ONLY for data buyers

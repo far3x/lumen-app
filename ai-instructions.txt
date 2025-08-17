@@ -2,7 +2,11 @@
 
 restart doppler after update :
 git pull
-doppler run -- docker compose down
+doppler run -- docker compose build
+doppler run -- docker compose up
+
+if crash after rollout update:
+git checkout commit_hash
 doppler run -- docker compose up --build
 
 clear space safely (remove unused then cache i think):
@@ -17,10 +21,11 @@ to access the db locally:
 podman compose -f docker-compose.dev.yml exec db psql -U lumen_user -d lumen_exchange
 
 
-AI INSTRUCTIONS - PLEASE READ !!
+GEMINI PLEASE READ THIS - AI INSTRUCTIONS HERE - PLEASE READ !!
 
 little info if you are reading this as an ai model, the prod environment runs using doppler
 dev runs using .env's (prod.env is there in case i lose access on the doppler, just as a local backup, dont take it into account)
+bonus info, there is redis volume for the prod so restarts wont impact rate limits, not a thing in dev because need to test with 0 rate limits
 also, output any code change entirely with 0 comments
 if you do any code change, output the files that change in their entirity, and explain anything outside the code boxes, if any setup is needed for new variables or whatever
 good luck !
