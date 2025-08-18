@@ -182,7 +182,7 @@ export function renderLandingPage() {
     <section class="pt-20 pb-20 bg-abyss-dark scroll-animate animate-reveal-in" style="transition-delay: 300ms;">
         <div class="container mx-auto px-6 max-w-4xl text-center">
             <h2 class="text-3xl md:text-4xl font-bold">Become a <span class="gradient-text">Genesis Contributor</span></h2>
-            <p class="mt-4 max-w-2xl mx-auto text-base sm:text-lg leading-relaxed text-text-secondary">The Lumen beta is live. Be one of the first 500 to contribute successfully and get an exclusive reward.</p>
+            <p class="mt-4 max-w-2xl mx-auto text-base sm:text-lg leading-relaxed text-text-secondary">The Lumen beta is live. Be one of the first 200 to contribute successfully and get an exclusive reward.</p>
             <p class="mt-6 text-4xl sm:text-5xl font-bold text-white">1,000 <span class="gradient-text">LUM</span> Bonus</p>
             <p class="text-sm text-text-secondary mt-1">Awarded on top of your standard contribution reward.</p>
             <div class="mt-8">

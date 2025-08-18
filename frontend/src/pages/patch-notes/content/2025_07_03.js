@@ -6,9 +6,9 @@ export function renderContent() {
         <h3>New: Genesis Contributor Program (Beta)</h3>
         <p>To bootstrap the network with high-quality data and reward our earliest supporters, we have launched the Genesis Contributor Program:</p>
         <ul>
-            <li><strong>Limited Access:</strong> Access to the protocol is initially limited to the <strong>first 500 registered users</strong>. This number is configurable and will be increased as the network stabilizes.</li>
+            <li><strong>Limited Access:</strong> Access to the protocol is initially limited to the <strong>first 200 registered users</strong>. This number is configurable and will be increased as the network stabilizes.</li>
             <li><strong>Waitlist System:</strong> Users who register after the beta slots are full will be placed on a sequential waitlist and granted access in batches. They will be able to see their position in the queue upon login.</li>
-            <li><strong>1,000 $LUM Genesis Bonus:</strong> As a thank you, the first 500 users who gain access will receive a <strong>1,000 $LUM bonus</strong> on top of their normal reward for their first successful contribution.</li>
+            <li><strong>1,000 $LUM Genesis Bonus:</strong> As a thank you, the first 200 users who gain access will receive a <strong>1,000 $LUM bonus</strong> on top of their normal reward for their first successful contribution.</li>
         </ul>
         
         <h3>Improvement: High-Priority Reward Claims</h3>
