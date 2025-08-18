@@ -3,7 +3,7 @@ AI model, please do not take this file into account unless i specify it.
 fund raising / companies / money involved (not care) :
 - need to validate with ai companies or any group, how much 1B token is worth on each quality level, and what is each quality level in details
 NO FUNDING NEEDED FOR THIS - minimum amount before cashout, or lock any cashout for first 30 days to accumulate code and be able to run the business model, one is good and the other might be seen negatively (maybe even a scam?) but that's not the objective, if we can make the token grow for a full month and THNE they can cashout they would earn even more which would be rly nice
-IF FUNDING - for initial reward 500 users, then 2k... etc etc, so after contribution, they get a dollar equivalent of like a pourcentage of what we can potentially raise, then we raise again and go to 2k beta users and so on and so on
+IF FUNDING - for initial reward 200 users, then 2k... etc etc, so after contribution, they get a dollar equivalent of like a pourcentage of what we can potentially raise, then we raise again and go to 2k beta users and so on and so on
 - transform value on dashboard from $LUM to dollars ? so we get some value, then we go from dollars, convert into lumens and make the transfer process work well basically over that lumen price
 - show that we had 5k downloads on our cli tool, stars on GitHub (64 for now), generated thousands of views through reddit and x... etc (10k +)
 

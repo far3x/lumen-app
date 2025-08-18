@@ -55,7 +55,7 @@ class AppSettings(BaseSettings):
     COOLDOWN_DAYS: int = int(os.getenv("COOLDOWN_DAYS", "7"))
 
     BETA_MODE_ENABLED: bool = os.getenv("BETA_MODE_ENABLED", "False").lower() in ("true", "1", "t")
-    BETA_MAX_USERS: int = int(os.getenv("BETA_MAX_USERS", "500"))
+    BETA_MAX_USERS: int = int(os.getenv("BETA_MAX_USERS", "200"))
     BETA_GENESIS_BONUS: float = float(os.getenv("BETA_GENESIS_BONUS", "1000.0"))
 
 
