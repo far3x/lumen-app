@@ -69,6 +69,7 @@ export function renderFooter(currentPath) {
                         <ul class="mt-4 space-y-3">
                         <li><a href="https://github.com/Far3000-YT/lumen" target="_blank" rel="noopener" data-external="true" class="group flex items-center text-text-secondary hover:text-text-main transition-colors">GitHub ${externalLinkIcon}</a></li>
                         <li><a href="https://x.com/lumencli" target="_blank" rel="noopener" data-external="true" class="group flex items-center text-text-secondary hover:text-text-main transition-colors">X / Twitter ${externalLinkIcon}</a></li>
+                        <li><a href="https://www.linkedin.com/company/pylumen/" target="_blank" rel="noopener" data-external="true" class="group flex items-center text-text-secondary hover:text-text-main transition-colors">LinkedIn ${externalLinkIcon}</a></li>
                         <li><a href="mailto:contact@lumen.onl" class="text-text-secondary hover:text-text-main transition-colors">Contact</a></li>
                         <li><a href="#" id="feedback-button" class="text-text-secondary hover:text-text-main transition-colors">Provide Feedback</a></li>
                         </ul>
@@ -92,6 +93,9 @@ export function renderFooter(currentPath) {
                         </a>
                         <a href="https://x.com/lumencli" target="_blank" rel="noopener" data-external="true" aria-label="X / Twitter">
                             <svg class="${socialIconClasses}" viewBox="0 0 24 24" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
+                        </a>
+                        <a href="https://www.linkedin.com/company/pylumen/" target="_blank" rel="noopener" data-external="true" aria-label="LinkedIn">
+                            <svg class="${socialIconClasses}" viewBox="0 0 24 24" fill="currentColor"><path d="M19 0h-14c-2.761 0-5 2.239-5 5v14c0 2.761 2.239 5 5 5h14c2.762 0 5-2.239 5-5v-14c0-2.761-2.238-5-5-5zm-11 19h-3v-11h3v11zm-1.5-12.268c-.966 0-1.75-.79-1.75-1.764s.784-1.764 1.75-1.764 1.75.79 1.75 1.764-.783 1.764-1.75 1.764zm13.5 12.268h-3v-5.604c0-3.368-4-3.113-4 0v5.604h-3v-11h3v1.765c1.396-2.586 7-2.777 7 2.476v6.759z"/></svg>
                         </a>
                     </div>
                 </div>
