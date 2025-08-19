@@ -70,7 +70,6 @@ export function renderFooter(currentPath) {
                         <li><a href="https://github.com/Far3000-YT/lumen" target="_blank" rel="noopener" data-external="true" class="group flex items-center text-text-secondary hover:text-text-main transition-colors">GitHub ${externalLinkIcon}</a></li>
                         <li><a href="https://x.com/lumencli" target="_blank" rel="noopener" data-external="true" class="group flex items-center text-text-secondary hover:text-text-main transition-colors">X / Twitter ${externalLinkIcon}</a></li>
                         <li><a href="https://www.linkedin.com/company/pylumen/" target="_blank" rel="noopener" data-external="true" class="group flex items-center text-text-secondary hover:text-text-main transition-colors">LinkedIn ${externalLinkIcon}</a></li>
-                        <li><a href="mailto:contact@lumen.onl" class="text-text-secondary hover:text-text-main transition-colors">Contact</a></li>
                         <li><a href="#" id="feedback-button" class="text-text-secondary hover:text-text-main transition-colors">Provide Feedback</a></li>
                         </ul>
                     </div>
