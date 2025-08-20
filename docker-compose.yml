@@ -218,6 +218,19 @@ services:
       retries: 3
       start_period: 10s
 
+  business_frontend:
+    container_name: lumen_business_frontend
+    build:
+      context: ./business-frontend
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:80/ || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+
   nginx:
     image: nginx:stable-alpine
     container_name: lumen_nginx
@@ -231,6 +244,7 @@ services:
     depends_on:
       - api
       - frontend
+      - business_frontend
     restart: unless-stopped
   
   backup:
