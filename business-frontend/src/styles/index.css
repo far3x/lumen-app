@@ -1,0 +1,22 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+    .scroll-animate {
+        @apply opacity-0 transition-all duration-700 ease-out;
+    }
+    .scroll-animate.scrolled-in {
+        @apply opacity-100;
+        transform: translateY(0) !important;
+    }
+    .animate-delay-1 { animation-delay: 150ms; }
+    .animate-delay-2 { animation-delay: 300ms; }
+    .animate-delay-3 { animation-delay: 450ms; }
+}
+
+@layer components {
+    .section-label {
+        @apply text-sm font-bold tracking-widest uppercase bg-accent-gradient bg-clip-text text-transparent mb-4;
+    }
+}
