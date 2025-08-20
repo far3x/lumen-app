@@ -27,7 +27,7 @@ socials :
 
 FIXES / THINGS TO ADD :
 - make algo give accurate rewards, scale with business model per tokens, give 20% to user, take 80% for ONE sell (meaning we can sell their code MULTIPLE times, unless contract that makes us sell code for higher price but makes it private)
-
+- add project into dashboard directly ? accepts only code files from project before sending to backend (will be stored on server for a small amount of time), and goes in queue, goes through lum local command and adds a contribution instead of using cli ?
 
 TO DO SOON :
 - (after business.lumen.onl dashboard etc) -> make sure if ai gives 0, we still get that in our base (if the code is non secure), because storing code isn't dangerous, its using it that is (and we could get a category on that, "dangerous" where data buyers could also be interested in getting)
