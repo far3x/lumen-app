@@ -3,7 +3,7 @@ import { icons } from './utils.js';
 function renderActivityItem(item) {
     if (item.type === 'CONTRIBUTION') {
         const rewardText = item.reward_amount > 0 
-            ? `<strong class="font-medium text-green-400">+${item.reward_amount.toFixed(4)} $LUM</strong>`
+            ? `<strong class="font-medium text-green-400">+${item.reward_amount.toFixed(4)} $LUMEN</strong>`
             : `<strong class="font-medium text-text-secondary">No reward granted</strong>`;
 
         return `
@@ -31,7 +31,7 @@ function renderActivityItem(item) {
                         <strong class="font-bold">You</strong> claimed your rewards.
                     </p>
                     <p class="text-text-secondary mt-1">
-                        Amount: <strong class="font-medium text-accent-cyan">${item.amount_claimed.toFixed(4)} $LUM</strong>
+                        Amount: <strong class="font-medium text-accent-cyan">${item.amount_claimed.toFixed(4)} $LUMEN</strong>
                     </p>
                      <a href="https://solscan.io/tx/${item.transaction_hash}?cluster=devnet" target="_blank" rel="noopener noreferrer" class="text-xs text-accent-cyan hover:underline">View on Solscan</a>
                 </div>

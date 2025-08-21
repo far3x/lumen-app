@@ -16,7 +16,9 @@ export function resetContributionsState() {
 
 function handleContributionUpdate(event) {
     const updatedContrib = event.detail;
-    const allContributions = window.dashboardState?.allContributions || [];
+    if (!window.dashboardState || !window.dashboardState.allUserContributions) return;
+
+    const allContributions = window.dashboardState.allUserContributions;
 
     const index = allContributions.findIndex(c => c.id === updatedContrib.id);
     if (index !== -1) {
@@ -25,19 +27,30 @@ function handleContributionUpdate(event) {
         allContributions.unshift(updatedContrib);
     }
     
+    if (contributionsState.currentPage === 1) {
+        const paginatedIndex = window.dashboardState.paginatedContributions.findIndex(c => c.id === updatedContrib.id);
+        if (paginatedIndex !== -1) {
+            window.dashboardState.paginatedContributions[paginatedIndex] = updatedContrib;
+        } else {
+            window.dashboardState.paginatedContributions.unshift(updatedContrib);
+        }
+    }
+
     const row = document.querySelector(`.contribution-row[data-id='${updatedContrib.id}']`);
     if (row) {
         row.outerHTML = renderSingleContributionRow(updatedContrib);
-        attachDetailModalListeners(allContributions);
+        attachDetailModalListeners();
     } else {
-        const tableBody = document.querySelector('#contributions-table-container tbody');
-        if (tableBody) {
-            const emptyRow = tableBody.querySelector('td[colspan="4"]');
-            if (emptyRow) {
-                tableBody.innerHTML = '';
+        if (contributionsState.currentPage === 1) {
+            const tableBody = document.querySelector('#contributions-table-container tbody');
+            if (tableBody) {
+                const emptyRow = tableBody.querySelector('td[colspan="4"]');
+                if (emptyRow) {
+                    tableBody.innerHTML = '';
+                }
+                tableBody.insertAdjacentHTML('afterbegin', renderSingleContributionRow(updatedContrib));
+                attachDetailModalListeners();
             }
-            tableBody.insertAdjacentHTML('afterbegin', renderSingleContributionRow(updatedContrib));
-            attachDetailModalListeners(allContributions);
         }
     }
 }
@@ -122,7 +135,7 @@ function renderContributionDetailModal(item) {
         <div class="text-text-main">
             <div class="text-center mb-8">
                 <p class="text-sm font-bold text-text-secondary uppercase tracking-widest">Total Reward</p>
-                <p class="text-5xl lg:text-6xl font-bold gradient-text mt-1">+${(item.reward_amount ?? 0).toLocaleString(undefined, {minimumFractionDigits: 4, maximumFractionDigits: 4})} $LUM</p>
+                <p class="text-5xl lg:text-6xl font-bold gradient-text mt-1">+${(item.reward_amount ?? 0).toLocaleString(undefined, {minimumFractionDigits: 4, maximumFractionDigits: 4})} $LUMEN</p>
             </div>
 
             <div class="grid grid-cols-1 lg:grid-cols-5 gap-8">
@@ -197,7 +210,7 @@ function renderContributionHistory(contributions) {
                     <tr>
                         <th class="py-3 px-4">Date</th>
                         <th class="py-3 px-4">Status</th>
-                        <th class="py-3 px-4 text-right">Reward ($LUM)</th>
+                        <th class="py-3 px-4 text-right">Reward ($LUMEN)</th>
                         <th class="py-3 px-4 text-center">Details</th>
                     </tr>
                 </thead>
@@ -244,11 +257,10 @@ async function changeContributionsPage(direction, dashboardState) {
         contributionsState.totalContributions = result.total;
         contributionsState.isLastPage = (contributionsState.currentPage * 10) >= result.total;
         
-        dashboardState.allContributions.length = 0;
-        dashboardState.allContributions.push(...result.items);
+        dashboardState.paginatedContributions = result.items;
 
         document.getElementById('contributions-table-container').innerHTML = renderContributionHistory(result.items);
-        attachDetailModalListeners(dashboardState.allContributions);
+        attachDetailModalListeners();
     } catch (error) {
         console.error("Failed to fetch new page of contributions:", error);
     } finally {
@@ -267,13 +279,28 @@ function updatePaginationButtons() {
     if (pageSpan) pageSpan.textContent = `Page ${contributionsState.currentPage}`;
 }
 
-function attachDetailModalListeners(allContributions) {
+function attachDetailModalListeners() {
     document.querySelectorAll('.details-btn').forEach(btn => {
-        btn.addEventListener('click', (e) => {
+        const newBtn = btn.cloneNode(true);
+        btn.parentNode.replaceChild(newBtn, btn);
+
+        newBtn.addEventListener('click', (e) => {
             const id = parseInt(e.currentTarget.dataset.id, 10);
-            const contributionItem = allContributions.find(c => c.id === id);
+            if (!window.dashboardState || !window.dashboardState.allUserContributions) {
+                console.error("Dashboard state not available for finding contribution details.");
+                return;
+            }
+            const contributionItem = window.dashboardState.allUserContributions.find(c => c.id === id);
             if (contributionItem) {
                 renderContributionDetailModal(contributionItem);
+            } else {
+                 console.warn(`Contribution with id ${id} not found in master list. Trying paginated list as a fallback.`);
+                 const fallbackItem = window.dashboardState.paginatedContributions.find(c => c.id === id);
+                 if (fallbackItem) {
+                    renderContributionDetailModal(fallbackItem);
+                 } else {
+                    console.error(`Contribution with id ${id} not found in any available list.`);
+                 }
             }
         });
     });
@@ -281,7 +308,7 @@ function attachDetailModalListeners(allContributions) {
 
 export function attachContributionPageListeners(dashboardState) {
     window.dashboardState = dashboardState;
-    attachDetailModalListeners(dashboardState.allContributions);
+    attachDetailModalListeners();
     document.getElementById('prev-page-btn')?.addEventListener('click', () => changeContributionsPage(-1, dashboardState));
     document.getElementById('next-page-btn')?.addEventListener('click', () => changeContributionsPage(1, dashboardState));
     updatePaginationButtons();

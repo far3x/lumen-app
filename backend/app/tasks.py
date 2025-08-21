@@ -91,7 +91,7 @@ def process_claim(self, user_id: int, claim_id: int):
         updated_account = crud.get_account_details(db, user_id=user.id)
         
         publish_user_update(db, user_id, "claim_success", {
-            "message": f"Successfully claimed {claimable_amount:.4f} LUM.",
+            "message": f"Successfully claimed {claimable_amount:.4f} LUMEN.",
             "transaction_hash": tx_hash,
             "account": json.loads(updated_account.model_dump_json())
         })
@@ -121,7 +121,7 @@ def process_contribution(self, user_id: int, codebase: str, contribution_db_id: 
             
         final_codebase = codebase
         if source == 'web':
-            logger.info(f"Contribution {contribution_db_id} is from web source. Performing server-side sanitization.")
+            logger.info(f"Contribution {contribution_db_id} is from web source. Performing server-side sanitization on the entire payload, CLI-style.")
             final_codebase = sanitization_service.sanitize_code(codebase)
 
         logger.info(f"Processing contribution {contribution_db_id} for user {user_id}. Starting uniqueness check...")
@@ -153,7 +153,6 @@ def process_contribution(self, user_id: int, codebase: str, contribution_db_id: 
         if nearest_neighbors:
             most_similar_contrib, min_distance = nearest_neighbors[0]
             
-            # cosine_similarity = 1 - cosine_distance | keep this line exceptionnally, the comment, important in case a revert is needed
             max_similarity_overall = 1 - min_distance
 
             if max_similarity_overall > SIMILARITY_UPDATE_THRESHOLD:
@@ -196,7 +195,8 @@ def process_contribution(self, user_id: int, codebase: str, contribution_db_id: 
         contribution_record.valuation_results = json.dumps(valuation_details)
         
         if base_reward > 0:
-            total_reward_for_contribution = base_reward
+            reward_with_multiplier = base_reward * user.reward_multiplier
+            total_reward_for_contribution = reward_with_multiplier
             bonus_reward = 0.0
 
             if settings.BETA_MODE_ENABLED and user.id <= settings.BETA_MAX_USERS and not user.is_beta_bonus_claimed:
@@ -204,7 +204,7 @@ def process_contribution(self, user_id: int, codebase: str, contribution_db_id: 
                 total_reward_for_contribution += bonus_reward
                 user.is_beta_bonus_claimed = True
                 db.add(user)
-                logger.info(f"[REWARD] Awarded Genesis Bonus of {settings.BETA_GENESIS_BONUS} LUM to user {user_id}.")
+                logger.info(f"[REWARD] Awarded Genesis Bonus of {settings.BETA_GENESIS_BONUS} LUMEN to user {user_id}.")
 
             crud.apply_reward_to_user(db, user, total_reward_for_contribution)
             
@@ -219,7 +219,7 @@ def process_contribution(self, user_id: int, codebase: str, contribution_db_id: 
             db.add(contribution_record)
             db.commit()
             
-            logger.info(f"[REWARD] Successfully processed and rewarded {total_reward_for_contribution:.4f} LUM for user {user_id} (Contribution {contribution_db_id}).")
+            logger.info(f"[REWARD] Successfully processed and rewarded {total_reward_for_contribution:.4f} LUMEN for user {user_id} (Contribution {contribution_db_id}).")
         else:
             contribution_record.reward_amount = 0.0
             contribution_record.content_embedding = new_embedding
@@ -230,7 +230,7 @@ def process_contribution(self, user_id: int, codebase: str, contribution_db_id: 
                 contribution_record.status = "REJECTED_NO_REWARD"
             db.add(contribution_record)
             db.commit()
-            logger.warning(f"[REWARD] Contribution {contribution_db_id} was valued at 0.0 LUM and status set to {contribution_record.status}.")
+            logger.warning(f"[REWARD] Contribution {contribution_db_id} was valued at 0.0 LUMEN and status set to {contribution_record.status}.")
         
         publish_contribution_update(db, contribution_db_id, user_id)
 

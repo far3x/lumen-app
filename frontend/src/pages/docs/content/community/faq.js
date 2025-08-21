@@ -34,7 +34,7 @@ export const renderFaq = () => `
         <div class="grid grid-rows-[0fr] group-open:grid-rows-[1fr] transition-[grid-template-rows] duration-500 ease-in-out">
             <div class="overflow-hidden">
                 <p class="text-text-secondary px-6 pb-6">
-                    To bootstrap the network and reward our earliest supporters, the protocol is in a limited beta phase. The first 500 developers to make a successful contribution will receive an exclusive, one-time reward of <strong>1,000 LUM</strong>. Users who register after the beta is full are placed on a waitlist and will be granted access in batches.
+                    To bootstrap the network and reward our earliest supporters, the protocol is in a limited beta phase. The first 500 developers to make a successful contribution will receive an exclusive, one-time reward of <strong>1,000 LUMEN</strong>. Users who register after the beta is full are placed on a waitlist and will be granted access in batches.
                 </p>
             </div>
         </div>

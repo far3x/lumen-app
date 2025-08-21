@@ -5,7 +5,7 @@ export const renderWhyLumen = () => `
     <h2 id="for-developers">For Developers: Monetize Your Work, Securely</h2>
     <p>Your work has powered the digital world. Now, it will power the intelligent one. Lumen ensures you are a key stakeholder in this revolution.</p>
     <ul>
-        <li><strong>Meaningful Rewards:</strong> Contribute your anonymized code and earn Protocol Credits ($LUM). Your work directly fuels the AI ecosystem, and you are rewarded for the value you provide based on a sophisticated, transparent <a href="/docs/valuation">valuation engine</a>.</li>
+        <li><strong>Meaningful Rewards:</strong> Contribute your anonymized code and earn Protocol Credits ($LUMEN). Your work directly fuels the AI ecosystem, and you are rewarded for the value you provide based on a sophisticated, transparent <a href="/docs/valuation">valuation engine</a>.</li>
         <li><strong>Effortless & Secure:</strong> Our "local-first" CLI ensures your code is anonymized on your machine before upload. Your security and intellectual property are protected by design. <a href="/docs/security">Learn more about our security-first approach</a>.</li>
         <li><strong>Direct Impact:</strong> The data you contribute will be used to train the next generation of AI models and developer tools that you yourself will use, helping to solve real-world problems and advance the state of the art.</li>
     </ul>

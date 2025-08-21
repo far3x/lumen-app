@@ -25,6 +25,6 @@ export function renderContent() {
         </ul>
 
         <h3>A More Compelling Call to Action</h3>
-        <p>The Genesis Contributor program, with its <strong>1,000 $LUM bonus</strong>, is now presented as a focused and exciting call to action near the end of the page, encouraging new developers to claim their spot and become foundational members of the network.</p>
+        <p>The Genesis Contributor program, with its <strong>1,000 $LUMEN bonus</strong>, is now presented as a focused and exciting call to action near the end of the page, encouraging new developers to claim their spot and become foundational members of the network.</p>
     `;
 }

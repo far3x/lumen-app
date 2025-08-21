@@ -31,7 +31,7 @@ export const renderTermsAndConditions = () => `
 
     <h2 id="agreement">1. Agreement to our Legal Terms</h2>
     <p>We are Lumen Protocol ("we," "us," "our"). We operate the website https://lumen.onl (the "Site"), the Lumen command-line interface (CLI), and any other related products and services that refer or link to these legal terms (the "Legal Terms") (collectively, the "Services").</p>
-    <p>Our protocol allows developers to securely contribute their source code as high-quality, anonymized training data for AI models in exchange for cryptocurrency rewards ($LUM).</p>
+    <p>Our protocol allows developers to securely contribute their source code as high-quality, anonymized training data for AI models in exchange for cryptocurrency rewards ($LUMEN).</p>
     <p>You agree that by accessing the Services, you have read, understood, and agreed to be bound by all of these Legal Terms. IF YOU DO NOT AGREE WITH ALL OF THESE LEGAL TERMS, THEN YOU ARE EXPRESSLY PROHIBITED FROM USING THE SERVICES AND YOU MUST DISCONTINUE USE IMMEDIATELY.</p>
     <p>We reserve the right, in our sole discretion, to make changes or modifications to these Legal Terms from time to time. We will alert you about any changes by updating the “Last updated” date of these Legal Terms, and you waive any right to receive specific notice of each such change. It is your responsibility to periodically review these Legal Terms to stay informed of updates.</p>
 
@@ -97,7 +97,7 @@ export const renderTermsAndConditions = () => `
     
     <h2 id="protocol-terms">19. Protocol-Specific Terms</h2>
     <h3>Cryptocurrency and Blockchain Risks</h3>
-    <p>You understand and acknowledge that the value of the $LUM token is subject to high volatility and market risks. The Lumen Protocol does not offer financial advice. All transactions recorded on the Solana blockchain are final and irreversible. You are solely responsible for the security of your personal cryptocurrency wallet and its private keys.</p>
+    <p>You understand and acknowledge that the value of the $LUMEN token is subject to high volatility and market risks. The Lumen Protocol does not offer financial advice. All transactions recorded on the Solana blockchain are final and irreversible. You are solely responsible for the security of your personal cryptocurrency wallet and its private keys.</p>
     <h3>Data Contribution License</h3>
     <p>By submitting any source code or related materials ("Data") to the protocol, you confirm that you have the full right and authority to do so. You retain complete ownership of your original Data. You grant the Lumen Protocol a perpetual, irrevocable, worldwide, royalty-free, non-exclusive license to use, reproduce, modify, and distribute the anonymized version of your contributed Data for the purpose of creating datasets for training artificial intelligence models and for sublicensing this anonymized data to third parties.</p>
     <h3>"As-Is" Service</h3>

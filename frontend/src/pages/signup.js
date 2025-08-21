@@ -149,7 +149,7 @@ function renderSignupForm() {
                 <div class="bg-surface/80 backdrop-blur-md p-6 rounded-xl border border-primary shadow-2xl shadow-black/20">
                     <div class="text-center mb-4">
                         <h1 class="text-2xl font-bold text-white">Get Started with Lumen</h1>
-                        <p class="text-text-secondary mt-2 text-sm">And start earning $LUM today.</p>
+                        <p class="text-text-secondary mt-2 text-sm">And start earning $LUMEN today.</p>
                     </div>
 
                     <div class="space-y-3">

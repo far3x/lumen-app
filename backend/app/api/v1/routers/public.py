@@ -30,11 +30,11 @@ def get_leaderboard(
     if cached_leaderboard:
         return JSONResponse(content=json.loads(cached_leaderboard))
 
-    top_users_data = crud.get_leaderboard(db, skip=0, limit=10)
+    top_users_data = crud.get_leaderboard(db, skip=0, limit=5)
     
-    top_10_entries = []
+    top_5_entries = []
     for rank, (user, total_earned) in enumerate(top_users_data, start=1):
-        top_10_entries.append(LeaderboardEntry(
+        top_5_entries.append(LeaderboardEntry(
             rank=rank,
             display_name=user.display_name,
             total_lum_earned=total_earned
@@ -51,7 +51,7 @@ def get_leaderboard(
             )
     
     response_data = LeaderboardResponse(
-        top_users=top_10_entries,
+        top_users=top_5_entries,
         current_user_rank=current_user_rank_entry
     )
 

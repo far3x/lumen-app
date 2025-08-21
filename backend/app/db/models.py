@@ -19,6 +19,7 @@ class User(Base):
     display_name = Column(String)
     solana_address = Column(String, unique=True, nullable=True, index=True)
     is_beta_bonus_claimed = Column(Boolean, default=False, nullable=False)
+    reward_multiplier = Column(Float, nullable=False, default=1.0)
     is_in_leaderboard = Column(Boolean, default=True, nullable=False)
     is_verified = Column(Boolean, default=False, nullable=False)
     verification_token = Column(String, nullable=True)

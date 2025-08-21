@@ -34,7 +34,7 @@ export function renderFooter(currentPath) {
             : `
             <div class="text-center mb-20 scroll-animate">
                 <h2 class="text-3xl md:text-4xl font-bold">Ready to Join the Data Economy?</h2>
-                <p class="text-text-secondary mt-4 max-w-xl mx-auto">Start contributing your anonymized code in minutes and get rewarded with $LUM tokens.</p>
+                <p class="text-text-secondary mt-4 max-w-xl mx-auto">Start contributing your anonymized code in minutes and get rewarded with $LUMEN tokens.</p>
                 <a href="${getMainPath('/signup')}" class="mt-8 inline-block px-8 py-3 font-bold bg-gradient-to-r from-accent-purple to-accent-pink text-white rounded-lg transition-all duration-300 hover:scale-105 hover:shadow-lg hover:shadow-accent-purple/30 hover:brightness-110">
                     Get Started Now
                 </a>

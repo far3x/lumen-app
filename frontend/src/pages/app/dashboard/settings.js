@@ -154,7 +154,7 @@ function renderWalletManagementCard(user) {
             <p class="text-xs text-text-secondary text-center mt-4">To ensure fairness and prevent abuse, wallet addresses cannot be changed. Please contact support if you have lost access to this wallet.</p>
         `;
     } else {
-        content = `<p class="text-sm text-text-secondary mt-1 mb-4 text-center">Link a Solana wallet to receive your $LUM rewards. This is a permanent, one-time action.</p>`;
+        content = `<p class="text-sm text-text-secondary mt-1 mb-4 text-center">Link a Solana wallet to receive your $LUMEN rewards. This is a permanent, one-time action.</p>`;
         
         if (isPhantomSiteConnected) {
             const truncatedSiteAddress = `${siteConnectedPhantomAddress.slice(0,6)}...${siteConnectedPhantomAddress.slice(-6)}`;
