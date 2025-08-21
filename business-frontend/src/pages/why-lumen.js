@@ -50,8 +50,8 @@ export function renderWhyLumenPage() {
                 <div class="mt-20 space-y-24">
                     <!-- Pillar 1: Security -->
                     <div class="grid lg:grid-cols-2 gap-16 items-center">
-                        <div class="w-full h-96 bg-white rounded-lg border border-border flex items-center justify-center">
-                           <p class="text-text-muted">Image Placeholder: Security (e.g., /public/security.jpg)</p>
+                        <div class="w-full h-96 bg-white rounded-lg border border-border flex items-center justify-center p-8">
+                           <img src="/shield.png" alt="A shield icon representing security and confidence" class="w-full h-full max-h-64 object-contain">
                         </div>
                         <div>
                              <h3 class="text-3xl font-bold text-text-headings">Operate with Unshakeable Confidence</h3>
@@ -60,8 +60,8 @@ export function renderWhyLumenPage() {
                     </div>
                     <!-- Pillar 2: Quality -->
                      <div class="grid lg:grid-cols-2 gap-16 items-center">
-                        <div class="lg:order-2 w-full h-96 bg-white rounded-lg border border-border flex items-center justify-center">
-                           <p class="text-text-muted">Image Placeholder: Quality (e.g., /public/quality.jpg)</p>
+                        <div class="lg:order-2 w-full h-96 bg-white rounded-lg border border-border flex items-center justify-center p-8">
+                           <img src="/gear.png" alt="A gear icon representing precision and quality control" class="w-full h-full max-h-64 object-contain">
                         </div>
                         <div class="lg:order-1">
                              <h3 class="text-3xl font-bold text-text-headings">Build with Unprecedented Precision</h3>
@@ -70,8 +70,8 @@ export function renderWhyLumenPage() {
                     </div>
                      <!-- Pillar 3: Exclusivity -->
                     <div class="grid lg:grid-cols-2 gap-16 items-center">
-                        <div class="w-full h-96 bg-white rounded-lg border border-border flex items-center justify-center">
-                           <p class="text-text-muted">Image Placeholder: Exclusivity (e.g., /public/exclusivity.jpg)</p>
+                        <div class="w-full h-96 bg-white rounded-lg border border-border flex items-center justify-center p-8">
+                           <img src="/diamond.png" alt="A diamond icon representing exclusivity and unique value" class="w-full h-full max-h-64 object-contain">
                         </div>
                         <div>
                              <h3 class="text-3xl font-bold text-text-headings">Secure a Definitive Advantage</h3>
@@ -114,7 +114,7 @@ export function renderWhyLumenPage() {
         <section class="py-24 md:py-32 bg-dark-surface text-white text-center">
             <div class="container mx-auto px-6">
                 <h2 class="text-4xl md:text-5xl font-bold">Ready to Build the Future?</h2>
-                <p class="mt-6 max-w-2xl mx-auto text-lg text-text-muted">See for yourself how Lumen's strategic data can transform your AI development pipeline. Book a demo with our team today.</p>
+                <p class="mt-6 max-w-2xl mx-auto text-lg text-gray-300">See for yourself how Lumen's strategic data can transform your AI development pipeline. Book a demo with our team today.</p>
                 <div class="mt-10 flex flex-col sm:flex-row justify-center items-center gap-6">
                     <a href="/contact" class="px-8 py-3 font-semibold text-white bg-accent-gradient rounded-md transition-all duration-300 hover:scale-105 hover:brightness-110">Book a Demo</a>
                     <a href="/product" class="font-semibold text-white hover:opacity-80 transition-opacity">Explore our Product &rarr;</a>
