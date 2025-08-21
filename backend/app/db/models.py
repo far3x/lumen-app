@@ -115,3 +115,14 @@ class Feedback(Base):
     content = Column(Text, nullable=False)
     created_at = Column(DateTime(timezone=True), server_default=func.now())
     user = relationship("User", back_populates="feedback")
+
+class ContactSubmission(Base):
+    __tablename__ = "contact_submissions"
+    id = Column(Integer, primary_key=True, index=True)
+    full_name = Column(String, nullable=False)
+    work_email = Column(String, nullable=False, index=True)
+    company_name = Column(String, nullable=False)
+    job_title = Column(String, nullable=True)
+    contact_reason = Column(String, nullable=False)
+    message = Column(Text, nullable=True)
+    created_at = Column(DateTime(timezone=True), server_default=func.now())

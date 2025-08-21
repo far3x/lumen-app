@@ -299,3 +299,17 @@ def get_user_claim_history(db: Session, user_id: int, skip: int = 0, limit: int 
 def delete_user(db: Session, user: models.User):
     db.delete(user)
     db.commit()
+
+def create_contact_submission(db: Session, submission: schemas.ContactSalesCreate):
+    db_submission = models.ContactSubmission(
+        full_name=submission.full_name,
+        work_email=submission.work_email,
+        company_name=submission.company_name,
+        job_title=submission.job_title,
+        contact_reason=submission.contact_reason,
+        message=submission.message
+    )
+    db.add(db_submission)
+    db.commit()
+    db.refresh(db_submission)
+    return db_submission
