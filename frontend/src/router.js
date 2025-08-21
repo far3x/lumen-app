@@ -40,7 +40,7 @@ const routeMeta = {
     },
     '/leaderboard': {
         title: 'Lumen Protocol | Contributor Leaderboard',
-        description: 'See the top contributors powering the Lumen network and earning $LUM rewards.',
+        description: 'See the top contributors powering the Lumen network and earning $LUMEN rewards.',
     },
     '/login': {
         title: 'Lumen Protocol | Login',

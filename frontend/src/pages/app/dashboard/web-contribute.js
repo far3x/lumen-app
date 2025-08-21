@@ -166,14 +166,20 @@ function render() {
         default:
             const user = getUser();
             const oneDayAgo = new Date(Date.now() - 24 * 60 * 60 * 1000);
-            const recentContributions = (window.dashboardState?.allContributions || []).filter(c => new Date(c.created_at) > oneDayAgo);
-            const contributionsToday = recentContributions.length;
+            const successfulStatuses = ['PROCESSED', 'REJECTED_NO_NEW_CODE', 'REJECTED_NO_REWARD'];
+            
+            const contributionsToday = (window.dashboardState?.allUserContributions || [])
+                .filter(c => 
+                    new Date(c.created_at) > oneDayAgo &&
+                    successfulStatuses.includes(c.status)
+                ).length;
+            
             const contributionsLeft = Math.max(0, 3 - contributionsToday);
             
             content = `
                 <div class="text-center mb-6">
                     <p class="text-sm font-medium ${contributionsLeft > 0 ? 'text-text-secondary' : 'text-yellow-400'}">
-                        You have ${contributionsLeft} / 3 contributions remaining today.
+                        You have ${contributionsLeft} / 3 successful contributions remaining today.
                     </p>
                 </div>
                 <div id="drop-zone" class="drop-zone flex flex-col justify-center ${contributionsLeft === 0 ? 'opacity-50 cursor-not-allowed' : 'hover:border-accent-purple hover:bg-surface/50'}">

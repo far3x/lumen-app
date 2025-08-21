@@ -21,6 +21,7 @@ class User(BaseModel):
     cooldown_until: Optional[datetime] = None
     has_beta_access: bool
     waitlist_position: Optional[int] = None
+    reward_multiplier: float
 
     class Config:
         from_attributes = True

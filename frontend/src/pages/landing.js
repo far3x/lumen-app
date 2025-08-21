@@ -22,7 +22,7 @@ export function renderLandingPage() {
             <h2 class="text-center text-2xl md:text-3xl font-bold text-text-main tracking-tight">
                 Built on a Foundation of World-Class Technology
             </h2>
-            <div class="mt-16 w-full overflow-hidden [mask-image:_linear-gradient(to_right,transparent_0,_black_128px,_black_calc(100%-200px),transparent_100%)]">
+            <div class="mt-16 w-full overflow-hidden [mask-image:_linear_gradient(to_right,transparent_0,_black_128px,_black_calc(100%-200px),transparent_100%)]">
                 <ul id="logo-carousel" class="flex w-max">
                     ${logoItems}
                 </ul>
@@ -182,9 +182,7 @@ export function renderLandingPage() {
     <section class="pt-20 pb-20 bg-abyss-dark scroll-animate animate-reveal-in" style="transition-delay: 300ms;">
         <div class="container mx-auto px-6 max-w-4xl text-center">
             <h2 class="text-3xl md:text-4xl font-bold">Become a <span class="gradient-text">Genesis Contributor</span></h2>
-            <p class="mt-4 max-w-2xl mx-auto text-base sm:text-lg leading-relaxed text-text-secondary">The Lumen beta is live. Be one of the first 200 to contribute successfully and get an exclusive reward.</p>
-            <p class="mt-6 text-4xl sm:text-5xl font-bold text-white">1,000 <span class="gradient-text">LUM</span> Bonus</p>
-            <p class="text-sm text-text-secondary mt-1">Awarded on top of your standard contribution reward.</p>
+            <p class="mt-4 max-w-2xl mx-auto text-base sm:text-lg leading-relaxed text-text-secondary">Contribute during our Genesis Phase to earn your stake in the network and receive a permanent reward multiplier.</p>
             <div class="mt-8">
                 <a href="/signup" class="animate-claim-spot-button px-8 py-3 font-bold bg-gradient-to-r from-accent-purple to-accent-pink text-white rounded-lg">
                     Claim Your Spot

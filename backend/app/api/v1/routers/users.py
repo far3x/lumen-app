@@ -120,7 +120,8 @@ async def read_users_me(request: Request, current_user: models.User = Depends(de
         "solana_address": current_user.solana_address,
         "cooldown_until": current_user.cooldown_until,
         "has_beta_access": has_beta_access,
-        "waitlist_position": waitlist_position
+        "waitlist_position": waitlist_position,
+        "reward_multiplier": current_user.reward_multiplier,
     }
     return UserSchema(**user_data)
 

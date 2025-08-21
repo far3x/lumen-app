@@ -15,8 +15,8 @@ let dashboardState = {
     user: null,
     account: null,
     userRank: null,
-    allContributions: [],
-    chartContributions: [],
+    paginatedContributions: [],
+    allUserContributions: [],
     recentContributions: [],
     allClaims: [],
 };
@@ -125,13 +125,13 @@ async function refreshDashboardData(isInitialLoad = false) {
         dashboardState.userRank = results[1].status === 'fulfilled' ? results[1].value.data : null;
         
         if (results[2].status === 'fulfilled') {
-            dashboardState.allContributions = results[2].value.items;
+            dashboardState.paginatedContributions = results[2].value.items;
             contributionsState.totalContributions = results[2].value.total;
             contributionsState.isLastPage = (contributionsState.currentPage * 10) >= results[2].value.total;
         }
 
         dashboardState.allClaims = results[3].status === 'fulfilled' ? results[3].value.items : [];
-        dashboardState.chartContributions = results[4].status === 'fulfilled' ? results[4].value : [];
+        dashboardState.allUserContributions = results[4].status === 'fulfilled' ? results[4].value : [];
 
         const urlParams = new URLSearchParams(window.location.search);
         const currentTabId = urlParams.get('tab') || 'overview';
@@ -262,13 +262,13 @@ function loadContent(tabId) {
             contentHTML = renderDashboardOverview(dashboardState.user, dashboardState.account, dashboardState.userRank?.rank, contributionsState.totalContributions);
             break;
         case 'my-contributions':
-            contentHTML = renderMyContributionsPage(dashboardState.allContributions);
+            contentHTML = renderMyContributionsPage(dashboardState.paginatedContributions);
             break;
         case 'web-contribute':
             contentHTML = renderWebContributePage();
             break;
         case 'network-feed':
-            contentHTML = renderRecentActivityPage(dashboardState.allContributions, dashboardState.allClaims);
+            contentHTML = renderRecentActivityPage(dashboardState.paginatedContributions, dashboardState.allClaims);
             break;
         case 'referral':
             contentHTML = renderReferralPage();
@@ -284,10 +284,10 @@ function loadContent(tabId) {
     dashboardContentArea.innerHTML = contentHTML;
     
     if (activeTabForRender === 'overview') {
-        initializeChart(dashboardState.chartContributions, activeTimeRange);
-        attachChartButtonListeners(dashboardState.chartContributions, (newRange) => {
+        initializeChart(dashboardState.allUserContributions, activeTimeRange);
+        attachChartButtonListeners(dashboardState.allUserContributions, (newRange) => {
             activeTimeRange = newRange;
-            initializeChart(dashboardState.chartContributions, newRange);
+            initializeChart(dashboardState.allUserContributions, newRange);
         });
         const claimButton = document.getElementById('claim-rewards-btn');
         if (claimButton) {

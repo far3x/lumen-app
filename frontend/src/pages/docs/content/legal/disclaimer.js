@@ -7,7 +7,7 @@ export const renderDisclaimer = () => `
     <p>The information on our Services is not intended to be, and shall not be understood or construed as, financial advice, investment advice, trading advice, or any other sort of advice. You should not take any action based upon any information contained on the Site without seeking independent professional counsel.</p>
 
     <h2 id="cryptocurrency-and-token-risks">Cryptocurrency and Token Risks</h2>
-    <p>You acknowledge and agree that the $LUM token is a utility token for use on the Lumen Protocol. Its value is inherently volatile and subject to significant market risks. We do not guarantee the value, stability, or liquidity of the $LUM token. By acquiring, holding, or using $LUM tokens, you are assuming all associated risks, including the risk of total loss. All transactions on the Solana blockchain are irreversible.</p>
+    <p>You acknowledge and agree that the $LUMEN token is a utility token for use on the Lumen Protocol. Its value is inherently volatile and subject to significant market risks. We do not guarantee the value, stability, or liquidity of the $LUMEN token. By acquiring, holding, or using $LUMEN tokens, you are assuming all associated risks, including the risk of total loss. All transactions on the Solana blockchain are irreversible.</p>
     
     <h2 id="as-is-service">"As Is" and "As Available" Disclaimer</h2>
     <p>THE SERVICES ARE PROVIDED ON AN "AS-IS" AND "AS-AVAILABLE" BASIS. YOU AGREE THAT YOUR USE OF THE SERVICES WILL BE AT YOUR SOLE RISK. TO THE FULLEST EXTENT PERMITTED BY LAW, WE DISCLAIM ALL WARRANTIES, EXPRESS OR IMPLIED, IN CONNECTION WITH THE SERVICES, INCLUDING THE IMPLIED WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, AND NON-INFRINGEMENT.</p>

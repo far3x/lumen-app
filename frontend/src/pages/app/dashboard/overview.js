@@ -1,5 +1,5 @@
 import Chart from 'chart.js/auto';
-import { icons, renderModal, updateBalancesInUI } from './utils.js';
+import { icons, renderModal, updateBalancesInUI, LUMEN_TO_USD_RATE } from './utils.js';
 import { api as authApi, fetchAndStoreAccount, getAccount } from '../../../lib/auth.js';
 import { DateTime } from 'luxon';
 
@@ -7,6 +7,7 @@ let chartInstance = null;
 
 function renderWalletSection(user, account) {
     const claimableBalance = account?.lum_balance || 0;
+    const claimableBalanceUSD = claimableBalance * LUMEN_TO_USD_RATE;
     const isWalletLinked = !!user?.solana_address;
     
     let isClaimDisabled = !isWalletLinked || claimableBalance <= 0;
@@ -49,6 +50,8 @@ function renderWalletSection(user, account) {
                 <div class="text-center md:text-right">
                     <p class="text-sm text-text-secondary">Claimable Balance</p>
                     <p class="text-3xl font-bold pulse-text font-mono">${claimableBalance.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 4})}</p>
+                    <p id="overview-claimable-balance-usd" class="text-base font-medium text-text-secondary font-sans mt-1">≈ $${(claimableBalanceUSD).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })} USD</p>
+                    <p class="text-xs text-subtle italic mt-1">*Simulated value for beta phase.</p>
                 </div>
                 <div class="mt-4 w-full md:w-auto">
                     ${claimButtonHTML}
@@ -129,7 +132,7 @@ export function initializeChart(contributions, timeRange) {
 
     chartInstance = new Chart(canvas, {
         type: 'line', data: { labels, datasets: [{
-            label: '$LUM Earned', data: dataPoints, borderColor: '#8A2BE2', backgroundColor: gradient,
+            label: '$LUMEN Earned', data: dataPoints, borderColor: '#8A2BE2', backgroundColor: gradient,
             fill: true, tension: 0.4, pointBackgroundColor: '#E5E5E5', pointBorderColor: '#8A2BE2',
             pointRadius: 4, pointBorderWidth: 2, pointHoverRadius: 7, pointHoverBorderWidth: 2, pointHoverBackgroundColor: '#fff',
         }]},
@@ -140,7 +143,7 @@ export function initializeChart(contributions, timeRange) {
                 padding: 12, cornerRadius: 8, borderColor: '#3F3F4D', borderWidth: 1, boxPadding: 6,
                 titleFont: { family: 'Satoshi', weight: 'bold' }, bodyFont: { family: 'Satoshi' },
                 displayColors: false,
-                callbacks: { label: (c) => `+ ${c.parsed.y.toFixed(4)} $LUM` }
+                callbacks: { label: (c) => `+ ${c.parsed.y.toFixed(4)} $LUMEN` }
             }},
             scales: {
                 x: { grid: { color: 'rgba(63, 63, 77, 0.2)' }, ticks: { color: '#A3A3B2', font: { family: 'Satoshi' } } },
@@ -187,6 +190,8 @@ export function attachChartButtonListeners(contributions, onRangeChangeCallback)
 
 export function renderDashboardOverview(user, account, rank, totalContributions) {
     const isBannerDismissed = localStorage.getItem('lumen_prelaunch_banner_dismissed') === 'true';
+    const totalEarned = account?.total_lum_earned ?? 0;
+    const totalEarnedUSD = totalEarned * LUMEN_TO_USD_RATE;
 
     return `
         <div id="prelaunch-banner" class="relative bg-yellow-900/30 border border-yellow-500/30 text-yellow-200 px-6 py-4 rounded-lg mb-6 flex items-start gap-4 ${isBannerDismissed ? 'hidden' : ''}">
@@ -207,15 +212,17 @@ export function renderDashboardOverview(user, account, rank, totalContributions)
             <p class="text-text-secondary">Here's your performance snapshot today.</p>
         </header>
 
-        <div class="mt-8 grid grid-cols-2 lg:grid-cols-4 gap-6 animate-fade-in-up" style="animation-delay: 100ms;">
-            
-            <div class="col-span-2 bg-gradient-to-br from-accent-purple/80 to-accent-pink/80 p-6 rounded-xl text-white shadow-lg shadow-accent-purple/20">
+        <div class="mt-8 grid grid-cols-1 md:grid-cols-3 gap-6 animate-fade-in-up" style="animation-delay: 100ms;">
+            <div class="md:col-span-3 bg-gradient-to-br from-accent-purple/80 to-accent-pink/80 p-6 rounded-xl text-white shadow-lg shadow-accent-purple/20">
                 <p class="text-sm font-medium text-purple-200">Total Earned (Lifetime)</p>
-                <p id="overview-total-balance" class="text-5xl font-bold mt-2">${account?.total_lum_earned?.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 4 }) ?? '0.00'} $LUM</p>
+                <p id="overview-total-balance" class="text-5xl font-bold mt-2">${totalEarned.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 4 })} $LUMEN</p>
+                <p id="overview-total-balance-usd" class="text-lg font-medium text-purple-200/80 mt-1">≈ $${(totalEarnedUSD).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })} USD</p>
+                <p class="text-xs text-purple-300/70 italic mt-1">*USD value is simulated for the beta phase. All earnings will be recalculated at the official token launch price when claims are enabled.</p>
             </div>
 
             ${renderStatCard('Global Rank', rank ? rank.toLocaleString() : 'N/A')}
             ${renderStatCard('Contributions', totalContributions.toLocaleString())}
+            ${renderStatCard('Reward Multiplier', `${user?.reward_multiplier?.toFixed(1) ?? '1.0'}x`)}
         </div>
 
         <div class="animate-fade-in-up" style="animation-delay: 300ms;">

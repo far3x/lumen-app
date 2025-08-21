@@ -4,7 +4,7 @@ fund raising / companies / money involved (not care) :
 - need to validate with ai companies or any group, how much 1B token is worth on each quality level, and what is each quality level in details
 NO FUNDING NEEDED FOR THIS - minimum amount before cashout, or lock any cashout for first 30 days to accumulate code and be able to run the business model, one is good and the other might be seen negatively (maybe even a scam?) but that's not the objective, if we can make the token grow for a full month and THNE they can cashout they would earn even more which would be rly nice
 IF FUNDING - for initial reward 200 users, then 2k... etc etc, so after contribution, they get a dollar equivalent of like a pourcentage of what we can potentially raise, then we raise again and go to 2k beta users and so on and so on
-- transform value on dashboard from $LUM to dollars ? so we get some value, then we go from dollars, convert into lumens and make the transfer process work well basically over that lumen price
+- transform value on dashboard from $LUMEN to dollars ? so we get some value, then we go from dollars, convert into lumens and make the transfer process work well basically over that lumen price
 - show that we had 5k downloads on our cli tool, stars on GitHub (64 for now), generated thousands of views through reddit and x... etc (10k +)
 
 after launch :
@@ -13,7 +13,7 @@ after launch :
 - from uvicorn to gunicorn asap
 
 not a priority :
-- daily bonuses ?? (we can call this the sniping leaderboard or idk, like 10 tasks daily that users can snipe) this day -> rust += x LUM$ automatically if good quality ? + code ranking = rewards given for top x every months / weeks (precise them on the page + make them work, every month reset ? or smth like that)
+- daily bonuses ?? (we can call this the sniping leaderboard or idk, like 10 tasks daily that users can snipe) this day -> rust += x LUMEN$ automatically if good quality ? + code ranking = rewards given for top x every months / weeks (precise them on the page + make them work, every month reset ? or smth like that)
 - make the referral system (no abuse with alt accounts etc... or then forget abt the idea, rly not a priority)
 - make feedback readable somewhere in that dashboard (private api for only admin, so me, id have an entire section just for my acc, accessible from a link and nothing else)
 - --- cli --- lum ollama folder/file (default root) (for later not in objectives / not a priority basically)

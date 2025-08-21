@@ -1,6 +1,6 @@
 export const renderGovernance = () => `
     <h1 id="governance">Protocol Governance</h1>
-    <p class="lead text-xl text-text-secondary">Lumen is not a company; it's a piece of public infrastructure. Our ultimate goal is for the protocol to be fully owned and operated by its community of $LUM token holders.</p>
+    <p class="lead text-xl text-text-secondary">Lumen is not a company; it's a piece of public infrastructure. Our ultimate goal is for the protocol to be fully owned and operated by its community of $LUMEN token holders.</p>
 
     <h2 id="lumen-improvement-proposals">Lumen Improvement Proposals (LIPs)</h2>
     <p>The formal mechanism for shaping the future of the protocol is the Lumen Improvement Proposal (LIP). A LIP is a design document providing information to the Lumen community, or describing a new feature for the protocol or its processes or environment.</p>
@@ -8,7 +8,7 @@ export const renderGovernance = () => `
     <ol>
         <li><strong>Community Discussion:</strong> A new idea is first proposed informally on the Lumen Governance Forum (launching in Phase 2). This allows for initial feedback, debate, and refinement from the entire community.</li>
         <li><strong>Formal Proposal (LIP Draft):</strong> If the idea gains traction, a community member or team drafts a formal LIP following a standardized template. This document details the proposal's motivation, technical specifications, and potential impact.</li>
-        <li><strong>On-Chain Voting:</strong> Once finalized, the LIP is submitted for an on-chain vote. The voting power of each participant is proportional to the amount of $LUM they hold or have staked. A pre-defined quorum and majority threshold must be met for the proposal to pass.</li>
+        <li><strong>On-Chain Voting:</strong> Once finalized, the LIP is submitted for an on-chain vote. The voting power of each participant is proportional to the amount of $LUMEN they hold or have staked. A pre-defined quorum and majority threshold must be met for the proposal to pass.</li>
         <li><strong>Implementation:</strong> If a LIP is approved by the token holders, it is officially adopted. The implementation can be carried out by the core development team or funded by a community grant from the Treasury to a qualified third-party team.</li>
     </ol>
 

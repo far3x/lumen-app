@@ -16,7 +16,7 @@ function renderLeaderboardRow(entry) {
             <div class="grid grid-cols-[auto_1fr_auto] items-center gap-4 p-3">
                 <div class="w-10 text-center">${getRankBadge(entry.rank)}</div>
                 <div class="font-medium text-text-main truncate text-sm md:text-base">${entry.display_name}</div>
-                <p class="font-semibold text-sm md:text-base gradient-text font-mono text-right">${entry.total_lum_earned.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })} $LUM</p>
+                <p class="font-semibold text-sm md:text-base gradient-text font-mono text-right">${entry.total_lum_earned.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })} $LUMEN</p>
             </div>
         </div>
     `;
@@ -56,7 +56,7 @@ function renderRecentActivityFeed(contributions) {
                                 <strong class="font-bold">${item.user_display_name}</strong> contributed new code to the network.
                             </p>
                             <p class="text-text-secondary mt-1">
-                                Reward: <strong class="font-medium text-green-400">+${item.reward_amount.toFixed(4)} $LUM</strong>
+                                Reward: <strong class="font-medium text-green-400">+${item.reward_amount.toFixed(4)} $LUMEN</strong>
                             </p>
                         </div>
                         <span class="text-xs text-subtle font-mono whitespace-nowrap pt-1 shrink-0">${DateTime.fromISO(item.created_at).toRelative()}</span>
@@ -76,12 +76,12 @@ function renderPageLayout(leaderboard, userRank, recentContributions) {
                     <div class="w-px h-8 bg-primary"></div>
                     <span class="text-3xl font-bold text-text-main">#${userRank.rank.toLocaleString()}</span>
                 </div>
-                <span class="font-mono text-lg gradient-text font-bold">${userRank.total_lum_earned.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })} $LUM</span>
+                <span class="font-mono text-lg gradient-text font-bold">${userRank.total_lum_earned.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })} $LUMEN</span>
             </div>
         </div>
     ` : '';
     
-    const leaderboardItems = Array.from({ length: 10 }, (_, i) => {
+    const leaderboardItems = Array.from({ length: 5 }, (_, i) => {
         const entry = leaderboard[i];
         return entry ? renderLeaderboardRow(entry) : renderEmptyRow(i + 1);
     }).join('');

@@ -3,6 +3,8 @@ import api from "../../../lib/api.js";
 import { walletService } from "../../../lib/wallet.js";
 import { DateTime } from "luxon";
 
+export const LUMEN_TO_USD_RATE = 0.001; // Simulated pre-launch value
+
 export function renderFeedbackModal() {
     const modalId = 'feedback-modal';
     const existingModal = document.getElementById(modalId);
@@ -243,20 +245,26 @@ export function updateBalancesInUI() {
     if (!account || !user) return;
 
     const claimableBalance = account.lum_balance ?? 0;
+    const claimableBalanceUSD = claimableBalance * LUMEN_TO_USD_RATE;
     const lifetimeBalance = account.total_lum_earned ?? 0;
 
     document.querySelectorAll('.navbar-user-balance').forEach(el => {
-        el.textContent = `${claimableBalance.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 4 })} $LUM`;
+        el.textContent = `${claimableBalance.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 4 })} $LUMEN`;
     });
     
     const overviewLifetimeEl = document.getElementById('overview-total-balance');
     if (overviewLifetimeEl) {
-        overviewLifetimeEl.textContent = `${lifetimeBalance.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 4 })} $LUM`;
+        overviewLifetimeEl.textContent = `${lifetimeBalance.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 4 })} $LUMEN`;
     }
 
     const overviewClaimableEl = document.querySelector('#claim-button-area .pulse-text');
     if (overviewClaimableEl) {
         overviewClaimableEl.textContent = claimableBalance.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 4});
+    }
+    
+    const overviewClaimableUsdEl = document.getElementById('overview-claimable-balance-usd');
+    if (overviewClaimableUsdEl) {
+        overviewClaimableUsdEl.textContent = `≈ $${(claimableBalanceUSD).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })} USD`;
     }
     
     const claimButton = document.getElementById('claim-rewards-btn');
