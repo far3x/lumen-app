@@ -18,7 +18,7 @@ const routes = {
     '/login': () => renderPlaceholderPage('Login'),
     '/contact': renderContactPage,
     '/signup': () => renderPlaceholderPage('Sign Up'),
-    '/privacy': () => renderPlaceholderPage('Privacy Policy'), // Added for the contact form link
+    '/privacy': () => renderPlaceholderPage('Privacy Policy'),
 };
 
 export const navigate = (path) => {
@@ -30,14 +30,7 @@ export const navigate = (path) => {
 const handleLocation = async () => {
     const path = window.location.pathname;
     
-    if (path !== '/' && path !== '/why-lumen' && path !== '/contact' && path !== '/product' && path !== '/docs' && path !== '/about' && path !== '/login' && path !== '/signup' && path !== '/privacy') {
-        window.history.replaceState({}, '', '/');
-        const contactSection = document.getElementById('contact');
-        if (contactSection) {
-            contactSection.scrollIntoView({ behavior: 'smooth' });
-        }
-        return;
-    }
+    window.scrollTo(0, 0);
 
     const route = routes[path] || routes['/'];
     contentContainer.innerHTML = await route();

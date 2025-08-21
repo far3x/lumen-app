@@ -13,7 +13,7 @@ export default {
         'white': '#FFFFFF',
         'background': '#FDFCFB',
         'surface': '#FFFFFF',
-        'dark-surface': '#1A2E35',
+        'dark-surface': '#252A2E',
         'text': {
           'headings': '#1E2022',
           'body': '#404346',

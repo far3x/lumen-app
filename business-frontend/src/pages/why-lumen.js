@@ -21,18 +21,18 @@ export function renderWhyLumenPage() {
                     <h2 class="text-4xl md:text-5xl font-bold text-text-headings">The Public Internet is a Compromised Asset</h2>
                     <p class="mt-6 text-lg text-text-body">Training on publicly scraped data is no longer a viable strategy. It's a race to the bottom, exposing your models and your business to systemic risks.</p>
                 </div>
-                <div class="mt-20 grid md:grid-cols-3 gap-12 text-center">
-                    <div class="bg-background p-8 rounded-lg border border-border">
+                <div class="mt-20 grid md:grid-cols-3 gap-12 text-left">
+                    <div class="bg-background p-8 rounded-lg">
                         <h3 class="font-bold text-xl text-text-headings">The Poisoned Well of Model Collapse</h3>
                         <p class="mt-2 text-text-muted">Public data is saturated with low-quality tutorials, insecure code, and synthetic output from other AIs. Training on this noise fundamentally limits your model's reasoning capabilities.</p>
                     </div>
-                     <div class="bg-background p-8 rounded-lg border border-border">
+                     <div class="bg-background p-8 rounded-lg">
                         <h3 class="font-bold text-xl text-text-headings">The Ticking Clock of Legal Risk</h3>
                         <p class="mt-2 text-text-muted">Using code without explicit consent is a legal and ethical minefield. Copyright infringement and license violations pose an existential threat to models built on scraped data.</p>
                     </div>
-                     <div class="bg-background p-8 rounded-lg border border-border">
+                     <div class="bg-background p-8 rounded-lg">
                         <h3 class="font-bold text-xl text-text-headings">The Innovation Bottleneck</h3>
-                        <p class="mt-2 text-text-muted">The most valuable code—novel algorithms, complex architectures, and proprietary business logic—is locked away in private repositories, completely inaccessible to your models.</p>
+                        <p class="mt-2 text-text-muted">The most valuable code, novel algorithms, complex architectures, and proprietary business logic is locked away in private repositories, completely inaccessible to your models.</p>
                     </div>
                 </div>
             </div>
@@ -51,12 +51,6 @@ export function renderWhyLumenPage() {
                     <!-- Pillar 1: Security -->
                     <div class="grid lg:grid-cols-2 gap-16 items-center">
                         <div class="w-full h-96 bg-white rounded-lg border border-border flex items-center justify-center">
-                           <!-- 
-                                IMAGE 1 GOES HERE
-                                Suggested: A clean, abstract visual representing security. 
-                                Think about a shield, a lock, or a simple diagram showing data flowing from a local machine through a "secure filter" before going to the cloud.
-                                Filename: /public/security.jpg
-                           -->
                            <p class="text-text-muted">Image Placeholder: Security (e.g., /public/security.jpg)</p>
                         </div>
                         <div>
@@ -67,12 +61,6 @@ export function renderWhyLumenPage() {
                     <!-- Pillar 2: Quality -->
                      <div class="grid lg:grid-cols-2 gap-16 items-center">
                         <div class="lg:order-2 w-full h-96 bg-white rounded-lg border border-border flex items-center justify-center">
-                           <!-- 
-                                IMAGE 2 GOES HERE
-                                Suggested: A visual representing precision or filtering.
-                                Think about a simple diagram of a funnel refining messy data points into clean, pure signal, or an abstract representation of data sorting.
-                                Filename: /public/quality.jpg
-                           -->
                            <p class="text-text-muted">Image Placeholder: Quality (e.g., /public/quality.jpg)</p>
                         </div>
                         <div class="lg:order-1">
@@ -83,12 +71,6 @@ export function renderWhyLumenPage() {
                      <!-- Pillar 3: Exclusivity -->
                     <div class="grid lg:grid-cols-2 gap-16 items-center">
                         <div class="w-full h-96 bg-white rounded-lg border border-border flex items-center justify-center">
-                           <!-- 
-                                IMAGE 3 GOES HERE
-                                Suggested: A visual representing a unique source or a competitive "moat".
-                                Think about an abstract image of a single unique element (e.g., a gold cube) standing out from a crowd of gray cubes, or a simple, elegant "key" icon.
-                                Filename: /public/exclusivity.jpg
-                           -->
                            <p class="text-text-muted">Image Placeholder: Exclusivity (e.g., /public/exclusivity.jpg)</p>
                         </div>
                         <div>
@@ -113,15 +95,15 @@ export function renderWhyLumenPage() {
                             <tr>
                                 <th class="p-4 border-b-2 border-border font-bold text-text-headings">Feature</th>
                                 <th class="p-4 border-b-2 border-border font-bold text-text-headings">Web Scraping / Public Data</th>
-                                <th class="p-4 border-b-2 border-border font-bold text-text-headings bg-background rounded-t-lg">Lumen Protocol</th>
+                                <th class="p-4 border-b-2 border-border font-bold text-text-headings">Lumen Protocol</th>
                             </tr>
                         </thead>
                         <tbody>
-                            <tr class="border-b border-border"><td class="p-4 font-semibold text-text-body">Data Source</td><td class="p-4 text-text-muted">Public, noisy, often AI-generated</td><td class="p-4 text-text-headings bg-background">Proprietary, human-written, high-signal</td></tr>
-                            <tr class="border-b border-border"><td class="p-4 font-semibold text-text-body">Legal Risk</td><td class="p-4 text-text-muted">High (Copyright & License Violations)</td><td class="p-4 text-text-headings bg-background">Mitigated (Explicit Contributor Consent via CLA)</td></tr>
-                            <tr class="border-b border-border"><td class="p-4 font-semibold text-text-body">Quality Control</td><td class="p-4 text-text-muted">None (Unfiltered, inconsistent)</td><td class="p-4 text-text-headings bg-background">Rigorous (AI-driven scoring on every contribution)</td></tr>
-                            <tr class="border-b border-border"><td class="p-4 font-semibold text-text-body">Novelty</td><td class="p-4 text-text-muted">Low (Repetitive, tutorial-heavy)</td><td class="p-4 text-text-headings bg-background">High (Focus on unique, non-public code)</td></tr>
-                            <tr><td class="p-4 font-semibold text-text-body">Anonymization</td><td class="p-4 text-text-muted">N/A (PII and secrets often exposed)</td><td class="p-4 text-text-headings bg-background rounded-b-lg">Built-in (Secure, local-first sanitization)</td></tr>
+                            <tr class="even:bg-gray-50/50"><td class="p-4 font-semibold text-text-body">Data Source</td><td class="p-4 text-text-muted"><span class="flex items-center gap-2"><svg class="w-5 h-5 text-red-500 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>Public, noisy, often AI-generated</span></td><td class="p-4 text-text-headings"><span class="flex items-center gap-2"><svg class="w-5 h-5 text-green-500 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>Proprietary, human-written, high-signal</span></td></tr>
+                            <tr class="even:bg-gray-50/50"><td class="p-4 font-semibold text-text-body">Legal Risk</td><td class="p-4 text-text-muted"><span class="flex items-center gap-2"><svg class="w-5 h-5 text-red-500 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>High (Copyright & License Violations)</span></td><td class="p-4 text-text-headings"><span class="flex items-center gap-2"><svg class="w-5 h-5 text-green-500 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>Mitigated (Explicit Contributor Consent via CLA)</span></td></tr>
+                            <tr class="even:bg-gray-50/50"><td class="p-4 font-semibold text-text-body">Quality Control</td><td class="p-4 text-text-muted"><span class="flex items-center gap-2"><svg class="w-5 h-5 text-red-500 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>None (Unfiltered, inconsistent)</span></td><td class="p-4 text-text-headings"><span class="flex items-center gap-2"><svg class="w-5 h-5 text-green-500 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>Rigorous (AI-driven scoring on every contribution)</span></td></tr>
+                            <tr class="even:bg-gray-50/50"><td class="p-4 font-semibold text-text-body">Novelty</td><td class="p-4 text-text-muted"><span class="flex items-center gap-2"><svg class="w-5 h-5 text-red-500 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>Low (Repetitive, tutorial-heavy)</span></td><td class="p-4 text-text-headings"><span class="flex items-center gap-2"><svg class="w-5 h-5 text-green-500 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>High (Focus on unique, non-public code)</span></td></tr>
+                            <tr><td class="p-4 font-semibold text-text-body">Anonymization</td><td class="p-4 text-text-muted"><span class="flex items-center gap-2"><svg class="w-5 h-5 text-red-500 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>N/A (PII and secrets often exposed)</span></td><td class="p-4 text-text-headings"><span class="flex items-center gap-2"><svg class="w-5 h-5 text-green-500 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>Built-in (Secure, local-first sanitization)</span></td></tr>
                         </tbody>
                     </table>
                 </div>
