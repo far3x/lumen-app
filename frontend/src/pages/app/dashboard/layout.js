@@ -3,6 +3,7 @@ import { updateBalancesInUI, renderModal } from './utils.js';
 import { navigate } from '../../../router.js';
 import { renderDashboardOverview, initializeChart, attachChartButtonListeners } from './overview.js';
 import { renderMyContributionsPage, attachContributionPageListeners, contributionsState, resetContributionsState } from './my-contributions.js';
+import { renderWebContributePage, attachWebContributeListeners } from './web-contribute.js';
 import { renderRecentActivityPage } from './network-feed.js';
 import { renderReferralPage, handleReferralNotifyClick } from './referral.js';
 import { renderSettingsPage, attachSettingsPageListeners } from './settings.js';
@@ -25,6 +26,7 @@ function renderSidebar(activeTab, user) {
     const sidebarButtons = [
         { id: 'overview', label: 'Dashboard', icon: icons.dashboard },
         { id: 'my-contributions', label: 'My Contributions', icon: icons.contributions },
+        { id: 'web-contribute', label: 'Web Contribute', icon: icons.upload },
         { id: 'network-feed', label: 'My Activity', icon: icons.feed },
         { id: 'referral', label: 'Refer a Dev', icon: icons.referral },
         { id: 'settings', label: 'Settings', icon: icons.settings },
@@ -137,7 +139,6 @@ async function refreshDashboardData(isInitialLoad = false) {
         updateBalancesInUI();
 
     } catch (error) {
-        console.error("Dashboard data refresh failed:", error);
         if (dashboardContentArea) {
             dashboardContentArea.innerHTML = `<div class="text-center p-8 text-red-400">Could not refresh dashboard data. Some features might be unavailable.</div>`;
         }
@@ -263,6 +264,9 @@ function loadContent(tabId) {
         case 'my-contributions':
             contentHTML = renderMyContributionsPage(dashboardState.allContributions);
             break;
+        case 'web-contribute':
+            contentHTML = renderWebContributePage();
+            break;
         case 'network-feed':
             contentHTML = renderRecentActivityPage(dashboardState.allContributions, dashboardState.allClaims);
             break;
@@ -292,6 +296,7 @@ function loadContent(tabId) {
         updateBalancesInUI();
     }
     if (activeTabForRender === 'my-contributions') attachContributionPageListeners(dashboardState);
+    if (activeTabForRender === 'web-contribute') attachWebContributeListeners();
     if (activeTabForRender === 'settings') attachSettingsPageListeners(dashboardState);
     if (activeTabForRender === 'referral') document.getElementById('notify-referral-btn')?.addEventListener('click', handleReferralNotifyClick);
 }
@@ -338,7 +343,6 @@ async function setupDashboard() {
         connectUserWebSocket();
 
     } catch (error) {
-        console.error("Dashboard setup failed globally:", error);
         if (error.response && error.response.status === 401) {
            logout();
            return;
