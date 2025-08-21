@@ -97,7 +97,7 @@ export function renderLandingPage() {
                     <p class="mt-6 text-lg text-gray-300">Our partners achieve breakthroughs, innovate faster, and drive down costs. See how they do it with Lumen.</p>
                 </div>
                 <div class="mt-20 h-48 bg-black/20 rounded-lg border border-white/10 flex items-center justify-center scroll-animate animate-delay-1" style="transform: translateY(2rem);">
-                     <p class="text-white/30">Customer Logos Placeholder</p>
+                     <p class="text-white/30">soon...</p>
                 </div>
             </div>
         </section>

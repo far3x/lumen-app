@@ -50,30 +50,30 @@ export function renderWhyLumenPage() {
                 <div class="mt-20 space-y-24">
                     <!-- Pillar 1: Security -->
                     <div class="grid lg:grid-cols-2 gap-16 items-center">
-                        <div class="w-full h-96 bg-white rounded-lg border border-border flex items-center justify-center p-8">
-                           <img src="/shield.png" alt="A shield icon representing security and confidence" class="w-full h-full max-h-64 object-contain">
+                        <div class="w-full h-[28rem] bg-white rounded-lg border border-border flex items-center justify-center p-8">
+                           <img src="/shield.png" alt="A shield icon representing security and confidence" class="w-full h-full object-contain">
                         </div>
-                        <div>
+                        <div class="flex flex-col justify-center">
                              <h3 class="text-3xl font-bold text-text-headings">Operate with Unshakeable Confidence</h3>
                              <p class="mt-4 text-lg text-text-body">Lumen de-risks your entire data pipeline. Our security model is built on a "local-first" principle, where all code is anonymized on the contributor's machine before upload. By sourcing data with explicit consent via our Contributor License Agreement, we provide a fully-auditable, legally-defensible asset that protects you from the copyright and privacy liabilities of web scraping.</p>
                         </div>
                     </div>
                     <!-- Pillar 2: Quality -->
                      <div class="grid lg:grid-cols-2 gap-16 items-center">
-                        <div class="lg:order-2 w-full h-96 bg-white rounded-lg border border-border flex items-center justify-center p-8">
-                           <img src="/gear.png" alt="A gear icon representing precision and quality control" class="w-full h-full max-h-64 object-contain">
+                        <div class="lg:order-2 w-full h-[28rem] bg-white rounded-lg border border-border flex items-center justify-center p-8">
+                           <img src="/gear.png" alt="A gear icon representing precision and quality control" class="w-full h-full object-contain">
                         </div>
-                        <div class="lg:order-1">
+                        <div class="lg:order-1 flex flex-col justify-center">
                              <h3 class="text-3xl font-bold text-text-headings">Build with Unprecedented Precision</h3>
                              <p class="mt-4 text-lg text-text-body">Stop training on noise. Our hybrid valuation engine acts as a rigorous quality gate, analyzing every contribution for complexity, architectural quality, and semantic uniqueness. This allows you to move beyond simple keyword filtering and curate bespoke datasets based on deep, structural attributes of the code, resulting in higher-performance models.</p>
                         </div>
                     </div>
                      <!-- Pillar 3: Exclusivity -->
                     <div class="grid lg:grid-cols-2 gap-16 items-center">
-                        <div class="w-full h-96 bg-white rounded-lg border border-border flex items-center justify-center p-8">
-                           <img src="/diamond.png" alt="A diamond icon representing exclusivity and unique value" class="w-full h-full max-h-64 object-contain">
+                        <div class="w-full h-[28rem] bg-white rounded-lg border border-border flex items-center justify-center p-8">
+                           <img src="/diamond.png" alt="A diamond icon representing exclusivity and unique value" class="w-full h-full object-contain">
                         </div>
-                        <div>
+                        <div class="flex flex-col justify-center">
                              <h3 class="text-3xl font-bold text-text-headings">Secure a Definitive Advantage</h3>
                              <p class="mt-4 text-lg text-text-body">Lumen provides access to the data your competitors cannot find. Our network is a continuously growing reservoir of proprietary, human-written code that does not exist on GitHub or the public internet. By training on this unique ground-truth data, you escape the echo chamber of public models and unlock novel capabilities.</p>
                         </div>
