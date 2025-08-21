@@ -7,6 +7,7 @@ let state = {
     project: null,
     errorMessage: '',
 };
+let currentDashboardState = null;
 
 function setState(newState) {
     Object.assign(state, newState);
@@ -168,7 +169,7 @@ function render() {
             const oneDayAgo = new Date(Date.now() - 24 * 60 * 60 * 1000);
             const successfulStatuses = ['PROCESSED', 'REJECTED_NO_NEW_CODE', 'REJECTED_NO_REWARD'];
             
-            const contributionsToday = (window.dashboardState?.allUserContributions || [])
+            const contributionsToday = (currentDashboardState?.allUserContributions || [])
                 .filter(c => 
                     new Date(c.created_at) > oneDayAgo &&
                     successfulStatuses.includes(c.status)
@@ -230,11 +231,13 @@ function attachListeners() {
     }
 }
 
-export function attachWebContributeListeners() {
+export function attachWebContributeListeners(dashboardState) {
+    currentDashboardState = dashboardState;
     render();
 }
 
-export function renderWebContributePage() {
+export function renderWebContributePage(dashboardState) {
+    currentDashboardState = dashboardState;
     state = { view: 'upload', project: null, errorMessage: '' };
     
     return `
