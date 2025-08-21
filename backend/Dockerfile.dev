@@ -17,6 +17,8 @@ WORKDIR /usr/src/app
 ENV PYTHONDONTWRITEBYTECODE 1
 ENV PYTHONUNBUFFERED 1
 
+RUN apt-get update -y && apt-get install -y --no-install-recommends git
+
 COPY --from=scc_builder /usr/local/bin/scc /usr/local/bin/scc
 
 COPY requirements.txt .

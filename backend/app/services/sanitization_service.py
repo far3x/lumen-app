@@ -6,6 +6,8 @@ from pygments import lex
 from pygments.lexers import guess_lexer
 from pygments.token import Comment
 from pygments.util import ClassNotFound
+from trufflehog3.core import scan, load_config, load_rules, DEFAULT_RULES_FILE
+import scrubadub
 
 logger = logging.getLogger(__name__)
 
@@ -22,12 +24,6 @@ class SanitizationService:
             return content
 
     def _redact_secrets(self, content: str) -> str:
-        try:
-            from trufflehog3.core import scan, load_config, load_rules, DEFAULT_RULES_FILE
-        except ImportError:
-            logger.error("trufflehog3 is not installed. Secrets will not be redacted.")
-            return content
-
         sanitized_content = content
         tmp_filepath = None
         try:
@@ -46,21 +42,16 @@ class SanitizationService:
                     if secret_string:
                         sanitized_content = sanitized_content.replace(secret_string.strip(), "[REDACTED_SECRET]")
         except Exception as e:
-            logger.warning(f"Secret scanning with trufflehog3 failed: {e}")
+            logger.error(f"An unexpected error occurred during secret scanning: {e}", exc_info=True)
         finally:
             if tmp_filepath and os.path.exists(tmp_filepath):
                 os.unlink(tmp_filepath)
         return sanitized_content
 
     def _redact_pii(self, content: str) -> str:
-        try:
-            import scrubadub
-            sanitized_content = scrubadub.clean(content, replace_with='placeholder')
-            sanitized_content = re.sub(r'\b(?:\d{1,3}\.){3}\d{1,3}\b', '[REDACTED_IP]', sanitized_content)
-            return sanitized_content
-        except ImportError:
-            logger.error("scrubadub is not installed. PII will not be redacted.")
-            return content
+        sanitized_content = scrubadub.clean(content, replace_with='placeholder')
+        sanitized_content = re.sub(r'\b(?:\d{1,3}\.){3}\d{1,3}\b', '[REDACTED_IP]', sanitized_content)
+        return sanitized_content
 
     def sanitize_code(self, content: str) -> str:
         if not content or not isinstance(content, str):
