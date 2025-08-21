@@ -11,9 +11,8 @@ from app.services.embedding import embedding_service
 from app.services.redis_service import redis_service
 from app.schemas import ContributionResponse, ValuationMetrics, AiAnalysis
 from app.services.solana_service import solana_service
-from fastapi_mail import FastMail, MessageSchema, ConnectionConfig
-from pathlib import Path
-from datetime import datetime
+from app.services.email_service import email_service
+import asyncio
 
 logger = logging.getLogger(__name__)
 
@@ -24,35 +23,9 @@ NEAR_PERFECT_SIMILARITY_THRESHOLD = 0.999
 DISTANCE_UPDATE_THRESHOLD = 1 - SIMILARITY_UPDATE_THRESHOLD
 NEAR_PERFECT_DISTANCE_THRESHOLD = 1 - NEAR_PERFECT_SIMILARITY_THRESHOLD
 
-mail_conf = ConnectionConfig(
-    MAIL_USERNAME=settings.MAIL_USERNAME,
-    MAIL_PASSWORD=settings.MAIL_PASSWORD,
-    MAIL_FROM=settings.MAIL_FROM,
-    MAIL_PORT=settings.MAIL_PORT,
-    MAIL_SERVER=settings.MAIL_SERVER,
-    MAIL_FROM_NAME=settings.MAIL_FROM_NAME,
-    MAIL_STARTTLS=settings.MAIL_STARTTLS,
-    MAIL_SSL_TLS=settings.MAIL_SSL_TLS,
-    USE_CREDENTIALS=True,
-    VALIDATE_CERTS=True,
-    TEMPLATE_FOLDER=Path(__file__).parent / 'templates'
-)
-
 @celery_app.task(name="send_contact_sales_email")
 def send_contact_sales_email_task(name: str, email: str):
-    template_body = {
-        "user_name": name,
-        "year": datetime.now().year,
-        "logo_url": settings.PUBLIC_LOGO_URL
-    }
-    message = MessageSchema(
-        subject="Thank you for contacting Lumen Protocol",
-        recipients=[email],
-        template_body=template_body,
-        subtype="html"
-    )
-    fm = FastMail(mail_conf)
-    fm.send_message(message, template_name="contact_sales_confirmation.html")
+    asyncio.run(email_service.send_contact_sales_confirmation(name, email))
     logger.info(f"Contact sales confirmation email sent to {email}")
 
 def publish_user_update(db, user_id: int, event_type: str, payload: dict):
