@@ -38,16 +38,6 @@ class HybridValuationService:
         except Exception:
             self.tokenizer = None
 
-    def _get_network_growth_multiplier(self, total_lum_distributed: float) -> float:
-        if total_lum_distributed < 1_000_000:
-            return 5.0
-        elif total_lum_distributed < 10_000_000:
-            return 2.0
-        elif total_lum_distributed < 50_000_000:
-            return 1.2
-        else:
-            return 1.0
-
     def _parse_codebase(self, codebase: str) -> list[dict]:
         print("[VALUATION_STEP] Parsing codebase with delimiter...")
         parsed_files = []
@@ -346,9 +336,7 @@ class HybridValuationService:
         if simulated_lum_price > 0:
             base_lum_reward = target_usd_reward / simulated_lum_price
         
-        network_growth_multiplier = self._get_network_growth_multiplier(total_lum_distributed)
-        
-        final_reward = base_lum_reward * network_growth_multiplier
+        final_reward = base_lum_reward
         
         sanitized_summary = html.escape(analysis_summary_from_ai) if analysis_summary_from_ai else None
         
@@ -361,7 +349,6 @@ class HybridValuationService:
             "rarity_multiplier": round(rarity_multiplier, 4),
             "simulated_lum_price_usd": round(simulated_lum_price, 6),
             "target_usd_reward": round(target_usd_reward, 4),
-            "network_growth_multiplier": round(network_growth_multiplier, 2),
             "final_reward": round(final_reward, 2)
         })
 

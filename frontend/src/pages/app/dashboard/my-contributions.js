@@ -27,6 +27,7 @@ function handleContributionUpdate(event) {
         allContributions.unshift(updatedContrib);
     }
     
+    // Also update paginated contributions if on page 1
     if (contributionsState.currentPage === 1) {
         const paginatedIndex = window.dashboardState.paginatedContributions.findIndex(c => c.id === updatedContrib.id);
         if (paginatedIndex !== -1) {
@@ -41,6 +42,7 @@ function handleContributionUpdate(event) {
         row.outerHTML = renderSingleContributionRow(updatedContrib);
         attachDetailModalListeners();
     } else {
+        // Only add if we're on the first page
         if (contributionsState.currentPage === 1) {
             const tableBody = document.querySelector('#contributions-table-container tbody');
             if (tableBody) {
@@ -169,7 +171,6 @@ function renderContributionDetailModal(item) {
                             ${renderKeyMetric('Tokens Analyzed', details.total_tokens?.toLocaleString() ?? 'N/A')}
                             ${renderKeyMetric('Avg. Complexity', details.avg_complexity?.toFixed(2) ?? 'N/A')}
                             ${renderKeyMetric('Uniqueness Multiplier', `${details.rarity_multiplier?.toFixed(2) ?? 'N/A'}x`)}
-                            ${renderKeyMetric('Network Growth Bonus', `${details.network_growth_multiplier?.toFixed(2) ?? 'N/A'}x`)}
                         </div>
                     </div>
                 </div>
