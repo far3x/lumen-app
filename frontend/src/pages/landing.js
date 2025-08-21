@@ -240,6 +240,16 @@ export function renderLandingPage() {
             ></video>
             <div class="absolute top-0 left-0 w-full h-full bg-black/50 -z-10"></div>
             <div class="container mx-auto px-6 relative z-10">
+                <div class="mb-8 scroll-animate animate-fade-in-up">
+                    <div class="inline-flex items-center flex-wrap justify-center gap-x-3 text-sm font-medium bg-surface/20 backdrop-blur-md border border-white/10 text-text-secondary rounded-full py-2 px-4">
+                        <a href="https://dexscreener.com/solana/ARxf6vS5wRhfxuWagMDd67T5keaBcdtTCMVV74un6777" target="_blank" rel="noopener noreferrer" data-external="true" class="hover:text-white transition-colors">Dexscreener</a>
+                        <span class="hidden sm:inline">-</span>
+                        <a href="https://heaven.xyz/token/ARxf6vS5wRhfxuWagMDd67T5keaBcdtTCMVV74un6777" target="_blank" rel="noopener noreferrer" data-external="true" class="hover:text-white transition-colors">Heavendex</a>
+                        <span class="hidden sm:inline">-</span>
+                        <span class="text-text-main ml-2 sm:ml-0">CA:</span>
+                        <span class="font-mono text-xs sm:text-sm break-all">ARxf6vS5wRhfxuWagMDd67T5keaBcdtTCMVV74un6777</span>
+                    </div>
+                </div>
                 <h1 class="text-3xl sm:text-4xl md:text-6xl lg:text-7xl font-bold tracking-tighter scroll-animate animate-fade-in-up" style="transition-delay: 100ms;">
                     Monetize Your Code.
                     <br>
