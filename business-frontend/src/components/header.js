@@ -1,6 +1,6 @@
 export function renderHeader() {
     const navLinkClasses = "text-text-body hover:text-text-headings transition-colors font-medium";
-    const buttonPrimaryClasses = "px-5 py-2.5 text-sm font-semibold text-white bg-accent-gradient rounded-md transition-transform hover:scale-105";
+    const buttonPrimaryClasses = "px-5 py-2.5 text-sm font-semibold text-white bg-accent-gradient rounded-md transition-all duration-300 hover:scale-105 hover:brightness-110";
     const buttonSecondaryClasses = "px-5 py-2.5 text-sm font-semibold text-text-headings bg-white border border-border hover:bg-background rounded-md transition-colors";
 
     return `
@@ -10,8 +10,8 @@ export function renderHeader() {
             <div class="flex justify-between items-center h-24">
                 <div class="flex items-center gap-10">
                     <a href="/" class="flex items-center gap-3">
-                        <img src="/logo.png" alt="Lumen Logo" class="h-10 w-10">
-                        <span class="font-bold text-2xl text-text-headings">Lumen</span>
+                        <img src="/logo.png" alt="Lumen Logo" class="h-12 w-12">
+                        <span class="font-bold text-2xl text-text-headings">lumen</span>
                     </a>
                     <nav class="hidden lg:flex items-center gap-8">
                         <a href="/why-lumen" class="${navLinkClasses}">Why Lumen</a>

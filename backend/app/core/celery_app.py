@@ -27,6 +27,10 @@ task_routes = {
         'queue': 'high_priority',
         'routing_key': 'task.high_priority',
     },
+    'app.tasks.send_contact_sales_email_task': {
+        'queue': 'high_priority',
+        'routing_key': 'task.high_priority',
+    }
 }
 
 celery_app.conf.update(task_routes=task_routes)

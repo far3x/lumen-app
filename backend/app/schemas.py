@@ -199,3 +199,11 @@ class FeedbackCreate(BaseModel):
 class ClaimRequestResponse(BaseModel):
     message: str
     claim_id: int
+
+class ContactSalesCreate(BaseModel):
+    full_name: str = Field(..., min_length=2)
+    work_email: EmailStr
+    company_name: str = Field(..., min_length=2)
+    job_title: Optional[str] = None
+    contact_reason: str
+    message: Optional[str] = Field(None, max_length=5000)

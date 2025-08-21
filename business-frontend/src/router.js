@@ -1,6 +1,8 @@
 import { renderHeader } from './components/header.js';
 import { renderFooter } from './components/footer.js';
 import { renderLandingPage } from './pages/landing.js';
+import { renderWhyLumenPage } from './pages/why-lumen.js';
+import { renderContactPage } from './pages/contact.js';
 import { renderPlaceholderPage } from './pages/placeholder.js';
 
 const contentContainer = document.getElementById('content-container');
@@ -9,13 +11,14 @@ const footerContainer = document.getElementById('footer-container');
 
 const routes = {
     '/': renderLandingPage,
-    '/why-lumen': () => renderPlaceholderPage('Why Lumen?'),
+    '/why-lumen': renderWhyLumenPage,
     '/product': () => renderPlaceholderPage('Our Product'),
     '/docs': () => renderPlaceholderPage('Documentation'),
     '/about': () => renderPlaceholderPage('About Us'),
     '/login': () => renderPlaceholderPage('Login'),
-    '/contact': () => renderPlaceholderPage('Contact Us'),
+    '/contact': renderContactPage,
     '/signup': () => renderPlaceholderPage('Sign Up'),
+    '/privacy': () => renderPlaceholderPage('Privacy Policy'), // Added for the contact form link
 };
 
 export const navigate = (path) => {
@@ -27,7 +30,7 @@ export const navigate = (path) => {
 const handleLocation = async () => {
     const path = window.location.pathname;
     
-    if (path !== '/') {
+    if (path !== '/' && path !== '/why-lumen' && path !== '/contact' && path !== '/product' && path !== '/docs' && path !== '/about' && path !== '/login' && path !== '/signup' && path !== '/privacy') {
         window.history.replaceState({}, '', '/');
         const contactSection = document.getElementById('contact');
         if (contactSection) {
@@ -72,7 +75,6 @@ export const initializeRouter = () => {
         }
     });
 
-    // REVISED: Header scroll behavior logic
     let lastScrollY = window.scrollY;
     const headerElement = document.getElementById('header-container');
 
@@ -80,10 +82,8 @@ export const initializeRouter = () => {
         if (headerElement) {
             const currentScrollY = window.scrollY;
             if (lastScrollY < currentScrollY && currentScrollY > 150) {
-                // Scrolling down
                 headerElement.classList.add('-translate-y-full');
             } else {
-                // Scrolling up
                 headerElement.classList.remove('-translate-y-full');
             }
             lastScrollY = currentScrollY;

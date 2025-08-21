@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="color-scheme" content="light dark">
+    <meta name="supported-color-schemes" content="light dark">
+    <title>Thank You for Contacting Lumen Protocol</title>
+    <style>
+        :root {
+            color-scheme: light dark;
+            supported-color-schemes: light dark;
+        }
+        @media (prefers-color-scheme: dark) {
+            body, .body-wrapper { background-color: #0D0D12 !important; }
+            .content-wrapper { background-color: #13131A !important; border-color: #3F3F4D !important; }
+            .main-text, .secondary-text { color: #E5E5E5 !important; }
+            .subtle-text { color: #A3A3B2 !important; }
+        }
+    </style>
+</head>
+<body style="margin: 0; padding: 0; width: 100%; font-family: 'Satoshi', Arial, sans-serif; -webkit-font-smoothing: antialiased;">
+    <div class="body-wrapper" style="background-color: #f3f4f6; padding: 20px;">
+        <table width="100%" border="0" cellpadding="0" cellspacing="0" role="presentation">
+            <tr>
+                <td align="center">
+                    <table class="content-wrapper" width="600" border="0" cellpadding="0" cellspacing="0" role="presentation" style="max-width: 600px; width: 100%; background-color: #ffffff; border: 1px solid #e5e7eb; border-radius: 12px; padding: 40px;">
+                        <tr>
+                            <td align="center" style="padding-bottom: 30px;">
+                                <img src="{{ logo_url }}" alt="Lumen Logo" style="width: 48px; height: 48px; display: block;">
+                            </td>
+                        </tr>
+                        <tr>
+                            <td align="center">
+                                <h1 class="main-text" style="font-size: 24px; font-weight: bold; color: #13131A; margin: 0 0 16px 0;">
+                                    Thank you for your inquiry, {{ user_name }}.
+                                </h1>
+                                <p class="secondary-text" style="font-size: 16px; color: #3F3F4D; line-height: 1.5; margin: 0 0 30px 0;">
+                                    We have received your message and are reviewing it. At Lumen, our mission is to build the foundational data layer for the next generation of AI by creating a fair and transparent economy for the world's most valuable data.
+                                </p>
+                                 <p class="secondary-text" style="font-size: 16px; color: #3F3F4D; line-height: 1.5; margin: 0 0 30px 0;">
+                                    A member of our team will be in touch with you personally within one business day.
+                                </p>
+                            </td>
+                        </tr>
+                         <tr>
+                            <td style="padding-top: 20px; border-top: 1px solid #e5e7eb;">
+                                <p class="subtle-text" style="font-size: 12px; color: #A3A3B2; text-align: center; margin: 0;">
+                                   Best regards,
+                                </p>
+                                <p class="subtle-text" style="font-size: 14px; color: #A3A3B2; text-align: center; font-weight: bold; margin: 4px 0 10px 0;">
+                                   The Lumen Protocol Team
+                                </p>
+                                <p class="subtle-text" style="font-size: 12px; color: #A3A3B2; text-align: center; margin: 10px 0 0 0;">
+                                    © {{ year }} Lumen Protocol. All rights reserved.
+                                </p>
+                            </td>
+                        </tr>
+                    </table>
+                </td>
+            </tr>
+        </table>
+    </div>
+</body>
+</html>
