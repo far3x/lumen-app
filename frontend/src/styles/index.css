@@ -399,3 +399,42 @@ details > summary::-webkit-details-marker {
     @apply font-bold text-text-main px-0.5;
     text-shadow: 0 0 8px rgba(255, 255, 255, 0.5), 0 0 12px rgba(0, 217, 217, 0.25);
 }
+
+.drop-zone {
+    @apply relative block w-full rounded-2xl border-2 border-dashed border-subtle p-12 text-center transition-colors duration-300;
+}
+
+.drop-zone.drag-over {
+    @apply border-accent-purple bg-surface;
+}
+
+.file-tree {
+    font-family: theme('fontFamily.mono');
+    font-size: 13px;
+    line-height: 1.6;
+}
+
+.file-tree ul {
+    @apply pl-4 border-l border-primary/50;
+}
+
+.file-tree li {
+    @apply relative;
+}
+
+.file-tree li::before {
+    content: '';
+    @apply absolute -left-4 top-2.5 h-px w-3 bg-primary/50;
+}
+
+.file-tree .file-item {
+    @apply flex items-center gap-2;
+}
+
+.file-tree .folder-item {
+    @apply font-bold cursor-pointer;
+}
+
+.file-tree .excluded {
+    @apply text-subtle line-through;
+}

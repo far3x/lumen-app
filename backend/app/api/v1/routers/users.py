@@ -2,6 +2,7 @@ from fastapi import APIRouter, Depends, HTTPException, Query, status, Request, R
 from sqlalchemy.orm import Session
 import json
 import secrets
+import tiktoken
 from datetime import timedelta, datetime, timezone
 from pathlib import Path
 from authlib.integrations.starlette_client import OAuth
@@ -13,11 +14,12 @@ from fastapi_mail import FastMail, MessageSchema, ConnectionConfig
 
 from app.db import crud, models, database
 from app.api.v1 import dependencies
-from app.schemas import User as UserSchema, AccountDetails, ContributionResponse, UserUpdate, ValuationMetrics, AiAnalysis, ChangePasswordRequest, WalletLinkRequest, ClaimTransactionResponse, SetWalletAddressRequest, UserDeletePayload, LeaderboardEntry
+from app.schemas import User as UserSchema, AccountDetails, ContributionResponse, UserUpdate, ValuationMetrics, AiAnalysis, ChangePasswordRequest, WalletLinkRequest, ClaimTransactionResponse, SetWalletAddressRequest, UserDeletePayload, LeaderboardEntry, ContributionCreate
 from pydantic import BaseModel, constr
 from typing import List, Optional
 from app.core import security, config
 from app.core.limiter import limiter
+from app.tasks import process_contribution
 
 class PaginatedContributions(BaseModel):
     items: List[ContributionResponse]
@@ -45,6 +47,54 @@ mail_conf = ConnectionConfig(
 
 oauth = OAuth()
 oauth.register( name='github', client_id=config.settings.GITHUB_CLIENT_ID, client_secret=config.settings.GITHUB_CLIENT_SECRET, access_token_url='https://github.com/login/oauth/access_token', authorize_url='https://github.com/login/oauth/authorize', api_base_url='https://api.github.com/', client_kwargs={'scope': 'user:email'} )
+
+try:
+    tokenizer = tiktoken.get_encoding("cl100k_base")
+except Exception:
+    tokenizer = None
+
+@router.post("/me/contribute/web", status_code=status.HTTP_202_ACCEPTED, dependencies=[Depends(dependencies.verify_beta_access)])
+@limiter.limit("5/day")
+async def contribute_data_from_web(
+    request: Request,
+    payload: ContributionCreate,
+    current_user: models.User = Depends(dependencies.get_current_user),
+    db: Session = Depends(database.get_db)
+):
+    one_day_ago = datetime.now(timezone.utc) - timedelta(days=1)
+    successful_contributions_count = db.query(models.Contribution).filter(
+        models.Contribution.user_id == current_user.id,
+        models.Contribution.status.in_(['PROCESSED', 'REJECTED_NO_NEW_CODE', 'REJECTED_NO_REWARD']),
+        models.Contribution.created_at >= one_day_ago
+    ).count()
+
+    if successful_contributions_count >= 3:
+        raise HTTPException(
+            status_code=status.HTTP_429_TOO_MANY_REQUESTS,
+            detail="You have reached your daily limit of 3 successful contributions (from web or CLI)."
+        )
+
+    if tokenizer:
+        token_count = len(tokenizer.encode(payload.codebase))
+        if token_count > 700_000:
+            raise HTTPException(
+                status_code=status.HTTP_413_REQUEST_ENTITY_TOO_LARGE,
+                detail="Payload is too large. The request is not allowed."
+            )
+
+    new_contribution = crud.create_contribution_record(
+        db,
+        user=current_user,
+        codebase=payload.codebase,
+        valuation_results={},
+        reward=0.0,
+        embedding=None,
+        initial_status="PENDING"
+    )
+
+    process_contribution.delay(current_user.id, payload.codebase, new_contribution.id, source='web')
+
+    return {"message": "Contribution received and is being processed.", "contribution_id": new_contribution.id}
 
 
 @router.get("/me", response_model=UserSchema)

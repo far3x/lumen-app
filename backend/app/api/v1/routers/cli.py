@@ -87,10 +87,10 @@ async def contribute_data(
     challenge_key = f"challenge:{current_user.id}"
     redis_service.delete(challenge_key)
     
-    twenty_four_hours_ago = datetime.now(timezone.utc) - timedelta(hours=24)
+    twenty_four_hours_ago = datetime.now(timezone.utc) - timedelta(days=1)
     successful_contributions_count = db.query(models.Contribution).filter(
         models.Contribution.user_id == current_user.id,
-        models.Contribution.status == 'PROCESSED',
+        models.Contribution.status.in_(['PROCESSED', 'REJECTED_NO_NEW_CODE', 'REJECTED_NO_REWARD']),
         models.Contribution.created_at >= twenty_four_hours_ago
     ).count()
 
@@ -118,7 +118,7 @@ async def contribute_data(
         initial_status="PENDING"
     )
     
-    process_contribution.delay(current_user.id, payload.codebase, new_contribution.id)
+    process_contribution.delay(current_user.id, payload.codebase, new_contribution.id, source='cli')
 
     return {"message": "Contribution received and is being processed.", "contribution_id": new_contribution.id}
 
@@ -139,7 +139,7 @@ async def get_contribution_status(
 
     return ContributionStatus(
         status=contribution.status,
-        contribution_id=contribution_id,
+        contribution_id=contribution.id,
         message=f"Current database status: {contribution.status}"
     )
 

@@ -12,6 +12,7 @@ from app.services.redis_service import redis_service
 from app.schemas import ContributionResponse, ValuationMetrics, AiAnalysis
 from app.services.solana_service import solana_service
 from app.services.email_service import email_service
+from app.services.sanitization_service import sanitization_service
 import asyncio
 
 logger = logging.getLogger(__name__)
@@ -105,7 +106,7 @@ def process_claim(self, user_id: int, claim_id: int):
 
 
 @celery_app.task(bind=True)
-def process_contribution(self, user_id: int, codebase: str, contribution_db_id: int):
+def process_contribution(self, user_id: int, codebase: str, contribution_db_id: int, source: str = 'cli'):
     db = SessionLocal()
     try:
         crud.update_contribution_status(db, contribution_db_id, "PROCESSING")
@@ -117,10 +118,15 @@ def process_contribution(self, user_id: int, codebase: str, contribution_db_id: 
             crud.update_contribution_status(db, contribution_db_id, "FAILED")
             publish_contribution_update(db, contribution_db_id, user_id)
             return
+            
+        final_codebase = codebase
+        if source == 'web':
+            logger.info(f"Contribution {contribution_db_id} is from web source. Performing server-side sanitization.")
+            final_codebase = sanitization_service.sanitize_code(codebase)
 
         logger.info(f"Processing contribution {contribution_db_id} for user {user_id}. Starting uniqueness check...")
         
-        parsed_files = hybrid_valuation_service._parse_codebase(codebase)
+        parsed_files = hybrid_valuation_service._parse_codebase(final_codebase)
         full_codebase_content = "\n".join(file_data["content"] for file_data in parsed_files)
         
         if not full_codebase_content.strip():
@@ -142,13 +148,12 @@ def process_contribution(self, user_id: int, codebase: str, contribution_db_id: 
         previous_codebase_for_valuation = None
         rejection_reason = None
 
-        # Filter out the current contribution itself from neighbors if it somehow appears
         nearest_neighbors = [res for res in nearest_neighbors if res[0].id != contribution_db_id]
 
         if nearest_neighbors:
             most_similar_contrib, min_distance = nearest_neighbors[0]
             
-            # cosine_similarity = 1 - cosine_distance
+            # cosine_similarity = 1 - cosine_distance | keep this line exceptionnally, the comment, important in case a revert is needed
             max_similarity_overall = 1 - min_distance
 
             if max_similarity_overall > SIMILARITY_UPDATE_THRESHOLD:
@@ -174,8 +179,13 @@ def process_contribution(self, user_id: int, codebase: str, contribution_db_id: 
         
         logger.info(f"[UNIQUENESS_PASS] Contribution {contribution_db_id} is unique or a valid update. Proceeding to valuation...")
         
-        valuation_result = hybrid_valuation_service.calculate(db, current_codebase=codebase, previous_codebase=previous_codebase_for_valuation)
+        valuation_result = hybrid_valuation_service.calculate(db, current_codebase=final_codebase, previous_codebase=previous_codebase_for_valuation)
         base_reward = valuation_result.get("final_reward", 0.0)
+        
+        if source == 'web':
+            base_reward /= 3.0
+            logger.info(f"[REWARD_MOD] Web contribution reward adjusted by 1/3. New base reward: {base_reward:.4f}")
+
         valuation_details = valuation_result.get("valuation_details", {})
 
         contribution_record = crud.get_contribution_by_id(db, contribution_db_id)

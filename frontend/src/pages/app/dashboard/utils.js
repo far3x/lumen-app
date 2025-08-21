@@ -179,7 +179,6 @@ export function renderWalletSelectionModal() {
                 await walletService.connect(walletName);
                 closeModal();
             } catch (error) {
-                console.error(error);
                 alert(`Failed to connect to ${walletName}. Make sure it's installed and unlocked.`);
             }
         });
@@ -203,6 +202,11 @@ export const icons = {
     referral: `<svg class="w-5 h-5" fill="none" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 12v10H4V12M2 7h20v5H2V7zm10 15V7m0 0H7.5a2.5 2.5 0 0 1 0-5C11 2 12 7 12 7zm0 0h4.5a2.5 2.5 0 0 0 0-5C13 2 12 7 12 7z" stroke="url(#dashboard-icon-gradient)" /></svg>`,
     settings: `<svg class="w-5 h-5" fill="none" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" stroke="url(#dashboard-icon-gradient)" /><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" stroke="url(#dashboard-icon-gradient)" /></svg>`,
     view: `<svg class="w-5 h-5" fill="none" viewBox="0 0 24 24"><path d="M2 12C2 12 5 5 12 5C19 5 22 12 22 12C22 12 19 19 12 19C5 19 2 12 2 12Z" stroke="url(#dashboard-icon-gradient)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M15 12C15 13.6569 13.6569 15 12 15C10.3431 15 9 13.6569 9 12C9 10.3431 10.3431 9 12 9C13.6569 9 15 10.3431 15 12Z" stroke="url(#dashboard-icon-gradient)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>`,
+    upload: `<svg class="w-5 h-5" fill="none" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" stroke="url(#dashboard-icon-gradient)"/></svg>`,
+    folder: `<svg class="w-5 h-5 inline-block text-accent-cyan" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z" /></svg>`,
+    file: `<svg class="w-5 h-5 inline-block text-text-secondary" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z" /></svg>`,
+    checkCircle: `<svg class="w-12 h-12" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>`,
+    errorCircle: `<svg class="w-12 h-12" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>`
 };
 
 export function getStatusClasses(status) {
@@ -259,7 +263,6 @@ export function updateBalancesInUI() {
     if(claimButton) {
         const subtextEl = document.getElementById('claim-rewards-btn-subtext');
         
-
         if (user.cooldown_until) {
             const now = DateTime.utc();
             const cooldownEnd = DateTime.fromISO(user.cooldown_until);
@@ -297,7 +300,6 @@ export function updateBalancesInUI() {
             claimButton.classList.remove('opacity-50', 'cursor-not-allowed');
             if (subtextEl) subtextEl.textContent = '';
         }
-
     }
 }
 
