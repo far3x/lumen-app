@@ -29,11 +29,11 @@ export function renderLandingPage() {
                             Unlock the value of your proprietary code. We provide the secure data layer for AI leaders to build world-class models without legal risk.
                         </p>
                         <div class="mt-10 flex flex-col sm:flex-row justify-center lg:justify-start items-center gap-4">
-                            <a href="#contact" class="w-full sm:w-auto px-8 py-3 font-semibold text-white bg-accent-gradient rounded-md transition-all duration-300 hover:scale-105 hover:brightness-110">Book a Demo</a>
+                            <a href="/contact" class="w-full sm:w-auto px-8 py-3 font-semibold text-white bg-accent-gradient rounded-md transition-all duration-300 hover:scale-105 hover:brightness-110">Book a Demo</a>
                             <a href="/product" class="w-full sm:w-auto px-8 py-3 font-semibold text-white bg-text-headings hover:bg-opacity-90 rounded-md transition-colors">Explore the Platform</a>
                         </div>
                     </div>
-                    <div class="lg:col-span-2 hidden lg:flex items-center justify-center h-96 bg-background rounded-lg border border-border overflow-hidden">
+                    <div class="lg:col-span-2 hidden lg:flex items-center justify-end h-96 w-96 bg-background rounded-lg overflow-hidden">
                         <img src="/jellyfish.gif" alt="Abstract data animation" class="w-full h-full object-contain"/>
                     </div>
                 </div>
@@ -94,7 +94,7 @@ export function renderLandingPage() {
                  <div class="max-w-3xl mx-auto scroll-animate" style="transform: translateY(2rem);">
                     <p class="section-label">Customer Stories</p>
                     <h2 class="text-4xl md:text-5xl font-bold">Industry leaders are data + AI companies</h2>
-                    <p class="mt-6 text-lg text-text-muted">Our partners achieve breakthroughs, innovate faster, and drive down costs. See how they do it with Lumen.</p>
+                    <p class="mt-6 text-lg text-gray-300">Our partners achieve breakthroughs, innovate faster, and drive down costs. See how they do it with Lumen.</p>
                 </div>
                 <div class="mt-20 h-48 bg-black/20 rounded-lg border border-white/10 flex items-center justify-center scroll-animate animate-delay-1" style="transform: translateY(2rem);">
                      <p class="text-white/30">Customer Logos Placeholder</p>
@@ -110,7 +110,7 @@ export function renderLandingPage() {
                     <p class="mt-4 text-lg text-text-body">Book a demo or contact our team to learn how Lumen can provide your organization with a strategic data advantage.</p>
                 </div>
                 <div class="mt-12 flex flex-col items-center gap-4 scroll-animate animate-delay-1" style="transform: translateY(2rem);">
-                    <a href="mailto:sales@lumen.onl" class="w-full sm:w-auto px-8 py-3 font-semibold text-white bg-accent-gradient rounded-md transition-all duration-300 hover:scale-105 hover:brightness-110">
+                    <a href="/contact" class="w-full sm:w-auto px-8 py-3 font-semibold text-white bg-accent-gradient rounded-md transition-all duration-300 hover:scale-105 hover:brightness-110">
                         Contact Sales
                     </a>
                     <p class="text-sm text-text-muted">or <a href="/product" class="text-text-body font-semibold hover:underline">explore our platform first</a>.</p>

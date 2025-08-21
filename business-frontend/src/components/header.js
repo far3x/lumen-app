@@ -23,7 +23,7 @@ export function renderHeader() {
 
                 <div class="hidden lg:flex items-center gap-4">
                     <a href="/login" class="${navLinkClasses}">Login</a>
-                    <a href="#contact" class="${buttonSecondaryClasses}">Contact Us</a>
+                    <a href="/contact" class="${buttonSecondaryClasses}">Contact Us</a>
                     <a href="/signup" class="${buttonPrimaryClasses}">Try Lumen</a>
                 </div>
 
