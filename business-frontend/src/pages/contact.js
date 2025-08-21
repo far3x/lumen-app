@@ -4,6 +4,7 @@ export function renderContactPage() {
         const form = document.getElementById('contact-form');
         const formContainer = document.getElementById('form-container');
         const successContainer = document.getElementById('success-container');
+        const errorMessage = document.getElementById('error-message');
 
         if (!form) return;
 
@@ -14,6 +15,7 @@ export function renderContactPage() {
             
             submitButton.disabled = true;
             submitButton.innerHTML = `<span class="animate-spin inline-block w-5 h-5 border-2 border-transparent border-t-white rounded-full"></span>`;
+            errorMessage.classList.add('hidden');
 
             const formData = {
                 full_name: form.fullName.value,
@@ -25,6 +27,7 @@ export function renderContactPage() {
             };
 
             try {
+                // Use Vite's env variable system to switch between dev and prod URLs
                 const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:8000';
                 const response = await fetch(`${apiUrl}/api/v1/business/contact-sales`, {
                     method: 'POST',
@@ -33,14 +36,16 @@ export function renderContactPage() {
                 });
 
                 if (!response.ok) {
-                    throw new Error('Network response was not ok.');
+                    const errorData = await response.json();
+                    throw new Error(errorData.detail || 'An error occurred.');
                 }
                 
                 formContainer.classList.add('hidden');
                 successContainer.classList.remove('hidden');
 
             } catch (error) {
-                alert('There was an error submitting your request. Please try again later.');
+                errorMessage.textContent = error.message || 'There was an error submitting your request. Please try again later.';
+                errorMessage.classList.remove('hidden');
                 submitButton.disabled = false;
                 submitButton.textContent = originalButtonText;
             }
@@ -64,9 +69,10 @@ export function renderContactPage() {
             <div class="container mx-auto px-6">
                 <div class="grid lg:grid-cols-2 gap-12 items-start">
                     <!-- THE FORM -->
-                    <div class="bg-white p-8 rounded-lg border border-gray-200 shadow-lg">
+                    <div class="bg-white p-8 rounded-lg border border-gray-200">
                         <div id="form-container">
                             <h2 class="text-2xl font-bold text-text-headings mb-6">Get in Touch</h2>
+                            <div id="error-message" class="hidden bg-red-100 border border-red-300 text-red-800 text-sm p-3 rounded-md mb-4"></div>
                             <form id="contact-form" class="space-y-4">
                                 <div class="grid sm:grid-cols-2 gap-4">
                                     <div>
