@@ -265,7 +265,7 @@ function loadContent(tabId) {
             contentHTML = renderMyContributionsPage(dashboardState.paginatedContributions);
             break;
         case 'web-contribute':
-            contentHTML = renderWebContributePage();
+            contentHTML = renderWebContributePage(dashboardState);
             break;
         case 'network-feed':
             contentHTML = renderRecentActivityPage(dashboardState.paginatedContributions, dashboardState.allClaims);
@@ -296,7 +296,7 @@ function loadContent(tabId) {
         updateBalancesInUI();
     }
     if (activeTabForRender === 'my-contributions') attachContributionPageListeners(dashboardState);
-    if (activeTabForRender === 'web-contribute') attachWebContributeListeners();
+    if (activeTabForRender === 'web-contribute') attachWebContributeListeners(dashboardState);
     if (activeTabForRender === 'settings') attachSettingsPageListeners(dashboardState);
     if (activeTabForRender === 'referral') document.getElementById('notify-referral-btn')?.addEventListener('click', handleReferralNotifyClick);
 }
