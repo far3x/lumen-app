@@ -1,16 +1,14 @@
 import Chart from 'chart.js/auto';
-import { icons, renderModal, updateBalancesInUI, LUMEN_TO_USD_RATE } from './utils.js';
-import { api as authApi, fetchAndStoreAccount, getAccount } from '../../../lib/auth.js';
+import { icons, renderModal } from './utils.js';
+import { api as authApi, fetchAndStoreAccount, getAccount, updateAllBalances } from '../../../lib/auth.js';
 import { DateTime } from 'luxon';
 
 let chartInstance = null;
 
 function renderWalletSection(user, account) {
     const claimableBalance = account?.lum_balance || 0;
-    const claimableBalanceUSD = claimableBalance * LUMEN_TO_USD_RATE;
-    const isWalletLinked = !!user?.solana_address;
     
-    let isClaimDisabled = !isWalletLinked || claimableBalance <= 0;
+    let isClaimDisabled = !user?.solana_address || claimableBalance <= 0;
     let cooldownMessage = '';
 
     if (user && user.cooldown_until) {
@@ -42,7 +40,7 @@ function renderWalletSection(user, account) {
             <div class="flex-grow text-center md:text-left">
                 <h3 class="text-2xl font-bold text-text-main">Claim Your Rewards</h3>
                 <p class="text-text-secondary mt-1">
-                    ${isWalletLinked ? 'Your rewards are ready to be claimed.' : 'Link your wallet in Settings to enable claims.'}
+                    ${user?.solana_address ? 'Your rewards are ready to be claimed.' : 'Link your wallet in Settings to enable claims.'}
                 </p>
                 <p id="claim-rewards-btn-subtext" class="text-xs text-yellow-400 mt-2 h-4">${cooldownMessage}</p>
             </div>
@@ -50,8 +48,8 @@ function renderWalletSection(user, account) {
                 <div class="text-center md:text-right">
                     <p class="text-sm text-text-secondary">Claimable Balance</p>
                     <p class="text-3xl font-bold pulse-text font-mono">${claimableBalance.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 4})}</p>
-                    <p id="overview-claimable-balance-usd" class="text-base font-medium text-text-secondary font-sans mt-1">≈ $${(claimableBalanceUSD).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })} USD</p>
-                    <p class="text-xs text-subtle italic mt-1">*Simulated value for beta phase.</p>
+                    <p id="overview-claimable-balance-usd" class="text-base font-medium text-text-secondary font-sans mt-1">≈ $0.00 USD</p>
+                    <p class="text-xs text-subtle italic mt-1">*USD value is based on the live market price.</p>
                 </div>
                 <div class="mt-4 w-full md:w-auto">
                     ${claimButtonHTML}
@@ -191,7 +189,6 @@ export function attachChartButtonListeners(contributions, onRangeChangeCallback)
 export function renderDashboardOverview(user, account, rank, totalContributions) {
     const isBannerDismissed = localStorage.getItem('lumen_prelaunch_banner_dismissed') === 'true';
     const totalEarned = account?.total_lum_earned ?? 0;
-    const totalEarnedUSD = totalEarned * LUMEN_TO_USD_RATE;
 
     return `
         <div id="prelaunch-banner" class="relative bg-yellow-900/30 border border-yellow-500/30 text-yellow-200 px-6 py-4 rounded-lg mb-6 flex items-start gap-4 ${isBannerDismissed ? 'hidden' : ''}">
@@ -201,7 +198,7 @@ export function renderDashboardOverview(user, account, rank, totalContributions)
             <div class="flex-grow">
                 <h4 class="font-bold">Welcome to the Genesis Phase!</h4>
                 <p class="text-sm text-yellow-300/80 mt-1">
-                    Rewards are currently accruing and will be claimable once the protocol is revenue-positive. Early contributions receive a x2 bonus multiplier. <a href="/docs/roadmap" class="font-semibold text-yellow-100 hover:underline">Learn More</a>
+                    Rewards are currently accruing and will be claimable once the protocol is revenue-positive. Early contributions receive a bonus multiplier. <a href="/docs/roadmap" class="font-semibold text-yellow-100 hover:underline">Learn More</a>
                 </p>
             </div>
             <button id="close-banner-btn" class="p-1 -mr-2 text-yellow-300/70 hover:text-yellow-200">&times;</button>
@@ -216,8 +213,8 @@ export function renderDashboardOverview(user, account, rank, totalContributions)
             <div class="md:col-span-3 bg-gradient-to-br from-accent-purple/80 to-accent-pink/80 p-6 rounded-xl text-white shadow-lg shadow-accent-purple/20">
                 <p class="text-sm font-medium text-purple-200">Total Earned (Lifetime)</p>
                 <p id="overview-total-balance" class="text-5xl font-bold mt-2">${totalEarned.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 4 })} $LUMEN</p>
-                <p id="overview-total-balance-usd" class="text-lg font-medium text-purple-200/80 mt-1">≈ $${(totalEarnedUSD).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })} USD</p>
-                <p class="text-xs text-purple-300/70 italic mt-1">*USD value is simulated for the beta phase. All earnings will be recalculated at the official token launch price when claims are enabled.</p>
+                <p id="overview-total-balance-usd" class="text-lg font-medium text-purple-200/80 mt-1">≈ $0.00 USD</p>
+                <p class="text-xs text-purple-300/70 italic mt-1">*USD value is based on the live market price.</p>
             </div>
 
             ${renderStatCard('Global Rank', rank ? rank.toLocaleString() : 'N/A')}

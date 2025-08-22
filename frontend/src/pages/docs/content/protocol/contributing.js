@@ -2,7 +2,7 @@ export const renderContributing = () => `
     <h1 id="contributing-data">Contributing Data</h1>
     <p class="lead text-xl text-text-secondary">Contributing to Lumen is the core of the protocol. It is the process by which you convert your work into value on the network. This guide explains how to contribute effectively and how your submissions are appraised.</p>
 
-    <h2 id="the-contribution-process">The Contribution Process</h2>
+    <h2 id="the-contribution-process">The Primary Contribution Process (CLI)</h2>
     <p>After you have <a href="/docs/installation">installed</a> and <a href="/docs/authentication">authenticated</a> the CLI, contributing is a single command. Navigate to the root directory of your project and run:</p>
     <div class="code-block">
         <div class="code-block-header">
@@ -22,15 +22,20 @@ export const renderContributing = () => `
         </div>
     </div>
 
-    <p>Behind the scenes, the CLI performs a series of critical local operations: it respects your <code>.gitignore</code>, discovers all relevant files, sanitizes their content to remove secrets, and securely submits the anonymized package to the network for valuation.</p>
-    
+    <p>The CLI is the recommended method for all developers. It's open-source, so you can see exactly how it works, and it provides the highest level of security by ensuring all sensitive data is scrubbed locally before anything is transmitted.</p>
+
+    <h2 id="alternative-web-contribution">Alternative: Web Contribution</h2>
+    <p>For convenience or for users who may be less comfortable with the command line, we also provide a web-based contribution tool directly in your <a href="/app/dashboard?tab=web-contribute">dashboard</a>. You can simply drag and drop your project folder into the browser.</p>
+    <blockquote>
+        <strong>Note on Rewards:</strong> To strongly encourage the use of the transparent, open-source CLI, contributions made via the web interface receive a modified reward (<strong>1/3 of the standard rate</strong>). The CLI remains the best way to maximize your earnings and ensure the highest level of local security.
+    </blockquote>
+
     <h2 id="contribution-guidelines">Contribution Guidelines & Limits</h2>
     <p>To maintain the high quality of our dataset and ensure the network remains fair for all contributors, the following guidelines are in place:</p>
     <ul>
-        <li><strong>Daily Contribution Limit:</strong> To encourage thoughtful, high-quality submissions, each user is limited to <strong>3 successful contributions per 24-hour period</strong>. This limit resets on a rolling basis and applies only to contributions that are successfully processed, not to submissions that fail validation.</li>
-        <li><strong>Payload Size Limit:</strong> The protocol enforces a technical limit of <strong>700,000 tokens</strong> per contribution. This is a safeguard for platform stability and ensures that even very large projects can be processed efficiently.</li>
+        <li><strong>Daily Contribution Limit:</strong> To encourage thoughtful, high-quality submissions, each user is limited to <strong>3 successful contributions per 24-hour period</strong> (across both web and CLI). This limit resets on a rolling basis and applies only to contributions that are successfully processed, not to submissions that fail validation.</li>
+        <li><strong>Payload Size Limit:</strong> The protocol enforces a technical limit of <strong>700,000 tokens</strong> (approximately 5MB of code) per contribution. This is a safeguard for platform stability and ensures that even very large projects can be processed efficiently.</li>
     </ul>
-    <blockquote>These limits are designed to incentivize quality over quantity. By encouraging you to submit your most valuable and well-developed projects, we increase the overall value of the dataset, which in turn increases the value of everyone's rewards.</blockquote>
 
     <h2 id="what-to-contribute">What to Contribute for Maximum Rewards</h2>
     <p>The protocol rewards the principles of good engineering, regardless of programming language. To maximize your rewards, focus on code that embodies these qualities:</p>
@@ -40,4 +45,4 @@ export const renderContributing = () => `
         <li><strong>Iteration and Progress:</strong> The protocol is designed to reward active development. Contributing updates to your projects is highly encouraged, as the engine specifically identifies and rewards the new value you have added since your last submission.</li>
     </ol>
     <p>In short, the more unique, complex, and thoughtful your code, the more valuable it is to the network, and the greater your reward will be.</p>
-`;
+`

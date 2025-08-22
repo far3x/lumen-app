@@ -12,6 +12,7 @@ from slowapi.middleware import SlowAPIMiddleware
 import asyncio
 from app.services.websocket_manager import manager
 from app.api.v1.dependencies import get_current_user_optional
+from app.tasks import update_token_price_task
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -66,6 +67,9 @@ async def startup_event():
             logger.error(f"Error seeding network stats: {e}")
         finally:
             db.close()
+        
+        logger.info("Triggering initial token price update on startup...")
+        update_token_price_task.delay()
         
         asyncio.create_task(manager.listen_for_redis_messages())
         logger.info("Redis Pub/Sub listener started.")

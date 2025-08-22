@@ -63,6 +63,7 @@ services:
     env_file: ./.env
     environment:
       DATABASE_URL: postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@pgbouncer:5432/${POSTGRES_DB}
+      BIRDEYE_API_KEY: ${BIRDEYE_API_KEY}
     ports:
       - "8000:8000"
     depends_on:
@@ -83,6 +84,7 @@ services:
     env_file: ./.env
     environment:
       DATABASE_URL: postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@pgbouncer:5432/${POSTGRES_DB}
+      BIRDEYE_API_KEY: ${BIRDEYE_API_KEY}
     depends_on:
       pgbouncer:
         condition: service_healthy
@@ -103,6 +105,28 @@ services:
     env_file: ./.env
     environment:
       DATABASE_URL: postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@pgbouncer:5432/${POSTGRES_DB}
+      BIRDEYE_API_KEY: ${BIRDEYE_API_KEY}
+    depends_on:
+      pgbouncer:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      api:
+        condition: service_started
+    restart: unless-stopped
+
+  worker_beat:
+    container_name: lumen_worker_beat
+    build:
+      context: ./backend
+      dockerfile: Dockerfile.dev
+    command: celery -A app.core.celery_app.celery_app beat --loglevel=info
+    volumes:
+      - ./backend:/usr/src/app
+    env_file: ./.env
+    environment:
+      DATABASE_URL: postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@pgbouncer:5432/${POSTGRES_DB}
+      BIRDEYE_API_KEY: ${BIRDEYE_API_KEY}
     depends_on:
       pgbouncer:
         condition: service_healthy

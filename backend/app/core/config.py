@@ -57,6 +57,8 @@ class AppSettings(BaseSettings):
     BETA_MODE_ENABLED: bool = os.getenv("BETA_MODE_ENABLED", "False").lower() in ("true", "1", "t")
     BETA_MAX_USERS: int = int(os.getenv("BETA_MAX_USERS", "200"))
     BETA_GENESIS_BONUS: float = float(os.getenv("BETA_GENESIS_BONUS", "1000.0"))
+    
+    BIRDEYE_API_KEY: str = os.getenv("BIRDEYE_API_KEY")
 
 
 settings = AppSettings()

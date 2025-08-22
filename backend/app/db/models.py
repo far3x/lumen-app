@@ -60,8 +60,8 @@ class Account(Base):
     __tablename__ = "accounts"
     id = Column(Integer, primary_key=True, index=True)
     user_id = Column(Integer, ForeignKey("users.id"))
-    lum_balance = Column(Float, default=0.0)
-    total_lum_earned = Column(Float, default=0.0, nullable=False)
+    usd_balance = Column(Float, default=0.0)
+    total_usd_earned = Column(Float, default=0.0, nullable=False)
     user = relationship("User", back_populates="account")
 
 class ClaimTransaction(Base):
@@ -86,7 +86,7 @@ class PersonalAccessToken(Base):
 class NetworkStats(Base):
     __tablename__ = "network_stats"
     id = Column(Integer, primary_key=True)
-    total_lum_distributed = Column(Float, default=0.0, nullable=False)
+    total_usd_distributed = Column(Float, default=0.0, nullable=False)
     total_contributions = Column(BigInteger, default=0, nullable=False)
     mean_complexity = Column(Float, default=5.0, nullable=False)
     m2_complexity = Column(Float, default=0.0, nullable=False)

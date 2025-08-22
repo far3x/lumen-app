@@ -33,7 +33,7 @@ def claim_rewards(
         )
 
     account = crud.get_account_details(db, user_id=current_user.id)
-    if not account or account.lum_balance <= 0:
+    if not account or account.usd_balance <= 0:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="You have no claimable rewards."
@@ -42,7 +42,7 @@ def claim_rewards(
     claim_record = crud.log_claim_transaction(
         db, 
         user_id=current_user.id, 
-        amount=account.lum_balance, 
+        amount=account.usd_balance, 
         tx_hash="PENDING"
     )
 
