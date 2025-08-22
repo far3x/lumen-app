@@ -13,16 +13,28 @@ from app.schemas import ContributionResponse, ValuationMetrics, AiAnalysis
 from app.services.solana_service import solana_service
 from app.services.email_service import email_service
 from app.services.sanitization_service import sanitization_service
+from app.services.price_service import price_service
 import asyncio
 
 logger = logging.getLogger(__name__)
 
-# Note: Cosine distance is what pgvector's <=> operator returns.
-# Cosine similarity is 1 - cosine_distance.
 SIMILARITY_UPDATE_THRESHOLD = 0.85 
 NEAR_PERFECT_SIMILARITY_THRESHOLD = 0.999
 DISTANCE_UPDATE_THRESHOLD = 1 - SIMILARITY_UPDATE_THRESHOLD
 NEAR_PERFECT_DISTANCE_THRESHOLD = 1 - NEAR_PERFECT_SIMILARITY_THRESHOLD
+
+@celery_app.task(name="app.tasks.update_token_price_task")
+def update_token_price_task():
+    logger.info("Running scheduled task to update LUMEN price...")
+    try:
+        price = asyncio.run(price_service.get_lumen_price_usd())
+        if price is not None:
+            redis_service.r.set("token_price:lumen_usd", str(price))
+            logger.info(f"LUMEN price successfully cached: ${price}")
+        else:
+            logger.warning("Scheduled task could not retrieve LUMEN price. Cache not updated.")
+    except Exception as e:
+        logger.error(f"Error in update_token_price_task: {e}", exc_info=True)
 
 @celery_app.task(name="send_contact_sales_email")
 def send_contact_sales_email_task(name: str, email: str):
@@ -73,27 +85,37 @@ def process_claim(self, user_id: int, claim_id: int):
         if not user or not user.solana_address:
             raise Exception("User or Solana address not found.")
         
-        account = crud.get_account_details(db, user_id=user.id)
-        if not account or account.lum_balance <= 0:
+        account = db.query(crud.models.Account).filter(crud.models.Account.user_id == user.id).first()
+        if not account or account.usd_balance <= 0:
             raise Exception("No claimable balance.")
+            
+        claimable_usd = account.usd_balance
+
+        lum_price_str = redis_service.r.get("token_price:lumen_usd")
+        if not lum_price_str or float(lum_price_str) <= 0:
+            raise Exception("Current token price is unavailable. Please try again shortly.")
         
-        claimable_amount = account.lum_balance
-        amount_lamports = int(claimable_amount * (10**9))
+        lum_price = float(lum_price_str)
+        amount_lumen = claimable_usd / lum_price
+        amount_lamports = int(amount_lumen * (10**9))
         
         tx_hash = solana_service.transfer_lum_tokens(
             recipient_address_str=user.solana_address,
             amount_lamports=amount_lamports
         )
         
-        crud.reset_claimable_balance(db, user_id=user.id)
+        account.usd_balance = 0.0
+        db.add(account)
+        db.commit()
+
         crud.update_claim_transaction_hash(db, claim_id, tx_hash)
         
-        updated_account = crud.get_account_details(db, user_id=user.id)
+        updated_account_details = crud.get_account_details(db, user_id=user.id)
         
         publish_user_update(db, user_id, "claim_success", {
-            "message": f"Successfully claimed {claimable_amount:.4f} LUMEN.",
+            "message": f"Successfully claimed {amount_lumen:.4f} LUMEN.",
             "transaction_hash": tx_hash,
-            "account": json.loads(updated_account.model_dump_json())
+            "account": json.loads(updated_account_details.model_dump_json())
         })
 
     except Exception as e:
@@ -179,11 +201,11 @@ def process_contribution(self, user_id: int, codebase: str, contribution_db_id: 
         logger.info(f"[UNIQUENESS_PASS] Contribution {contribution_db_id} is unique or a valid update. Proceeding to valuation...")
         
         valuation_result = hybrid_valuation_service.calculate(db, current_codebase=final_codebase, previous_codebase=previous_codebase_for_valuation)
-        base_reward = valuation_result.get("final_reward", 0.0)
+        base_reward_usd = valuation_result.get("final_reward", 0.0)
         
         if source == 'web':
-            base_reward /= 3.0
-            logger.info(f"[REWARD_MOD] Web contribution reward adjusted by 1/3. New base reward: {base_reward:.4f}")
+            base_reward_usd /= 3.0
+            logger.info(f"[REWARD_MOD] Web contribution reward adjusted by 1/3. New base reward: ${base_reward_usd:.4f}")
 
         valuation_details = valuation_result.get("valuation_details", {})
 
@@ -194,8 +216,8 @@ def process_contribution(self, user_id: int, codebase: str, contribution_db_id: 
 
         contribution_record.valuation_results = json.dumps(valuation_details)
         
-        if base_reward > 0:
-            reward_with_multiplier = base_reward * user.reward_multiplier
+        if base_reward_usd > 0:
+            reward_with_multiplier = base_reward_usd * user.reward_multiplier
             total_reward_for_contribution = reward_with_multiplier
             bonus_reward = 0.0
 
@@ -212,14 +234,14 @@ def process_contribution(self, user_id: int, codebase: str, contribution_db_id: 
             if avg_complexity > 0 :
                 crud.update_network_stats(db, avg_complexity, total_reward_for_contribution)
             
-            contribution_record.reward_amount = base_reward
+            contribution_record.reward_amount = base_reward_usd
             contribution_record.content_embedding = new_embedding
             contribution_record.status = "PROCESSED"
             
             db.add(contribution_record)
             db.commit()
             
-            logger.info(f"[REWARD] Successfully processed and rewarded {total_reward_for_contribution:.4f} LUMEN for user {user_id} (Contribution {contribution_db_id}).")
+            logger.info(f"[REWARD] Successfully processed and rewarded ${total_reward_for_contribution:.4f} for user {user_id} (Contribution {contribution_db_id}).")
         else:
             contribution_record.reward_amount = 0.0
             contribution_record.content_embedding = new_embedding
@@ -230,7 +252,7 @@ def process_contribution(self, user_id: int, codebase: str, contribution_db_id: 
                 contribution_record.status = "REJECTED_NO_REWARD"
             db.add(contribution_record)
             db.commit()
-            logger.warning(f"[REWARD] Contribution {contribution_db_id} was valued at 0.0 LUMEN and status set to {contribution_record.status}.")
+            logger.warning(f"[REWARD] Contribution {contribution_db_id} was valued at $0.0 and status set to {contribution_record.status}.")
         
         publish_contribution_update(db, contribution_db_id, user_id)
 

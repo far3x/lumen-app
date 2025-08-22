@@ -1,5 +1,5 @@
-import { getUser, getAccount, fetchContributions, logout, fetchAndStoreUser, fetchAndStoreAccount, isAuthenticated, fetchClaims, api as authApi, fetchAllContributions, setAccount } from '../../../lib/auth.js';
-import { updateBalancesInUI, renderModal } from './utils.js';
+import { getUser, getAccount, fetchContributions, logout, fetchAndStoreUser, fetchAndStoreAccount, isAuthenticated, fetchClaims, api as authApi, fetchAllContributions, setAccount, updateAllBalances } from '../../../lib/auth.js';
+import { renderModal } from './utils.js';
 import { navigate } from '../../../router.js';
 import { renderDashboardOverview, initializeChart, attachChartButtonListeners } from './overview.js';
 import { renderMyContributionsPage, attachContributionPageListeners, contributionsState, resetContributionsState } from './my-contributions.js';
@@ -136,7 +136,7 @@ async function refreshDashboardData(isInitialLoad = false) {
         const urlParams = new URLSearchParams(window.location.search);
         const currentTabId = urlParams.get('tab') || 'overview';
         loadContent(currentTabId);
-        updateBalancesInUI();
+        updateAllBalances();
 
     } catch (error) {
         if (dashboardContentArea) {
@@ -173,7 +173,7 @@ function connectUserWebSocket() {
 
         if (data.payload && data.payload.account) {
             setAccount(data.payload.account);
-            updateBalancesInUI();
+            updateAllBalances();
         }
 
         if (data.type === 'contribution_update') {
@@ -183,7 +183,7 @@ function connectUserWebSocket() {
             }
         } else if (data.type === 'claim_success') {
             await fetchAndStoreAccount();
-            updateBalancesInUI();
+            updateAllBalances();
             const txLink = `https://solscan.io/tx/${data.payload.transaction_hash}?cluster=devnet`;
             const modalContent = `
                 <div class="text-center">
@@ -202,7 +202,7 @@ function connectUserWebSocket() {
                 claimButton.innerHTML = 'Claim Rewards';
             }
         } else if (data.type === 'claim_failed') {
-            updateBalancesInUI();
+            updateAllBalances();
             const modalContent = `
                  <div class="text-center">
                     <div class="w-16 h-16 mx-auto mb-4 bg-red-900/50 text-red-300 rounded-full flex items-center justify-center">
@@ -293,7 +293,7 @@ function loadContent(tabId) {
         if (claimButton) {
             claimButton.addEventListener('click', () => handleClaim(claimButton, dashboardState.user));
         }
-        updateBalancesInUI();
+        updateAllBalances();
     }
     if (activeTabForRender === 'my-contributions') attachContributionPageListeners(dashboardState);
     if (activeTabForRender === 'web-contribute') attachWebContributeListeners(dashboardState);
@@ -336,7 +336,7 @@ async function setupDashboard() {
         updateSidebarUI(currentTabId);
         
         document.querySelectorAll('.navbar-user-display-name').forEach(el => el.textContent = user.display_name ?? 'User');
-        if (account) updateBalancesInUI();
+        if (account) updateAllBalances();
 
         await refreshDashboardData(true);
 

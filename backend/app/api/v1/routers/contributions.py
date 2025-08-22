@@ -6,6 +6,7 @@ from app.db import crud, models, database
 from app.api.v1 import dependencies
 from app.schemas import ContributionResponse, ValuationMetrics, AiAnalysis
 from app.core.limiter import limiter
+from app.services.redis_service import redis_service
 
 router = APIRouter(prefix="/contributions", tags=["Contributions"])
 
@@ -32,6 +33,11 @@ def get_single_contribution(
             except (json.JSONDecodeError, TypeError): data = {}
         if isinstance(data, dict):
             valuation_data = data
+    
+    lum_price_str = redis_service.get("token_price:lumen_usd")
+    lum_price = float(lum_price_str) if lum_price_str and float(lum_price_str) > 0 else 0.001
+    reward_usd = contrib.reward_amount
+    reward_lum = reward_usd / lum_price if lum_price > 0 else 0
 
     manual_metrics = ValuationMetrics(
         total_lloc=valuation_data.get('total_lloc', 0),
@@ -51,7 +57,7 @@ def get_single_contribution(
     return ContributionResponse(
         id=contrib.id,
         created_at=contrib.created_at,
-        reward_amount=contrib.reward_amount,
+        reward_amount=reward_lum,
         status=contrib.status,
         valuation_details=valuation_data,
         manual_metrics=manual_metrics,

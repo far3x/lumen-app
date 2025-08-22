@@ -87,8 +87,8 @@ class UserDeletePayload(BaseModel):
     token: Optional[str] = None
 
 class Account(BaseModel):
-    lum_balance: float
-    total_lum_earned: float
+    usd_balance: float
+    total_usd_earned: float
 
     class Config:
         from_attributes = True

@@ -11,6 +11,7 @@ from datetime import datetime, timedelta, timezone
 from app.core import security, config
 from app import schemas
 from . import models
+from app.services.redis_service import redis_service
 
 def get_user(db: Session, user_id: int):
     return db.query(models.User).filter(models.User.id == user_id).first()
@@ -127,7 +128,7 @@ def get_total_user_count(db: Session):
     return db.query(models.User).count()
 
 def create_account_for_user(db: Session, user: models.User):
-    db_account = models.Account(user_id=user.id, lum_balance=0.0, total_lum_earned=0.0)
+    db_account = models.Account(user_id=user.id, usd_balance=0.0, total_usd_earned=0.0)
     db.add(db_account); db.commit(); db.refresh(db_account)
     return db_account
 
@@ -139,25 +140,25 @@ def get_account_details(db: Session, user_id: int) -> Optional[schemas.AccountDe
     last_claim_at = db.query(func.max(models.ClaimTransaction.created_at)).filter(models.ClaimTransaction.user_id == user_id).scalar()
     
     return schemas.AccountDetails(
-        lum_balance=account.lum_balance,
-        total_lum_earned=account.total_lum_earned,
+        usd_balance=account.usd_balance,
+        total_usd_earned=account.total_usd_earned,
         last_claim_at=last_claim_at
     )
 
 def get_network_stats(db: Session):
     return db.query(models.NetworkStats).first()
 
-def update_network_stats(db: Session, complexity_score: float, reward_amount: float):
+def update_network_stats(db: Session, complexity_score: float, reward_amount_usd: float):
     stats = get_network_stats(db)
     if not stats:
         stats = models.NetworkStats(); db.add(stats)
 
-    if stats.total_lum_distributed is None:
-        stats.total_lum_distributed = 0.0
+    if stats.total_usd_distributed is None:
+        stats.total_usd_distributed = 0.0
     if stats.total_contributions is None:
         stats.total_contributions = 0
 
-    stats.total_lum_distributed += reward_amount
+    stats.total_usd_distributed += reward_amount_usd
     n = stats.total_contributions; stats.total_contributions += 1
     delta = complexity_score - stats.mean_complexity
     stats.mean_complexity += delta / (n + 1)
@@ -168,26 +169,22 @@ def update_network_stats(db: Session, complexity_score: float, reward_amount: fl
         stats.std_dev_complexity = stats.variance_complexity ** 0.5
     db.commit()
 
-def apply_reward_to_user(db: Session, user: models.User, reward_amount: float):
+def apply_reward_to_user(db: Session, user: models.User, reward_amount_usd: float):
     account = user.account
     if not account: return 0.0
     
-    if account.total_lum_earned is None:
-        account.total_lum_earned = 0.0
+    if account.total_usd_earned is None:
+        account.total_usd_earned = 0.0
 
-    account.lum_balance += reward_amount
-    account.total_lum_earned += reward_amount
+    account.usd_balance += reward_amount_usd
+    account.total_usd_earned += reward_amount_usd
 
     db.add(user)
     db.add(account)
     db.commit()
-    return reward_amount
+    return reward_amount_usd
 
 def get_nearest_neighbors(db: Session, embedding, limit: int = 5):
-    """
-    Finds the nearest neighbors for a given embedding using cosine similarity.
-    Returns a list of tuples (Contribution, distance).
-    """
     return db.query(
         models.Contribution,
         models.Contribution.content_embedding.cosine_distance(embedding).label('distance')
@@ -229,10 +226,10 @@ def get_user_contributions(db: Session, user_id: int, skip: int = 0, limit: int 
     return db.query(models.Contribution).filter(models.Contribution.user_id == user_id).order_by(models.Contribution.created_at.desc()).offset(skip).limit(limit).all()
 
 def get_leaderboard(db: Session, skip: int = 0, limit: int = 100):
-    return db.query(models.User, models.Account.total_lum_earned)\
+    return db.query(models.User, models.Account.total_usd_earned)\
              .join(models.Account)\
              .filter(models.User.is_in_leaderboard == True, models.User.is_verified == True, models.User.id <= config.settings.BETA_MAX_USERS if config.settings.BETA_MODE_ENABLED else True)\
-             .order_by(models.Account.total_lum_earned.desc())\
+             .order_by(models.Account.total_usd_earned.desc())\
              .offset(skip).limit(limit).all()
 
 def get_recent_processed_contributions(db: Session, limit: int = 10):
@@ -250,13 +247,13 @@ def get_user_contributions_paginated(db: Session, user_id: int, skip: int = 0, l
 
 def get_user_rank(db: Session, user_id: int):
     query = text("""
-        SELECT rank, display_name, total_lum_earned
+        SELECT rank, display_name, total_usd_earned
         FROM (
             SELECT 
                 u.id, 
                 u.display_name, 
-                a.total_lum_earned,
-                ROW_NUMBER() OVER (ORDER BY a.total_lum_earned DESC) as rank
+                a.total_usd_earned,
+                ROW_NUMBER() OVER (ORDER BY a.total_usd_earned DESC) as rank
             FROM users u
             JOIN accounts a ON u.id = a.user_id
             WHERE u.is_in_leaderboard = :is_in_leaderboard 
@@ -278,7 +275,7 @@ def get_user_rank(db: Session, user_id: int):
 def reset_claimable_balance(db: Session, user_id: int):
     account = db.query(models.Account).filter(models.Account.user_id == user_id).first()
     if account:
-        account.lum_balance = 0.0
+        account.usd_balance = 0.0
         db.add(account)
         db.commit()
         db.refresh(account)

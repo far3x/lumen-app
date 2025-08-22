@@ -30,7 +30,18 @@ task_routes = {
     'app.tasks.send_contact_sales_email_task': {
         'queue': 'high_priority',
         'routing_key': 'task.high_priority',
-    }
+    },
+    'app.tasks.update_token_price_task': {
+        'queue': 'high_priority',
+        'routing_key': 'task.high_priority',
+    },
+}
+
+celery_app.conf.beat_schedule = {
+    'update-token-price-every-15-minutes': {
+        'task': 'app.tasks.update_token_price_task',
+        'schedule': 900.0,
+    },
 }
 
 celery_app.conf.update(task_routes=task_routes)

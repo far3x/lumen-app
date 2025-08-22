@@ -1,4 +1,4 @@
-import { isAuthenticated, getUser, logout, getAccount, api as authApi, fetchAndStoreUser } from '../lib/auth.js';
+import { isAuthenticated, getUser, getAccount, api as authApi, fetchAndStoreUser, logout } from '../lib/auth.js';
 import { walletService } from '../lib/wallet.js';
 import { navigate } from '../router.js';
 import { renderWalletSelectionModal, renderModal } from '../pages/app/dashboard/utils.js';
@@ -141,8 +141,6 @@ export function setupNavbarEventListeners() {
 export function renderNavbar(currentPath) {
     const authed = isAuthenticated();
     const user = getUser();
-    const account = getAccount();
-    const balance = account?.lum_balance ?? 0;
     const externalLinkIcon = `<svg xmlns="http://www.w3.org/2000/svg" class="inline-block h-4 w-4 ml-1.5 opacity-60 group-hover:opacity-100" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" /></svg>`;
 
     const isDocsSubdomain = window.location.hostname.startsWith('docs.');
@@ -187,7 +185,7 @@ export function renderNavbar(currentPath) {
                         <div class="border-t border-primary pt-4 space-y-4">
                             <div class="p-3 rounded-lg bg-primary/50">
                                 <p class="text-xs text-text-secondary">Your Balance</p>
-                                <p class="font-mono text-lg gradient-text navbar-user-balance">${balance.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 4 })} $LUMEN</p>
+                                <p class="font-mono text-lg gradient-text navbar-user-balance">... $LUMEN</p>
                             </div>
                             <a href="${dashboardUrl}" class="${getMobileNavLinkClasses('/app/dashboard')}">Dashboard</a>
                             <button id="logout-button-mobile" class="w-full text-left ${getMobileNavLinkClasses('')} text-red-400 hover:text-red-300">Log Out</button>
@@ -205,7 +203,7 @@ export function renderNavbar(currentPath) {
             <button id="user-menu-button" class="flex items-center gap-x-3 h-11 pl-4 pr-2 bg-primary/50 hover:bg-primary/80 transition-colors border border-subtle/50 rounded-full">
                 <span class="text-sm font-medium text-text-main navbar-user-display-name">${user?.display_name ?? 'User'}</span>
                 <div class="w-px h-5 bg-subtle/50"></div>
-                <span class="text-sm font-bold gradient-text navbar-user-balance">${balance.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 4 })} $LUMEN</span>
+                <span class="text-sm font-bold gradient-text navbar-user-balance">... $LUMEN</span>
                 <svg class="w-5 h-5 text-text-secondary ml-1" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" /></svg>
             </button>
             <div id="user-menu-dropdown" class="absolute hidden top-full left-1/2 transform -translate-x-1/2 mt-2 w-56 origin-top bg-primary border border-subtle rounded-lg shadow-lg py-1 z-[60]">
@@ -217,7 +215,7 @@ export function renderNavbar(currentPath) {
             </div>
         </div>
         <div class="flex lg:hidden items-center gap-x-4">
-            <span class="font-mono text-sm gradient-text navbar-user-balance">${balance.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 4 })} $LUMEN</span>
+            <span class="font-mono text-sm gradient-text navbar-user-balance">... $LUMEN</span>
             <button id="mobile-menu-trigger" type="button" class="p-2 text-text-secondary hover:text-text-main"><svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path></svg></button>
         </div>` : `
         <div class="hidden lg:flex items-center h-11 p-1 bg-primary/50 border border-subtle/50 rounded-full">

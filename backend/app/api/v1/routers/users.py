@@ -20,6 +20,7 @@ from typing import List, Optional
 from app.core import security, config
 from app.core.limiter import limiter
 from app.tasks import process_contribution
+from app.services.redis_service import redis_service
 
 class PaginatedContributions(BaseModel):
     items: List[ContributionResponse]
@@ -137,10 +138,16 @@ async def get_my_rank(
         
     user_rank_data = crud.get_user_rank(db, user_id=current_user.id)
     if user_rank_data:
+        lum_price_str = redis_service.get("token_price:lumen_usd")
+        lum_price = float(lum_price_str) if lum_price_str and float(lum_price_str) > 0 else 0.001
+        
+        total_usd_earned = user_rank_data.total_usd_earned
+        total_lum_earned = total_usd_earned / lum_price if lum_price > 0 else 0
+
         return LeaderboardEntry(
             rank=user_rank_data.rank,
             display_name=user_rank_data.display_name,
-            total_lum_earned=user_rank_data.total_lum_earned
+            total_lum_earned=total_lum_earned
         )
     return None
 
@@ -328,6 +335,9 @@ def get_my_all_contributions(
 ):
     contributions = crud.get_all_user_contributions(db, user_id=current_user.id)
     
+    lum_price_str = redis_service.get("token_price:lumen_usd")
+    lum_price = float(lum_price_str) if lum_price_str and float(lum_price_str) > 0 else 0.001
+
     response_list = []
     for contrib in contributions:
         valuation_data = {}
@@ -342,6 +352,9 @@ def get_my_all_contributions(
             if isinstance(data, dict):
                 valuation_data = data
         
+        reward_usd = contrib.reward_amount
+        reward_lum = reward_usd / lum_price if lum_price > 0 else 0
+
         manual_metrics = ValuationMetrics(
             total_lloc=valuation_data.get('total_lloc', 0),
             total_tokens=valuation_data.get('total_tokens', 0),
@@ -360,7 +373,7 @@ def get_my_all_contributions(
         response_list.append(ContributionResponse(
             id=contrib.id,
             created_at=contrib.created_at,
-            reward_amount=contrib.reward_amount,
+            reward_amount=reward_lum,
             status=contrib.status,
             valuation_details=valuation_data,
             manual_metrics=manual_metrics,
@@ -380,6 +393,9 @@ def get_my_contributions(
 ):
     contributions, total_count = crud.get_user_contributions_paginated(db, user_id=current_user.id, skip=skip, limit=limit)
     
+    lum_price_str = redis_service.get("token_price:lumen_usd")
+    lum_price = float(lum_price_str) if lum_price_str and float(lum_price_str) > 0 else 0.001
+
     response_list = []
     for contrib in contributions:
         valuation_data = {}
@@ -394,6 +410,9 @@ def get_my_contributions(
             if isinstance(data, dict):
                 valuation_data = data
         
+        reward_usd = contrib.reward_amount
+        reward_lum = reward_usd / lum_price if lum_price > 0 else 0
+
         manual_metrics = ValuationMetrics(
             total_lloc=valuation_data.get('total_lloc', 0),
             total_tokens=valuation_data.get('total_tokens', 0),
@@ -412,7 +431,7 @@ def get_my_contributions(
         response_list.append(ContributionResponse(
             id=contrib.id,
             created_at=contrib.created_at,
-            reward_amount=contrib.reward_amount,
+            reward_amount=reward_lum,
             status=contrib.status,
             valuation_details=valuation_data,
             manual_metrics=manual_metrics,

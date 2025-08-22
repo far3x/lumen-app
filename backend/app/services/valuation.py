@@ -329,14 +329,10 @@ class HybridValuationService:
         
         target_usd_reward = self.BASE_USD_VALUE_PER_POINT * contribution_quality_score
 
-        total_lum_distributed = stats.total_lum_distributed if stats else 0
+        total_lum_distributed = stats.total_usd_distributed if stats else 0
         simulated_lum_price = self.INITIAL_LUM_USD_PRICE + (self.PRICE_GROWTH_FACTOR * math.sqrt(total_lum_distributed))
         
-        base_lum_reward = 0.0
-        if simulated_lum_price > 0:
-            base_lum_reward = target_usd_reward / simulated_lum_price
-        
-        final_reward = base_lum_reward
+        final_reward = target_usd_reward
         
         sanitized_summary = html.escape(analysis_summary_from_ai) if analysis_summary_from_ai else None
         
@@ -349,7 +345,7 @@ class HybridValuationService:
             "rarity_multiplier": round(rarity_multiplier, 4),
             "simulated_lum_price_usd": round(simulated_lum_price, 6),
             "target_usd_reward": round(target_usd_reward, 4),
-            "final_reward": round(final_reward, 2)
+            "final_reward_usd": round(final_reward, 4)
         })
 
         return {"final_reward": final_reward, "valuation_details": valuation_details}

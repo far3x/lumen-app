@@ -17,6 +17,18 @@ def get_visitor_id_key(request: Request) -> str:
         return visitor_id
     return request.client.host
 
+@router.get("/token-price/{token_symbol}")
+@limiter.limit("120/minute")
+def get_token_price(request: Request, token_symbol: str):
+    if token_symbol.lower() != 'lumen':
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Token not found")
+    
+    price_str = redis_service.get("token_price:lumen_usd")
+    if not price_str:
+        return {"symbol": "LUMEN", "price_usd": 0.001, "cached": False}
+        
+    return {"symbol": "LUMEN", "price_usd": float(price_str), "cached": True}
+
 @router.get("/leaderboard", response_model=LeaderboardResponse)
 @limiter.limit("60/minute")
 def get_leaderboard(
@@ -29,25 +41,31 @@ def get_leaderboard(
 
     if cached_leaderboard:
         return JSONResponse(content=json.loads(cached_leaderboard))
+    
+    lum_price_str = redis_service.get("token_price:lumen_usd")
+    lum_price = float(lum_price_str) if lum_price_str and float(lum_price_str) > 0 else 0.001
 
     top_users_data = crud.get_leaderboard(db, skip=0, limit=5)
     
     top_5_entries = []
-    for rank, (user, total_earned) in enumerate(top_users_data, start=1):
+    for rank, (user, total_usd_earned) in enumerate(top_users_data, start=1):
+        total_lum_earned = total_usd_earned / lum_price if lum_price > 0 else 0
         top_5_entries.append(LeaderboardEntry(
             rank=rank,
             display_name=user.display_name,
-            total_lum_earned=total_earned
+            total_lum_earned=total_lum_earned
         ))
 
     current_user_rank_entry = None
     if current_user:
         user_rank_data = crud.get_user_rank(db, user_id=current_user.id)
         if user_rank_data:
+            total_usd_earned = user_rank_data.total_usd_earned
+            total_lum_earned = total_usd_earned / lum_price if lum_price > 0 else 0
             current_user_rank_entry = LeaderboardEntry(
                 rank=user_rank_data.rank,
                 display_name=user_rank_data.display_name,
-                total_lum_earned=user_rank_data.total_lum_earned
+                total_lum_earned=total_lum_earned
             )
     
     response_data = LeaderboardResponse(
@@ -72,14 +90,19 @@ def get_recent_contributions(
 
     if cached_contributions:
         return JSONResponse(content=json.loads(cached_contributions))
+    
+    lum_price_str = redis_service.get("token_price:lumen_usd")
+    lum_price = float(lum_price_str) if lum_price_str and float(lum_price_str) > 0 else 0.001
 
     recent_contributions_data = crud.get_recent_processed_contributions(db, limit=limit)
     response_list = []
     for contrib, display_name in recent_contributions_data:
+        reward_usd = contrib.reward_amount
+        reward_lum = reward_usd / lum_price if lum_price > 0 else 0
         response_list.append(PublicContributionResponse(
             id=contrib.id,
             created_at=contrib.created_at,
-            reward_amount=contrib.reward_amount,
+            reward_amount=reward_lum,
             user_display_name=display_name
         ))
 

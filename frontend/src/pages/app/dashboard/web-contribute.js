@@ -87,6 +87,26 @@ async function handleSubmit() {
         const response = await api.post('/users/me/contribute/web', {
             codebase: state.project.payload,
         });
+
+        // Create a placeholder and add it to the state immediately
+        const placeholderContribution = {
+            id: response.data.contribution_id,
+            created_at: new Date().toISOString(),
+            status: 'PENDING',
+            reward_amount: 0,
+            valuation_details: {},
+        };
+
+        if (currentDashboardState.paginatedContributions) {
+            currentDashboardState.paginatedContributions.unshift(placeholderContribution);
+        }
+        if (currentDashboardState.allUserContributions) {
+            currentDashboardState.allUserContributions.unshift(placeholderContribution);
+        }
+        if (window.contributionsState) {
+            window.contributionsState.totalContributions += 1;
+        }
+
         setState({ view: 'success', project: { ...state.project, id: response.data.contribution_id } });
     } catch (error) {
         setState({ view: 'error', errorMessage: error.response?.data?.detail || 'An unexpected error occurred during submission.' });
@@ -193,6 +213,7 @@ function render() {
                             <input type="file" id="folder-input" webkitdirectory directory class="sr-only" ${contributionsLeft === 0 ? 'disabled' : ''}>
                         </label>
                         <p class="text-xs text-subtle mt-4">Max project size: 5 MB. All processing is done in your browser before upload.</p>
+                        <p class="text-xs text-yellow-400 mt-2">Please note: This tool only accepts project folders, not individual files.</p>
                     </div>
                 </div>
             `;

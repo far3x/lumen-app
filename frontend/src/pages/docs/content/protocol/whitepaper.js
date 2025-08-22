@@ -55,7 +55,7 @@ export const renderWhitepaper = () => `
     <ol>
         <li><strong>Deploy Capital as Rewards:</strong> Initial funding is used to directly fund the reward pool. This creates a powerful incentive for the world's best developers to contribute their high quality data from day one, solving the chicken and egg problem.</li>
         <li><strong>Create a Proprietary Asset:</strong> This targeted incentive creates our core asset: an ethically sourced, high signal dataset of human written code that is not available anywhere else. This dataset is our defensible moat.</li>
-        <li><strong>Drive Enterprise Revenue:</strong> The unique value of this asset allows us to secure enterprise contracts. This revenue is then used to fund the next cycle of rewards, making the entire model self sustaining and profitable.</li>
+        <li><strong>Drive Enterprise Revenue & Create Buying Pressure:</strong> The revenue generated from data sales is used to <strong>buy back $LUMEN from the open market</strong>. This action directly funds the reward pool for the next cycle of contributions and creates consistent, utility-driven demand for the token. This transforms sell pressure from rewards into a sustainable economic loop where protocol success directly translates to token value.</li>
     </ol>
     <h3>4.3 Go to Market: A Phased Plan for Market Entry</h3>
     <p>Our launch plan for the next 3 to 6 months is focused on validating both sides of our marketplace:</p>

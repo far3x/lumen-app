@@ -1,6 +1,6 @@
 import { renderNavbar, setupNavbarEventListeners, updateNavbarWalletState } from './components/navbar.js';
 import { renderFooter } from './components/footer.js';
-import { isAuthenticated, fetchAndStoreUser, getUser, logout, validateAndRefreshUserSession } from './lib/auth.js';
+import { isAuthenticated, fetchAndStoreUser, getUser, logout, validateAndRefreshUserSession, updateAllBalances } from './lib/auth.js';
 import { walletService } from './lib/wallet.js';
 import Lenis from 'lenis';
 import { renderFeedbackModal } from './pages/app/dashboard/utils.js';
@@ -244,6 +244,10 @@ const handleLocation = async () => {
         if (!fullScreenPages.includes(path)) {
             navbarContainer.innerHTML = renderNavbar(path);
             footerContainer.innerHTML = renderFooter(path);
+        }
+
+        if (isAuthenticated()) {
+            updateAllBalances();
         }
 
         if (lenis) {
