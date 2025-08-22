@@ -3,20 +3,58 @@
 @tailwind utilities;
 
 @layer base {
-    .scroll-animate {
-        @apply opacity-0 transition-all duration-700 ease-out;
+    body {
+        @apply bg-app-bg text-app-text-secondary;
     }
-    .scroll-animate.scrolled-in {
-        @apply opacity-100;
-        transform: translateY(0) !important;
-    }
-    .animate-delay-1 { animation-delay: 150ms; }
-    .animate-delay-2 { animation-delay: 300ms; }
-    .animate-delay-3 { animation-delay: 450ms; }
 }
 
 @layer components {
-    .section-label {
-        @apply text-sm font-bold tracking-widest uppercase bg-accent-gradient bg-clip-text text-transparent mb-4;
+    .dashboard-container {
+        @apply p-8;
+    }
+    .widget-card {
+        @apply bg-app-surface border border-app-border rounded-xl;
+    }
+    .page-headline {
+        @apply text-2xl font-bold text-app-text-primary;
+    }
+    .data-table {
+        @apply w-full text-left;
+    }
+    .data-table th {
+        @apply p-4 text-xs font-semibold text-app-text-tertiary uppercase border-b border-app-border;
+    }
+    .data-table td {
+        @apply p-4 text-sm text-app-text-primary border-b border-app-border;
+    }
+    .data-table tbody tr:last-child td {
+        @apply border-b-0;
+    }
+    .form-input {
+        @apply w-full mt-1 px-3 py-2 bg-app-bg border border-app-border rounded-md shadow-sm focus:outline-none focus:ring-1 focus:ring-accent-purple focus:border-accent-purple text-app-text-primary;
+    }
+    .form-label {
+        @apply block text-sm font-medium text-app-text-secondary;
+    }
+    .btn {
+        @apply inline-flex items-center justify-center px-4 py-2 text-sm font-semibold rounded-md transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2;
+    }
+    .btn-accent {
+        @apply btn bg-accent-gradient text-white hover:brightness-110 focus:ring-accent-purple;
+    }
+    .btn-secondary {
+        @apply btn bg-app-surface text-app-text-primary border border-app-border hover:bg-app-bg;
+    }
+    .custom-checkbox {
+        @apply h-5 w-5 rounded border-2 border-app-border text-accent-purple focus:ring-accent-purple transition;
+    }
+    .range-slider {
+        @apply w-full h-2 bg-app-bg rounded-lg appearance-none cursor-pointer;
+    }
+    .range-slider::-webkit-slider-thumb {
+        @apply appearance-none w-4 h-4 bg-accent-purple rounded-full shadow;
+    }
+    .range-slider::-moz-range-thumb {
+        @apply w-4 h-4 bg-accent-purple rounded-full shadow border-none;
     }
 }
