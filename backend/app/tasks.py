@@ -15,6 +15,8 @@ from app.services.email_service import email_service
 from app.services.sanitization_service import sanitization_service
 from app.services.price_service import price_service
 import asyncio
+from fastapi_mail import MessageSchema
+from datetime import datetime
 
 logger = logging.getLogger(__name__)
 
@@ -40,6 +42,23 @@ def update_token_price_task():
 def send_contact_sales_email_task(name: str, email: str):
     asyncio.run(email_service.send_contact_sales_confirmation(name, email))
     logger.info(f"Contact sales confirmation email sent to {email}")
+
+@celery_app.task(name="send_business_verification_email")
+def send_business_verification_email_task(email: str, token: str):
+    verification_link = f"{settings.FRONTEND_URL}/business/verify?token={token}"
+    template_body = {
+        "verification_link": verification_link,
+        "year": datetime.now().year,
+        "logo_url": settings.PUBLIC_LOGO_URL
+    }
+    message = MessageSchema(
+        subject="Lumen Protocol: Verify Your Business Account",
+        recipients=[email],
+        template_body=template_body,
+        subtype="html"
+    )
+    asyncio.run(email_service.fm.send_message(message, template_name="business_verification_email.html"))
+    logger.info(f"Business verification email sent to {email}")
 
 def publish_user_update(db, user_id: int, event_type: str, payload: dict):
     message = { "type": event_type, "payload": payload }
@@ -222,8 +241,14 @@ def process_contribution(self, user_id: int, codebase: str, contribution_db_id: 
             bonus_reward = 0.0
 
             if settings.BETA_MODE_ENABLED and user.id <= settings.BETA_MAX_USERS and not user.is_beta_bonus_claimed:
-                bonus_reward = settings.BETA_GENESIS_BONUS
-                total_reward_for_contribution += bonus_reward
+                bonus_reward_lumen = settings.BETA_GENESIS_BONUS
+
+                lum_price_str = redis_service.r.get("token_price:lumen_usd")
+                lum_price_usd = float(lum_price_str) if lum_price_str else 0.001
+                bonus_reward_usd = lum_price_usd * bonus_reward_lumen
+                
+                total_reward_for_contribution += bonus_reward_usd
+
                 user.is_beta_bonus_claimed = True
                 db.add(user)
                 logger.info(f"[REWARD] Awarded Genesis Bonus of {settings.BETA_GENESIS_BONUS} LUMEN to user {user_id}.")

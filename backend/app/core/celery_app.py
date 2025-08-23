@@ -27,7 +27,11 @@ task_routes = {
         'queue': 'high_priority',
         'routing_key': 'task.high_priority',
     },
-    'app.tasks.send_contact_sales_email_task': {
+    'send_contact_sales_email': {
+        'queue': 'high_priority',
+        'routing_key': 'task.high_priority',
+    },
+    'send_business_verification_email': {
         'queue': 'high_priority',
         'routing_key': 'task.high_priority',
     },

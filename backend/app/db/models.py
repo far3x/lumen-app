@@ -10,6 +10,7 @@ from pgvector.sqlalchemy import Vector
 from .database import Base
 from app.core.config import settings
 
+
 class User(Base):
     __tablename__ = "users"
     id = Column(Integer, primary_key=True, index=True)
@@ -132,6 +133,7 @@ class Company(Base):
     __tablename__ = "companies"
     id = Column(Integer, primary_key=True, index=True)
     name = Column(String, index=True, unique=True, nullable=False)
+    plan = Column(String, default="free", nullable=False)
     token_balance = Column(BigInteger, default=0, nullable=False)
     created_at = Column(DateTime(timezone=True), server_default=func.now())
     users = relationship("BusinessUser", back_populates="company", cascade="all, delete-orphan")
@@ -143,7 +145,9 @@ class BusinessUser(Base):
     email = Column(String, unique=True, index=True, nullable=False)
     hashed_password = Column(String, nullable=False)
     full_name = Column(String, nullable=False)
-    role = Column(String, default="member", nullable=False) # e.g., 'admin', 'member'
+    role = Column(String, default="member", nullable=False)
+    is_verified = Column(Boolean, default=False, nullable=False)
+    verification_token = Column(String, nullable=True)
     company_id = Column(Integer, ForeignKey("companies.id"), nullable=False)
     created_at = Column(DateTime(timezone=True), server_default=func.now())
     company = relationship("Company", back_populates="users")
