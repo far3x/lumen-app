@@ -9,9 +9,10 @@ from typing import Optional
 from datetime import datetime, timedelta, timezone
 
 from app.core import security, config
-from app import schemas
+from app import schemas, business_schemas
 from . import models
 from app.services.redis_service import redis_service
+
 
 def get_user(db: Session, user_id: int):
     return db.query(models.User).filter(models.User.id == user_id).first()
@@ -322,3 +323,32 @@ def create_contact_submission(db: Session, submission: schemas.ContactSalesCreat
     db.commit()
     db.refresh(db_submission)
     return db_submission
+
+
+def get_business_user_by_email(db: Session, email: str) -> Optional[models.BusinessUser]:
+    return db.query(models.BusinessUser).filter(models.BusinessUser.email == email).first()
+
+def get_company_by_name(db: Session, name: str) -> Optional[models.Company]:
+    return db.query(models.Company).filter(models.Company.name == name).first()
+
+def create_business_user(db: Session, user_data: business_schemas.BusinessUserCreate) -> models.BusinessUser:
+    company = get_company_by_name(db, name=user_data.company_name)
+    if not company:
+        company = models.Company(name=user_data.company_name)
+        db.add(company)
+        db.commit()
+        db.refresh(company)
+
+    hashed_password = security.get_password_hash(user_data.password)
+    
+    db_user = models.BusinessUser(
+        email=user_data.email,
+        hashed_password=hashed_password,
+        full_name=user_data.full_name,
+        company_id=company.id,
+        role='admin'
+    )
+    db.add(db_user)
+    db.commit()
+    db.refresh(db_user)
+    return db_user

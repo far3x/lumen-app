@@ -15,13 +15,13 @@ export default {
         'surface': '#FFFFFF',
         'dark-surface': '#252A2E',
 
-        'app-bg': '#F0F2F5',
+        'app-bg': '#E5E7EB',
         'app-surface': '#FFFFFF',
-        'app-border': '#DDE3EA',
+        'app-border': '#D1D5DB',
         'app-text-primary': '#1A202C',
         'app-text-secondary': '#5A6474',
         'app-text-tertiary': '#8C96A5',
-        'app-accent-hover': '#F7F8FA',
+        'app-accent-hover': '#F3F4F6',
 
         'text': {
           'headings': '#1E2022',

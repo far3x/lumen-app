@@ -5,7 +5,7 @@ from slowapi.errors import RateLimitExceeded
 from app.core.limiter import limiter
 from app.core.config import settings
 from app.db.database import Base, engine, SessionLocal
-from app.api.v1.routers import auth, cli, users, public, security, contributions, rewards, websockets, business
+from app.api.v1.routers import auth, cli, users, public, security, contributions, rewards, websockets, business, business_auth
 from app.core.celery_app import celery_app
 import logging
 from slowapi.middleware import SlowAPIMiddleware
@@ -93,6 +93,7 @@ app.include_router(contributions.router, prefix="/api/v1")
 app.include_router(rewards.router, prefix="/api/v1")
 app.include_router(websockets.router)
 app.include_router(business.router, prefix="/api/v1")
+app.include_router(business_auth.router, prefix="/api/v1")
 
 @app.get("/", tags=["Root"])
 @limiter.limit("10/minute")
