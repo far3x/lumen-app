@@ -36,14 +36,14 @@ const clearAuthData = () => {
     localStorage.removeItem('business_company');
 };
 
-export const register = async (fullName, email, password, companyName) => {
+export const register = async (fullName, email, password, companyName, recaptcha_token) => {
     const response = await api.post('/business/register', {
         full_name: fullName,
         email,
         password,
         company_name: companyName,
+        recaptcha_token: recaptcha_token,
     });
-    setAuthData(response.data);
     return response.data;
 };
 

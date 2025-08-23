@@ -5,6 +5,7 @@ class BusinessUserCreate(BaseModel):
     email: EmailStr
     password: str = Field(..., min_length=8)
     company_name: str = Field(..., min_length=2)
+    recaptcha_token: str
 
 class BusinessUserLogin(BaseModel):
     email: EmailStr
@@ -16,6 +17,7 @@ class BusinessUser(BaseModel):
     full_name: str
     role: str
     company_id: int
+    is_verified: bool
 
     class Config:
         from_attributes = True
@@ -23,6 +25,7 @@ class BusinessUser(BaseModel):
 class Company(BaseModel):
     id: int
     name: str
+    plan: str
     token_balance: int
 
     class Config:

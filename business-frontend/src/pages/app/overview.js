@@ -1,3 +1,5 @@
+import { getUser, getCompany } from '../../lib/auth.js';
+
 function renderFakeLineChart() {
     const points = "0,100 50,80 100,85 150,65 200,70 250,50 300,40 350,20 400,30 450,10";
     return `
@@ -53,6 +55,9 @@ function renderFakeBarChart() {
 }
 
 export function renderOverviewPage() {
+    const user = getUser();
+    const company = getCompany();
+
     const headerHtml = `
         <div class="flex-1">
             <h1 class="page-headline">Dashboard Overview</h1>
@@ -68,71 +73,45 @@ export function renderOverviewPage() {
                  <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6 6 0 00-5-5.917V5a1 1 0 00-2 0v.083A6 6 0 006 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" /></svg>
             </button>
              <div class="h-8 w-px bg-app-border"></div>
-             <button class="flex items-center gap-2">
-                <img src="https://i.pravatar.cc/40?img=1" alt="User Avatar" class="w-8 h-8 rounded-full">
-                <svg class="w-4 h-4 text-app-text-tertiary" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" /></svg>
-             </button>
+             <div class="flex items-center gap-2">
+                <div class="w-8 h-8 rounded-full bg-accent-gradient text-white flex items-center justify-center font-bold text-sm">${user.full_name.charAt(0).toUpperCase()}</div>
+                <span class="font-semibold text-app-text-primary text-sm">${user.full_name}</span>
+             </div>
         </div>
     `;
 
     const pageHtml = `
         <div class="dashboard-container">
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-                <div class="widget-card p-6">
-                    <p class="text-sm font-medium text-app-text-secondary">Tokens Consumed (This Month)</p>
-                    <p class="text-3xl font-bold text-app-text-primary mt-2">12.7M / 75M</p>
-                </div>
-                <div class="widget-card p-6">
-                    <p class="text-sm font-medium text-app-text-secondary">Active API Keys</p>
-                    <p class="text-3xl font-bold text-app-text-primary mt-2">3</p>
-                </div>
-                <div class="widget-card p-6">
-                    <p class="text-sm font-medium text-app-text-secondary">Team Members</p>
-                    <p class="text-3xl font-bold text-app-text-primary mt-2">5</p>
+                <div class="widget-card p-6 md:col-span-2 lg:col-span-2">
+                    <p class="text-sm font-medium text-app-text-secondary">Account Details</p>
+                    <div class="mt-2 space-y-2 text-app-text-primary">
+                        <p><strong>Name:</strong> ${user.full_name}</p>
+                        <p><strong>Email:</strong> ${user.email}</p>
+                        <p><strong>Company:</strong> ${company.name}</p>
+                        <p><strong>Role:</strong> <span class="capitalize">${user.role}</span></p>
+                    </div>
                 </div>
                 <div class="widget-card p-6">
                     <p class="text-sm font-medium text-app-text-secondary">Current Plan</p>
-                    <p class="text-3xl font-bold text-app-text-primary mt-2">Startup Plan</p>
+                    <p class="text-3xl font-bold text-app-text-primary mt-2 capitalize">${company.plan || 'Free'}</p>
+                </div>
+                <div class="widget-card p-6">
+                    <p class="text-sm font-medium text-app-text-secondary">Token Balance</p>
+                    <p class="text-3xl font-bold text-app-text-primary mt-2">${company.token_balance.toLocaleString()}</p>
                 </div>
             </div>
-
-            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-6">
-                <div class="lg:col-span-2 widget-card">
-                    <div class="p-6">
-                        <h2 class="text-lg font-semibold text-app-text-primary">Token Usage: Last 30 Days</h2>
-                        <div class="h-80 mt-4 rounded-lg">
-                            ${renderFakeLineChart()}
-                        </div>
-                    </div>
-                </div>
-                <div class="widget-card">
-                     <div class="p-6">
-                        <h2 class="text-lg font-semibold text-app-text-primary">Usage by Language</h2>
-                        <div class="h-80 mt-4 rounded-lg">
-                            ${renderFakeBarChart()}
-                        </div>
-                    </div>
-                </div>
-            </div>
-
+            
             <div class="widget-card mt-6">
                 <div class="p-6">
-                    <h2 class="text-lg font-semibold text-app-text-primary">Recent API Activity</h2>
+                    <h2 class="text-lg font-semibold text-app-text-primary">Recent API Activity (Placeholder)</h2>
                 </div>
                 <table class="data-table">
                      <thead>
-                        <tr>
-                            <th>Request</th>
-                            <th>API Key</th>
-                            <th>Tokens</th>
-                            <th>Timestamp</th>
-                        </tr>
+                        <tr><th>Request</th><th>API Key</th><th>Tokens</th><th>Timestamp</th></tr>
                     </thead>
                     <tbody>
-                        <tr><td><span class="font-mono text-green-600">POST</span> /v1/datasets/query</td><td>Production V2</td><td>-1.2M</td><td>2 min ago</td></tr>
-                        <tr><td><span class="font-mono text-green-600">POST</span> /v1/datasets/query</td><td>Staging Env</td><td>-450k</td><td>15 min ago</td></tr>
-                        <tr><td><span class="font-mono text-blue-600">GET</span> /v1/datasets/stats</td><td>Production V2</td><td>-100</td><td>1 hour ago</td></tr>
-                        <tr><td><span class="font-mono text-green-600">POST</span> /v1/datasets/query</td><td>Production V2</td><td>-2.1M</td><td>3 hours ago</td></tr>
+                        <tr><td><span class="font-mono text-green-600">POST</span> /v1/datasets/query</td><td>-</td><td>-</td><td>-</td></tr>
                     </tbody>
                 </table>
             </div>

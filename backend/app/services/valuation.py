@@ -329,8 +329,8 @@ class HybridValuationService:
         
         target_usd_reward = self.BASE_USD_VALUE_PER_POINT * contribution_quality_score
 
-        total_lum_distributed = stats.total_usd_distributed if stats else 0
-        simulated_lum_price = self.INITIAL_LUM_USD_PRICE + (self.PRICE_GROWTH_FACTOR * math.sqrt(total_lum_distributed))
+        total_usd_distributed = stats.total_usd_distributed if stats else 0
+        simulated_lum_price = self.INITIAL_LUM_USD_PRICE + (self.PRICE_GROWTH_FACTOR * math.sqrt(total_usd_distributed))
         
         final_reward = target_usd_reward
         

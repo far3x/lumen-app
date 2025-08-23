@@ -1,10 +1,28 @@
+import { isAuthenticated, getUser, logout } from '../lib/auth.js';
+import { navigate } from '../router.js';
+
 export function renderHeader() {
+    const authed = isAuthenticated();
+    const user = getUser();
+
     const navLinkClasses = "text-text-body hover:text-text-headings transition-colors font-medium";
     const buttonPrimaryClasses = "px-5 py-2.5 text-sm font-semibold text-white bg-accent-gradient rounded-md transition-all duration-300 hover:scale-105 hover:brightness-110";
     const buttonSecondaryClasses = "px-5 py-2.5 text-sm font-semibold text-text-headings bg-white border border-border hover:bg-background rounded-md transition-colors";
 
+    const authLinks = authed ? `
+        <a href="/app/overview" class="${buttonSecondaryClasses}">Dashboard</a>
+        <button id="logout-btn" class="${buttonPrimaryClasses}">Log Out</button>
+    ` : `
+        <a href="/login" class="${navLinkClasses}">Login</a>
+        <a href="/contact" class="${buttonSecondaryClasses}">Contact Us</a>
+        <a href="/signup" class="${buttonPrimaryClasses}">Try Lumen</a>
+    `;
+
+    setTimeout(() => {
+        document.getElementById('logout-btn')?.addEventListener('click', logout);
+    }, 0);
+
     return `
-    <!-- REVISED: Added transition classes for scroll behavior -->
     <div class="bg-white/80 backdrop-blur-lg border-b border-border transition-transform duration-300">
         <div class="container mx-auto px-6">
             <div class="flex justify-between items-center h-24">
@@ -22,9 +40,7 @@ export function renderHeader() {
                 </div>
 
                 <div class="hidden lg:flex items-center gap-4">
-                    <a href="/login" class="${navLinkClasses}">Login</a>
-                    <a href="/contact" class="${buttonSecondaryClasses}">Contact Us</a>
-                    <a href="/signup" class="${buttonPrimaryClasses}">Try Lumen</a>
+                    ${authLinks}
                 </div>
 
                 <div class="lg:hidden">

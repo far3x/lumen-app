@@ -280,6 +280,7 @@ services:
       dockerfile: Dockerfile
       args:
         VITE_API_URL: ${API_URL}
+        VITE_GOOGLE_RECAPTCHA_SITE_KEY: ${GOOGLE_RECAPTCHA_SITE_KEY}
     restart: unless-stopped
     healthcheck:
       test: ["CMD-SHELL", "curl -f http://localhost:80/ || exit 1"]

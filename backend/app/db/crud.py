@@ -324,7 +324,6 @@ def create_contact_submission(db: Session, submission: schemas.ContactSalesCreat
     db.refresh(db_submission)
     return db_submission
 
-
 def get_business_user_by_email(db: Session, email: str) -> Optional[models.BusinessUser]:
     return db.query(models.BusinessUser).filter(models.BusinessUser.email == email).first()
 
@@ -348,6 +347,13 @@ def create_business_user(db: Session, user_data: business_schemas.BusinessUserCr
         company_id=company.id,
         role='admin'
     )
+    
+    expires = timedelta(hours=24)
+    verification_token = security.create_access_token(
+        data={"sub": f"verify_business:{db_user.email}"}, expires_delta=expires
+    )
+    db_user.verification_token = verification_token
+    
     db.add(db_user)
     db.commit()
     db.refresh(db_user)

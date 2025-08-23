@@ -3,7 +3,9 @@ import { renderWhyLumenPage } from './pages/why-lumen.js';
 import { renderContactPage } from './pages/contact.js';
 import { renderLoginPage } from './pages/login.js';
 import { renderSignupPage } from './pages/signup.js';
+import { renderVerifyPage } from './pages/verify.js';
 import { renderPlaceholderPage } from './pages/placeholder.js';
+import { renderCheckEmailPage } from './pages/check-email.js';
 import { renderDashboardLayout } from './pages/app/layout.js';
 import { renderHeader as renderMarketingHeader } from './components/header.js';
 import { renderFooter as renderMarketingFooter } from './components/footer.js';
@@ -22,6 +24,8 @@ const marketingRoutes = {
     '/contact': renderContactPage,
     '/login': renderLoginPage,
     '/signup': renderSignupPage,
+    '/verify': renderVerifyPage,
+    '/check-email': renderCheckEmailPage,
     '/product': () => renderPlaceholderPage('Our Product'),
     '/docs': () => renderPlaceholderPage('Documentation'),
     '/about': () => renderPlaceholderPage('About Us'),
