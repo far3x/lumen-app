@@ -127,3 +127,34 @@ class ContactSubmission(Base):
     contact_reason = Column(String, nullable=False)
     message = Column(Text, nullable=True)
     created_at = Column(DateTime(timezone=True), server_default=func.now())
+
+class Company(Base):
+    __tablename__ = "companies"
+    id = Column(Integer, primary_key=True, index=True)
+    name = Column(String, index=True, unique=True, nullable=False)
+    token_balance = Column(BigInteger, default=0, nullable=False)
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
+    users = relationship("BusinessUser", back_populates="company", cascade="all, delete-orphan")
+    api_keys = relationship("ApiKey", back_populates="company", cascade="all, delete-orphan")
+
+class BusinessUser(Base):
+    __tablename__ = "business_users"
+    id = Column(Integer, primary_key=True, index=True)
+    email = Column(String, unique=True, index=True, nullable=False)
+    hashed_password = Column(String, nullable=False)
+    full_name = Column(String, nullable=False)
+    role = Column(String, default="member", nullable=False) # e.g., 'admin', 'member'
+    company_id = Column(Integer, ForeignKey("companies.id"), nullable=False)
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
+    company = relationship("Company", back_populates="users")
+
+class ApiKey(Base):
+    __tablename__ = "api_keys"
+    id = Column(Integer, primary_key=True, index=True)
+    key_hash = Column(String, unique=True, index=True, nullable=False)
+    name = Column(String, nullable=False)
+    company_id = Column(Integer, ForeignKey("companies.id"), nullable=False)
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
+    last_used_at = Column(DateTime(timezone=True), nullable=True)
+    is_active = Column(Boolean, default=True, nullable=False)
+    company = relationship("Company", back_populates="api_keys")

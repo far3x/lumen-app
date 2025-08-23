@@ -8,8 +8,8 @@ IF FUNDING - for initial reward 200 users, then 2k... etc etc, so after contribu
 - show that we had 5k downloads on our cli tool, stars on GitHub (64 for now), generated thousands of views through reddit and x... etc (10k +)
 
 after launch :
-- link actual rpc... etc (no devnet) in prod
-- vps upgrade after 50 daily users
+- link actual rpc... etc (no devnet) in prod (when signed companies in)
+- vps upgrade after too much daily users (50 contributors daily)
 - from uvicorn to gunicorn asap
 
 not a priority :
@@ -25,9 +25,6 @@ socials :
 - can provide strategic datasets that are sold to only one specific company for way higher prices? private datasets
 - companies will not only buy raw data, but actually pre-processed data, clean data with no duplicates, no comments, atcual metrics and most importantly scores that can make datasets go from low quality and not worth anything, to high quality in high quantity and worth WAY more than anything
 
-FIXES / THINGS TO ADD :
-- make algo give accurate rewards, scale with business model per tokens, give 20% to user, take 80% for ONE sell (meaning we can sell their code MULTIPLE times, unless contract that makes us sell code for higher price but makes it private)
-- add project into dashboard directly ? accepts only code files from project before sending to backend (will be stored on server for a small amount of time), and goes in queue, goes through lum local command and adds a contribution instead of using cli ?
 
 TO DO SOON :
 - (after business.lumen.onl dashboard etc) -> make sure if ai gives 0, we still get that in our base (if the code is non secure), because storing code isn't dangerous, its using it that is (and we could get a category on that, "dangerous" where data buyers could also be interested in getting)

@@ -1,11 +1,13 @@
-
 import { renderLandingPage } from './pages/landing.js';
 import { renderWhyLumenPage } from './pages/why-lumen.js';
 import { renderContactPage } from './pages/contact.js';
+import { renderLoginPage } from './pages/login.js';
+import { renderSignupPage } from './pages/signup.js';
 import { renderPlaceholderPage } from './pages/placeholder.js';
 import { renderDashboardLayout } from './pages/app/layout.js';
 import { renderHeader as renderMarketingHeader } from './components/header.js';
 import { renderFooter as renderMarketingFooter } from './components/footer.js';
+import { isAuthenticated } from './lib/auth.js';
 
 const app = document.getElementById('app');
 const headerContainer = document.getElementById('header-container');
@@ -18,11 +20,11 @@ const marketingRoutes = {
     '/': renderLandingPage,
     '/why-lumen': renderWhyLumenPage,
     '/contact': renderContactPage,
+    '/login': renderLoginPage,
+    '/signup': renderSignupPage,
     '/product': () => renderPlaceholderPage('Our Product'),
     '/docs': () => renderPlaceholderPage('Documentation'),
     '/about': () => renderPlaceholderPage('About Us'),
-    '/login': () => renderPlaceholderPage('Login'),
-    '/signup': () => renderPlaceholderPage('Sign Up'),
     '/privacy': () => renderPlaceholderPage('Privacy Policy'),
 };
 
@@ -39,12 +41,20 @@ const handleLocation = async () => {
     window.scrollTo(0, 0);
 
     if (isAppRoute) {
+        if (!isAuthenticated()) {
+            navigate('/login');
+            return;
+        }
         app.className = 'bg-app-bg text-app-text-secondary font-sans antialiased';
         headerContainer.innerHTML = '';
         footerContainer.innerHTML = '';
         contentContainer.className = '';
         contentContainer.innerHTML = await renderDashboardLayout();
     } else {
+        if (isAuthenticated() && (path === '/login' || path === '/signup')) {
+            navigate('/app/overview');
+            return;
+        }
         app.className = 'relative min-h-screen flex flex-col bg-background text-text-body font-sans antialiased';
         headerContainer.innerHTML = renderMarketingHeader();
         footerContainer.innerHTML = renderMarketingFooter();
