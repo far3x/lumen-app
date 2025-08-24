@@ -18,7 +18,6 @@ class User(BaseModel):
     has_password: bool
     github_id: Optional[str] = None
     solana_address: Optional[str] = None
-    cooldown_until: Optional[datetime] = None
     has_beta_access: bool
     waitlist_position: Optional[int] = None
     reward_multiplier: float
@@ -172,10 +171,11 @@ class WalletLinkRequest(BaseModel):
     message: str
     signature: str
 
-class ClaimTransactionResponse(BaseModel):
+class BatchPayoutResponse(BaseModel):
     id: int
-    amount_claimed: float
-    transaction_hash: str
+    amount_usd: float
+    status: str
+    transaction_hash: Optional[str] = None
     created_at: datetime
 
     class Config:

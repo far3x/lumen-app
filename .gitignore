@@ -8,6 +8,8 @@ local_settings.py
 *.sqlite3
 prod.env
 
+priv_key_to_json.py
+
 # --- Python / FastAPI Backend ---
 /backend/venv/
 /backend/lumen_exchange.db

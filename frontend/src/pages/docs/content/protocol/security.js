@@ -34,8 +34,8 @@ export const renderSecurity = () => `
     <h2 id="on-chain-security">On-Chain Security</h2>
     <p>Your rewards are managed with transparency and security on the Solana blockchain.</p>
     <ul>
-        <li><strong>Protocol Treasury Wallet:</strong> All rewards are dispensed from a protocol-controlled treasury wallet on the Solana network. The private key for this wallet is stored securely as an environment variable, isolated from the main application database and other services.</li>
+        <li><strong>Protocol Treasury Wallet:</strong> All USDC payouts are dispensed from a protocol-controlled treasury wallet on the Solana network. The private key for this wallet is stored securely as an environment variable, isolated from the main application database and other services.</li>
         <li><strong>Secure Wallet Linking:</strong> We use cryptographic signature verification (Ed25519) to confirm you own the Solana wallet you are linking for rewards, preventing unauthorized address changes.</li>
-        <li><strong>Public & Auditable:</strong> All claim transactions are public on the Solana blockchain, providing a transparent and auditable record of rewards distribution that can be verified on any block explorer like Solscan.</li>
+        <li><strong>Public & Auditable:</strong> All payout transactions are public on the Solana blockchain, providing a transparent and auditable record of rewards distribution that can be verified on any block explorer like Solscan.</li>
     </ul>
-`;
+`

@@ -8,7 +8,7 @@ export const renderFaq = () => `
         <div class="grid grid-rows-[0fr] group-open:grid-rows-[1fr] transition-[grid-template-rows] duration-500 ease-in-out">
             <div class="overflow-hidden">
                 <p class="text-text-secondary px-6 pb-6">
-                    Lumen is a platform that rewards developers for contributing their code. This code is then safely anonymized and used to create high-quality datasets for training better Artificial Intelligence models. It's a way for you to turn your unique coding projects into a valuable, reward-earning asset.
+                    Lumen is a platform that rewards developers with real-world value (in USDC stablecoin) for contributing their code. This code is then safely anonymized and used to create high-quality datasets for training better Artificial Intelligence models. It's a way for you to turn your unique coding projects into a valuable, reward-earning asset.
                 </p>
             </div>
         </div>
@@ -34,7 +34,7 @@ export const renderFaq = () => `
         <div class="grid grid-rows-[0fr] group-open:grid-rows-[1fr] transition-[grid-template-rows] duration-500 ease-in-out">
             <div class="overflow-hidden">
                 <p class="text-text-secondary px-6 pb-6">
-                    To bootstrap the network and reward our earliest supporters, the protocol is in a limited beta phase. The first 500 developers to make a successful contribution will receive an exclusive, one-time reward of <strong>1,000 LUMEN</strong>. Users who register after the beta is full are placed on a waitlist and will be granted access in batches.
+                    To bootstrap the network and reward our earliest supporters, the protocol is in a limited beta phase. The first 200 developers to make a successful contribution will receive an exclusive, one-time reward of <strong>1,000 $LUMEN</strong>. Users who register after the beta is full are placed on a waitlist and will be granted access in batches.
                 </p>
             </div>
         </div>
@@ -46,7 +46,17 @@ export const renderFaq = () => `
         <div class="grid grid-rows-[0fr] group-open:grid-rows-[1fr] transition-[grid-template-rows] duration-500 ease-in-out">
             <div class="overflow-hidden">
                 <p class="text-text-secondary px-6 pb-6">
-                   The value of the rewards is directly tied to the value of the data on the network. AI companies pay real-world currency to access our datasets. A significant portion of that revenue is then used to fund the protocol's reward pool. This creates a sustainable economic system where the value of developer rewards grows as the data becomes more valuable to the AI industry.
+                   The value is direct and stable. Your contribution is appraised by our engine and assigned a specific <strong>USD value</strong>. This amount accrues in your account balance. We then pay you that exact amount in <strong>USDC</strong>, a stablecoin pegged 1:1 to the US Dollar. There is no complex token economy to worry about; the value you earn is the value you receive.
+                </p>
+            </div>
+        </div>
+    </details>
+    <details class="group bg-surface border border-subtle/50 rounded-lg cursor-pointer my-4">
+        <summary class="flex items-center justify-between font-bold p-6">How do I get paid?</summary>
+        <div class="grid grid-rows-[0fr] group-open:grid-rows-[1fr] transition-[grid-template-rows] duration-500 ease-in-out">
+            <div class="overflow-hidden">
+                <p class="text-text-secondary px-6 pb-6">
+                   Payouts are <strong>automatic and daily</strong>. There is no manual "claim" button. Once every 24 hours, the protocol creates a payout batch. It takes a snapshot of your current accrued USD balance, resets it to zero, and automatically sends that amount in USDC to the Solana wallet you have linked in your settings. You can track all past and pending payouts in your dashboard.
                 </p>
             </div>
         </div>
@@ -103,4 +113,4 @@ export const renderFaq = () => `
             </div>
         </div>
     </details>
-`;
+`

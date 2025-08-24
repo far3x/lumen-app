@@ -10,12 +10,12 @@ from app.db.database import SessionLocal
 from app.schemas import DeviceAuthResponse, Token, ContributionCreate, ContributionStatus, ContributionCliResponse
 from app.services.redis_service import redis_service
 from app.api.v1 import dependencies
-from app.tasks import process_contribution
+from app.tasks import process_contribution, create_daily_payout_batch_task, reconcile_failed_payouts_task
 from app.core.limiter import limiter
 from typing import List, Optional
 from datetime import datetime, timezone, timedelta
 
-router = APIRouter(prefix="/cli", tags=["CLI"])
+router = APIRouter(prefix="/cli", tags=["CLI", "Dev"])
 
 def get_user_id_from_pat_for_rate_limit(request: Request) -> str:
     auth_header = request.headers.get("authorization")
@@ -152,3 +152,13 @@ async def get_contribution_history(
 ):
     contributions, _ = crud.get_user_contributions_paginated(db, user_id=current_user.id, skip=0, limit=10)
     return contributions
+
+@router.post("/trigger-payout-batch", status_code=status.HTTP_202_ACCEPTED, dependencies=[Depends(dependencies.verify_dev_mode)])
+async def trigger_payout_batch(request: Request):
+    task = create_daily_payout_batch_task.delay()
+    return {"message": "Daily payout batch task has been triggered.", "task_id": task.id}
+
+@router.post("/trigger-reconciliation", status_code=status.HTTP_202_ACCEPTED, dependencies=[Depends(dependencies.verify_dev_mode)])
+async def trigger_reconciliation(request: Request):
+    task = reconcile_failed_payouts_task.delay()
+    return {"message": "Failed payout reconciliation task has been triggered.", "task_id": task.id}

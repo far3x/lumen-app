@@ -1,4 +1,4 @@
-import { api, fetchContributions } from '../../../lib/auth.js';
+import { api, fetchContributions, fetchPayouts } from '../../../lib/auth.js';
 import { getStatusClasses, getStatusText, renderModal, escapeHtml, icons, renderFeedbackModal } from './utils.js';
 
 export let contributionsState = {
@@ -27,7 +27,6 @@ function handleContributionUpdate(event) {
         allContributions.unshift(updatedContrib);
     }
     
-    // Also update paginated contributions if on page 1
     if (contributionsState.currentPage === 1) {
         const paginatedIndex = window.dashboardState.paginatedContributions.findIndex(c => c.id === updatedContrib.id);
         if (paginatedIndex !== -1) {
@@ -42,7 +41,6 @@ function handleContributionUpdate(event) {
         row.outerHTML = renderSingleContributionRow(updatedContrib);
         attachDetailModalListeners();
     } else {
-        // Only add if we're on the first page
         if (contributionsState.currentPage === 1) {
             const tableBody = document.querySelector('#contributions-table-container tbody');
             if (tableBody) {
@@ -76,33 +74,6 @@ function triggerContextualFeedback() {
     }
 }
 
-function renderProTipsSection() {
-    const principles = [
-        { number: '01', title: 'Prioritize Novelty', text: 'The protocol rewards what AI has not seen. Your unique solutions, personal projects, or unpublished work are the most valuable assets for training.' },
-        { number: '02', title: 'Focus on Quality', text: 'Value is tied to substance. Well-structured applications, thoughtful architectural patterns, and clean, efficient code earn more than simple scripts.' },
-        { number: '03', title: 'Iterate and Update', text: 'The engine rewards progress. Regularly contributing updates to your active projects is a great way to earn, as the protocol values the new logic you add over time.' },
-    ];
-
-    return `
-    <div class="mt-12">
-        <h3 class="font-bold text-lg text-text-main mb-4">Principles of Value</h3>
-        <div class="relative bg-surface rounded-xl border border-primary overflow-hidden">
-            <div class="flex flex-col md:flex-row">
-            ${principles.map((principle, index) => `
-                <div class="flex-1 p-6 relative ${index > 0 ? 'md:border-l md:border-primary' : ''}">
-                    <span class="absolute top-4 right-4 text-5xl font-bold gradient-text opacity-10">${principle.number}</span>
-                    <div class="relative">
-                        <h4 class="font-bold text-text-main">${principle.title}</h4>
-                        <p class="text-sm text-text-secondary mt-1">${principle.text}</p>
-                    </div>
-                </div>
-            `).join('')}
-            </div>
-        </div>
-    </div>
-    `;
-}
-
 function renderScoreBar(label, score) {
     const normalizedScore = (score === undefined || score === null) ? 0 : Math.max(0, Math.min(1, score));
     const percentage = normalizedScore * 100;
@@ -125,6 +96,8 @@ function renderContributionDetailModal(item) {
     const details = item.valuation_details || {};
     const languageBreakdown = details.language_breakdown || {};
     const languageEntries = Object.entries(languageBreakdown);
+    const rewardUsd = item.reward_amount ?? 0;
+    const lumenEquivalent = (details.simulated_lum_price_usd && details.simulated_lum_price_usd > 0) ? (rewardUsd / details.simulated_lum_price_usd) : 0;
 
     const renderKeyMetric = (label, value) => `
         <div class="flex justify-between items-center text-sm py-2 border-b border-primary/50">
@@ -136,8 +109,9 @@ function renderContributionDetailModal(item) {
     const content = `
         <div class="text-text-main">
             <div class="text-center mb-8">
-                <p class="text-sm font-bold text-text-secondary uppercase tracking-widest">Total Reward</p>
-                <p class="text-5xl lg:text-6xl font-bold gradient-text mt-1">+${(item.reward_amount ?? 0).toLocaleString(undefined, {minimumFractionDigits: 4, maximumFractionDigits: 4})} $LUMEN</p>
+                <p class="text-sm font-bold text-text-secondary uppercase tracking-widest">Contribution Value</p>
+                <p class="text-5xl lg:text-6xl font-bold gradient-text mt-1">$${rewardUsd.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 4})}</p>
+                <p class="text-lg font-medium text-text-secondary mt-1">≈ ${lumenEquivalent.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})} $LUMEN</p>
             </div>
 
             <div class="grid grid-cols-1 lg:grid-cols-5 gap-8">
@@ -175,14 +149,6 @@ function renderContributionDetailModal(item) {
                     </div>
                 </div>
             </div>
-
-            ${item.transaction_hash ? `
-            <div class="text-center pt-8 mt-8 border-t border-primary">
-                 <a href="https://solscan.io/tx/${item.transaction_hash}?cluster=devnet" target="_blank" rel="noopener noreferrer" class="inline-flex items-center gap-2 text-accent-cyan hover:underline text-sm font-medium">
-                    View On-Chain Proof
-                    <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" /></svg>
-                </a>
-            </div>` : ''}
         </div>
     `;
     renderModal(`Contribution #${item.id} Details`, content, { size: '3xl' });
@@ -193,7 +159,7 @@ function renderSingleContributionRow(item) {
     <tr class="contribution-row" data-id="${item.id}">
         <td class="py-4 px-4 text-text-secondary">${new Date(item.created_at).toLocaleDateString()}</td>
         <td class="py-4 px-4"><span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getStatusClasses(item.status)}">${getStatusText(item.status)}</span></td>
-        <td class="py-4 px-4 text-right font-mono ${item.reward_amount > 0 ? 'text-green-400' : 'text-text-secondary'}">${item.reward_amount > 0 ? `+${item.reward_amount.toFixed(4)}` : '...'}</td>
+        <td class="py-4 px-4 text-right font-mono ${item.reward_amount > 0 ? 'text-green-400' : 'text-text-secondary'}">${item.reward_amount > 0 ? `+$${item.reward_amount.toFixed(4)}` : '...'}</td>
         <td class="py-4 px-4 text-center">
             <button class="details-btn text-text-secondary hover:brightness-150 transition-all disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:brightness-100" data-id="${item.id}" ${item.status !== 'PROCESSED' ? 'disabled' : ''}>
                 ${icons.view}
@@ -211,7 +177,7 @@ function renderContributionHistory(contributions) {
                     <tr>
                         <th class="py-3 px-4">Date</th>
                         <th class="py-3 px-4">Status</th>
-                        <th class="py-3 px-4 text-right">Reward ($LUMEN)</th>
+                        <th class="py-3 px-4 text-right">Reward (USD)</th>
                         <th class="py-3 px-4 text-center">Details</th>
                     </tr>
                 </thead>
@@ -221,6 +187,51 @@ function renderContributionHistory(contributions) {
                         <div class="w-12 h-12 text-accent-purple mb-4">${icons.contributions}</div>
                         <p>No contributions found yet.</p>
                         <a href="/docs/contributing" class="mt-2 text-sm font-semibold gradient-text hover:brightness-125 transition">Learn how to contribute</a>
+                    </div>
+                </td></tr>`}
+                </tbody>
+            </table>
+        </div>
+    `;
+}
+
+function renderPayoutHistory(payouts) {
+    const getPayoutStatus = (status) => {
+        const classes = {
+            COMPLETED: 'bg-green-900/50 text-green-300',
+            PENDING: 'bg-yellow-900/50 text-yellow-300',
+            FAILED: 'bg-red-900/50 text-red-300',
+            RECONCILED: 'bg-blue-900/50 text-blue-300'
+        };
+        return `<span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${classes[status] || 'bg-gray-700/50 text-gray-300'}">${status}</span>`;
+    };
+
+    return `
+        <div class="overflow-x-auto">
+            <table class="w-full text-left text-sm">
+                <thead class="text-xs text-subtle uppercase border-b border-primary">
+                    <tr>
+                        <th class="py-3 px-4">Date</th>
+                        <th class="py-3 px-4">Status</th>
+                        <th class="py-3 px-4 text-right">Amount (USDC)</th>
+                        <th class="py-3 px-4 text-center">Transaction</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-primary">
+                ${payouts.length > 0 ? payouts.map(payout => `
+                    <tr>
+                        <td class="py-4 px-4 text-text-secondary">${new Date(payout.created_at).toLocaleDateString()}</td>
+                        <td class="py-4 px-4">${getPayoutStatus(payout.status)}</td>
+                        <td class="py-4 px-4 text-right font-mono text-accent-cyan">$${payout.amount_usd.toFixed(4)}</td>
+                        <td class="py-4 px-4 text-center">
+                            ${payout.transaction_hash ? `<a href="https://solscan.io/tx/${payout.transaction_hash}?cluster=devnet" target="_blank" rel="noopener noreferrer" class="text-accent-cyan hover:underline">View</a>` : '<span class="text-subtle">-</span>'}
+                        </td>
+                    </tr>
+                `).join('') : `<tr><td colspan="4" class="py-12 text-center text-text-secondary">
+                    <div class="flex flex-col items-center">
+                        <div class="w-12 h-12 text-accent-cyan mb-4">${icons.dashboard}</div>
+                        <p>No payouts have been processed yet.</p>
+                        <p class="text-xs mt-1">Your first payout will appear here after the next batch.</p>
                     </div>
                 </td></tr>`}
                 </tbody>
@@ -260,7 +271,7 @@ async function changeContributionsPage(direction, dashboardState) {
         
         dashboardState.paginatedContributions = result.items;
 
-        document.getElementById('contributions-table-container').innerHTML = renderContributionHistory(result.items);
+        document.getElementById('contributions-view').innerHTML = renderContributionHistory(result.items);
         attachDetailModalListeners();
     } catch (error) {
         console.error("Failed to fetch new page of contributions:", error);
@@ -307,9 +318,35 @@ function attachDetailModalListeners() {
     });
 }
 
-export function attachContributionPageListeners(dashboardState) {
+export async function attachContributionPageListeners(dashboardState) {
     window.dashboardState = dashboardState;
     attachDetailModalListeners();
+
+    const tabs = document.querySelectorAll('.history-tab-btn');
+    const views = document.querySelectorAll('.history-view');
+
+    tabs.forEach(clickedTab => {
+        clickedTab.addEventListener('click', async () => {
+            tabs.forEach(tab => {
+                tab.classList.remove('border-accent-cyan', 'text-text-main');
+                tab.classList.add('border-transparent', 'text-text-secondary');
+            });
+            clickedTab.classList.remove('border-transparent', 'text-text-secondary');
+            clickedTab.classList.add('border-accent-cyan', 'text-text-main');
+            
+            views.forEach(view => view.classList.add('hidden'));
+            const targetView = document.getElementById(clickedTab.dataset.view);
+            targetView.classList.remove('hidden');
+
+            if (clickedTab.dataset.view === 'payouts-view' && !targetView.dataset.loaded) {
+                targetView.innerHTML = `<div class="text-center p-8"><span class="animate-spin inline-block w-8 h-8 border-4 border-transparent border-t-accent-purple rounded-full"></span></div>`;
+                const payouts = await fetchPayouts();
+                targetView.innerHTML = renderPayoutHistory(payouts);
+                targetView.dataset.loaded = 'true';
+            }
+        });
+    });
+
     document.getElementById('prev-page-btn')?.addEventListener('click', () => changeContributionsPage(-1, dashboardState));
     document.getElementById('next-page-btn')?.addEventListener('click', () => changeContributionsPage(1, dashboardState));
     updatePaginationButtons();
@@ -322,15 +359,34 @@ export function renderMyContributionsPage(initialContributions) {
 
     return `
         <header>
-            <h1 class="text-3xl font-bold">My Contributions</h1>
-            <p class="text-text-secondary mt-1">A detailed history of your code submissions and their valuation.</p>
+            <h1 class="text-3xl font-bold">History</h1>
+            <p class="text-text-secondary mt-1">A detailed history of your code submissions and payouts.</p>
         </header>
-        ${renderProTipsSection()}
-        <div class="bg-surface p-2 sm:p-6 rounded-lg border border-primary mt-8">
-            <div id="contributions-table-container">
-                ${renderContributionHistory(initialContributions)}
+
+        <div class="mt-8">
+            <div class="border-b border-primary mb-6">
+                <nav class="flex space-x-6">
+                    <button data-view="contributions-view" class="history-tab-btn pb-3 border-b-2 border-accent-cyan text-text-main font-semibold">Contributions</button>
+                    <button data-view="payouts-view" class="history-tab-btn pb-3 border-b-2 border-transparent text-text-secondary hover:text-text-main font-semibold">Payouts</button>
+                </nav>
             </div>
-            ${showPagination ? renderContributionsPagination() : ''}
+            
+            <div id="contributions-view" class="history-view">
+                <div class="bg-surface p-2 sm:p-6 rounded-lg border border-primary">
+                    <div id="contributions-table-container">
+                        ${renderContributionHistory(initialContributions)}
+                    </div>
+                    ${showPagination ? renderContributionsPagination() : ''}
+                </div>
+            </div>
+
+            <div id="payouts-view" class="history-view hidden">
+                <div class="bg-surface p-2 sm:p-6 rounded-lg border border-primary">
+                    <div id="payouts-table-container">
+                        <div class="text-center p-8 text-text-secondary">Click the "Payouts" tab to load your history.</div>
+                    </div>
+                </div>
+            </div>
         </div>
     `;
 }
