@@ -78,10 +78,16 @@ class NetworkStats(Base):
     id = Column(Integer, primary_key=True)
     total_usd_distributed = Column(Float, default=0.0, nullable=False)
     total_contributions = Column(BigInteger, default=0, nullable=False)
+    total_lloc = Column(BigInteger, default=0, nullable=False)
+    total_tokens = Column(BigInteger, default=0, nullable=False)
     mean_complexity = Column(Float, default=5.0, nullable=False)
     m2_complexity = Column(Float, default=0.0, nullable=False)
     variance_complexity = Column(Float, default=4.0, nullable=False)
     std_dev_complexity = Column(Float, default=2.0, nullable=False)
+    mean_quality = Column(Float, default=0.5, nullable=False)
+    m2_quality = Column(Float, default=0.0, nullable=False)
+    variance_quality = Column(Float, default=0.25, nullable=False)
+    std_dev_quality = Column(Float, default=0.5, nullable=False)
 
 class Contribution(Base):
     __tablename__ = "contributions"

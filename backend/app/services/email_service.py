@@ -34,4 +34,19 @@ class EmailService:
         )
         await self.fm.send_message(message, template_name="contact_sales_confirmation.html")
 
+    async def send_business_verification_email(self, email: str, token: str):
+        verification_link = f"{settings.BUSINESS_FRONTEND_URL}/verify?token={token}"
+        template_body = {
+            "verification_link": verification_link,
+            "year": datetime.now().year,
+            "logo_url": settings.PUBLIC_LOGO_URL
+        }
+        message = MessageSchema(
+            subject="Lumen Protocol: Verify Your Business Account",
+            recipients=[email],
+            template_body=template_body,
+            subtype="html"
+        )
+        await self.fm.send_message(message, template_name="business_verification_email.html")
+
 email_service = EmailService()

@@ -146,25 +146,40 @@ def get_account_details(db: Session, user_id: int) -> Optional[schemas.AccountDe
 def get_network_stats(db: Session):
     return db.query(models.NetworkStats).first()
 
-def update_network_stats(db: Session, complexity_score: float, reward_amount_usd: float):
+def update_network_stats(db: Session, complexity_score: float, reward_amount_usd: float, total_lloc: int, total_tokens: int, quality_score: float):
     stats = get_network_stats(db)
     if not stats:
-        stats = models.NetworkStats(); db.add(stats)
+        stats = models.NetworkStats()
+        db.add(stats)
 
-    if stats.total_usd_distributed is None:
-        stats.total_usd_distributed = 0.0
-    if stats.total_contributions is None:
-        stats.total_contributions = 0
-
+    if stats.total_usd_distributed is None: stats.total_usd_distributed = 0.0
+    if stats.total_contributions is None: stats.total_contributions = 0
+    if stats.total_lloc is None: stats.total_lloc = 0
+    if stats.total_tokens is None: stats.total_tokens = 0
+    
     stats.total_usd_distributed += reward_amount_usd
-    n = stats.total_contributions; stats.total_contributions += 1
-    delta = complexity_score - stats.mean_complexity
-    stats.mean_complexity += delta / (n + 1)
-    delta2 = complexity_score - stats.mean_complexity
-    stats.m2_complexity += delta * delta2
+    stats.total_lloc += total_lloc
+    stats.total_tokens += total_tokens
+
+    n = stats.total_contributions
+    stats.total_contributions += 1
+
+    delta_complexity = complexity_score - stats.mean_complexity
+    stats.mean_complexity += delta_complexity / (n + 1)
+    delta2_complexity = complexity_score - stats.mean_complexity
+    stats.m2_complexity += delta_complexity * delta2_complexity
     if n > 0:
         stats.variance_complexity = stats.m2_complexity / n
         stats.std_dev_complexity = stats.variance_complexity ** 0.5
+    
+    delta_quality = quality_score - stats.mean_quality
+    stats.mean_quality += delta_quality / (n + 1)
+    delta2_quality = quality_score - stats.mean_quality
+    stats.m2_quality += delta_quality * delta2_quality
+    if n > 0:
+        stats.variance_quality = stats.m2_quality / n
+        stats.std_dev_quality = stats.variance_quality ** 0.5
+
     db.commit()
 
 def apply_reward_to_user(db: Session, user: models.User, reward_amount_usd: float):

@@ -3,59 +3,30 @@ from fastapi.security import OAuth2PasswordRequestForm
 from sqlalchemy.orm import Session
 from datetime import timedelta, timezone, datetime
 from jose import jwt, JWTError
-from fastapi_mail import FastMail, MessageSchema, ConnectionConfig
-from pathlib import Path
 
 from app.db import crud, models, database
 from app.core import security, config
 from app.business_schemas import BusinessUserCreate, BusinessToken, BusinessUser as BusinessUserSchema, Company as CompanySchema
 from app.core.limiter import limiter
 from app.api.v1.routers.auth import verify_recaptcha
+from app.tasks import send_business_verification_email_task
 
 router = APIRouter(prefix="/business", tags=["Business Authentication"])
 
-mail_conf = ConnectionConfig(
-    MAIL_USERNAME=config.settings.MAIL_USERNAME,
-    MAIL_PASSWORD=config.settings.MAIL_PASSWORD,
-    MAIL_FROM=config.settings.MAIL_FROM,
-    MAIL_PORT=config.settings.MAIL_PORT,
-    MAIL_SERVER=config.settings.MAIL_SERVER,
-    MAIL_FROM_NAME=config.settings.MAIL_FROM_NAME,
-    MAIL_STARTTLS=config.settings.MAIL_STARTTLS,
-    MAIL_SSL_TLS=config.settings.MAIL_SSL_TLS,
-    USE_CREDENTIALS=True,
-    VALIDATE_CERTS=True,
-    TEMPLATE_FOLDER=Path(__file__).parent.parent.parent.parent / 'templates'
-)
-
 @router.post("/register", status_code=status.HTTP_202_ACCEPTED)
-async def register_business_user(request: Request, user_data: BusinessUserCreate, background_tasks: BackgroundTasks, db: Session = Depends(database.get_db)):
+async def register_business_user(request: Request, user_data: BusinessUserCreate, db: Session = Depends(database.get_db)):
     await verify_recaptcha(user_data.recaptcha_token)
 
     db_user = crud.get_business_user_by_email(db, email=user_data.email)
     if db_user:
         return {"message": "If an account with this email does not already exist, a verification email has been sent."}
 
-    company = crud.get_company_by_name(db, name=user_data.company_name)
-    if company:
-        return {"message": "If an account with this email does not already exist, a verification email has been sent."}
-
     new_user = crud.create_business_user(db, user_data=user_data)
     
-    fm = FastMail(mail_conf)
-    verification_link = f"{config.settings.FRONTEND_URL}/business/verify?token={new_user.verification_token}"
-    template_body = {
-        "verification_link": verification_link,
-        "year": datetime.now().year,
-        "logo_url": config.settings.PUBLIC_LOGO_URL
-    }
-    message = MessageSchema(
-        subject="Lumen Protocol: Verify Your Business Account",
-        recipients=[new_user.email],
-        template_body=template_body,
-        subtype="html"
+    send_business_verification_email_task.delay(
+        email=new_user.email,
+        token=new_user.verification_token
     )
-    background_tasks.add_task(fm.send_message, message, template_name="business_verification_email.html")
     
     return {"message": "If an account with this email does not already exist, a verification email has been sent."}
 

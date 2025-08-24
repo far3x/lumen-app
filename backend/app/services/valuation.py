@@ -323,7 +323,7 @@ class HybridValuationService:
                 z_score = (current_metrics['avg_complexity'] - stats.mean_complexity) / stats.std_dev_complexity
                 rarity_multiplier = 1.0 + math.tanh(z_score)
 
-        ai_weighted_multiplier = (clarity * 0.5) + (architecture * 0.2) + (code_quality * 0.3)
+        ai_weighted_multiplier = (clarity * 0.3) + (architecture * 0.2) + (code_quality * 0.5)
         
         contribution_quality_score = (tokens_for_reward * self.TOKEN_TO_POINT_FACTOR) * ai_weighted_multiplier * rarity_multiplier
         
@@ -341,6 +341,7 @@ class HybridValuationService:
             "project_clarity_score": clarity,
             "architectural_quality_score": architecture,
             "code_quality_score": code_quality,
+            "ai_weighted_multiplier": round(ai_weighted_multiplier, 4),
             "analysis_summary": sanitized_summary,
             "rarity_multiplier": round(rarity_multiplier, 4),
             "simulated_lum_price_usd": round(simulated_lum_price, 6),
