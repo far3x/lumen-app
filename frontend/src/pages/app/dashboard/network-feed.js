@@ -3,7 +3,7 @@ import { icons } from './utils.js';
 function renderActivityItem(item) {
     if (item.type === 'CONTRIBUTION') {
         const rewardText = item.reward_amount > 0 
-            ? `<strong class="font-medium text-green-400">+${item.reward_amount.toFixed(4)} $LUMEN</strong>`
+            ? `<strong class="font-medium text-green-400">+$${item.reward_amount.toFixed(4)}</strong>`
             : `<strong class="font-medium text-text-secondary">No reward granted</strong>`;
 
         return `
@@ -22,16 +22,16 @@ function renderActivityItem(item) {
         `;
     }
 
-    if (item.type === 'CLAIM') {
+    if (item.type === 'PAYOUT') {
         return `
             <li class="flex items-start space-x-4 animate-fade-in-up">
                 <div class="p-3 bg-primary rounded-full mt-1 text-green-400">${icons.dashboard}</div>
                 <div class="flex-grow text-sm">
                     <p class="text-text-main">
-                        <strong class="font-bold">You</strong> claimed your rewards.
+                        <strong class="font-bold">A payout</strong> was processed to your wallet.
                     </p>
                     <p class="text-text-secondary mt-1">
-                        Amount: <strong class="font-medium text-accent-cyan">${item.amount_claimed.toFixed(4)} $LUMEN</strong>
+                        Amount: <strong class="font-medium text-accent-cyan">$${item.amount_usd.toFixed(4)} USDC</strong>
                     </p>
                      <a href="https://solscan.io/tx/${item.transaction_hash}?cluster=devnet" target="_blank" rel="noopener noreferrer" class="text-xs text-accent-cyan hover:underline">View on Solscan</a>
                 </div>
@@ -58,18 +58,18 @@ function renderFeed(events) {
     `;
 }
 
-export function renderRecentActivityPage(contributions, claims) {
+export function renderRecentActivityPage(contributions, payouts) {
     const contributionsWithType = (contributions || []).map(item => ({ ...item, type: 'CONTRIBUTION' }));
-    const claimsWithType = (claims || []).map(item => ({ ...item, type: 'CLAIM' }));
+    const payoutsWithType = (payouts || []).map(item => ({ ...item, type: 'PAYOUT' }));
 
-    const combinedActivity = [...contributionsWithType, ...claimsWithType];
+    const combinedActivity = [...contributionsWithType, ...payoutsWithType];
 
     combinedActivity.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
 
     return `
         <header>
             <h1 class="text-3xl font-bold">My Activity</h1>
-            <p class="text-text-secondary mt-1">A timeline of your personal contributions and claims.</p>
+            <p class="text-text-secondary mt-1">A timeline of your personal contributions and payouts.</p>
         </header>
         <div id="live-feed-container" class="bg-surface p-6 rounded-lg border border-primary mt-8">
             ${renderFeed(combinedActivity)}

@@ -20,7 +20,7 @@ logger = logging.getLogger(__name__)
 
 class SolanaService:
     def __init__(self):
-        if not all([settings.SOLANA_RPC_URL, settings.TREASURY_PRIVATE_KEY, settings.LUM_TOKEN_MINT_ADDRESS]):
+        if not all([settings.SOLANA_RPC_URL, settings.TREASURY_PRIVATE_KEY, settings.LUM_TOKEN_MINT_ADDRESS, settings.USDC_TOKEN_MINT_ADDRESS]):
             raise ValueError("Solana configuration is incomplete. Please check your environment variables.")
         
         self.client = Client(settings.SOLANA_RPC_URL)
@@ -32,7 +32,8 @@ class SolanaService:
             logger.critical(f"FATAL: Could not parse TREASURY_PRIVATE_KEY. Error: {e}")
             raise ValueError("Invalid TREASURY_PRIVATE_KEY format. It must be a JSON array of numbers.") from e
 
-        self.mint_pubkey = Pubkey.from_string(settings.LUM_TOKEN_MINT_ADDRESS)
+        self.lum_mint_pubkey = Pubkey.from_string(settings.LUM_TOKEN_MINT_ADDRESS)
+        self.usdc_mint_pubkey = Pubkey.from_string(settings.USDC_TOKEN_MINT_ADDRESS)
         logger.info(f"SolanaService initialized. Treasury Address: {self.treasury_keypair.pubkey()}")
 
     def _send_and_confirm_tx(self, instructions: list[Instruction], signers: list[Keypair]) -> str:
@@ -56,8 +57,8 @@ class SolanaService:
         
         return str(tx_signature)
 
-    def _get_or_create_associated_token_account(self, recipient_pubkey: Pubkey) -> Pubkey:
-        ata_address = get_associated_token_address(recipient_pubkey, self.mint_pubkey)
+    def _get_or_create_associated_token_account(self, recipient_pubkey: Pubkey, mint_pubkey: Pubkey) -> Pubkey:
+        ata_address = get_associated_token_address(recipient_pubkey, mint_pubkey)
         
         try:
             account_info = self.client.get_account_info(ata_address)
@@ -72,7 +73,7 @@ class SolanaService:
         instruction = create_associated_token_account(
             payer=self.treasury_keypair.pubkey(),
             owner=recipient_pubkey,
-            mint=self.mint_pubkey
+            mint=mint_pubkey
         )
         
         try:
@@ -83,7 +84,9 @@ class SolanaService:
             logger.error(f"Failed to create associated token account for {recipient_pubkey}: {e}")
             raise
 
-    def transfer_lum_tokens(self, recipient_address_str: str, amount_lamports: int) -> str:
+    def transfer_usdc_tokens(self, recipient_address_str: str, amount_usd: float) -> str:
+        amount_lamports = int(amount_usd * (10**6))
+
         if amount_lamports <= 0:
             raise ValueError("Transfer amount must be positive.")
 
@@ -92,10 +95,10 @@ class SolanaService:
         except Exception as e:
             raise ValueError(f"Invalid recipient address: {recipient_address_str}") from e
 
-        source_ata = get_associated_token_address(self.treasury_keypair.pubkey(), self.mint_pubkey)
-        destination_ata = self._get_or_create_associated_token_account(recipient_pubkey)
+        source_ata = get_associated_token_address(self.treasury_keypair.pubkey(), self.usdc_mint_pubkey)
+        destination_ata = self._get_or_create_associated_token_account(recipient_pubkey, self.usdc_mint_pubkey)
 
-        logger.info(f"Initiating transfer of {amount_lamports} lamports to {recipient_address_str}")
+        logger.info(f"Initiating USDC transfer of {amount_usd} USD ({amount_lamports} lamports) to {recipient_address_str}")
 
         try:
             params = TransferParams(
@@ -109,10 +112,10 @@ class SolanaService:
             instruction = spl_transfer(params)
             
             tx_signature = self._send_and_confirm_tx([instruction], [self.treasury_keypair])
-            logger.info(f"Transfer successful. Signature: {tx_signature}")
+            logger.info(f"USDC Transfer successful. Signature: {tx_signature}")
             return tx_signature
         except Exception as e:
-            logger.error(f"On-chain transfer failed: {e}")
+            logger.error(f"On-chain USDC transfer failed: {e}")
             raise
 
 solana_service = SolanaService()

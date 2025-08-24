@@ -14,7 +14,7 @@ from fastapi_mail import FastMail, MessageSchema, ConnectionConfig
 
 from app.db import crud, models, database
 from app.api.v1 import dependencies
-from app.schemas import User as UserSchema, AccountDetails, ContributionResponse, UserUpdate, ValuationMetrics, AiAnalysis, ChangePasswordRequest, WalletLinkRequest, ClaimTransactionResponse, SetWalletAddressRequest, UserDeletePayload, LeaderboardEntry, ContributionCreate
+from app.schemas import User as UserSchema, AccountDetails, ContributionResponse, UserUpdate, ValuationMetrics, AiAnalysis, ChangePasswordRequest, WalletLinkRequest, BatchPayoutResponse, SetWalletAddressRequest, UserDeletePayload, LeaderboardEntry, ContributionCreate
 from pydantic import BaseModel, constr
 from typing import List, Optional
 from app.core import security, config
@@ -24,10 +24,6 @@ from app.services.redis_service import redis_service
 
 class PaginatedContributions(BaseModel):
     items: List[ContributionResponse]
-    total: int
-
-class PaginatedClaims(BaseModel):
-    items: List[ClaimTransactionResponse]
     total: int
 
 router = APIRouter(prefix="/users", tags=["Users"])
@@ -119,7 +115,6 @@ async def read_users_me(request: Request, current_user: models.User = Depends(de
         "has_password": current_user.has_password,
         "github_id": current_user.github_id,
         "solana_address": current_user.solana_address,
-        "cooldown_until": current_user.cooldown_until,
         "has_beta_access": has_beta_access,
         "waitlist_position": waitlist_position,
         "reward_multiplier": current_user.reward_multiplier,
@@ -335,9 +330,6 @@ def get_my_all_contributions(
 ):
     contributions = crud.get_all_user_contributions(db, user_id=current_user.id)
     
-    lum_price_str = redis_service.get("token_price:lumen_usd")
-    lum_price = float(lum_price_str) if lum_price_str and float(lum_price_str) > 0 else 0.001
-
     response_list = []
     for contrib in contributions:
         valuation_data = {}
@@ -352,9 +344,6 @@ def get_my_all_contributions(
             if isinstance(data, dict):
                 valuation_data = data
         
-        reward_usd = contrib.reward_amount
-        reward_lum = reward_usd / lum_price if lum_price > 0 else 0
-
         manual_metrics = ValuationMetrics(
             total_lloc=valuation_data.get('total_lloc', 0),
             total_tokens=valuation_data.get('total_tokens', 0),
@@ -373,7 +362,7 @@ def get_my_all_contributions(
         response_list.append(ContributionResponse(
             id=contrib.id,
             created_at=contrib.created_at,
-            reward_amount=reward_lum,
+            reward_amount=contrib.reward_amount,
             status=contrib.status,
             valuation_details=valuation_data,
             manual_metrics=manual_metrics,
@@ -393,9 +382,6 @@ def get_my_contributions(
 ):
     contributions, total_count = crud.get_user_contributions_paginated(db, user_id=current_user.id, skip=skip, limit=limit)
     
-    lum_price_str = redis_service.get("token_price:lumen_usd")
-    lum_price = float(lum_price_str) if lum_price_str and float(lum_price_str) > 0 else 0.001
-
     response_list = []
     for contrib in contributions:
         valuation_data = {}
@@ -410,9 +396,6 @@ def get_my_contributions(
             if isinstance(data, dict):
                 valuation_data = data
         
-        reward_usd = contrib.reward_amount
-        reward_lum = reward_usd / lum_price if lum_price > 0 else 0
-
         manual_metrics = ValuationMetrics(
             total_lloc=valuation_data.get('total_lloc', 0),
             total_tokens=valuation_data.get('total_tokens', 0),
@@ -431,7 +414,7 @@ def get_my_contributions(
         response_list.append(ContributionResponse(
             id=contrib.id,
             created_at=contrib.created_at,
-            reward_amount=reward_lum,
+            reward_amount=contrib.reward_amount,
             status=contrib.status,
             valuation_details=valuation_data,
             manual_metrics=manual_metrics,
@@ -440,17 +423,17 @@ def get_my_contributions(
     
     return PaginatedContributions(items=response_list, total=total_count)
 
-@router.get("/me/claims", response_model=PaginatedClaims, dependencies=[Depends(dependencies.verify_beta_access)])
+@router.get("/me/payouts", response_model=List[BatchPayoutResponse], dependencies=[Depends(dependencies.verify_beta_access)])
 @limiter.limit("30/minute")
-def get_my_claims(
+def get_my_payouts(
     request: Request,
     current_user: models.User = Depends(dependencies.get_current_user),
     db: Session = Depends(database.get_db),
     skip: int = Query(0, ge=0),
-    limit: int = Query(10, le=100)
+    limit: int = Query(50, le=100)
 ):
-    claims, total_count = crud.get_user_claim_history(db, user_id=current_user.id, skip=skip, limit=limit)
-    return PaginatedClaims(items=claims, total=total_count)
+    payouts = db.query(models.BatchPayout).filter(models.BatchPayout.user_id == current_user.id).order_by(models.BatchPayout.created_at.desc()).offset(skip).limit(limit).all()
+    return payouts
 
 @router.get('/link-oauth/{provider}', dependencies=[Depends(dependencies.verify_beta_access)])
 async def link_oauth_account(

@@ -91,18 +91,13 @@ def get_recent_contributions(
     if cached_contributions:
         return JSONResponse(content=json.loads(cached_contributions))
     
-    lum_price_str = redis_service.get("token_price:lumen_usd")
-    lum_price = float(lum_price_str) if lum_price_str and float(lum_price_str) > 0 else 0.001
-
     recent_contributions_data = crud.get_recent_processed_contributions(db, limit=limit)
     response_list = []
     for contrib, display_name in recent_contributions_data:
-        reward_usd = contrib.reward_amount
-        reward_lum = reward_usd / lum_price if lum_price > 0 else 0
         response_list.append(PublicContributionResponse(
             id=contrib.id,
             created_at=contrib.created_at,
-            reward_amount=reward_lum,
+            reward_amount=contrib.reward_amount,
             user_display_name=display_name
         ))
 

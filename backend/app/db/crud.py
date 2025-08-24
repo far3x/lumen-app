@@ -37,9 +37,6 @@ def create_user(db: Session, user: schemas.UserCreate):
 
     db_user = models.User(email=user.email, hashed_password=hashed_password, display_name=display_name)
     
-    if config.settings.COOLDOWN_DAYS > 0:
-        db_user.cooldown_until = datetime.now(timezone.utc) + timedelta(days=config.settings.COOLDOWN_DAYS)
-    
     expires = timedelta(hours=24)
     verification_token = security.create_access_token(data={"sub": f"verify:{db_user.email}"}, expires_delta=expires)
     db_user.verification_token = verification_token
@@ -104,9 +101,6 @@ def create_oauth_user(db: Session, provider: str, user_info: dict):
     
     db_user = models.User(**user_data)
     
-    if config.settings.COOLDOWN_DAYS > 0:
-        db_user.cooldown_until = datetime.now(timezone.utc) + timedelta(days=config.settings.COOLDOWN_DAYS)
-
     db.add(db_user)
     db.commit()
     db.refresh(db_user)
@@ -138,7 +132,10 @@ def get_account_details(db: Session, user_id: int) -> Optional[schemas.AccountDe
     if not account:
         return None
     
-    last_claim_at = db.query(func.max(models.ClaimTransaction.created_at)).filter(models.ClaimTransaction.user_id == user_id).scalar()
+    last_claim_at = db.query(func.max(models.BatchPayout.created_at)).filter(
+        models.BatchPayout.user_id == user_id,
+        models.BatchPayout.status == 'COMPLETED'
+    ).scalar()
     
     return schemas.AccountDetails(
         usd_balance=account.usd_balance,

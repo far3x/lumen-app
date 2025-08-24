@@ -1,6 +1,7 @@
 from celery import Celery
 from kombu import Queue
 from app.core.config import settings
+from celery.schedules import crontab
 
 celery_app = Celery(
     "tasks",
@@ -23,10 +24,6 @@ task_routes = {
         'queue': 'default',
         'routing_key': 'task.default',
     },
-    'app.tasks.process_claim': {
-        'queue': 'high_priority',
-        'routing_key': 'task.high_priority',
-    },
     'send_contact_sales_email': {
         'queue': 'high_priority',
         'routing_key': 'task.high_priority',
@@ -39,12 +36,28 @@ task_routes = {
         'queue': 'high_priority',
         'routing_key': 'task.high_priority',
     },
+    'app.tasks.create_daily_payout_batch_task': {
+        'queue': 'high_priority',
+        'routing_key': 'task.high_priority',
+    },
+    'app.tasks.process_payout_batch': {
+        'queue': 'default',
+        'routing_key': 'task.default',
+    },
+    'app.tasks.reconcile_failed_payouts': {
+        'queue': 'default',
+        'routing_key': 'task.default',
+    },
 }
 
 celery_app.conf.beat_schedule = {
     'update-token-price-every-15-minutes': {
         'task': 'app.tasks.update_token_price_task',
         'schedule': 900.0,
+    },
+    'reconcile-failed-payouts-hourly': {
+        'task': 'app.tasks.reconcile_failed_payouts_task',
+        'schedule': 3600.0,
     },
 }
 

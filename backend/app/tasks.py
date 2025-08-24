@@ -2,6 +2,7 @@ import math
 import json
 import numpy as np
 import logging
+import time
 from app.core.celery_app import celery_app
 from app.core.config import settings
 from app.db.database import SessionLocal
@@ -16,7 +17,9 @@ from app.services.sanitization_service import sanitization_service
 from app.services.price_service import price_service
 import asyncio
 from fastapi_mail import MessageSchema
-from datetime import datetime
+from datetime import datetime, timezone
+from app.db.models import PayoutBatch, BatchPayout, Account
+from sqlalchemy import func
 
 logger = logging.getLogger(__name__)
 
@@ -96,55 +99,132 @@ def publish_contribution_update(db, contribution_id: int, user_id: int):
 
     publish_user_update(db, user_id, "contribution_update", new_payload)
 
-@celery_app.task(bind=True)
-def process_claim(self, user_id: int, claim_id: int):
+@celery_app.task(name="app.tasks.reconcile_failed_payouts_task")
+def reconcile_failed_payouts_task():
     db = SessionLocal()
     try:
-        user = crud.get_user(db, user_id=user_id)
-        if not user or not user.solana_address:
-            raise Exception("User or Solana address not found.")
-        
-        account = db.query(crud.models.Account).filter(crud.models.Account.user_id == user.id).first()
-        if not account or account.usd_balance <= 0:
-            raise Exception("No claimable balance.")
-            
-        claimable_usd = account.usd_balance
+        failed_payouts = db.query(BatchPayout).filter(BatchPayout.status == "FAILED").all()
+        if not failed_payouts:
+            logger.info("Reconciliation task: No failed payouts to process.")
+            return
 
-        lum_price_str = redis_service.r.get("token_price:lumen_usd")
-        if not lum_price_str or float(lum_price_str) <= 0:
-            raise Exception("Current token price is unavailable. Please try again shortly.")
-        
-        lum_price = float(lum_price_str)
-        amount_lumen = claimable_usd / lum_price
-        amount_lamports = int(amount_lumen * (10**9))
-        
-        tx_hash = solana_service.transfer_lum_tokens(
-            recipient_address_str=user.solana_address,
-            amount_lamports=amount_lamports
-        )
-        
-        account.usd_balance = 0.0
-        db.add(account)
-        db.commit()
-
-        crud.update_claim_transaction_hash(db, claim_id, tx_hash)
-        
-        updated_account_details = crud.get_account_details(db, user_id=user.id)
-        
-        publish_user_update(db, user_id, "claim_success", {
-            "message": f"Successfully claimed {amount_lumen:.4f} LUMEN.",
-            "transaction_hash": tx_hash,
-            "account": json.loads(updated_account_details.model_dump_json())
-        })
+        logger.info(f"Reconciliation task: Found {len(failed_payouts)} failed payouts to reconcile.")
+        for payout in failed_payouts:
+            account = db.query(Account).filter(Account.user_id == payout.user_id).first()
+            if account:
+                logger.warning(f"Refunding ${payout.amount_usd} to user {payout.user_id} for failed payout {payout.id}.")
+                account.usd_balance += payout.amount_usd
+                payout.status = "RECONCILED"
+                payout.error_message = f"Refunded to user balance on {datetime.now(timezone.utc)}. Original Error: {payout.error_message}"
+                db.commit()
+            else:
+                logger.error(f"Could not find account for user {payout.user_id} to refund failed payout {payout.id}.")
 
     except Exception as e:
-        logger.error(f"Claim processing failed for claim_id {claim_id}: {e}", exc_info=True)
-        publish_user_update(db, user_id, "claim_failed", {
-            "message": f"Claim failed: {str(e)}"
-        })
+        logger.error(f"Critical error during payout reconciliation: {e}", exc_info=True)
     finally:
         db.close()
 
+@celery_app.task(name="app.tasks.process_payout_batch")
+def process_payout_batch_task(batch_id: int):
+    db = SessionLocal()
+    try:
+        batch = db.query(PayoutBatch).filter(PayoutBatch.id == batch_id).first()
+        if not batch or batch.status != "CLOSED":
+            logger.error(f"Payout batch {batch_id} not found or not in CLOSED state.")
+            return
+
+        batch.status = "PROCESSING"
+        db.commit()
+
+        payouts_to_process = db.query(BatchPayout).filter(BatchPayout.batch_id == batch_id, BatchPayout.status == "PENDING").all()
+        
+        for i, payout in enumerate(payouts_to_process):
+            if i > 0:
+                time.sleep(1.2)
+
+            user = payout.user
+            if not user or not user.solana_address:
+                payout.status = "FAILED"
+                payout.error_message = "User or Solana address not found at time of processing."
+                db.commit()
+                continue
+            
+            try:
+                tx_hash = solana_service.transfer_usdc_tokens(
+                    recipient_address_str=user.solana_address,
+                    amount_usd=payout.amount_usd
+                )
+                payout.transaction_hash = tx_hash
+                payout.status = "COMPLETED"
+            except Exception as e:
+                logger.error(f"Failed to process payout {payout.id} for user {user.id}: {e}")
+                payout.status = "FAILED"
+                payout.error_message = str(e)
+            
+            db.commit()
+
+        batch.status = "COMPLETED"
+        db.commit()
+        logger.info(f"Successfully processed payout batch {batch_id}.")
+
+    except Exception as e:
+        logger.error(f"Critical error processing payout batch {batch_id}: {e}", exc_info=True)
+        batch.status = "FAILED"
+        db.commit()
+    finally:
+        db.close()
+
+
+@celery_app.task(name="app.tasks.create_daily_payout_batch_task")
+def create_daily_payout_batch_task():
+    db = SessionLocal()
+    try:
+        now = datetime.now(timezone.utc)
+        
+        open_batch = db.query(PayoutBatch).filter(PayoutBatch.status == "OPEN").first()
+        if not open_batch:
+            logger.warning("No open batch found. This should only happen on the first run. Creating a new one.")
+        else:
+            logger.info(f"Closing batch {open_batch.id}...")
+            open_batch.end_time = now
+            open_batch.status = "CLOSED"
+
+            users_to_pay = db.query(Account).filter(Account.usd_balance > 0).all()
+            
+            total_batch_amount = 0
+            if users_to_pay:
+                for account in users_to_pay:
+                    payout_amount = account.usd_balance
+                    total_batch_amount += payout_amount
+
+                    new_payout = BatchPayout(
+                        batch_id=open_batch.id,
+                        user_id=account.user_id,
+                        amount_usd=payout_amount
+                    )
+                    db.add(new_payout)
+                    
+                    account.usd_balance = 0.0
+                    db.add(account)
+
+            open_batch.total_amount_usd = total_batch_amount
+            db.commit()
+            
+            logger.info(f"Batch {open_batch.id} closed. Snapshotted {len(users_to_pay)} users for a total of ${total_batch_amount:.2f}.")
+
+            if total_batch_amount > 0:
+                process_payout_batch_task.delay(open_batch.id)
+
+        logger.info("Creating new OPEN batch for the next 24-hour cycle.")
+        new_batch = PayoutBatch(start_time=now, status="OPEN")
+        db.add(new_batch)
+        db.commit()
+
+    except Exception as e:
+        logger.error(f"Error in create_daily_payout_batch_task: {e}", exc_info=True)
+    finally:
+        db.close()
 
 @celery_app.task(bind=True)
 def process_contribution(self, user_id: int, codebase: str, contribution_db_id: int, source: str = 'cli'):

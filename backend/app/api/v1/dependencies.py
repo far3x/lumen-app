@@ -142,3 +142,10 @@ async def get_current_user_optional(request: Request, db: Session = Depends(get_
     user = await get_current_user_from_token_optional(token, db)
     request.state.user = user
     return user
+
+async def verify_dev_mode():
+    if not config.settings.DEV_MODE:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="This endpoint does not exist in production."
+        )

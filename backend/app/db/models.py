@@ -1,5 +1,5 @@
 import hashlib
-from sqlalchemy import Column, Integer, String, Float, ForeignKey, DateTime, Boolean, BigInteger, Text
+from sqlalchemy import Column, Integer, String, Float, ForeignKey, DateTime, Boolean, BigInteger, Text, Enum
 from sqlalchemy.orm import relationship
 from sqlalchemy.sql import func
 from sqlalchemy.dialects.postgresql import JSONB
@@ -34,11 +34,9 @@ class User(Base):
     deletion_token = Column(String, unique=True, nullable=True)
     deletion_token_expires = Column(Float, nullable=True)
     created_at = Column(DateTime(timezone=True), server_default=func.now())
-    cooldown_until = Column(DateTime(timezone=True), nullable=True)
     account = relationship("Account", back_populates="user", uselist=False, cascade="all, delete-orphan")
     personal_access_tokens = relationship("PersonalAccessToken", back_populates="user", cascade="all, delete-orphan")
     contributions = relationship("Contribution", back_populates="user")
-    claim_transactions = relationship("ClaimTransaction", back_populates="user", cascade="all, delete-orphan")
     feedback = relationship("Feedback", back_populates="user", cascade="all, delete-orphan")
     
     @hybrid_property
@@ -64,15 +62,6 @@ class Account(Base):
     usd_balance = Column(Float, default=0.0)
     total_usd_earned = Column(Float, default=0.0, nullable=False)
     user = relationship("User", back_populates="account")
-
-class ClaimTransaction(Base):
-    __tablename__ = "claim_transactions"
-    id = Column(Integer, primary_key=True, index=True)
-    user_id = Column(Integer, ForeignKey("users.id"), nullable=False)
-    amount_claimed = Column(Float, nullable=False)
-    transaction_hash = Column(String, nullable=False, index=True)
-    created_at = Column(DateTime(timezone=True), server_default=func.now())
-    user = relationship("User", back_populates="claim_transactions")
 
 class PersonalAccessToken(Base):
     __tablename__ = "personal_access_tokens"
@@ -162,3 +151,26 @@ class ApiKey(Base):
     last_used_at = Column(DateTime(timezone=True), nullable=True)
     is_active = Column(Boolean, default=True, nullable=False)
     company = relationship("Company", back_populates="api_keys")
+
+class PayoutBatch(Base):
+    __tablename__ = "payout_batches"
+    id = Column(Integer, primary_key=True, index=True)
+    start_time = Column(DateTime(timezone=True), server_default=func.now(), nullable=False)
+    end_time = Column(DateTime(timezone=True), nullable=True)
+    status = Column(Enum("OPEN", "CLOSED", "PROCESSING", "COMPLETED", name="batch_status_enum"), default="OPEN", nullable=False)
+    total_amount_usd = Column(Float, default=0.0)
+    payouts = relationship("BatchPayout", back_populates="batch", cascade="all, delete-orphan")
+
+class BatchPayout(Base):
+    __tablename__ = "batch_payouts"
+    id = Column(Integer, primary_key=True, index=True)
+    batch_id = Column(Integer, ForeignKey("payout_batches.id"), nullable=False)
+    user_id = Column(Integer, ForeignKey("users.id"), nullable=False)
+    amount_usd = Column(Float, nullable=False)
+    status = Column(Enum("PENDING", "COMPLETED", "FAILED", "RECONCILED", name="payout_status_enum"), default="PENDING", nullable=False)
+    transaction_hash = Column(String, nullable=True, index=True)
+    error_message = Column(Text, nullable=True)
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
+    
+    batch = relationship("PayoutBatch", back_populates="payouts")
+    user = relationship("User")

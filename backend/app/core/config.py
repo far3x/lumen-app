@@ -51,6 +51,7 @@ class AppSettings(BaseSettings):
     SOLANA_RPC_URL: str = os.getenv("SOLANA_RPC_URL")
     TREASURY_PRIVATE_KEY: str = os.getenv("TREASURY_PRIVATE_KEY")
     LUM_TOKEN_MINT_ADDRESS: str = os.getenv("LUM_TOKEN_MINT_ADDRESS")
+    USDC_TOKEN_MINT_ADDRESS: str = os.getenv("USDC_TOKEN_MINT_ADDRESS")
     
     COOLDOWN_DAYS: int = int(os.getenv("COOLDOWN_DAYS", "7"))
 
@@ -59,6 +60,8 @@ class AppSettings(BaseSettings):
     BETA_GENESIS_BONUS: float = float(os.getenv("BETA_GENESIS_BONUS", "1000.0"))
     
     BIRDEYE_API_KEY: str = os.getenv("BIRDEYE_API_KEY")
+
+    DEV_MODE: bool = os.getenv("DEV_MODE", "False").lower() in ("true", "1", "t")
 
 
 settings = AppSettings()

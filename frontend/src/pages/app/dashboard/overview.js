@@ -5,55 +5,25 @@ import { DateTime } from 'luxon';
 
 let chartInstance = null;
 
-function renderWalletSection(user, account) {
-    const claimableBalance = account?.lum_balance || 0;
+function renderNextPayoutCard(account) {
+    const pendingBalance = account?.usd_balance || 0;
     
-    let isClaimDisabled = !user?.solana_address || claimableBalance <= 0;
-    let cooldownMessage = '';
-
-    if (user && user.cooldown_until) {
-        const now = DateTime.utc();
-        const cooldownEnd = DateTime.fromISO(user.cooldown_until);
-        if (now < cooldownEnd) {
-            isClaimDisabled = true;
-            cooldownMessage = `Reward claims are disabled during the pre-launch beta phase.`;
-        }
-    }
-
-    const claimButtonHTML = `
-        <button id="claim-rewards-btn"
-                class="w-full md:w-auto px-8 py-3 font-bold bg-gradient-to-r from-accent-purple to-accent-pink text-white rounded-lg transition-all duration-300 hover:scale-105 hover:shadow-lg hover:shadow-accent-purple/30 hover:brightness-110 shrink-0
-                       ${isClaimDisabled ? 'opacity-50 cursor-not-allowed' : ''}"
-                ${isClaimDisabled ? 'disabled' : ''}>
-            Claim Rewards
-        </button>
-    `;
-
     return `
-    <div id="claim-button-area" class="mt-8 relative bg-surface p-8 rounded-xl border border-primary overflow-hidden shadow-2xl shadow-black/30">
+    <div id="next-payout-card" class="mt-8 relative bg-surface p-8 rounded-xl border border-primary overflow-hidden shadow-2xl shadow-black/30">
         <div class="absolute -right-10 -top-10 text-primary/10">
             <svg class="w-48 h-48" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" d="M21 12a2.25 2.25 0 0 0-2.25-2.25H15a3 3 0 1 1-6 0H5.25A2.25 2.25 0 0 0 3 12m18 0v6a2.25 2.25 0 0 1-2.25-2.25H5.25A2.25 2.25 0 0 1 3 18v-6m18 0V9M3 12V9m18 3a2.25 2.25 0 0 0-2.25-2.25H5.25A2.25 2.25 0 0 0 3 12m15-3a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" />
+                <path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
             </svg>
         </div>
-        <div class="relative z-10 flex flex-col md:flex-row items-start justify-between gap-6">
+        <div class="relative z-10 flex flex-col md:flex-row items-center justify-between gap-6">
             <div class="flex-grow text-center md:text-left">
-                <h3 class="text-2xl font-bold text-text-main">Claim Your Rewards</h3>
-                <p class="text-text-secondary mt-1">
-                    ${user?.solana_address ? 'Your rewards are ready to be claimed.' : 'Link your wallet in Settings to enable claims.'}
-                </p>
-                <p id="claim-rewards-btn-subtext" class="text-xs text-yellow-400 mt-2 h-4">${cooldownMessage}</p>
+                <h3 class="text-2xl font-bold text-text-main">Payout Batches</h3>
+                <p class="text-text-secondary mt-1 text-sm">Payouts are manually processed in batches approximately every 48 hours to ensure security and accuracy.</p>
             </div>
-            <div class="w-full md:w-auto flex flex-col items-center md:items-end">
-                <div class="text-center md:text-right">
-                    <p class="text-sm text-text-secondary">Claimable Balance</p>
-                    <p class="text-3xl font-bold pulse-text font-mono">${claimableBalance.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 4})}</p>
-                    <p id="overview-claimable-balance-usd" class="text-base font-medium text-text-secondary font-sans mt-1">≈ $0.00 USD</p>
-                    <p class="text-xs text-subtle italic mt-1">*USD value is based on the live market price.</p>
-                </div>
-                <div class="mt-4 w-full md:w-auto">
-                    ${claimButtonHTML}
-                </div>
+            <div class="w-full md:w-auto flex flex-col items-center md:items-end bg-primary p-6 rounded-lg">
+                <p class="text-sm text-text-secondary">Balance for Next Payout</p>
+                <p id="next-payout-balance" class="text-3xl font-bold text-white font-mono mt-1">$${pendingBalance.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 4})}</p>
+                <p class="text-xs text-subtle italic mt-1">This is your current pending USD balance.</p>
             </div>
         </div>
     </div>
@@ -130,7 +100,7 @@ export function initializeChart(contributions, timeRange) {
 
     chartInstance = new Chart(canvas, {
         type: 'line', data: { labels, datasets: [{
-            label: '$LUMEN Earned', data: dataPoints, borderColor: '#8A2BE2', backgroundColor: gradient,
+            label: 'USD Earned', data: dataPoints, borderColor: '#8A2BE2', backgroundColor: gradient,
             fill: true, tension: 0.4, pointBackgroundColor: '#E5E5E5', pointBorderColor: '#8A2BE2',
             pointRadius: 4, pointBorderWidth: 2, pointHoverRadius: 7, pointHoverBorderWidth: 2, pointHoverBackgroundColor: '#fff',
         }]},
@@ -141,7 +111,7 @@ export function initializeChart(contributions, timeRange) {
                 padding: 12, cornerRadius: 8, borderColor: '#3F3F4D', borderWidth: 1, boxPadding: 6,
                 titleFont: { family: 'Satoshi', weight: 'bold' }, bodyFont: { family: 'Satoshi' },
                 displayColors: false,
-                callbacks: { label: (c) => `+ ${c.parsed.y.toFixed(4)} $LUMEN` }
+                callbacks: { label: (c) => `+ $${c.parsed.y.toFixed(4)} USD` }
             }},
             scales: {
                 x: { grid: { color: 'rgba(63, 63, 77, 0.2)' }, ticks: { color: '#A3A3B2', font: { family: 'Satoshi' } } },
@@ -188,7 +158,7 @@ export function attachChartButtonListeners(contributions, onRangeChangeCallback)
 
 export function renderDashboardOverview(user, account, rank, totalContributions) {
     const isBannerDismissed = localStorage.getItem('lumen_prelaunch_banner_dismissed') === 'true';
-    const totalEarned = account?.total_lum_earned ?? 0;
+    const totalEarned = account?.total_usd_earned ?? 0;
 
     return `
         <div id="prelaunch-banner" class="relative bg-yellow-900/30 border border-yellow-500/30 text-yellow-200 px-6 py-4 rounded-lg mb-6 flex items-start gap-4 ${isBannerDismissed ? 'hidden' : ''}">
@@ -212,9 +182,9 @@ export function renderDashboardOverview(user, account, rank, totalContributions)
         <div class="mt-8 grid grid-cols-1 md:grid-cols-3 gap-6 animate-fade-in-up" style="animation-delay: 100ms;">
             <div class="md:col-span-3 bg-gradient-to-br from-accent-purple/80 to-accent-pink/80 p-6 rounded-xl text-white shadow-lg shadow-accent-purple/20">
                 <p class="text-sm font-medium text-purple-200">Total Earned (Lifetime)</p>
-                <p id="overview-total-balance" class="text-5xl font-bold mt-2">${totalEarned.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 4 })} $LUMEN</p>
-                <p id="overview-total-balance-usd" class="text-lg font-medium text-purple-200/80 mt-1">≈ $0.00 USD</p>
-                <p class="text-xs text-purple-300/70 italic mt-1">*USD value is based on the live market price.</p>
+                <p id="overview-total-balance-usd" class="text-5xl font-bold mt-2">$0.00</p>
+                <p id="overview-total-balance-lumen" class="text-lg font-medium text-purple-200/80 mt-1">≈ 0.00 $LUMEN</p>
+                <p class="text-xs text-purple-300/70 italic mt-1">*LUMEN value is an estimate based on live market price.</p>
             </div>
 
             ${renderStatCard('Global Rank', rank ? rank.toLocaleString() : 'N/A')}
@@ -223,7 +193,7 @@ export function renderDashboardOverview(user, account, rank, totalContributions)
         </div>
 
         <div class="animate-fade-in-up" style="animation-delay: 300ms;">
-             ${renderWalletSection(user, account)}
+             ${renderNextPayoutCard(account)}
         </div>
 
         <div class="animate-fade-in-up bg-surface p-6 rounded-xl border border-primary mt-6" style="animation-delay: 200ms;">

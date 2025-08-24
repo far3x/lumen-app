@@ -1,4 +1,4 @@
-import { getUser, getAccount, fetchContributions, logout, fetchAndStoreUser, fetchAndStoreAccount, isAuthenticated, fetchClaims, api as authApi, fetchAllContributions, setAccount, updateAllBalances } from '../../../lib/auth.js';
+import { getUser, getAccount, fetchContributions, logout, fetchAndStoreUser, fetchAndStoreAccount, isAuthenticated, fetchPayouts, api as authApi, fetchAllContributions, setAccount, updateAllBalances } from '../../../lib/auth.js';
 import { renderModal } from './utils.js';
 import { navigate } from '../../../router.js';
 import { renderDashboardOverview, initializeChart, attachChartButtonListeners } from './overview.js';
@@ -17,15 +17,14 @@ let dashboardState = {
     userRank: null,
     paginatedContributions: [],
     allUserContributions: [],
-    recentContributions: [],
-    allClaims: [],
+    allPayouts: [],
 };
 let activeTimeRange = 'all';
 
 function renderSidebar(activeTab, user) {
     const sidebarButtons = [
         { id: 'overview', label: 'Dashboard', icon: icons.dashboard },
-        { id: 'my-contributions', label: 'My Contributions', icon: icons.contributions },
+        { id: 'my-contributions', label: 'History', icon: icons.contributions },
         { id: 'web-contribute', label: 'Web Contribute', icon: icons.upload },
         { id: 'network-feed', label: 'My Activity', icon: icons.feed },
         { id: 'referral', label: 'Refer a Dev', icon: icons.referral },
@@ -79,32 +78,6 @@ function handleSidebarButtonClick(event) {
     window.history.pushState({}, '', newUrl.pathname + newUrl.search);
 }
 
-async function handleClaim(claimButton, user) {
-    const account = getAccount();
-    if (!account || account.lum_balance <= 0) return;
-
-    claimButton.disabled = true;
-    claimButton.innerHTML = `<span class="animate-spin inline-block w-5 h-5 border-2 border-transparent border-t-white rounded-full"></span> Claiming...`;
-
-    try {
-        await authApi.post('/rewards/claim');
-    } catch (error) {
-        const errorMessage = error.response?.data?.detail || "An unknown error occurred.";
-        const errorContent = `
-             <div class="text-center">
-                <div class="w-16 h-16 mx-auto mb-4 bg-red-900/50 text-red-300 rounded-full flex items-center justify-center">
-                    <svg class="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
-                </div>
-                <h3 class="font-bold text-lg text-white">Claim Request Failed</h3>
-                <p class="text-text-secondary mt-2">${errorMessage}</p>
-            </div>
-        `;
-        renderModal('Error', errorContent);
-        claimButton.disabled = false;
-        claimButton.innerHTML = 'Claim Rewards';
-    }
-}
-
 async function refreshDashboardData(isInitialLoad = false) {
     const dashboardContentArea = document.getElementById('dashboard-content-area');
 
@@ -117,7 +90,7 @@ async function refreshDashboardData(isInitialLoad = false) {
             fetchAndStoreAccount(),
             authApi.get('/users/me/rank'),
             fetchContributions(1, 10),
-            fetchClaims(1, 10),
+            fetchPayouts(1, 10),
             fetchAllContributions()
         ]);
 
@@ -130,7 +103,7 @@ async function refreshDashboardData(isInitialLoad = false) {
             contributionsState.isLastPage = (contributionsState.currentPage * 10) >= results[2].value.total;
         }
 
-        dashboardState.allClaims = results[3].status === 'fulfilled' ? results[3].value.items : [];
+        dashboardState.allPayouts = results[3].status === 'fulfilled' ? results[3].value : [];
         dashboardState.allUserContributions = results[4].status === 'fulfilled' ? results[4].value : [];
 
         const urlParams = new URLSearchParams(window.location.search);
@@ -180,43 +153,6 @@ function connectUserWebSocket() {
             document.dispatchEvent(new CustomEvent('contributionUpdate', { detail: data.payload.contribution }));
             if (data.payload.contribution.status === 'PROCESSED' || data.payload.contribution.status === 'REJECTED_NO_NEW_CODE') {
                 refreshDashboardData();
-            }
-        } else if (data.type === 'claim_success') {
-            await fetchAndStoreAccount();
-            updateAllBalances();
-            const txLink = `https://solscan.io/tx/${data.payload.transaction_hash}?cluster=devnet`;
-            const modalContent = `
-                <div class="text-center">
-                    <div class="w-16 h-16 mx-auto mb-4 bg-green-900/50 text-green-300 rounded-full flex items-center justify-center">
-                        <svg class="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
-                    </div>
-                    <h3 class="font-bold text-lg text-white">Claim Successful!</h3>
-                    <p class="text-text-secondary mt-2 mb-4">${data.payload.message}</p>
-                    <a href="${txLink}" target="_blank" rel="noopener noreferrer" class="font-medium text-accent-cyan hover:underline">View Transaction</a>
-                </div>
-            `;
-            renderModal('Rewards Claimed', modalContent);
-            const claimButton = document.getElementById('claim-rewards-btn');
-            if (claimButton) {
-                claimButton.disabled = false;
-                claimButton.innerHTML = 'Claim Rewards';
-            }
-        } else if (data.type === 'claim_failed') {
-            updateAllBalances();
-            const modalContent = `
-                 <div class="text-center">
-                    <div class="w-16 h-16 mx-auto mb-4 bg-red-900/50 text-red-300 rounded-full flex items-center justify-center">
-                        <svg class="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
-                    </div>
-                    <h3 class="font-bold text-lg text-white">Claim Failed</h3>
-                    <p class="text-text-secondary mt-2">${data.payload.message}</p>
-                </div>
-            `;
-            renderModal('Error', modalContent);
-            const claimButton = document.getElementById('claim-rewards-btn');
-            if (claimButton) {
-                claimButton.disabled = false;
-                claimButton.innerHTML = 'Claim Rewards';
             }
         }
     };
@@ -268,7 +204,7 @@ function loadContent(tabId) {
             contentHTML = renderWebContributePage(dashboardState);
             break;
         case 'network-feed':
-            contentHTML = renderRecentActivityPage(dashboardState.paginatedContributions, dashboardState.allClaims);
+            contentHTML = renderRecentActivityPage(dashboardState.paginatedContributions, dashboardState.allPayouts);
             break;
         case 'referral':
             contentHTML = renderReferralPage();
@@ -289,10 +225,6 @@ function loadContent(tabId) {
             activeTimeRange = newRange;
             initializeChart(dashboardState.allUserContributions, newRange);
         });
-        const claimButton = document.getElementById('claim-rewards-btn');
-        if (claimButton) {
-            claimButton.addEventListener('click', () => handleClaim(claimButton, dashboardState.user));
-        }
         updateAllBalances();
     }
     if (activeTabForRender === 'my-contributions') attachContributionPageListeners(dashboardState);

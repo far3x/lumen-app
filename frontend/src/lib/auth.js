@@ -165,8 +165,8 @@ export const fetchAllContributions = async () => {
     return response.data;
 };
 
-export const fetchClaims = async (page = 1, limit = 10) => {
-    const response = await api.get(`/users/me/claims?skip=${(page - 1) * limit}&limit=${limit}`);
+export const fetchPayouts = async (page = 1, limit = 50) => {
+    const response = await api.get(`/users/me/payouts?skip=${(page - 1) * limit}&limit=${limit}`);
     return response.data;
 };
 
@@ -194,75 +194,26 @@ export async function updateAllBalances() {
         console.warn("Could not fetch live token price, using fallback.");
     }
 
-    const claimableBalanceUSD = account.usd_balance ?? 0;
-    const claimableBalanceLUM = claimableBalanceUSD / currentPrice;
+    const pendingPayoutUSD = account.usd_balance ?? 0;
     const lifetimeBalanceUSD = account.total_usd_earned ?? 0;
     const lifetimeBalanceLUM = lifetimeBalanceUSD / currentPrice;
     
     document.querySelectorAll('.navbar-user-balance').forEach(el => {
-        el.textContent = `${claimableBalanceLUM.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 4 })} $LUMEN`;
+        el.textContent = `$${pendingPayoutUSD.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
     });
     
-    const overviewLifetimeEl = document.getElementById('overview-total-balance');
-    if (overviewLifetimeEl) {
-        overviewLifetimeEl.textContent = `${lifetimeBalanceLUM.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 4 })} $LUMEN`;
-    }
-
-    const overviewTotalUsdEl = document.getElementById('overview-total-balance-usd');
-    if (overviewTotalUsdEl) {
-        overviewTotalUsdEl.textContent = `≈ $${lifetimeBalanceUSD.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })} USD`;
-    }
-
-    const overviewClaimableEl = document.querySelector('#claim-button-area .pulse-text');
-    if (overviewClaimableEl) {
-        overviewClaimableEl.textContent = claimableBalanceLUM.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 4});
+    const overviewLifetimeUsdEl = document.getElementById('overview-total-balance-usd');
+    if (overviewLifetimeUsdEl) {
+        overviewLifetimeUsdEl.textContent = `$${lifetimeBalanceUSD.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
     }
     
-    const overviewClaimableUsdEl = document.getElementById('overview-claimable-balance-usd');
-    if (overviewClaimableUsdEl) {
-        overviewClaimableUsdEl.textContent = `≈ $${(claimableBalanceUSD).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })} USD`;
+    const overviewLifetimeLumenEl = document.getElementById('overview-total-balance-lumen');
+    if (overviewLifetimeLumenEl) {
+        overviewLifetimeLumenEl.textContent = `≈ ${lifetimeBalanceLUM.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })} $LUMEN`;
     }
-    
-    const claimButton = document.getElementById('claim-rewards-btn');
-    if(claimButton) {
-        const subtextEl = document.getElementById('claim-rewards-btn-subtext');
-        
-        if (user.cooldown_until) {
-            const now = DateTime.utc();
-            const cooldownEnd = DateTime.fromISO(user.cooldown_until);
-            if (now < cooldownEnd) {
-                claimButton.disabled = true;
-                claimButton.classList.add('opacity-50', 'cursor-not-allowed');
-                const remaining = cooldownEnd.diff(now, ['days', 'hours']).normalize();
-                if (subtextEl) subtextEl.textContent = `New account cooldown. You can claim in ${remaining.toFormat("d 'days,' h 'hours'")}.`;
-                return;
-            }
-        }
-        
-        const isWalletLinked = !!user.solana_address;
-        if (!isWalletLinked || claimableBalanceLUM <= 0) {
-            claimButton.disabled = true;
-            claimButton.classList.add('opacity-50', 'cursor-not-allowed');
-            if (subtextEl) subtextEl.textContent = '';
-            return;
-        }
 
-        const lastClaimTimestamp = account.last_claim_at ? new Date(account.last_claim_at).getTime() : 0;
-        const cooldown = 24 * 60 * 60 * 1000;
-        const now = Date.now();
-        const timeSinceLastClaim = now - lastClaimTimestamp;
-
-        if (lastClaimTimestamp !== 0 && timeSinceLastClaim < cooldown) {
-            claimButton.disabled = true;
-            claimButton.classList.add('opacity-50', 'cursor-not-allowed');
-            const remainingTime = cooldown - timeSinceLastClaim;
-            const hours = Math.floor(remainingTime / (1000 * 60 * 60));
-            const minutes = Math.floor((remainingTime % (1000 * 60 * 60)) / (1000 * 60));
-            if (subtextEl) subtextEl.textContent = `You can claim again in ${hours}h ${minutes}m.`;
-        } else {
-            claimButton.disabled = false;
-            claimButton.classList.remove('opacity-50', 'cursor-not-allowed');
-            if (subtextEl) subtextEl.textContent = '';
-        }
+    const nextPayoutBalanceEl = document.getElementById('next-payout-balance');
+    if(nextPayoutBalanceEl) {
+        nextPayoutBalanceEl.textContent = `$${pendingPayoutUSD.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 4 })}`;
     }
 }

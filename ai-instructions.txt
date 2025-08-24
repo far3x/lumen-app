@@ -22,6 +22,8 @@ then dbeaver login
 to access the db locally:
 podman compose -f docker-compose.dev.yml exec db psql -U lumen_user -d lumen_exchange
 
+to run batch:
+doppler run -- docker compose exec worker_default celery -A app.core.celery_app.celery_app call app.tasks.create_daily_payout_batch_task
 
 GEMINI PLEASE READ THIS - AI INSTRUCTIONS HERE - PLEASE READ !!
 
