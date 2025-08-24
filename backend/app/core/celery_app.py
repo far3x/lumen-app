@@ -24,11 +24,11 @@ task_routes = {
         'queue': 'default',
         'routing_key': 'task.default',
     },
-    'send_contact_sales_email': {
+    'app.tasks.send_contact_sales_email_task': {
         'queue': 'high_priority',
         'routing_key': 'task.high_priority',
     },
-    'send_business_verification_email': {
+    'app.tasks.send_business_verification_email_task': {
         'queue': 'high_priority',
         'routing_key': 'task.high_priority',
     },
@@ -45,6 +45,10 @@ task_routes = {
         'routing_key': 'task.default',
     },
     'app.tasks.reconcile_failed_payouts': {
+        'queue': 'default',
+        'routing_key': 'task.default',
+    },
+    'app.tasks.recalculate_network_stats_task': {
         'queue': 'default',
         'routing_key': 'task.default',
     },

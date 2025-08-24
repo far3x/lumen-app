@@ -75,7 +75,7 @@ async def verify_recaptcha(token: str):
             raise HTTPException(status_code=400, detail="Invalid reCAPTCHA token.")
 
 @router.post("/register", status_code=status.HTTP_201_CREATED)
-@limiter.limit("1/day", key_func=get_visitor_id_for_rate_limit)
+@limiter.limit("3/day", key_func=get_visitor_id_for_rate_limit)
 async def register_user(request: Request, user: UserCreate, background_tasks: BackgroundTasks, db: Session = Depends(database.get_db)):
     await verify_recaptcha(user.recaptcha_token)
 

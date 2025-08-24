@@ -6,7 +6,7 @@ import time
 from app.core.celery_app import celery_app
 from app.core.config import settings
 from app.db.database import SessionLocal
-from app.db import crud
+from app.db import crud, models
 from app.services.valuation import hybrid_valuation_service
 from app.services.embedding import embedding_service
 from app.services.redis_service import redis_service
@@ -28,6 +28,78 @@ NEAR_PERFECT_SIMILARITY_THRESHOLD = 0.999
 DISTANCE_UPDATE_THRESHOLD = 1 - SIMILARITY_UPDATE_THRESHOLD
 NEAR_PERFECT_DISTANCE_THRESHOLD = 1 - NEAR_PERFECT_SIMILARITY_THRESHOLD
 
+@celery_app.task(name="app.tasks.recalculate_network_stats_task")
+def recalculate_network_stats_task():
+    logger.info("Starting manual recalculation of all network statistics...")
+    db = SessionLocal()
+    try:
+        stats = db.query(models.NetworkStats).first()
+        if not stats:
+            stats = models.NetworkStats()
+            db.add(stats)
+            logger.info("No existing network stats found. Created new record.")
+        
+        # Reset all stats to their initial default values
+        logger.info("Resetting current network stats to zero/defaults...")
+        stats.total_usd_distributed = 0.0
+        stats.total_contributions = 0
+        stats.total_lloc = 0
+        stats.total_tokens = 0
+        stats.mean_complexity = 5.0
+        stats.m2_complexity = 0.0
+        stats.variance_complexity = 4.0
+        stats.std_dev_complexity = 2.0
+        stats.mean_quality = 0.5
+        stats.m2_quality = 0.0
+        stats.variance_quality = 0.25
+        stats.std_dev_quality = 0.5
+        db.commit()
+
+        all_contributions = db.query(models.Contribution).filter(
+            models.Contribution.status == "PROCESSED",
+            models.Contribution.reward_amount > 0
+        ).order_by(models.Contribution.created_at.asc()).all()
+
+        logger.info(f"Found {len(all_contributions)} processed contributions to recalculate.")
+
+        for i, contribution in enumerate(all_contributions):
+            details = json.loads(contribution.valuation_results) if isinstance(contribution.valuation_results, str) else contribution.valuation_results
+            
+            stats.total_usd_distributed += contribution.reward_amount
+            stats.total_lloc += details.get("total_lloc", 0)
+            stats.total_tokens += details.get("total_tokens", 0)
+            
+            n = i
+            
+            complexity_score = details.get("avg_complexity", 0.0)
+            delta_complexity = complexity_score - stats.mean_complexity
+            stats.mean_complexity += delta_complexity / (n + 1)
+            delta2_complexity = complexity_score - stats.mean_complexity
+            stats.m2_complexity += delta_complexity * delta2_complexity
+            
+            quality_score = details.get("ai_weighted_multiplier", 0.0)
+            delta_quality = quality_score - stats.mean_quality
+            stats.mean_quality += delta_quality / (n + 1)
+            delta2_quality = quality_score - stats.mean_quality
+            stats.m2_quality += delta_quality * delta2_quality
+
+        stats.total_contributions = len(all_contributions)
+        n_final = stats.total_contributions
+        if n_final > 1:
+            stats.variance_complexity = stats.m2_complexity / (n_final -1)
+            stats.std_dev_complexity = stats.variance_complexity ** 0.5
+            stats.variance_quality = stats.m2_quality / (n_final -1)
+            stats.std_dev_quality = stats.variance_quality ** 0.5
+
+        db.commit()
+        logger.info("Successfully recalculated and saved all network statistics.")
+
+    except Exception as e:
+        logger.error(f"Critical error during network stats recalculation: {e}", exc_info=True)
+        db.rollback()
+    finally:
+        db.close()
+
 @celery_app.task(name="app.tasks.update_token_price_task")
 def update_token_price_task():
     logger.info("Running scheduled task to update LUMEN price...")
@@ -41,26 +113,14 @@ def update_token_price_task():
     except Exception as e:
         logger.error(f"Error in update_token_price_task: {e}", exc_info=True)
 
-@celery_app.task(name="send_contact_sales_email")
+@celery_app.task
 def send_contact_sales_email_task(name: str, email: str):
     asyncio.run(email_service.send_contact_sales_confirmation(name, email))
     logger.info(f"Contact sales confirmation email sent to {email}")
 
-@celery_app.task(name="send_business_verification_email")
+@celery_app.task
 def send_business_verification_email_task(email: str, token: str):
-    verification_link = f"{settings.FRONTEND_URL}/business/verify?token={token}"
-    template_body = {
-        "verification_link": verification_link,
-        "year": datetime.now().year,
-        "logo_url": settings.PUBLIC_LOGO_URL
-    }
-    message = MessageSchema(
-        subject="Lumen Protocol: Verify Your Business Account",
-        recipients=[email],
-        template_body=template_body,
-        subtype="html"
-    )
-    asyncio.run(email_service.fm.send_message(message, template_name="business_verification_email.html"))
+    asyncio.run(email_service.send_business_verification_email(email, token))
     logger.info(f"Business verification email sent to {email}")
 
 def publish_user_update(db, user_id: int, event_type: str, payload: dict):
@@ -336,8 +396,19 @@ def process_contribution(self, user_id: int, codebase: str, contribution_db_id: 
             crud.apply_reward_to_user(db, user, total_reward_for_contribution)
             
             avg_complexity = valuation_details.get("avg_complexity", 0.0)
-            if avg_complexity > 0 :
-                crud.update_network_stats(db, avg_complexity, total_reward_for_contribution)
+            quality_score = valuation_details.get("ai_weighted_multiplier", 0.0)
+            total_lloc = valuation_details.get("total_lloc", 0)
+            total_tokens = valuation_details.get("total_tokens", 0)
+
+            if avg_complexity > 0 or quality_score > 0:
+                crud.update_network_stats(
+                    db,
+                    avg_complexity,
+                    total_reward_for_contribution,
+                    total_lloc,
+                    total_tokens,
+                    quality_score
+                )
             
             contribution_record.reward_amount = base_reward_usd
             contribution_record.content_embedding = new_embedding

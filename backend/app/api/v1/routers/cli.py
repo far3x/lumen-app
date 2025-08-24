@@ -10,7 +10,7 @@ from app.db.database import SessionLocal
 from app.schemas import DeviceAuthResponse, Token, ContributionCreate, ContributionStatus, ContributionCliResponse
 from app.services.redis_service import redis_service
 from app.api.v1 import dependencies
-from app.tasks import process_contribution, create_daily_payout_batch_task, reconcile_failed_payouts_task
+from app.tasks import process_contribution, create_daily_payout_batch_task, reconcile_failed_payouts_task, recalculate_network_stats_task
 from app.core.limiter import limiter
 from typing import List, Optional
 from datetime import datetime, timezone, timedelta
@@ -162,3 +162,8 @@ async def trigger_payout_batch(request: Request):
 async def trigger_reconciliation(request: Request):
     task = reconcile_failed_payouts_task.delay()
     return {"message": "Failed payout reconciliation task has been triggered.", "task_id": task.id}
+
+@router.post("/trigger-recalculate-stats", status_code=status.HTTP_202_ACCEPTED, dependencies=[Depends(dependencies.verify_dev_mode)])
+async def trigger_recalculate_stats(request: Request):
+    task = recalculate_network_stats_task.delay()
+    return {"message": "Network stats recalculation task has been triggered.", "task_id": task.id}
