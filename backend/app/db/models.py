@@ -162,6 +162,7 @@ class ApiKey(Base):
     last_used_at = Column(DateTime(timezone=True), nullable=True)
     is_active = Column(Boolean, default=True, nullable=False)
     company = relationship("Company", back_populates="api_keys")
+    usage_events = relationship("ApiKeyUsageEvent", back_populates="api_key", cascade="all, delete-orphan")
 
 class PayoutBatch(Base):
     __tablename__ = "payout_batches"
@@ -195,3 +196,13 @@ class UnlockedContribution(Base):
     
     company = relationship("Company", back_populates="unlocked_contributions")
     contribution = relationship("Contribution")
+
+class ApiKeyUsageEvent(Base):
+    __tablename__ = "api_key_usage_events"
+    id = Column(Integer, primary_key=True, index=True)
+    api_key_id = Column(Integer, ForeignKey("api_keys.id", ondelete="CASCADE"), nullable=False)
+    company_id = Column(Integer, ForeignKey("companies.id", ondelete="CASCADE"), nullable=False)
+    tokens_used = Column(Integer, nullable=False)
+    created_at = Column(DateTime(timezone=True), server_default=func.now(), index=True)
+
+    api_key = relationship("ApiKey", back_populates="usage_events")

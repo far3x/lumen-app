@@ -10,6 +10,7 @@ import { renderDashboardLayout } from './pages/app/layout.js';
 import { renderHeader as renderMarketingHeader } from './components/header.js';
 import { renderFooter as renderMarketingFooter } from './components/footer.js';
 import { isAuthenticated } from './lib/auth.js';
+import { stateService } from './lib/state.js';
 
 const app = document.getElementById('app');
 const headerContainer = document.getElementById('header-container');
@@ -39,6 +40,7 @@ export const navigate = (path) => {
 };
 
 const handleLocation = async () => {
+    stateService.init();
     const path = window.location.pathname;
     const isAppRoute = appRouteRegex.test(path);
 
@@ -49,7 +51,8 @@ const handleLocation = async () => {
             navigate('/login');
             return;
         }
-        app.className = 'bg-app-bg text-app-text-secondary font-sans antialiased';
+        await stateService.fetchDashboardStats();
+        app.className = 'bg-app-bg text-text-body font-sans antialiased';
         headerContainer.innerHTML = '';
         footerContainer.innerHTML = '';
         contentContainer.className = '';

@@ -42,18 +42,14 @@ def get_leaderboard(
     if cached_leaderboard:
         return JSONResponse(content=json.loads(cached_leaderboard))
     
-    lum_price_str = redis_service.get("token_price:lumen_usd")
-    lum_price = float(lum_price_str) if lum_price_str and float(lum_price_str) > 0 else 0.001
-
     top_users_data = crud.get_leaderboard(db, skip=0, limit=5)
     
     top_5_entries = []
     for rank, (user, total_usd_earned) in enumerate(top_users_data, start=1):
-        total_lum_earned = total_usd_earned / lum_price if lum_price > 0 else 0
         top_5_entries.append(LeaderboardEntry(
             rank=rank,
             display_name=user.display_name,
-            total_lum_earned=total_lum_earned
+            total_usd_earned=total_usd_earned
         ))
 
     current_user_rank_entry = None
@@ -61,11 +57,10 @@ def get_leaderboard(
         user_rank_data = crud.get_user_rank(db, user_id=current_user.id)
         if user_rank_data:
             total_usd_earned = user_rank_data.total_usd_earned
-            total_lum_earned = total_usd_earned / lum_price if lum_price > 0 else 0
             current_user_rank_entry = LeaderboardEntry(
                 rank=user_rank_data.rank,
                 display_name=user_rank_data.display_name,
-                total_lum_earned=total_lum_earned
+                total_usd_earned=total_usd_earned
             )
     
     response_data = LeaderboardResponse(

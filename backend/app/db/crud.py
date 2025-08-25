@@ -3,7 +3,7 @@ import json
 import re
 import secrets
 from sqlalchemy.orm import Session
-from sqlalchemy import func, text, case
+from sqlalchemy import func, text, case, and_
 from fastapi import HTTPException, status
 from typing import Optional
 from datetime import datetime, timedelta, timezone
@@ -252,7 +252,11 @@ def get_leaderboard(db: Session, skip: int = 0, limit: int = 100):
 def get_recent_processed_contributions(db: Session, limit: int = 10):
     query = db.query(models.Contribution, models.User.display_name)\
              .join(models.User)\
-             .filter(models.Contribution.status == "PROCESSED", models.User.is_in_leaderboard == True)
+             .filter(
+                models.Contribution.status == "PROCESSED", 
+                models.User.is_in_leaderboard == True,
+                models.User.is_verified == True
+             )
 
     if config.settings.BETA_MODE_ENABLED:
         query = query.filter(models.User.id <= config.settings.BETA_MAX_USERS)
@@ -391,13 +395,23 @@ def revoke_api_key(db: Session, key_id: int, company_id: int):
     api_key.is_active = False
     db.commit()
 
-def search_contributions(db: Session, company_id: int, limit: int) -> list[dict]:
+def search_contributions(db: Session, company_id: int, limit: int, **kwargs) -> list[dict]:
     unlocked_subquery = db.query(models.UnlockedContribution.contribution_id).filter(models.UnlockedContribution.company_id == company_id).subquery()
     
-    results = db.query(
+    query = db.query(
         models.Contribution,
         case((models.Contribution.id.in_(unlocked_subquery), True), else_=False).label("is_unlocked")
-    ).filter(models.Contribution.status == "PROCESSED").order_by(func.random()).limit(limit).all()
+    ).filter(models.Contribution.status == "PROCESSED")
+
+    # Add dynamic filters from kwargs
+    if kwargs.get('min_clarity') is not None:
+        query = query.filter(models.Contribution.valuation_results['project_clarity_score'].astext.cast(sa.Float) >= kwargs['min_clarity'])
+    if kwargs.get('min_arch') is not None:
+        query = query.filter(models.Contribution.valuation_results['architectural_quality_score'].astext.cast(sa.Float) >= kwargs['min_arch'])
+    if kwargs.get('min_quality') is not None:
+        query = query.filter(models.Contribution.valuation_results['code_quality_score'].astext.cast(sa.Float) >= kwargs['min_quality'])
+    
+    results = query.order_by(func.random()).limit(limit).all()
 
     previews = []
     for contrib, is_unlocked in results:
@@ -417,7 +431,7 @@ def search_contributions(db: Session, company_id: int, limit: int) -> list[dict]
         })
     return previews
 
-def unlock_contribution(db: Session, company_id: int, contribution_id: int) -> models.Contribution:
+def unlock_contribution(db: Session, company_id: int, contribution_id: int, api_key_id: int) -> models.Contribution:
     company = db.query(models.Company).filter(models.Company.id == company_id).first()
     contribution = db.query(models.Contribution).filter(models.Contribution.id == contribution_id).first()
 
@@ -438,6 +452,14 @@ def unlock_contribution(db: Session, company_id: int, contribution_id: int) -> m
     
     new_unlock = models.UnlockedContribution(company_id=company_id, contribution_id=contribution_id)
     db.add(new_unlock)
+
+    usage_event = models.ApiKeyUsageEvent(
+        api_key_id=api_key_id,
+        company_id=company_id,
+        tokens_used=token_cost
+    )
+    db.add(usage_event)
+
     db.commit()
     db.refresh(company)
 
@@ -448,3 +470,111 @@ def get_unlocked_contribution_content(db: Session, company_id: int, contribution
     if unlocked:
         return unlocked.contribution
     return None
+
+def get_dashboard_stats(db: Session, company_id: int):
+    company = db.query(models.Company).filter(models.Company.id == company_id).first()
+    if not company:
+        raise HTTPException(status_code=404, detail="Company not found")
+    
+    active_api_key_count = db.query(models.ApiKey).filter(
+        models.ApiKey.company_id == company_id, models.ApiKey.is_active == True
+    ).count()
+
+    team_member_count = db.query(models.BusinessUser).filter(
+        models.BusinessUser.company_id == company_id
+    ).count()
+
+    return {
+        "token_balance": company.token_balance,
+        "current_plan": company.plan,
+        "active_api_key_count": active_api_key_count,
+        "team_member_count": team_member_count
+    }
+
+def get_usage_stats_by_day(db: Session, company_id: int, start_date: datetime):
+    results = db.query(
+        func.date(models.ApiKeyUsageEvent.created_at).label('date'),
+        func.sum(models.ApiKeyUsageEvent.tokens_used).label('total_tokens')
+    ).filter(
+        models.ApiKeyUsageEvent.company_id == company_id,
+        models.ApiKeyUsageEvent.created_at >= start_date
+    ).group_by(
+        func.date(models.ApiKeyUsageEvent.created_at)
+    ).order_by(
+        func.date(models.ApiKeyUsageEvent.created_at)
+    ).all()
+    return [{"date": row.date, "tokens_used": row.total_tokens} for row in results]
+
+def get_recently_unlocked_contributions(db: Session, company_id: int, limit: int = 5):
+    results = db.query(models.UnlockedContribution)\
+        .filter(models.UnlockedContribution.company_id == company_id)\
+        .order_by(models.UnlockedContribution.unlocked_at.desc())\
+        .limit(limit).all()
+    
+    details = []
+    for unlock in results:
+        contrib = unlock.contribution
+        valuation = json.loads(contrib.valuation_results) if isinstance(contrib.valuation_results, str) else contrib.valuation_results
+        details.append({
+            "id": contrib.id,
+            "unlocked_at": unlock.unlocked_at,
+            "language": next(iter(valuation.get("language_breakdown", {"Unknown": 0})), "Unknown"),
+            "tokens": valuation.get("total_tokens", 0),
+            "quality_score": valuation.get("code_quality_score", 0) * 10
+        })
+    return details
+
+def get_team_members(db: Session, company_id: int):
+    return db.query(models.BusinessUser).filter(models.BusinessUser.company_id == company_id).order_by(models.BusinessUser.created_at).all()
+
+def create_invited_business_user(db: Session, invite_data: business_schemas.InviteCreate, company: models.Company):
+    # For invited users, generate a temporary random password. They would reset this via an email link.
+    temp_password = secrets.token_urlsafe(16)
+    hashed_password = security.get_password_hash(temp_password)
+
+    db_user = models.BusinessUser(
+        email=invite_data.email,
+        hashed_password=hashed_password,
+        full_name=invite_data.full_name,
+        role=invite_data.role,
+        company_id=company.id,
+        is_verified=True # Invited users are implicitly verified by an admin.
+    )
+    db.add(db_user)
+    db.commit()
+    db.refresh(db_user)
+    return db_user
+
+def remove_team_member(db: Session, user_id: int, company_id: int):
+    user_to_delete = db.query(models.BusinessUser).filter(
+        models.BusinessUser.id == user_id,
+        models.BusinessUser.company_id == company_id
+    ).first()
+    
+    if not user_to_delete:
+        raise HTTPException(status_code=404, detail="Team member not found in this company.")
+    
+    db.delete(user_to_delete)
+    db.commit()
+
+def update_company_profile(db: Session, company: models.Company, company_data: business_schemas.CompanyUpdate):
+    update_data = company_data.model_dump(exclude_unset=True)
+    for key, value in update_data.items():
+        setattr(company, key, value)
+    db.add(company)
+    db.commit()
+    db.refresh(company)
+    return company
+
+def update_business_user_profile(db: Session, user: models.BusinessUser, user_data: business_schemas.BusinessUserUpdate):
+    update_data = user_data.model_dump(exclude_unset=True)
+    for key, value in update_data.items():
+        setattr(user, key, value)
+    db.add(user)
+    db.commit()
+    db.refresh(user)
+    return user
+
+def update_api_key_last_used(db: Session, api_key_id: int):
+    db.query(models.ApiKey).filter(models.ApiKey.id == api_key_id).update({"last_used_at": datetime.now(timezone.utc)})
+    db.commit()

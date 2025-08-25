@@ -157,7 +157,7 @@ class ContributionCliResponse(BaseModel):
 class LeaderboardEntry(BaseModel):
     rank: int
     display_name: str
-    total_lum_earned: float
+    total_usd_earned: float 
 
     class Config:
         from_attributes = True

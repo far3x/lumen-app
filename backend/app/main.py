@@ -39,7 +39,12 @@ app.add_middleware(SlowAPIMiddleware)
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=[settings.FRONTEND_URL, "https://docs.lumen.onl", "http://localhost:5174", "https://business.lumen.onl"],
+    allow_origins=[
+        settings.FRONTEND_URL,
+        settings.BUSINESS_FRONTEND_URL,
+        "https://business.lumen.onl",
+        "https://docs.lumen.onl"
+    ],
     allow_credentials=True,
     allow_methods=["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
     allow_headers=["Authorization", "Content-Type", "X-Lumen-Challenge", "X-Lumen-Signature", "X-Lumen-Timestamp", "X-Visitor-ID"],
