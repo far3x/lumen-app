@@ -1,6 +1,6 @@
 from pydantic import BaseModel, EmailStr, Field
 from typing import Optional, List
-from datetime import datetime
+from datetime import datetime, date
 
 class BusinessUserCreate(BaseModel):
     full_name: str = Field(..., min_length=2)
@@ -75,7 +75,6 @@ class FullContribution(BaseModel):
     id: int
     created_at: datetime
     raw_content: str
-    # You can add more detailed valuation metrics here if needed
 
 class ContributionSearchResult(BaseModel):
     keywords: Optional[str] = None
@@ -84,3 +83,47 @@ class ContributionSearchResult(BaseModel):
     min_quality: Optional[float] = Field(None, ge=0, le=1)
     languages: Optional[List[str]] = None
     limit: int = 20
+
+class DashboardStats(BaseModel):
+    token_balance: int
+    current_plan: str
+    active_api_key_count: int
+    team_member_count: int
+
+class UsageDataPoint(BaseModel):
+    date: date
+    tokens_used: int
+
+class UnlockedContributionDetail(BaseModel):
+    id: int
+    unlocked_at: datetime
+    language: str
+    tokens: int
+    quality_score: float
+
+    class Config:
+        from_attributes = True
+
+class TeamMember(BaseModel):
+    id: int
+    full_name: str
+    email: EmailStr
+    role: str
+    created_at: datetime
+
+    class Config:
+        from_attributes = True
+
+class InviteCreate(BaseModel):
+    email: EmailStr
+    full_name: str
+    role: str = 'member'
+
+class CompanyUpdate(BaseModel):
+    name: Optional[str] = Field(None, min_length=2)
+    company_size: Optional[str] = None
+    industry: Optional[str] = None
+
+class BusinessUserUpdate(BaseModel):
+    full_name: Optional[str] = Field(None, min_length=2)
+    job_title: Optional[str] = None

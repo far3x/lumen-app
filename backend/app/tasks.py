@@ -377,8 +377,7 @@ def process_contribution(self, user_id: int, codebase: str, contribution_db_id: 
         
         if base_reward_usd > 0:
             reward_with_multiplier = base_reward_usd * user.reward_multiplier
-            total_reward_for_contribution = reward_with_multiplier
-            bonus_reward = 0.0
+            total_reward_for_account = reward_with_multiplier 
 
             if settings.BETA_MODE_ENABLED and user.id <= settings.BETA_MAX_USERS and not user.is_beta_bonus_claimed:
                 bonus_reward_lumen = settings.BETA_GENESIS_BONUS
@@ -387,13 +386,13 @@ def process_contribution(self, user_id: int, codebase: str, contribution_db_id: 
                 lum_price_usd = float(lum_price_str) if lum_price_str else 0.001
                 bonus_reward_usd = lum_price_usd * bonus_reward_lumen
                 
-                total_reward_for_contribution += bonus_reward_usd
+                total_reward_for_account += bonus_reward_usd
 
                 user.is_beta_bonus_claimed = True
                 db.add(user)
                 logger.info(f"[REWARD] Awarded Genesis Bonus of {settings.BETA_GENESIS_BONUS} LUMEN to user {user_id}.")
 
-            crud.apply_reward_to_user(db, user, total_reward_for_contribution)
+            crud.apply_reward_to_user(db, user, total_reward_for_account)
             
             avg_complexity = valuation_details.get("avg_complexity", 0.0)
             quality_score = valuation_details.get("ai_weighted_multiplier", 0.0)
@@ -404,20 +403,20 @@ def process_contribution(self, user_id: int, codebase: str, contribution_db_id: 
                 crud.update_network_stats(
                     db,
                     avg_complexity,
-                    total_reward_for_contribution,
+                    reward_with_multiplier,
                     total_lloc,
                     total_tokens,
                     quality_score
                 )
             
-            contribution_record.reward_amount = base_reward_usd
+            contribution_record.reward_amount = reward_with_multiplier
             contribution_record.content_embedding = new_embedding
             contribution_record.status = "PROCESSED"
             
             db.add(contribution_record)
             db.commit()
             
-            logger.info(f"[REWARD] Successfully processed and rewarded ${total_reward_for_contribution:.4f} for user {user_id} (Contribution {contribution_db_id}).")
+            logger.info(f"[REWARD] Successfully processed. Contribution {contribution_db_id} valued at ${reward_with_multiplier:.4f}. Total account credit: ${total_reward_for_account:.4f}.")
         else:
             contribution_record.reward_amount = 0.0
             contribution_record.content_embedding = new_embedding

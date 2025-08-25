@@ -64,6 +64,16 @@ async def get_current_business_user(
         raise credentials_exception
     return user
 
+async def get_current_admin_user(
+    current_user: models.BusinessUser = Depends(get_current_business_user)
+) -> models.BusinessUser:
+    if current_user.role != 'admin':
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="You do not have permission to perform this action."
+        )
+    return current_user
+
 async def get_current_company_from_user(
     current_user: models.BusinessUser = Depends(get_current_business_user)
 ) -> models.Company:
@@ -111,6 +121,8 @@ async def get_current_company_from_api_key(
     company = crud.get_company_by_api_key(db, api_key)
     if not company or not company.api_keys[0].is_active:
         raise credentials_exception
+    
+    crud.update_api_key_last_used(db, company.api_keys[0].id)
     
     return company
 
