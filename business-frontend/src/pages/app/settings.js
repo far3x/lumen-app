@@ -3,9 +3,21 @@ export function renderSettingsPage() {
 
     const pageHtml = `
         <div class="dashboard-container">
-            <div class="widget-card p-8 text-center">
-                <h2 class="text-xl font-bold text-app-text-primary">Settings Page</h2>
-                <p class="mt-2 text-app-text-secondary">This area is under construction.</p>
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <div class="widget-card p-6">
+                    <h2 class="text-lg font-semibold text-app-text-primary">Account Information</h2>
+                    <p class="text-sm text-app-text-secondary mt-1">Manage your personal profile.</p>
+                    <div class="mt-4 border-t border-app-border pt-4 text-center">
+                        <p class="text-app-text-secondary">User profile settings are under construction.</p>
+                    </div>
+                </div>
+                 <div class="widget-card p-6">
+                    <h2 class="text-lg font-semibold text-app-text-primary">Company Information</h2>
+                    <p class="text-sm text-app-text-secondary mt-1">Manage your company profile.</p>
+                    <div class="mt-4 border-t border-app-border pt-4 text-center">
+                        <p class="text-app-text-secondary">Company profile settings are under construction.</p>
+                    </div>
+                </div>
             </div>
         </div>
     `;

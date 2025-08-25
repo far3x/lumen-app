@@ -3,7 +3,7 @@ import json
 import re
 import secrets
 from sqlalchemy.orm import Session
-from sqlalchemy import func, text
+from sqlalchemy import func, text, case
 from fastapi import HTTPException, status
 from typing import Optional
 from datetime import datetime, timedelta, timezone
@@ -239,18 +239,26 @@ def get_user_contributions(db: Session, user_id: int, skip: int = 0, limit: int 
     return db.query(models.Contribution).filter(models.Contribution.user_id == user_id).order_by(models.Contribution.created_at.desc()).offset(skip).limit(limit).all()
 
 def get_leaderboard(db: Session, skip: int = 0, limit: int = 100):
-    return db.query(models.User, models.Account.total_usd_earned)\
+    query = db.query(models.User, models.Account.total_usd_earned)\
              .join(models.Account)\
-             .filter(models.User.is_in_leaderboard == True, models.User.is_verified == True, models.User.id <= config.settings.BETA_MAX_USERS if config.settings.BETA_MODE_ENABLED else True)\
-             .order_by(models.Account.total_usd_earned.desc())\
-             .offset(skip).limit(limit).all()
+             .filter(models.User.is_in_leaderboard == True, models.User.is_verified == True)
+    
+    if config.settings.BETA_MODE_ENABLED:
+        query = query.filter(models.User.id <= config.settings.BETA_MAX_USERS)
+
+    return query.order_by(models.Account.total_usd_earned.desc())\
+                .offset(skip).limit(limit).all()
 
 def get_recent_processed_contributions(db: Session, limit: int = 10):
-    return db.query(models.Contribution, models.User.display_name)\
+    query = db.query(models.Contribution, models.User.display_name)\
              .join(models.User)\
-             .filter(models.Contribution.status == "PROCESSED", models.User.is_in_leaderboard == True, models.User.id <= config.settings.BETA_MAX_USERS if config.settings.BETA_MODE_ENABLED else True)\
-             .order_by(models.Contribution.created_at.desc())\
-             .limit(limit).all()
+             .filter(models.Contribution.status == "PROCESSED", models.User.is_in_leaderboard == True)
+
+    if config.settings.BETA_MODE_ENABLED:
+        query = query.filter(models.User.id <= config.settings.BETA_MAX_USERS)
+
+    return query.order_by(models.Contribution.created_at.desc())\
+                .limit(limit).all()
 
 def get_user_contributions_paginated(db: Session, user_id: int, skip: int = 0, limit: int = 10):
     query = db.query(models.Contribution).filter(models.Contribution.user_id == user_id)
@@ -285,39 +293,6 @@ def get_user_rank(db: Session, user_id: int):
     }).first()
     return result
 
-def reset_claimable_balance(db: Session, user_id: int):
-    account = db.query(models.Account).filter(models.Account.user_id == user_id).first()
-    if account:
-        account.usd_balance = 0.0
-        db.add(account)
-        db.commit()
-        db.refresh(account)
-    return account
-
-def log_claim_transaction(db: Session, user_id: int, amount: float, tx_hash: str):
-    claim = models.ClaimTransaction(
-        user_id=user_id,
-        amount_claimed=amount,
-        transaction_hash=tx_hash
-    )
-    db.add(claim)
-    db.commit()
-    db.refresh(claim)
-    return claim
-
-def update_claim_transaction_hash(db: Session, claim_id: int, tx_hash: str):
-    claim = db.query(models.ClaimTransaction).filter_by(id=claim_id).first()
-    if claim:
-        claim.transaction_hash = tx_hash
-        db.commit()
-    return claim
-
-def get_user_claim_history(db: Session, user_id: int, skip: int = 0, limit: int = 100):
-    query = db.query(models.ClaimTransaction).filter(models.ClaimTransaction.user_id == user_id)
-    total_count = query.count()
-    items = query.order_by(models.ClaimTransaction.created_at.desc()).offset(skip).limit(limit).all()
-    return items, total_count
-
 def delete_user(db: Session, user: models.User):
     db.delete(user)
     db.commit()
@@ -336,6 +311,9 @@ def create_contact_submission(db: Session, submission: schemas.ContactSalesCreat
     db.refresh(db_submission)
     return db_submission
 
+def get_business_user_by_id(db: Session, user_id: int) -> Optional[models.BusinessUser]:
+    return db.query(models.BusinessUser).filter(models.BusinessUser.id == user_id).first()
+
 def get_business_user_by_email(db: Session, email: str) -> Optional[models.BusinessUser]:
     return db.query(models.BusinessUser).filter(models.BusinessUser.email == email).first()
 
@@ -345,8 +323,19 @@ def get_company_by_name(db: Session, name: str) -> Optional[models.Company]:
 def create_business_user(db: Session, user_data: business_schemas.BusinessUserCreate) -> models.BusinessUser:
     company = get_company_by_name(db, name=user_data.company_name)
     if not company:
-        company = models.Company(name=user_data.company_name)
+        company = models.Company(
+            name=user_data.company_name,
+            company_size=user_data.company_size,
+            industry=user_data.industry
+        )
         db.add(company)
+        db.commit()
+        db.refresh(company)
+    else:
+        if user_data.company_size:
+            company.company_size = user_data.company_size
+        if user_data.industry:
+            company.industry = user_data.industry
         db.commit()
         db.refresh(company)
 
@@ -356,6 +345,7 @@ def create_business_user(db: Session, user_data: business_schemas.BusinessUserCr
         email=user_data.email,
         hashed_password=hashed_password,
         full_name=user_data.full_name,
+        job_title=user_data.job_title,
         company_id=company.id,
         role='admin'
     )
@@ -370,3 +360,91 @@ def create_business_user(db: Session, user_data: business_schemas.BusinessUserCr
     db.commit()
     db.refresh(db_user)
     return db_user
+
+def get_company_by_api_key(db: Session, api_key: str) -> Optional[models.Company]:
+    hashed_key = hashlib.sha256(api_key.encode()).hexdigest()
+    api_key_obj = db.query(models.ApiKey).filter(models.ApiKey.key_hash == hashed_key).first()
+    return api_key_obj.company if api_key_obj else None
+
+def get_api_keys_for_company(db: Session, company_id: int) -> list[models.ApiKey]:
+    return db.query(models.ApiKey).filter(models.ApiKey.company_id == company_id).order_by(models.ApiKey.created_at.desc()).all()
+
+def create_api_key(db: Session, company: models.Company, name: str) -> str:
+    key_prefix = secrets.token_hex(4)
+    raw_key = f"lum_biz_{key_prefix}_{secrets.token_urlsafe(32)}"
+    hashed_key = hashlib.sha256(raw_key.encode()).hexdigest()
+
+    db_key = models.ApiKey(
+        company_id=company.id,
+        name=name,
+        key_prefix=key_prefix,
+        key_hash=hashed_key
+    )
+    db.add(db_key)
+    db.commit()
+    return raw_key
+
+def revoke_api_key(db: Session, key_id: int, company_id: int):
+    api_key = db.query(models.ApiKey).filter(models.ApiKey.id == key_id, models.ApiKey.company_id == company_id).first()
+    if not api_key:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="API Key not found or you do not have permission to revoke it.")
+    api_key.is_active = False
+    db.commit()
+
+def search_contributions(db: Session, company_id: int, limit: int) -> list[dict]:
+    unlocked_subquery = db.query(models.UnlockedContribution.contribution_id).filter(models.UnlockedContribution.company_id == company_id).subquery()
+    
+    results = db.query(
+        models.Contribution,
+        case((models.Contribution.id.in_(unlocked_subquery), True), else_=False).label("is_unlocked")
+    ).filter(models.Contribution.status == "PROCESSED").order_by(func.random()).limit(limit).all()
+
+    previews = []
+    for contrib, is_unlocked in results:
+        details = json.loads(contrib.valuation_results) if isinstance(contrib.valuation_results, str) else contrib.valuation_results
+        first_lang = next(iter(details.get("language_breakdown", {"Unknown": 0})), "Unknown")
+        
+        previews.append({
+            "id": contrib.id,
+            "created_at": contrib.created_at,
+            "language": first_lang,
+            "tokens": details.get("total_tokens", 0),
+            "clarity_score": details.get("project_clarity_score", 0) * 10,
+            "arch_score": details.get("architectural_quality_score", 0) * 10,
+            "quality_score": details.get("code_quality_score", 0) * 10,
+            "is_unlocked": is_unlocked,
+            "code_preview": "\n".join(contrib.raw_content.splitlines()[:15])
+        })
+    return previews
+
+def unlock_contribution(db: Session, company_id: int, contribution_id: int) -> models.Contribution:
+    company = db.query(models.Company).filter(models.Company.id == company_id).first()
+    contribution = db.query(models.Contribution).filter(models.Contribution.id == contribution_id).first()
+
+    if not company or not contribution:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Resource not found")
+    
+    is_unlocked = db.query(models.UnlockedContribution).filter_by(company_id=company_id, contribution_id=contribution_id).first()
+    if is_unlocked:
+        return contribution
+
+    details = json.loads(contribution.valuation_results) if isinstance(contribution.valuation_results, str) else contribution.valuation_results
+    token_cost = details.get("total_tokens", 0)
+    
+    if company.token_balance < token_cost:
+        raise HTTPException(status_code=status.HTTP_402_PAYMENT_REQUIRED, detail="Insufficient token balance")
+
+    company.token_balance -= token_cost
+    
+    new_unlock = models.UnlockedContribution(company_id=company_id, contribution_id=contribution_id)
+    db.add(new_unlock)
+    db.commit()
+    db.refresh(company)
+
+    return contribution
+
+def get_unlocked_contribution_content(db: Session, company_id: int, contribution_id: int) -> Optional[models.Contribution]:
+    unlocked = db.query(models.UnlockedContribution).filter_by(company_id=company_id, contribution_id=contribution_id).first()
+    if unlocked:
+        return unlocked.contribution
+    return None

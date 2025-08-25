@@ -31,16 +31,16 @@ function setupEventListeners() {
 export function renderLoginPage() {
     setTimeout(setupEventListeners, 0);
     return `
-    <div class="bg-white py-24 sm:py-32">
-        <div class="container mx-auto px-6 max-w-lg">
-            <div class="max-w-md mx-auto">
+    <div class="flex-grow flex items-stretch bg-white min-h-[calc(100vh-6rem)]">
+        <div class="w-full lg:w-1/2 flex flex-col items-center justify-center p-8">
+             <div class="max-w-md w-full">
                 <div class="text-center">
                     <a href="/" class="inline-block mb-6">
                         <img class="h-12 w-auto" src="/logo.png" alt="Lumen Logo">
                     </a>
-                    <h2 class="text-3xl font-bold tracking-tight text-text-headings">Sign in to your account</h2>
+                    <h2 class="text-3xl font-bold tracking-tight text-text-headings">Welcome Back</h2>
                     <p class="mt-2 text-text-body">
-                        Or <a href="/signup" class="font-medium text-accent-purple hover:text-accent-pink">create a new business account</a>
+                        Sign in to access your business dashboard.
                     </p>
                 </div>
                 <div class="mt-10">
@@ -62,6 +62,18 @@ export function renderLoginPage() {
                             <button type="submit" class="w-full px-8 py-3 font-semibold text-white bg-accent-gradient rounded-md transition-all duration-300 hover:scale-105 hover:brightness-110">Sign In</button>
                         </div>
                     </form>
+                    <p class="mt-6 text-center text-sm text-text-muted">
+                        Don't have an account? <a href="/signup" class="font-medium text-accent-purple hover:text-accent-pink">Create one</a>
+                    </p>
+                </div>
+            </div>
+        </div>
+        <div class="hidden lg:flex flex-col items-center justify-center w-1/2 bg-gray-100 p-12 border-l border-border">
+            <div class="text-center">
+                <img src="/jellyfish.gif" alt="Lumen Data Jellyfish" class="w-80 h-80 object-contain rounded-lg mx-auto">
+                <div class="mt-8 max-w-sm mx-auto">
+                     <h3 class="text-2xl font-bold text-text-headings">The Strategic Data Advantage for AI</h3>
+                     <p class="text-text-body mt-2">Unlock proprietary, ethically-sourced code to build world-class models without legal risk.</p>
                 </div>
             </div>
         </div>

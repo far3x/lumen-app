@@ -41,6 +41,36 @@ async def get_current_user(request: Request, db: Session = Depends(get_db)) -> m
     request.state.user = user
     return user
 
+async def get_current_business_user(
+    token: str = Depends(oauth2_scheme), db: Session = Depends(get_db)
+) -> models.BusinessUser:
+    credentials_exception = HTTPException(
+        status_code=status.HTTP_401_UNAUTHORIZED,
+        detail="Could not validate business credentials",
+    )
+    try:
+        payload = jwt.decode(token, config.settings.SECRET_KEY, algorithms=[config.settings.ALGORITHM])
+        if payload.get("type") != "business":
+            raise credentials_exception
+            
+        user_id: str = payload.get("sub")
+        if user_id is None:
+            raise credentials_exception
+    except JWTError:
+        raise credentials_exception
+    
+    user = crud.get_business_user_by_id(db, user_id=int(user_id))
+    if user is None or not user.is_verified:
+        raise credentials_exception
+    return user
+
+async def get_current_company_from_user(
+    current_user: models.BusinessUser = Depends(get_current_business_user)
+) -> models.Company:
+    if not current_user.company:
+         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Company not found for user")
+    return current_user.company
+
 async def verify_beta_access(user: models.User = Depends(get_current_user)):
     if config.settings.BETA_MODE_ENABLED and user.id > config.settings.BETA_MAX_USERS:
         raise HTTPException(
@@ -62,6 +92,27 @@ async def get_current_user_from_pat(pat: str = Depends(oauth2_scheme), db: Sessi
     if user is None:
         raise credentials_exception
     return user
+
+async def get_current_company_from_api_key(
+    authorization: str = Header(...), db: Session = Depends(get_db)
+) -> models.Company:
+    credentials_exception = HTTPException(
+        status_code=status.HTTP_401_UNAUTHORIZED,
+        detail="Could not validate API Key",
+    )
+    
+    if not authorization.startswith("Bearer "):
+        raise credentials_exception
+    
+    api_key = authorization.split(" ")[1]
+    if not api_key.startswith("lum_biz_"):
+        raise credentials_exception
+
+    company = crud.get_company_by_api_key(db, api_key)
+    if not company or not company.api_keys[0].is_active:
+        raise credentials_exception
+    
+    return company
 
 async def verify_beta_access_for_cli(user: models.User = Depends(get_current_user_from_pat)):
     if config.settings.BETA_MODE_ENABLED and user.id > config.settings.BETA_MAX_USERS:

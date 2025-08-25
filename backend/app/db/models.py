@@ -130,9 +130,12 @@ class Company(Base):
     name = Column(String, index=True, unique=True, nullable=False)
     plan = Column(String, default="free", nullable=False)
     token_balance = Column(BigInteger, default=0, nullable=False)
+    company_size = Column(String, nullable=True)
+    industry = Column(String, nullable=True)
     created_at = Column(DateTime(timezone=True), server_default=func.now())
     users = relationship("BusinessUser", back_populates="company", cascade="all, delete-orphan")
     api_keys = relationship("ApiKey", back_populates="company", cascade="all, delete-orphan")
+    unlocked_contributions = relationship("UnlockedContribution", back_populates="company")
 
 class BusinessUser(Base):
     __tablename__ = "business_users"
@@ -140,6 +143,7 @@ class BusinessUser(Base):
     email = Column(String, unique=True, index=True, nullable=False)
     hashed_password = Column(String, nullable=False)
     full_name = Column(String, nullable=False)
+    job_title = Column(String, nullable=True)
     role = Column(String, default="member", nullable=False)
     is_verified = Column(Boolean, default=False, nullable=False)
     verification_token = Column(String, nullable=True)
@@ -150,6 +154,7 @@ class BusinessUser(Base):
 class ApiKey(Base):
     __tablename__ = "api_keys"
     id = Column(Integer, primary_key=True, index=True)
+    key_prefix = Column(String(8), unique=True, nullable=False)
     key_hash = Column(String, unique=True, index=True, nullable=False)
     name = Column(String, nullable=False)
     company_id = Column(Integer, ForeignKey("companies.id"), nullable=False)
@@ -180,3 +185,13 @@ class BatchPayout(Base):
     
     batch = relationship("PayoutBatch", back_populates="payouts")
     user = relationship("User")
+
+class UnlockedContribution(Base):
+    __tablename__ = "unlocked_contributions"
+    id = Column(Integer, primary_key=True, index=True)
+    company_id = Column(Integer, ForeignKey("companies.id"), nullable=False)
+    contribution_id = Column(Integer, ForeignKey("contributions.id"), nullable=False)
+    unlocked_at = Column(DateTime(timezone=True), server_default=func.now())
+    
+    company = relationship("Company", back_populates="unlocked_contributions")
+    contribution = relationship("Contribution")

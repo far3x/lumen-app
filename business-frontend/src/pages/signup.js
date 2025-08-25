@@ -31,6 +31,9 @@ function setupEventListeners() {
         const email = e.target.email.value;
         const password = e.target.password.value;
         const companyName = e.target.companyName.value;
+        const jobTitle = e.target.jobTitle.value;
+        const companySize = e.target.companySize.value;
+        const industry = e.target.industry.value;
         const recaptcha_token = grecaptcha.getResponse();
 
         const submitButton = form.querySelector('button[type="submit"]');
@@ -48,7 +51,7 @@ function setupEventListeners() {
         submitButton.innerHTML = `<span class="animate-spin inline-block w-5 h-5 border-2 border-transparent border-t-white rounded-full"></span>`;
 
         try {
-            await register(fullName, email, password, companyName, recaptcha_token);
+            await register(fullName, email, password, companyName, jobTitle, companySize, industry, recaptcha_token);
             navigate('/check-email');
         } catch (error) {
             errorMessageElement.textContent = error.response?.data?.detail || 'An unknown error occurred.';
@@ -63,39 +66,89 @@ function setupEventListeners() {
 export function renderSignupPage() {
     setTimeout(setupEventListeners, 0);
     return `
-    <div class="bg-white py-16 sm:py-24">
-        <div class="container mx-auto px-6 max-w-lg">
-            <div class="max-w-md mx-auto">
-                <div class="text-center">
-                    <a href="/" class="inline-block mb-6"><img class="h-12 w-auto" src="/logo.png" alt="Lumen Logo"></a>
-                    <h2 class="text-3xl font-bold tracking-tight text-text-headings">Create a business account</h2>
+    <div class="flex-grow flex items-stretch bg-white min-h-[calc(100vh-6rem)]">
+        <div class="hidden lg:flex flex-col w-2/5 bg-white p-12 lg:p-20 justify-between">
+            <div>
+                 <a href="/" class="flex items-center gap-3">
+                    <img src="/logo.png" alt="Lumen Logo" class="h-10 w-10">
+                    <span class="font-bold text-2xl text-text-headings">lumen</span>
+                </a>
+                <h2 class="text-3xl font-bold tracking-tight text-text-headings mt-12">The Strategic Data Advantage for AI</h2>
+                <p class="mt-4 text-text-body">Create an account to unlock proprietary, ethically-sourced code and build world-class models without legal risk.</p>
+                <ul class="mt-8 space-y-4 text-text-body">
+                    <li class="flex items-start gap-3">
+                        <svg class="w-5 h-5 text-accent-purple shrink-0 mt-1" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+                        <span><strong>Access Proprietary Data:</strong> Gain a competitive edge with high-signal, human-written code not found on public repositories.</span>
+                    </li>
+                    <li class="flex items-start gap-3">
+                        <svg class="w-5 h-5 text-accent-purple shrink-0 mt-1" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+                        <span><strong>Manage Your Team:</strong> Invite members, manage API keys, and monitor usage from a unified dashboard.</span>
+                    </li>
+                     <li class="flex items-start gap-3">
+                        <svg class="w-5 h-5 text-accent-purple shrink-0 mt-1" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+                        <span><strong>Secure API Access:</strong> Integrate Lumen's data into your MLOps pipeline with secure, revocable API keys.</span>
+                    </li>
+                </ul>
+            </div>
+        </div>
+        <div class="w-full lg:w-3/5 flex flex-col items-center justify-center p-8 bg-gray-100 border-l border-border">
+            <div class="max-w-lg w-full">
+                <div>
+                    <h2 class="text-3xl font-bold tracking-tight text-text-headings">Create your business account</h2>
                     <p class="mt-2 text-text-body">
+                        The first user to register for a company becomes its administrator.
+                    </p>
+                    <p class="mt-1 text-text-muted">
                         Already have an account? <a href="/login" class="font-medium text-accent-purple hover:text-accent-pink">Sign in</a>
                     </p>
                 </div>
                 <div class="mt-8">
                     <div id="error-message" class="hidden bg-red-100 border border-red-300 text-red-800 text-sm p-3 rounded-md mb-4"></div>
                     <form id="signup-form" class="space-y-4">
-                        <div>
-                            <label for="fullName" class="block text-sm font-medium leading-6 text-text-body">Full Name</label>
-                            <input id="fullName" name="fullName" type="text" required class="form-input">
+                        <div class="grid sm:grid-cols-2 gap-4">
+                            <div>
+                                <label for="fullName" class="form-label">Full Name</label>
+                                <input id="fullName" name="fullName" type="text" required class="form-input">
+                            </div>
+                            <div>
+                                <label for="jobTitle" class="form-label">Job Title <span class="text-text-muted">(Optional)</span></label>
+                                <input id="jobTitle" name="jobTitle" type="text" class="form-input">
+                            </div>
                         </div>
                         <div>
-                            <label for="companyName" class="block text-sm font-medium leading-6 text-text-body">Company Name</label>
-                            <input id="companyName" name="companyName" type="text" required class="form-input">
-                        </div>
-                        <div>
-                            <label for="email" class="block text-sm font-medium leading-6 text-text-body">Email address</label>
+                            <label for="email" class="form-label">Work Email</label>
                             <input id="email" name="email" type="email" autocomplete="email" required class="form-input">
                         </div>
                         <div>
-                             <label for="password" class="block text-sm font-medium leading-6 text-text-body">Password</label>
+                             <label for="password" class="form-label">Password</label>
                             <input id="password" name="password" type="password" required class="form-input" minlength="8">
                             <div class="mt-2 w-full bg-gray-200 rounded-full h-1.5"><div id="strength-bar-fill" class="h-1.5 rounded-full transition-all"></div></div>
                             <p id="strength-text" class="text-xs text-right text-gray-500 h-4 mt-1"></p>
                         </div>
-                        <div class="flex justify-center"><div id="recaptcha-container"></div></div>
+                         <hr class="!my-6 border-border"/>
+                        <div class="grid sm:grid-cols-2 gap-4">
+                             <div>
+                                <label for="companyName" class="form-label">Company Name</label>
+                                <input id="companyName" name="companyName" type="text" required class="form-input">
+                            </div>
+                            <div>
+                                <label for="companySize" class="form-label">Company Size <span class="text-text-muted">(Optional)</span></label>
+                                <select id="companySize" name="companySize" class="form-input">
+                                    <option value="">Select a size...</option>
+                                    <option value="1-10">1-10 employees</option>
+                                    <option value="11-50">11-50 employees</option>
+                                    <option value="51-200">51-200 employees</option>
+                                    <option value="201-1000">201-1,000 employees</option>
+                                    <option value="1001+">1,001+ employees</option>
+                                </select>
+                            </div>
+                        </div>
                         <div>
+                            <label for="industry" class="form-label">Industry <span class="text-text-muted">(Optional)</span></label>
+                            <input id="industry" name="industry" type="text" class="form-input" placeholder="e.g., AI Research, FinTech, Healthcare">
+                        </div>
+                        <div class="flex justify-center pt-2"><div id="recaptcha-container"></div></div>
+                        <div class="pt-2">
                             <button type="submit" class="w-full px-8 py-3 font-semibold text-white bg-accent-gradient rounded-md transition-all duration-300 hover:scale-105 hover:brightness-110">Create Account</button>
                         </div>
                     </form>
@@ -104,7 +157,8 @@ export function renderSignupPage() {
         </div>
     </div>
     <style>
-        .form-input { @apply block w-full rounded-md border-0 py-2.5 px-3 text-text-body shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-accent-purple sm:text-sm sm:leading-6; }
+        .form-input { @apply block w-full rounded-md border-0 py-2.5 px-3 bg-white text-text-body shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-accent-purple sm:text-sm sm:leading-6; }
+        .form-label { @apply block text-sm font-medium leading-6 text-text-body; }
         .strength-bar-fill { @apply transition-all duration-300; }
     </style>
     `;
