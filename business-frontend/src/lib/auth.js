@@ -20,6 +20,11 @@ export const getCompany = () => {
     return storedCompany ? JSON.parse(storedCompany) : null;
 }
 
+export const setCompany = (newCompanyData) => {
+    company = newCompanyData;
+    localStorage.setItem('business_company', JSON.stringify(company));
+};
+
 const setAuthData = (data) => {
     user = data.user;
     company = data.company;
@@ -36,12 +41,15 @@ const clearAuthData = () => {
     localStorage.removeItem('business_company');
 };
 
-export const register = async (fullName, email, password, companyName, recaptcha_token) => {
+export const register = async (fullName, email, password, companyName, jobTitle, companySize, industry, recaptcha_token) => {
     const response = await api.post('/business/register', {
         full_name: fullName,
         email,
         password,
         company_name: companyName,
+        job_title: jobTitle,
+        company_size: companySize,
+        industry: industry,
         recaptcha_token: recaptcha_token,
     });
     return response.data;
