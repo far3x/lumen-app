@@ -133,16 +133,10 @@ async def get_my_rank(
         
     user_rank_data = crud.get_user_rank(db, user_id=current_user.id)
     if user_rank_data:
-        lum_price_str = redis_service.get("token_price:lumen_usd")
-        lum_price = float(lum_price_str) if lum_price_str and float(lum_price_str) > 0 else 0.001
-        
-        total_usd_earned = user_rank_data.total_usd_earned
-        total_lum_earned = total_usd_earned / lum_price if lum_price > 0 else 0
-
         return LeaderboardEntry(
             rank=user_rank_data.rank,
             display_name=user_rank_data.display_name,
-            total_lum_earned=total_lum_earned
+            total_usd_earned=user_rank_data.total_usd_earned
         )
     return None
 
