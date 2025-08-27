@@ -32,6 +32,10 @@ task_routes = {
         'queue': 'high_priority',
         'routing_key': 'task.high_priority',
     },
+    'app.tasks.send_team_invitation_email_task': {
+        'queue': 'high_priority',
+        'routing_key': 'task.high_priority',
+    },
     'app.tasks.update_token_price_task': {
         'queue': 'high_priority',
         'routing_key': 'task.high_priority',

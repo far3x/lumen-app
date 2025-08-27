@@ -97,7 +97,7 @@ function showGenerateKeyModal() {
             <div id="modal-content-area" class="p-6">
                  <form id="generate-key-form">
                     <label for="key-name" class="form-label">Key Name</label>
-                    <input type="text" id="key-name" required class="form-input" placeholder="e.g., Production Model V3">
+                    <input type="text" id="key-name" required class="form-input" placeholder="e.g., Production Model V3" minlength="3" maxlength="50">
                     <div id="modal-error-message" class="hidden text-red-600 text-sm mt-2"></div>
                     <button type="submit" class="btn btn-primary w-full mt-4">Generate Key</button>
                 </form>
@@ -129,6 +129,12 @@ async function handleGenerateKey(e, closeModal) {
     const errorEl = form.querySelector('#modal-error-message');
     const submitBtn = form.querySelector('button[type="submit"]');
 
+    if (nameInput.value.length < 3) {
+        errorEl.textContent = 'Key name must be at least 3 characters long.';
+        errorEl.classList.remove('hidden');
+        return;
+    }
+
     submitBtn.disabled = true;
     submitBtn.innerHTML = `<span class="animate-spin inline-block w-5 h-5 border-2 border-transparent border-t-white rounded-full"></span>`;
     errorEl.classList.add('hidden');
@@ -153,7 +159,7 @@ async function handleGenerateKey(e, closeModal) {
         });
         await fetchApiKeys();
     } catch (error) {
-        errorEl.textContent = error.response?.data?.detail || 'Failed to generate key.';
+        errorEl.textContent = error.response?.data?.detail?.[0]?.msg || error.response?.data?.detail || 'Failed to generate key.';
         errorEl.classList.remove('hidden');
         submitBtn.disabled = false;
         submitBtn.innerHTML = `Generate Key`;

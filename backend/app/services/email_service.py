@@ -48,5 +48,22 @@ class EmailService:
             subtype="html"
         )
         await self.fm.send_message(message, template_name="business_verification_email.html")
+    
+    async def send_team_invitation_email(self, invited_by_name: str, company_name: str, invitee_email: str):
+        login_link = f"{settings.BUSINESS_FRONTEND_URL}/login"
+        template_body = {
+            "invited_by_name": invited_by_name,
+            "company_name": company_name,
+            "login_link": login_link,
+            "year": datetime.now().year,
+            "logo_url": settings.PUBLIC_LOGO_URL
+        }
+        message = MessageSchema(
+            subject=f"You've been invited to join {company_name} on Lumen Protocol",
+            recipients=[invitee_email],
+            template_body=template_body,
+            subtype="html"
+        )
+        await self.fm.send_message(message, template_name="team_invitation_email.html")
 
 email_service = EmailService()

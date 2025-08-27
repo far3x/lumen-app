@@ -1,4 +1,5 @@
 from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi.responses import StreamingResponse
 from sqlalchemy.orm import Session
 from app.db import crud, models, database
 from app.api.v1.dependencies import get_current_company_from_user, get_current_business_user, get_current_admin_user, get_current_company_from_api_key
@@ -6,10 +7,12 @@ from app.business_schemas import (
     ApiKeyInfo, ApiKeyCreate, ContributionSearchResult, ContributionPreview, 
     FullContribution, DashboardStats, UsageDataPoint, UnlockedContributionDetail,
     TeamMember, InviteCreate, CompanyUpdate, BusinessUserUpdate, BusinessUser as BusinessUserSchema,
-    Company as CompanySchema
+    Company as CompanySchema, ApiKeyUsageSummary
 )
+from app.tasks import send_team_invitation_email_task
 from typing import List
 from datetime import datetime, timedelta
+import io
 
 router = APIRouter(prefix="/business", tags=["Business Data"])
 
@@ -19,8 +22,13 @@ async def get_dashboard_stats(company: models.Company = Depends(get_current_comp
 
 @router.get("/usage-stats", response_model=List[UsageDataPoint])
 async def get_usage_stats(company: models.Company = Depends(get_current_company_from_user), db: Session = Depends(database.get_db)):
-    start_date = datetime.utcnow() - timedelta(days=210) # Approx 7 months
+    start_date = datetime.utcnow() - timedelta(days=210) 
     return crud.get_usage_stats_by_day(db, company_id=company.id, start_date=start_date)
+
+@router.get("/api-key-usage", response_model=List[ApiKeyUsageSummary])
+async def get_api_key_usage(company: models.Company = Depends(get_current_company_from_user), db: Session = Depends(database.get_db)):
+    start_date = datetime.utcnow() - timedelta(days=30)
+    return crud.get_api_key_usage_summary(db, company_id=company.id, start_date=start_date)
 
 @router.get("/data/unlocked", response_model=List[UnlockedContributionDetail])
 async def get_unlocked_contributions(company: models.Company = Depends(get_current_company_from_user), db: Session = Depends(database.get_db)):
@@ -41,7 +49,13 @@ async def invite_team_member(
         raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="A user with this email already exists.")
     
     new_user = crud.create_invited_business_user(db, invite_data=invite_data, company=company)
-    # In a real scenario, you'd trigger a password setup email here.
+    
+    send_team_invitation_email_task.delay(
+        invited_by_name=admin_user.full_name,
+        company_name=company.name,
+        invitee_email=new_user.email
+    )
+
     return new_user
 
 @router.delete("/team/{user_id}", status_code=status.HTTP_204_NO_CONTENT)
@@ -74,7 +88,6 @@ async def update_business_user_profile(
 ):
     return crud.update_business_user_profile(db, user=current_user, user_data=user_data)
 
-# API Key Management
 @router.get("/api-keys", response_model=List[ApiKeyInfo])
 async def get_api_keys(company: models.Company = Depends(get_current_company_from_user), db: Session = Depends(database.get_db)):
     return crud.get_api_keys_for_company(db, company_id=company.id)
@@ -89,7 +102,6 @@ async def revoke_api_key(key_id: int, company: models.Company = Depends(get_curr
     crud.revoke_api_key(db, key_id=key_id, company_id=company.id)
     return
 
-# Data Explorer & Access
 @router.post("/data/search", response_model=List[ContributionPreview])
 async def search_contributions(
     search_params: ContributionSearchResult, 
@@ -125,11 +137,28 @@ async def unlock_contribution(
 @router.get("/data/contributions/{contribution_id}", response_model=FullContribution)
 async def get_unlocked_contribution(
     contribution_id: int, 
-    company: models.Company = Depends(get_current_company_from_user), 
-    api_key: models.ApiKey = Depends(get_current_company_from_api_key),
+    company: models.Company = Depends(get_current_company_from_api_key),
     db: Session = Depends(database.get_db)
 ):
     contribution = crud.get_unlocked_contribution_content(db, company_id=company.id, contribution_id=contribution_id)
     if not contribution:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Contribution not found or not unlocked.")
     return contribution
+
+@router.get("/data/download/{contribution_id}", response_class=StreamingResponse)
+async def download_unlocked_contribution(
+    contribution_id: int,
+    company: models.Company = Depends(get_current_company_from_api_key),
+    db: Session = Depends(database.get_db)
+):
+    contribution = crud.get_unlocked_contribution_content(db, company_id=company.id, contribution_id=contribution_id)
+    if not contribution:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Contribution not found or not unlocked.")
+
+    content_stream = io.StringIO(contribution.raw_content)
+    
+    return StreamingResponse(
+        content_stream,
+        media_type="text/plain",
+        headers={"Content-Disposition": f"attachment; filename=lumen_contribution_{contribution_id}.txt"}
+    )

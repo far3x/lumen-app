@@ -123,6 +123,11 @@ def send_business_verification_email_task(email: str, token: str):
     asyncio.run(email_service.send_business_verification_email(email, token))
     logger.info(f"Business verification email sent to {email}")
 
+@celery_app.task
+def send_team_invitation_email_task(invited_by_name: str, company_name: str, invitee_email: str):
+    asyncio.run(email_service.send_team_invitation_email(invited_by_name, company_name, invitee_email))
+    logger.info(f"Team invitation email sent to {invitee_email} for company {company_name}")
+
 def publish_user_update(db, user_id: int, event_type: str, payload: dict):
     message = { "type": event_type, "payload": payload }
     redis_service.r.publish(f"user-updates:{user_id}", json.dumps(message))
