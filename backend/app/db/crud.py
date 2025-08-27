@@ -35,7 +35,16 @@ def create_user(db: Session, user: schemas.UserCreate):
     if not display_name:
         display_name = f"user-{secrets.token_hex(4)}"
 
-    db_user = models.User(email=user.email, hashed_password=hashed_password, display_name=display_name)
+    db.execute(text("LOCK TABLE users IN SHARE ROW EXCLUSIVE MODE"))
+    max_id = db.query(func.max(models.User.id)).scalar()
+    new_user_id = (max_id or 0) + 1
+
+    db_user = models.User(
+        id=new_user_id,
+        email=user.email,
+        hashed_password=hashed_password,
+        display_name=display_name
+    )
     
     expires = timedelta(hours=24)
     verification_token = security.create_access_token(data={"sub": f"verify:{db_user.email}"}, expires_delta=expires)
@@ -96,7 +105,16 @@ def create_oauth_user(db: Session, provider: str, user_info: dict):
             db.refresh(db_user)
             return db_user
 
-    user_data = {"display_name": clean_name, "email": email, "is_verified": True}
+    db.execute(text("LOCK TABLE users IN SHARE ROW EXCLUSIVE MODE"))
+    max_id = db.query(func.max(models.User.id)).scalar()
+    new_user_id = (max_id or 0) + 1
+
+    user_data = {
+        "id": new_user_id,
+        "display_name": clean_name, 
+        "email": email, 
+        "is_verified": True
+    }
     if provider == "github": user_data["github_id"] = str(user_info["id"])
     
     db_user = models.User(**user_data)
@@ -403,7 +421,6 @@ def search_contributions(db: Session, company_id: int, limit: int, **kwargs) -> 
         case((models.Contribution.id.in_(unlocked_subquery), True), else_=False).label("is_unlocked")
     ).filter(models.Contribution.status == "PROCESSED")
 
-    # Add dynamic filters from kwargs
     if kwargs.get('min_clarity') is not None:
         query = query.filter(models.Contribution.valuation_results['project_clarity_score'].astext.cast(sa.Float) >= kwargs['min_clarity'])
     if kwargs.get('min_arch') is not None:
@@ -528,7 +545,6 @@ def get_team_members(db: Session, company_id: int):
     return db.query(models.BusinessUser).filter(models.BusinessUser.company_id == company_id).order_by(models.BusinessUser.created_at).all()
 
 def create_invited_business_user(db: Session, invite_data: business_schemas.InviteCreate, company: models.Company):
-    # For invited users, generate a temporary random password. They would reset this via an email link.
     temp_password = secrets.token_urlsafe(16)
     hashed_password = security.get_password_hash(temp_password)
 
@@ -538,7 +554,7 @@ def create_invited_business_user(db: Session, invite_data: business_schemas.Invi
         full_name=invite_data.full_name,
         role=invite_data.role,
         company_id=company.id,
-        is_verified=True # Invited users are implicitly verified by an admin.
+        is_verified=True 
     )
     db.add(db_user)
     db.commit()
