@@ -2,10 +2,11 @@ import hashlib
 import json
 import re
 import secrets
+import sqlalchemy as sa
 from sqlalchemy.orm import Session
-from sqlalchemy import func, text, case, and_
+from sqlalchemy import func, text, case, and_, desc
 from fastapi import HTTPException, status
-from typing import Optional
+from typing import Optional, List, Dict
 from datetime import datetime, timedelta, timezone
 
 from app.core import security, config
@@ -339,27 +340,17 @@ def get_business_user_by_id(db: Session, user_id: int) -> Optional[models.Busine
 def get_business_user_by_email(db: Session, email: str) -> Optional[models.BusinessUser]:
     return db.query(models.BusinessUser).filter(models.BusinessUser.email == email).first()
 
-def get_company_by_name(db: Session, name: str) -> Optional[models.Company]:
-    return db.query(models.Company).filter(models.Company.name == name).first()
-
 def create_business_user(db: Session, user_data: business_schemas.BusinessUserCreate) -> models.BusinessUser:
-    company = get_company_by_name(db, name=user_data.company_name)
-    if not company:
-        company = models.Company(
-            name=user_data.company_name,
-            company_size=user_data.company_size,
-            industry=user_data.industry
-        )
-        db.add(company)
-        db.commit()
-        db.refresh(company)
-    else:
-        if user_data.company_size:
-            company.company_size = user_data.company_size
-        if user_data.industry:
-            company.industry = user_data.industry
-        db.commit()
-        db.refresh(company)
+    company = models.Company(
+        name=user_data.company_name,
+        company_size=user_data.company_size,
+        industry=user_data.industry,
+        plan="free",
+        token_balance=0
+    )
+    db.add(company)
+    db.commit()
+    db.refresh(company)
 
     hashed_password = security.get_password_hash(user_data.password)
     
@@ -385,7 +376,10 @@ def create_business_user(db: Session, user_data: business_schemas.BusinessUserCr
 
 def get_company_by_api_key(db: Session, api_key: str) -> Optional[models.Company]:
     hashed_key = hashlib.sha256(api_key.encode()).hexdigest()
-    api_key_obj = db.query(models.ApiKey).filter(models.ApiKey.key_hash == hashed_key).first()
+    api_key_obj = db.query(models.ApiKey).filter(
+        models.ApiKey.key_hash == hashed_key,
+        models.ApiKey.is_active == True
+    ).first()
     return api_key_obj.company if api_key_obj else None
 
 def get_api_keys_for_company(db: Session, company_id: int) -> list[models.ApiKey]:
@@ -508,6 +502,33 @@ def get_dashboard_stats(db: Session, company_id: int):
         "team_member_count": team_member_count
     }
 
+def get_api_key_usage_summary(db: Session, company_id: int, start_date: datetime) -> List[Dict]:
+    results = db.query(
+        models.ApiKey.name,
+        models.ApiKey.key_prefix,
+        models.ApiKey.is_active,
+        func.sum(models.ApiKeyUsageEvent.tokens_used).label('total_tokens')
+    ).join(models.ApiKeyUsageEvent, models.ApiKey.id == models.ApiKeyUsageEvent.api_key_id)\
+    .filter(
+        models.ApiKey.company_id == company_id,
+        models.ApiKeyUsageEvent.created_at >= start_date
+    ).group_by(models.ApiKey.id).order_by(desc('total_tokens')).all()
+    
+    all_keys = db.query(models.ApiKey).filter(models.ApiKey.company_id == company_id).all()
+    
+    usage_map = {res.key_prefix: res.total_tokens for res in results}
+    
+    summary = []
+    for key in all_keys:
+        summary.append({
+            "name": key.name,
+            "key_prefix": key.key_prefix,
+            "is_active": key.is_active,
+            "total_tokens": usage_map.get(key.key_prefix, 0)
+        })
+
+    return sorted(summary, key=lambda x: x['total_tokens'], reverse=True)
+
 def get_usage_stats_by_day(db: Session, company_id: int, start_date: datetime):
     results = db.query(
         func.date(models.ApiKeyUsageEvent.created_at).label('date'),
@@ -524,6 +545,7 @@ def get_usage_stats_by_day(db: Session, company_id: int, start_date: datetime):
 
 def get_recently_unlocked_contributions(db: Session, company_id: int, limit: int = 5):
     results = db.query(models.UnlockedContribution)\
+        .join(models.Contribution)\
         .filter(models.UnlockedContribution.company_id == company_id)\
         .order_by(models.UnlockedContribution.unlocked_at.desc())\
         .limit(limit).all()

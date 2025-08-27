@@ -58,6 +58,7 @@
         @apply fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 animate-fade-in;
     }
 
+    /* New Styles for Data Explorer */
     @keyframes pulse {
         50% {
             opacity: .5;
@@ -70,10 +71,15 @@
         @apply bg-gray-200 rounded;
     }
     .code-preview-block {
-        -ms-overflow-style: none;
-        scrollbar-width: none;
+        -ms-overflow-style: none;  /* IE and Edge */
+        scrollbar-width: none;  /* Firefox */
     }
     .code-preview-block::-webkit-scrollbar {
-        display: none;
+        display: none; /* Chrome, Safari, and Opera */
+    }
+    .code-preview-block.locked pre {
+        @apply blur-sm;
+        -webkit-mask-image: linear-gradient(to bottom, black 50%, transparent 100%);
+        mask-image: linear-gradient(to bottom, black 50%, transparent 100%);
     }
 }

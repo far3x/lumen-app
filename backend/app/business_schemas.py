@@ -56,8 +56,14 @@ class ApiKeyInfo(BaseModel):
     class Config:
         from_attributes = True
 
+class ApiKeyUsageSummary(BaseModel):
+    name: str
+    key_prefix: str
+    is_active: bool
+    total_tokens: int
+
 class ApiKeyCreate(BaseModel):
-    name: str = Field(..., min_length=3)
+    name: str = Field(..., min_length=3, max_length=50)
     key: Optional[str] = None
 
 class ContributionPreview(BaseModel):

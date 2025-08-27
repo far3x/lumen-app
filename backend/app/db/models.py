@@ -127,7 +127,7 @@ class ContactSubmission(Base):
 class Company(Base):
     __tablename__ = "companies"
     id = Column(Integer, primary_key=True, index=True)
-    name = Column(String, index=True, unique=True, nullable=False)
+    name = Column(String, index=True, unique=False, nullable=False)
     plan = Column(String, default="free", nullable=False)
     token_balance = Column(BigInteger, default=0, nullable=False)
     company_size = Column(String, nullable=True)
@@ -136,6 +136,8 @@ class Company(Base):
     users = relationship("BusinessUser", back_populates="company", cascade="all, delete-orphan")
     api_keys = relationship("ApiKey", back_populates="company", cascade="all, delete-orphan")
     unlocked_contributions = relationship("UnlockedContribution", back_populates="company")
+    billing_history = relationship("BillingHistory", back_populates="company", cascade="all, delete-orphan")
+    invitations = relationship("TeamInvitation", back_populates="company", cascade="all, delete-orphan")
 
 class BusinessUser(Base):
     __tablename__ = "business_users"
@@ -147,7 +149,7 @@ class BusinessUser(Base):
     role = Column(String, default="member", nullable=False)
     is_verified = Column(Boolean, default=False, nullable=False)
     verification_token = Column(String, nullable=True)
-    company_id = Column(Integer, ForeignKey("companies.id"), nullable=False)
+    company_id = Column(Integer, ForeignKey("companies.id"), nullable=True)
     created_at = Column(DateTime(timezone=True), server_default=func.now())
     company = relationship("Company", back_populates="users")
 
@@ -206,3 +208,25 @@ class ApiKeyUsageEvent(Base):
     created_at = Column(DateTime(timezone=True), server_default=func.now(), index=True)
 
     api_key = relationship("ApiKey", back_populates="usage_events")
+
+class BillingHistory(Base):
+    __tablename__ = "billing_history"
+    id = Column(Integer, primary_key=True, index=True)
+    company_id = Column(Integer, ForeignKey("companies.id", ondelete="CASCADE"), nullable=False)
+    date = Column(DateTime(timezone=True), server_default=func.now(), nullable=False)
+    description = Column(String, nullable=False)
+    amount_usd = Column(Float, nullable=False)
+    status = Column(String, nullable=False, default="paid") # e.g., 'paid', 'pending', 'failed'
+    invoice_url = Column(String, nullable=True)
+    company = relationship("Company", back_populates="billing_history")
+
+class TeamInvitation(Base):
+    __tablename__ = "team_invitations"
+    id = Column(Integer, primary_key=True, index=True)
+    company_id = Column(Integer, ForeignKey("companies.id", ondelete="CASCADE"), nullable=False)
+    email = Column(String, nullable=False, index=True)
+    token = Column(String, unique=True, index=True, nullable=False)
+    status = Column(String, nullable=False, server_default="pending") # 'pending', 'accepted', 'expired'
+    expires_at = Column(DateTime(timezone=True), nullable=False)
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
+    company = relationship("Company", back_populates="invitations")

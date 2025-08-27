@@ -92,11 +92,118 @@ async function fetchTeam() {
 }
 
 function showInviteModal() {
-    // ... modal logic for inviting a user
+    const modalId = 'invite-member-modal';
+    if(document.getElementById(modalId)) return;
+
+    const modalHtml = `
+    <div id="${modalId}" class="modal-overlay">
+        <div class="bg-app-surface w-full max-w-md rounded-xl border border-app-border shadow-2xl">
+            <header class="p-4 border-b border-app-border flex justify-between items-center">
+                <h2 class="text-lg font-bold text-text-headings">Invite Team Member</h2>
+                <button class="modal-close-btn p-1 text-text-muted rounded-full hover:bg-app-accent-hover">&times;</button>
+            </header>
+            <div id="invite-modal-content" class="p-6">
+                 <form id="invite-member-form" class="space-y-4">
+                    <div>
+                        <label for="invite-name" class="form-label">Full Name</label>
+                        <input type="text" id="invite-name" required class="form-input">
+                    </div>
+                    <div>
+                        <label for="invite-email" class="form-label">Email Address</label>
+                        <input type="email" id="invite-email" required class="form-input">
+                    </div>
+                    <div id="modal-error-message" class="hidden text-red-600 text-sm"></div>
+                    <button type="submit" class="btn btn-primary w-full mt-2">Send Invitation</button>
+                </form>
+            </div>
+        </div>
+    </div>`;
+    document.body.insertAdjacentHTML('beforeend', modalHtml);
+    document.body.classList.add('modal-open');
+
+    const modal = document.getElementById(modalId);
+    const closeModal = () => {
+        modal.remove();
+        if (document.querySelectorAll('.modal-overlay').length === 0) {
+            document.body.classList.remove('modal-open');
+        }
+    };
+    modal.querySelector('.modal-close-btn').addEventListener('click', closeModal);
+    document.getElementById('invite-member-form').addEventListener('submit', (e) => handleInviteSubmit(e, closeModal));
+}
+
+async function handleInviteSubmit(e, closeModal) {
+    e.preventDefault();
+    const form = e.target;
+    const name = form.querySelector('#invite-name').value;
+    const email = form.querySelector('#invite-email').value;
+    const errorEl = form.querySelector('#modal-error-message');
+    const submitBtn = form.querySelector('button[type="submit"]');
+
+    errorEl.classList.add('hidden');
+    submitBtn.disabled = true;
+    submitBtn.innerHTML = `<span class="animate-spin inline-block w-5 h-5 border-2 border-transparent border-t-white rounded-full"></span> Sending...`;
+
+    try {
+        await api.post('/business/team/invite', { full_name: name, email, role: 'member' });
+        
+        const contentArea = document.getElementById('invite-modal-content');
+        contentArea.innerHTML = `
+            <div class="text-center py-8">
+                <h3 class="font-semibold text-text-headings">Invitation Sent!</h3>
+                <p class="text-sm text-text-muted mt-2">An invitation has been sent to ${email}. They will need to check their inbox to get started.</p>
+                <button id="invite-success-close" class="btn btn-secondary mt-4">Close</button>
+            </div>
+        `;
+        document.getElementById('invite-success-close').addEventListener('click', closeModal);
+        await fetchTeam();
+    } catch (error) {
+        errorEl.textContent = error.response?.data?.detail || 'Failed to send invitation.';
+        errorEl.classList.remove('hidden');
+        submitBtn.disabled = false;
+        submitBtn.innerHTML = 'Send Invitation';
+    }
 }
 
 function showRemoveMemberModal(userId, userName) {
-    // ... modal logic for removing a user
+    const modalId = 'remove-member-modal';
+    if(document.getElementById(modalId)) return;
+
+    const modalHtml = `
+    <div id="${modalId}" class="modal-overlay">
+        <div class="bg-app-surface w-full max-w-md rounded-xl border border-app-border shadow-2xl">
+            <header class="p-4 border-b border-app-border"><h2 class="text-lg font-bold text-red-700">Remove Team Member</h2></header>
+            <div class="p-6">
+                 <p class="text-text-body">Are you sure you want to remove <strong class="font-semibold text-text-headings">${userName}</strong> from the team? This action is permanent.</p>
+                 <div class="flex gap-4 mt-6">
+                    <button id="cancel-remove-btn" class="btn btn-secondary w-full">Cancel</button>
+                    <button id="confirm-remove-btn" class="btn btn-danger w-full">Remove Member</button>
+                 </div>
+            </div>
+        </div>
+    </div>`;
+    document.body.insertAdjacentHTML('beforeend', modalHtml);
+    document.body.classList.add('modal-open');
+
+    const modal = document.getElementById(modalId);
+    const closeModal = () => {
+        modal.remove();
+        if (document.querySelectorAll('.modal-overlay').length === 0) {
+            document.body.classList.remove('modal-open');
+        }
+    };
+    modal.querySelector('#cancel-remove-btn').addEventListener('click', closeModal);
+    document.getElementById('confirm-remove-btn').addEventListener('click', () => handleRemoveSubmit(userId, closeModal));
+}
+
+async function handleRemoveSubmit(userId, closeModal) {
+    try {
+        await api.delete(`/business/team/${userId}`);
+        closeModal();
+        await fetchTeam();
+    } catch (error) {
+        alert('Failed to remove team member. Please try again.');
+    }
 }
 
 function initialize() {
