@@ -81,23 +81,9 @@ export function renderLandingPage() {
                             <a href="/docs" class="font-semibold text-text-body hover:text-text-headings transition-colors">View Documentation &rarr;</a>
                         </div>
                     </div>
-                    <div class="h-96 bg-background rounded-lg border border-border flex items-center justify-center scroll-animate animate-delay-1" style="transform: translateY(2rem);">
-                         <p class="text-text-muted">Product Screenshot Placeholder</p>
+                    <div class="bg-background rounded-lg border border-border shadow-xl overflow-hidden scroll-animate animate-delay-1" style="transform: translateY(2rem);">
+                         <img src="/dashboard-preview.png" alt="Lumen Business Dashboard Preview" class="w-full h-full object-cover object-top">
                     </div>
-                </div>
-            </div>
-        </section>
-
-        <!-- SOCIAL PROOF (DARK SECTION) -->
-        <section class="py-24 md:py-32 bg-dark-surface text-white">
-            <div class="container mx-auto px-6 max-w-6xl text-center">
-                 <div class="max-w-3xl mx-auto scroll-animate" style="transform: translateY(2rem);">
-                    <p class="section-label">Customer Stories</p>
-                    <h2 class="text-4xl md:text-5xl font-bold">Industry leaders are data + AI companies</h2>
-                    <p class="mt-6 text-lg text-gray-300">Our partners achieve breakthroughs, innovate faster, and drive down costs. See how they do it with Lumen.</p>
-                </div>
-                <div class="mt-20 h-48 bg-black/20 rounded-lg border border-white/10 flex items-center justify-center scroll-animate animate-delay-1" style="transform: translateY(2rem);">
-                     <p class="text-white/30">soon...</p>
                 </div>
             </div>
         </section>

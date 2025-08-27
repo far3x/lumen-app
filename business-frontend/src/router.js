@@ -11,6 +11,7 @@ import { renderHeader as renderMarketingHeader } from './components/header.js';
 import { renderFooter as renderMarketingFooter } from './components/footer.js';
 import { isAuthenticated } from './lib/auth.js';
 import { stateService } from './lib/state.js';
+import { renderProductPage } from './pages/product.js';
 
 const app = document.getElementById('app');
 const headerContainer = document.getElementById('header-container');
@@ -27,7 +28,7 @@ const marketingRoutes = {
     '/signup': renderSignupPage,
     '/verify': renderVerifyPage,
     '/check-email': renderCheckEmailPage,
-    '/product': () => renderPlaceholderPage('Our Product'),
+    '/product': renderProductPage,
     '/docs': () => renderPlaceholderPage('Documentation'),
     '/about': () => renderPlaceholderPage('About Us'),
     '/privacy': () => renderPlaceholderPage('Privacy Policy'),

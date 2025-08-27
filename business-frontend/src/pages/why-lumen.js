@@ -111,13 +111,13 @@ export function renderWhyLumenPage() {
         </section>
 
         <!-- FINAL CTA -->
-        <section class="py-24 md:py-32 bg-dark-surface text-white text-center">
+        <section class="py-24 md:py-32 bg-white text-center">
             <div class="container mx-auto px-6">
-                <h2 class="text-4xl md:text-5xl font-bold">Ready to Build the Future?</h2>
-                <p class="mt-6 max-w-2xl mx-auto text-lg text-gray-300">See for yourself how Lumen's strategic data can transform your AI development pipeline. Book a demo with our team today.</p>
+                <h2 class="text-4xl md:text-5xl font-bold text-text-headings">Ready to Build the Future?</h2>
+                <p class="mt-6 max-w-2xl mx-auto text-lg text-text-body">See for yourself how Lumen's strategic data can transform your AI development pipeline. Book a demo with our team today.</p>
                 <div class="mt-10 flex flex-col sm:flex-row justify-center items-center gap-6">
                     <a href="/contact" class="px-8 py-3 font-semibold text-white bg-accent-gradient rounded-md transition-all duration-300 hover:scale-105 hover:brightness-110">Book a Demo</a>
-                    <a href="/product" class="font-semibold text-white hover:opacity-80 transition-opacity">Explore our Product &rarr;</a>
+                    <a href="/product" class="font-semibold text-text-headings hover:text-primary transition-colors">Explore our Product &rarr;</a>
                 </div>
             </div>
         </section>
