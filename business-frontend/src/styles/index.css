@@ -57,4 +57,23 @@
     .modal-overlay {
         @apply fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 animate-fade-in;
     }
+
+    @keyframes pulse {
+        50% {
+            opacity: .5;
+        }
+    }
+    .skeleton-loader {
+        @apply animate-pulse space-y-2;
+    }
+    .skeleton-line {
+        @apply bg-gray-200 rounded;
+    }
+    .code-preview-block {
+        -ms-overflow-style: none;
+        scrollbar-width: none;
+    }
+    .code-preview-block::-webkit-scrollbar {
+        display: none;
+    }
 }
