@@ -96,8 +96,9 @@ export const docPages = {
         content: () => import('./content/protocol/tokenomics.js').then(m => m.renderTokenomics()), 
         toc: [
             { id: 'protocol-economy', title: 'The Protocol Economy' },
-            { id: 'rewards-mechanism', title: 'The Rewards Mechanism' },
-            { id: 'economic-loop', title: 'The Economic Loop' }
+            { id: 'genesis-phase', title: 'Phase 1: The Genesis Phase' },
+            { id: 'sustainable-economy', title: 'Phase 2: The Sustainable Economy' },
+            { id: 'lum-utility', title: 'The Role of the LUM Token' }
         ]
     },
     'governance': { 
