@@ -1,27 +1,40 @@
 export const renderTokenomics = () => `
     <h1 id="protocol-economy">The Protocol Economy</h1>
-    <p class="lead text-xl text-text-secondary">The Lumen Protocol is powered by a sustainable economic model designed to fairly reward developers for the value they create. The system is fueled by real-world revenue and pays out in a stable, trusted digital asset (USDC).</p>
+    <p class="lead text-xl text-text-secondary">Lumen's tokenomy is the engine of our ecosystem. It is designed for long term sustainability and is fueled by real world utility. The system ensures that every participant, from individual developers to enterprise data consumers, is incentivized to contribute to the network's growth.</p>
 
-    <h2 id="rewards-mechanism">The Rewards Mechanism for Developers</h2>
-    <p>Your reward is calculated in USD from the moment your contribution is valued. This provides a clear and stable understanding of the value you've created, insulated from market volatility. These accrued USD balances are then paid out automatically in daily batches.</p>
-    <blockquote>We utilize the Solana blockchain for its high speed and near-zero transaction fees. Payouts are made in USDC, a stablecoin pegged 1:1 with the US Dollar. This ensures that when you receive your rewards, you keep what you have earned without losing value to network costs or price fluctuations.</blockquote>
-    
+    <h2 id="genesis-phase">Phase 1: The Genesis Phase (Current State)</h2>
+    <p>We are currently in the Genesis Phase, a critical period of strategic data acquisition. Unlike protocols that rely on future promises, we are actively deploying our own capital to reward contributors with real world value today. Our private investors are funding a robust rewards pool to build the foundational dataset that will power the entire network.</p>
+    <ul>
+        <li><strong>Immediate USDC Rewards:</strong> Your contributions are appraised by our valuation engine and assigned a direct USD value. This value accrues in your account and is paid out automatically in USDC, a stablecoin pegged 1:1 to the US Dollar. The value you earn is the value you receive.</li>
+        <li><strong>Permanent Reward Multiplier:</strong> As a reward for your early belief in our vision, all Genesis Contributors receive a permanent boost to their account's reward multiplier. This means you will continue to earn more for your contributions, forever.</li>
+    </ul>
+    <blockquote>Contributing now is a unique opportunity. You are not just a user; you are a foundational partner, earning immediate rewards while securing an enhanced stake in the future success of the network.</blockquote>
+
+    <h2 id="sustainable-economy">Phase 2: The Sustainable Economy</h2>
+    <p>The current investment in data acquisition is the bridge to our long term, self sustaining economic model. Once the protocol's dataset reaches critical mass and enterprise sales begin, this powerful economic flywheel will be activated.</p>
     <div class="my-8 p-6 bg-surface border border-primary rounded-lg">
-        <h3 id="flywheel-effect" class="font-bold text-lg text-text-main mb-2">The Economic Engine: A Direct Value Loop</h3>
-        <p class="text-text-secondary">Our business model is straightforward and sustainable. It directly connects the value of the data to the rewards paid to the developers who create it.</p>
+        <h3 id="flywheel-effect" class="font-bold text-lg text-text-main mb-2">The Enterprise Flywheel: Linking Revenue to Rewards</h3>
         <ol class="!my-4 list-decimal list-inside space-y-2">
-            <li><strong>Enterprise Revenue:</strong> AI companies and data consumers purchase access to Lumen's premium, proprietary datasets using traditional currency (e.g., USD or USDC). This real-world revenue is the engine of the entire system.</li>
-            <li><strong>Funding the Treasury:</strong> This revenue directly funds the protocol's treasury wallet.</li>
-            <li><strong>Daily Developer Payouts:</strong> Every 24 hours, the protocol automatically distributes the accrued rewards from the treasury to contributors in the form of USDC.</li>
+            <li><strong>Enterprise Revenue:</strong> AI companies purchase access to Lumen's premium, proprietary datasets, generating real world revenue in USDC.</li>
+            <li><strong>Funding the Treasury:</strong> This revenue directly funds the protocol's treasury, creating a sustainable source for rewards.</li>
+            <li><strong>Developer Payouts:</strong> The protocol continues its daily, automated USDC payouts to contributors, now funded by enterprise revenue instead of initial investor capital.</li>
         </ol>
-        <p>This model creates a direct, transparent link between the commercial success of the data marketplace and the rewards paid to our community. The value is driven by utility, not speculation.</p>
+        <p>This model creates a direct, transparent, and sustainable link between the commercial success of the data marketplace and the rewards paid to our community of developers.</p>
     </div>
 
-    <h2 id="economic-loop">The Role of the $LUMEN Token</h2>
-    <p>While daily rewards are paid in USDC for stability, the native protocol token, $LUMEN, will serve critical functions within the ecosystem, primarily focused on governance and utility.</p>
+    <h2 id="lum-utility">The Role of the LUM Token: Utility & Governance</h2>
+    <p>While daily rewards are paid in USDC for stability, the native protocol token, LUM, serves critical functions within the ecosystem. The demand for LUM is driven entirely by its utility, making it essential for unlocking the protocol's most valuable features.</p>
+    
+    <h3>Staking: The Key to Enhanced Value</h3>
+    <p>Staking LUM is the mechanism for participants to signal their long term commitment and unlock enhanced privileges.</p>
     <ul>
-        <li><strong>Governance:</strong> $LUMEN holders will have the power to vote on Lumen Improvement Proposals (LIPs), shaping the future of the protocol's features, fee structures, and treasury management.</li>
-        <li><strong>Staking & Data Access:</strong> In future phases, staking $LUMEN may be required for certain tiers of data access or to receive a share of protocol fees, aligning long-term holders with the success of the network.</li>
+        <li><strong>For Data Consumers: The Lumen Index.</strong> The highest tier of contributions, as ranked by our valuation engine, is reserved for an exclusive pool called the Lumen Index. To gain API access to this premium data, companies must purchase and stake LUM tokens. This creates powerful, non speculative demand from our most capitalized users.</li>
+        <li><strong>For Developers: Multiplier Staking.</strong> Contributors can stake LUM to increase their personal Reward Multiplier. This creates a powerful feedback loop: contribute, earn USDC, use it to acquire and stake LUM, and earn even more on future contributions.</li>
     </ul>
-    <p>This dual-asset model provides the best of both worlds: the stability of USDC for immediate, tangible rewards, and the utility of $LUMEN for long-term governance and participation in the protocol's success.</p>
-`
+
+    <h3>Buybacks & Burns: Linking Revenue to Scarcity</h3>
+    <p>A portion of all USDC revenue generated from enterprise data sales will be used to perform an automated, on market buy back of LUM tokens. These purchased tokens will then be transparently burned, permanently reducing the total supply. As protocol revenue grows, the token supply systematically shrinks, directly linking our commercial success to token scarcity.</p>
+
+    <h3>Governance: Shaping the Future</h3>
+    <p>LUM holders will have the power to vote on Lumen Improvement Proposals (LIPs), giving them direct control over the protocol's future. This includes key decisions on the valuation engine, fee mechanics, and treasury management, ensuring Lumen evolves into a true piece of community owned infrastructure.</p>
+`;
