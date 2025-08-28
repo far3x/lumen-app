@@ -22,19 +22,19 @@ export const renderTokenomics = () => `
         <p>This model creates a direct, transparent, and sustainable link between the commercial success of the data marketplace and the rewards paid to our community of developers.</p>
     </div>
 
-    <h2 id="lum-utility">The Role of the LUM Token: Utility & Governance</h2>
-    <p>While daily rewards are paid in USDC for stability, the native protocol token, LUM, serves critical functions within the ecosystem. The demand for LUM is driven entirely by its utility, making it essential for unlocking the protocol's most valuable features.</p>
+    <h2 id="lum-utility">The Role of the LUMEN Token: Utility & Governance</h2>
+    <p>While daily rewards are paid in USDC for stability, the native protocol token, LUMEN, serves critical functions within the ecosystem. The demand for LUMEN is driven entirely by its utility, making it essential for unlocking the protocol's most valuable features.</p>
     
     <h3>Staking: The Key to Enhanced Value</h3>
-    <p>Staking LUM is the mechanism for participants to signal their long term commitment and unlock enhanced privileges.</p>
+    <p>Staking LUMEN is the mechanism for participants to signal their long term commitment and unlock enhanced privileges.</p>
     <ul>
-        <li><strong>For Data Consumers: The Lumen Index.</strong> The highest tier of contributions, as ranked by our valuation engine, is reserved for an exclusive pool called the Lumen Index. To gain API access to this premium data, companies must purchase and stake LUM tokens. This creates powerful, non speculative demand from our most capitalized users.</li>
-        <li><strong>For Developers: Multiplier Staking.</strong> Contributors can stake LUM to increase their personal Reward Multiplier. This creates a powerful feedback loop: contribute, earn USDC, use it to acquire and stake LUM, and earn even more on future contributions.</li>
+        <li><strong>For Data Consumers: The Lumen Index.</strong> The highest tier of contributions, as ranked by our valuation engine, is reserved for an exclusive pool called the Lumen Index. To gain API access to this premium data, companies must purchase and stake LUMEN tokens. This creates powerful, non speculative demand from our most capitalized users.</li>
+        <li><strong>For Developers: Multiplier Staking.</strong> Contributors can stake LUMEN to increase their personal Reward Multiplier. This creates a powerful feedback loop: contribute, earn USDC, use it to acquire and stake LUMEN, and earn even more on future contributions.</li>
     </ul>
 
     <h3>Buybacks & Burns: Linking Revenue to Scarcity</h3>
-    <p>A portion of all USDC revenue generated from enterprise data sales will be used to perform an automated, on market buy back of LUM tokens. These purchased tokens will then be transparently burned, permanently reducing the total supply. As protocol revenue grows, the token supply systematically shrinks, directly linking our commercial success to token scarcity.</p>
+    <p>A portion of all USDC revenue generated from enterprise data sales will be used to perform an automated, on market buy back of LUMEN tokens. These purchased tokens will then be transparently burned, permanently reducing the total supply. As protocol revenue grows, the token supply systematically shrinks, directly linking our commercial success to token scarcity.</p>
 
     <h3>Governance: Shaping the Future</h3>
-    <p>LUM holders will have the power to vote on Lumen Improvement Proposals (LIPs), giving them direct control over the protocol's future. This includes key decisions on the valuation engine, fee mechanics, and treasury management, ensuring Lumen evolves into a true piece of community owned infrastructure.</p>
+    <p>LUMEN holders will have the power to vote on Lumen Improvement Proposals (LIPs), giving them direct control over the protocol's future. This includes key decisions on the valuation engine, fee mechanics, and treasury management, ensuring Lumen evolves into a true piece of community owned infrastructure.</p>
 `;
