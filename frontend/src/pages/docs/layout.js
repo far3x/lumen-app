@@ -98,7 +98,7 @@ export const docPages = {
             { id: 'protocol-economy', title: 'The Protocol Economy' },
             { id: 'genesis-phase', title: 'Phase 1: The Genesis Phase' },
             { id: 'sustainable-economy', title: 'Phase 2: The Sustainable Economy' },
-            { id: 'lum-utility', title: 'The Role of the LUM Token' }
+            { id: 'lum-utility', title: 'The Role of the LUMEN Token' }
         ]
     },
     'governance': { 
