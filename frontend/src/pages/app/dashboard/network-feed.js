@@ -33,7 +33,7 @@ function renderActivityItem(item) {
                     <p class="text-text-secondary mt-1">
                         Amount: <strong class="font-medium text-accent-cyan">$${item.amount_usd.toFixed(4)} USDC</strong>
                     </p>
-                     <a href="https://solscan.io/tx/${item.transaction_hash}?cluster=devnet" target="_blank" rel="noopener noreferrer" class="text-xs text-accent-cyan hover:underline">View on Solscan</a>
+                     <a href="https://solscan.io/tx/${item.transaction_hash}" target="_blank" rel="noopener noreferrer" class="text-xs text-accent-cyan hover:underline">View on Solscan</a>
                 </div>
                 <span class="text-xs text-subtle font-mono whitespace-nowrap">${new Date(item.created_at).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' })}</span>
             </li>

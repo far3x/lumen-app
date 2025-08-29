@@ -10,7 +10,7 @@ class WalletService extends EventEmitter {
         super();
         this.adapter = null;
         this.publicKey = null;
-        this.network = WalletAdapterNetwork.Devnet;
+        this.network = WalletAdapterNetwork.Mainnet;
         this.connection = new Connection(clusterApiUrl(this.network));
         this.supportedWallets = [
             new PhantomWalletAdapter(),
