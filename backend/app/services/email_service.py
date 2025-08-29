@@ -49,12 +49,12 @@ class EmailService:
         )
         await self.fm.send_message(message, template_name="business_verification_email.html")
     
-    async def send_team_invitation_email(self, invited_by_name: str, company_name: str, invitee_email: str):
-        login_link = f"{settings.BUSINESS_FRONTEND_URL}/login"
+    async def send_new_user_invitation_email(self, invited_by_name: str, company_name: str, invitee_email: str, token: str):
+        signup_link = f"{settings.BUSINESS_FRONTEND_URL}/signup?invite_token={token}"
         template_body = {
             "invited_by_name": invited_by_name,
             "company_name": company_name,
-            "login_link": login_link,
+            "signup_link": signup_link,
             "year": datetime.now().year,
             "logo_url": settings.PUBLIC_LOGO_URL
         }
@@ -64,6 +64,24 @@ class EmailService:
             template_body=template_body,
             subtype="html"
         )
-        await self.fm.send_message(message, template_name="team_invitation_email.html")
+        await self.fm.send_message(message, template_name="team_invitation_new_user.html")
+
+    async def send_existing_user_invitation_email(self, invited_by_name: str, company_name: str, invitee_email: str, token: str):
+        accept_link = f"{settings.BUSINESS_FRONTEND_URL}/accept-invite?token={token}"
+        template_body = {
+            "invited_by_name": invited_by_name,
+            "company_name": company_name,
+            "accept_link": accept_link,
+            "year": datetime.now().year,
+            "logo_url": settings.PUBLIC_LOGO_URL
+        }
+        message = MessageSchema(
+            subject=f"You've been invited to join {company_name} on Lumen Protocol",
+            recipients=[invitee_email],
+            template_body=template_body,
+            subtype="html"
+        )
+        await self.fm.send_message(message, template_name="team_invitation_existing_user.html")
+
 
 email_service = EmailService()

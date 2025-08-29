@@ -4,7 +4,8 @@ import re
 import secrets
 import sqlalchemy as sa
 from sqlalchemy.orm import Session
-from sqlalchemy import func, text, case, and_, desc
+from sqlalchemy import func, text, case, and_, desc, or_
+from sqlalchemy.dialects import postgresql
 from fastapi import HTTPException, status
 from typing import Optional, List, Dict
 from datetime import datetime, timedelta, timezone
@@ -341,16 +342,30 @@ def get_business_user_by_email(db: Session, email: str) -> Optional[models.Busin
     return db.query(models.BusinessUser).filter(models.BusinessUser.email == email).first()
 
 def create_business_user(db: Session, user_data: business_schemas.BusinessUserCreate) -> models.BusinessUser:
-    company = models.Company(
-        name=user_data.company_name,
-        company_size=user_data.company_size,
-        industry=user_data.industry,
-        plan="free",
-        token_balance=0
-    )
-    db.add(company)
-    db.commit()
-    db.refresh(company)
+    company = None
+    if user_data.invite_token:
+        invitation = db.query(models.TeamInvitation).filter(
+            models.TeamInvitation.token == user_data.invite_token,
+            models.TeamInvitation.email == user_data.email,
+            models.TeamInvitation.status == 'pending',
+            models.TeamInvitation.expires_at > datetime.now(timezone.utc)
+        ).first()
+        if invitation:
+            company = invitation.company
+            invitation.status = 'accepted'
+            db.add(invitation)
+    
+    if not company:
+        company = models.Company(
+            name=user_data.company_name,
+            company_size=user_data.company_size,
+            industry=user_data.industry,
+            plan="free",
+            token_balance=0
+        )
+        db.add(company)
+        db.commit()
+        db.refresh(company)
 
     hashed_password = security.get_password_hash(user_data.password)
     
@@ -360,7 +375,7 @@ def create_business_user(db: Session, user_data: business_schemas.BusinessUserCr
         full_name=user_data.full_name,
         job_title=user_data.job_title,
         company_id=company.id,
-        role='admin'
+        role='admin' if not user_data.invite_token else 'member'
     )
     
     expires = timedelta(hours=24)
@@ -407,6 +422,15 @@ def revoke_api_key(db: Session, key_id: int, company_id: int):
     api_key.is_active = False
     db.commit()
 
+def get_distinct_contribution_languages(db: Session) -> List[str]:
+    query = text("""
+        SELECT DISTINCT key as language
+        FROM contributions, jsonb_object_keys(valuation_results->'language_breakdown') as key
+        WHERE status = 'PROCESSED' AND jsonb_typeof(valuation_results->'language_breakdown') = 'object'
+    """)
+    result = db.execute(query).fetchall()
+    return sorted([row[0] for row in result])
+
 def search_contributions(db: Session, company_id: int, limit: int, **kwargs) -> list[dict]:
     unlocked_subquery = db.query(models.UnlockedContribution.contribution_id).filter(models.UnlockedContribution.company_id == company_id).subquery()
     
@@ -415,12 +439,24 @@ def search_contributions(db: Session, company_id: int, limit: int, **kwargs) -> 
         case((models.Contribution.id.in_(unlocked_subquery), True), else_=False).label("is_unlocked")
     ).filter(models.Contribution.status == "PROCESSED")
 
+    if kwargs.get('keywords'):
+        query = query.filter(models.Contribution.valuation_results['analysis_summary'].astext.ilike(f"%{kwargs['keywords']}%"))
+
+    if kwargs.get('languages'):
+        # Use the ?| operator which checks if the JSONB object has any of the keys in the array
+        query = query.filter(models.Contribution.valuation_results['language_breakdown'].astext.cast(postgresql.JSONB).op('?|')(kwargs['languages']))
+    
+    if kwargs.get('min_tokens') is not None:
+        query = query.filter(models.Contribution.valuation_results['total_tokens'].astext.cast(sa.Integer) >= kwargs['min_tokens'])
+    if kwargs.get('max_tokens') is not None:
+        query = query.filter(models.Contribution.valuation_results['total_tokens'].astext.cast(sa.Integer) <= kwargs['max_tokens'])
+
     if kwargs.get('min_clarity') is not None:
-        query = query.filter(models.Contribution.valuation_results['project_clarity_score'].astext.cast(sa.Float) >= kwargs['min_clarity'])
+        query = query.filter(models.Contribution.valuation_results['project_clarity_score'].astext.cast(sa.Float) * 10 >= kwargs['min_clarity'])
     if kwargs.get('min_arch') is not None:
-        query = query.filter(models.Contribution.valuation_results['architectural_quality_score'].astext.cast(sa.Float) >= kwargs['min_arch'])
+        query = query.filter(models.Contribution.valuation_results['architectural_quality_score'].astext.cast(sa.Float) * 10 >= kwargs['min_arch'])
     if kwargs.get('min_quality') is not None:
-        query = query.filter(models.Contribution.valuation_results['code_quality_score'].astext.cast(sa.Float) >= kwargs['min_quality'])
+        query = query.filter(models.Contribution.valuation_results['code_quality_score'].astext.cast(sa.Float) * 10 >= kwargs['min_quality'])
     
     results = query.order_by(func.random()).limit(limit).all()
 
@@ -438,7 +474,7 @@ def search_contributions(db: Session, company_id: int, limit: int, **kwargs) -> 
             "arch_score": details.get("architectural_quality_score", 0) * 10,
             "quality_score": details.get("code_quality_score", 0) * 10,
             "is_unlocked": is_unlocked,
-            "code_preview": "\n".join(contrib.raw_content.splitlines()[:15])
+            "code_preview": "\n".join(contrib.raw_content.splitlines()[:20])
         })
     return previews
 
@@ -616,3 +652,19 @@ def update_business_user_profile(db: Session, user: models.BusinessUser, user_da
 def update_api_key_last_used(db: Session, api_key_id: int):
     db.query(models.ApiKey).filter(models.ApiKey.id == api_key_id).update({"last_used_at": datetime.now(timezone.utc)})
     db.commit()
+
+def create_team_invitation(db: Session, company: models.Company, email: str) -> models.TeamInvitation:
+    token = secrets.token_urlsafe(32)
+    expires_at = datetime.now(timezone.utc) + timedelta(days=3)
+    
+    invitation = models.TeamInvitation(
+        company_id=company.id,
+        email=email,
+        token=token,
+        status='pending',
+        expires_at=expires_at
+    )
+    db.add(invitation)
+    db.commit()
+    db.refresh(invitation)
+    return invitation

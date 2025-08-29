@@ -58,6 +58,20 @@
         @apply fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 animate-fade-in;
     }
 
+    .custom-checkbox {
+        @apply h-4 w-4 rounded border-gray-300 text-primary focus:ring-primary;
+    }
+
+    .toggle-switch {
+        @apply relative inline-flex items-center cursor-pointer;
+    }
+    .toggle-switch-input {
+        @apply sr-only;
+    }
+    .toggle-switch-bg {
+        @apply w-11 h-6 bg-gray-200 rounded-full after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all;
+    }
+
     /* New Styles for Data Explorer */
     @keyframes pulse {
         50% {
@@ -78,7 +92,6 @@
         display: none; /* Chrome, Safari, and Opera */
     }
     .code-preview-block.locked pre {
-        @apply blur-sm;
         -webkit-mask-image: linear-gradient(to bottom, black 50%, transparent 100%);
         mask-image: linear-gradient(to bottom, black 50%, transparent 100%);
     }
