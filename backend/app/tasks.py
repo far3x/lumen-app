@@ -124,9 +124,23 @@ def send_business_verification_email_task(email: str, token: str):
     logger.info(f"Business verification email sent to {email}")
 
 @celery_app.task
-def send_team_invitation_email_task(invited_by_name: str, company_name: str, invitee_email: str):
-    asyncio.run(email_service.send_team_invitation_email(invited_by_name, company_name, invitee_email))
-    logger.info(f"Team invitation email sent to {invitee_email} for company {company_name}")
+def send_team_invitation_email_task(
+    invited_by_name: str, company_name: str, invitee_email: str, invite_token: str, user_exists: bool
+):
+    if user_exists:
+        asyncio.run(
+            email_service.send_existing_user_invitation_email(
+                invited_by_name, company_name, invitee_email, invite_token
+            )
+        )
+        logger.info(f"Team invitation email sent to EXISTING user {invitee_email} for company {company_name}")
+    else:
+        asyncio.run(
+            email_service.send_new_user_invitation_email(
+                invited_by_name, company_name, invitee_email, invite_token
+            )
+        )
+        logger.info(f"Team invitation email sent to NEW user {invitee_email} for company {company_name}")
 
 def publish_user_update(db, user_id: int, event_type: str, payload: dict):
     message = { "type": event_type, "payload": payload }

@@ -14,12 +14,16 @@ from app.tasks import send_business_verification_email_task
 router = APIRouter(prefix="/business", tags=["Business Authentication"])
 
 @router.post("/register", status_code=status.HTTP_202_ACCEPTED)
+@limiter.limit("10/day")
 async def register_business_user(request: Request, user_data: BusinessUserCreate, db: Session = Depends(database.get_db)):
     await verify_recaptcha(user_data.recaptcha_token)
 
     db_user = crud.get_business_user_by_email(db, email=user_data.email)
     if db_user:
-        return {"message": "If an account with this email does not already exist, a verification email has been sent."}
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail="A user with this email already exists."
+        )
 
     new_user = crud.create_business_user(db, user_data=user_data)
     
@@ -28,10 +32,10 @@ async def register_business_user(request: Request, user_data: BusinessUserCreate
         token=new_user.verification_token
     )
     
-    return {"message": "If an account with this email does not already exist, a verification email has been sent."}
+    return {"message": "Verification email has been sent. Please check your inbox to activate your account."}
 
 @router.post("/login", response_model=BusinessToken)
-@limiter.limit("10/minute")
+@limiter.limit("20/hour")
 async def login_business_user(request: Request, form_data: OAuth2PasswordRequestForm = Depends(), db: Session = Depends(database.get_db)):
     user = crud.get_business_user_by_email(db, email=form_data.username)
     if not user or not security.verify_password(form_data.password, user.hashed_password):

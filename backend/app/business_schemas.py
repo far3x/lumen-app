@@ -11,6 +11,7 @@ class BusinessUserCreate(BaseModel):
     company_size: Optional[str] = Field(None, max_length=255)
     industry: Optional[str] = Field(None, max_length=255)
     recaptcha_token: str
+    invite_token: Optional[str] = None
 
 class BusinessUserLogin(BaseModel):
     email: EmailStr
@@ -83,11 +84,13 @@ class FullContribution(BaseModel):
     raw_content: str
 
 class ContributionSearchResult(BaseModel):
-    keywords: Optional[str] = None
-    min_clarity: Optional[float] = Field(None, ge=0, le=1)
-    min_arch: Optional[float] = Field(None, ge=0, le=1)
-    min_quality: Optional[float] = Field(None, ge=0, le=1)
+    keywords: Optional[str] = Field(None, max_length=255)
     languages: Optional[List[str]] = None
+    min_tokens: Optional[int] = Field(None, ge=0)
+    max_tokens: Optional[int] = Field(None, ge=0)
+    min_clarity: Optional[float] = Field(None, ge=0, le=10)
+    min_arch: Optional[float] = Field(None, ge=0, le=10)
+    min_quality: Optional[float] = Field(None, ge=0, le=10)
     limit: int = 20
 
 class DashboardStats(BaseModel):

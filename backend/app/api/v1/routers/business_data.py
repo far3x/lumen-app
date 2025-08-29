@@ -38,25 +38,34 @@ async def get_unlocked_contributions(company: models.Company = Depends(get_curre
 async def get_team_members(company: models.Company = Depends(get_current_company_from_user), db: Session = Depends(database.get_db)):
     return crud.get_team_members(db, company_id=company.id)
 
-@router.post("/team/invite", response_model=TeamMember, status_code=status.HTTP_201_CREATED)
+@router.post("/team/invite", status_code=status.HTTP_202_ACCEPTED)
 async def invite_team_member(
     invite_data: InviteCreate,
     company: models.Company = Depends(get_current_company_from_user),
     admin_user: models.BusinessUser = Depends(get_current_admin_user),
     db: Session = Depends(database.get_db)
 ):
-    if crud.get_business_user_by_email(db, email=invite_data.email):
-        raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="A user with this email already exists.")
+    existing_user_in_company = db.query(models.BusinessUser).filter(
+        models.BusinessUser.email == invite_data.email,
+        models.BusinessUser.company_id == company.id
+    ).first()
+    if existing_user_in_company:
+        raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="This user is already a member of your team.")
+
+    invitation = crud.create_team_invitation(db, company=company, email=invite_data.email)
     
-    new_user = crud.create_invited_business_user(db, invite_data=invite_data, company=company)
-    
+    user_exists = crud.get_business_user_by_email(db, email=invite_data.email) is not None
+
     send_team_invitation_email_task.delay(
         invited_by_name=admin_user.full_name,
         company_name=company.name,
-        invitee_email=new_user.email
+        invitee_email=invite_data.email,
+        invite_token=invitation.token,
+        user_exists=user_exists
     )
 
-    return new_user
+    return {"message": "Invitation sent successfully."}
+
 
 @router.delete("/team/{user_id}", status_code=status.HTTP_204_NO_CONTENT)
 async def remove_team_member(
@@ -102,21 +111,30 @@ async def revoke_api_key(key_id: int, company: models.Company = Depends(get_curr
     crud.revoke_api_key(db, key_id=key_id, company_id=company.id)
     return
 
+@router.get("/data/languages", response_model=List[str])
+async def get_contribution_languages(db: Session = Depends(database.get_db)):
+    return crud.get_distinct_contribution_languages(db)
+
 @router.post("/data/search", response_model=List[ContributionPreview])
 async def search_contributions(
     search_params: ContributionSearchResult, 
     company: models.Company = Depends(get_current_company_from_user), 
     db: Session = Depends(database.get_db)
 ):
+    if search_params.min_tokens is not None and search_params.max_tokens is not None and search_params.min_tokens > search_params.max_tokens:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="min_tokens cannot be greater than max_tokens")
+
     results = crud.search_contributions(
         db, 
         company_id=company.id, 
         limit=search_params.limit,
         keywords=search_params.keywords,
+        languages=search_params.languages,
+        min_tokens=search_params.min_tokens,
+        max_tokens=search_params.max_tokens,
         min_clarity=search_params.min_clarity,
         min_arch=search_params.min_arch,
         min_quality=search_params.min_quality,
-        languages=search_params.languages
     )
     return results
 

@@ -2,6 +2,16 @@ import api from '../../lib/api.js';
 import { stateService } from '../../lib/state.js';
 
 let company = stateService.getState().company;
+let availableLanguages = [];
+let activeFilters = {
+    keywords: '',
+    languages: [],
+    min_tokens: null,
+    max_tokens: null,
+    quality: { active: false, value: 7.0 },
+    clarity: { active: false, value: 7.0 },
+    arch: { active: false, value: 7.0 },
+};
 
 function renderSkeletonLoader() {
     return Array(5).fill('').map(() => `
@@ -12,24 +22,15 @@ function renderSkeletonLoader() {
     `).join('');
 }
 
-export function attachDataExplorerListeners() {
+export async function attachDataExplorerListeners() {
     company = stateService.getState().company;
     if (company && company.plan === 'free') {
-        return; 
+        return;
     }
-
-    document.querySelectorAll('.filter-slider').forEach(slider => {
-        const valueDisplay = document.getElementById(`${slider.id}-value`);
-        if (valueDisplay) {
-            valueDisplay.textContent = (slider.value / 10).toFixed(1);
-            slider.addEventListener('input', (e) => {
-                valueDisplay.textContent = (e.target.value / 10).toFixed(1);
-            });
-        }
-    });
-
+    await fetchLanguages();
+    renderFilterPanel();
     document.getElementById('apply-filters-btn')?.addEventListener('click', handleSearch);
-    
+    document.getElementById('reset-filters-btn')?.addEventListener('click', handleResetFilters);
     handleSearch();
 }
 
@@ -39,6 +40,91 @@ function handleResultItemClick(e) {
     document.querySelectorAll('.result-item').forEach(el => el.classList.remove('border-primary', 'bg-app-accent-hover'));
     itemElement.classList.add('border-primary', 'bg-app-accent-hover');
     renderDetailView(itemData);
+}
+
+async function fetchLanguages() {
+    try {
+        const response = await api.get('/business/data/languages');
+        availableLanguages = response.data;
+    } catch (error) {
+        console.error("Failed to fetch languages:", error);
+        availableLanguages = [];
+    }
+}
+
+function renderFilterPanel() {
+    const container = document.getElementById('filter-panel-container');
+    if (!container) return;
+
+    const scoreFilter = (id, label) => `
+        <div>
+            <div class="flex items-center justify-between">
+                <label for="${id}-toggle" class="form-label">${label}</label>
+                <label class="toggle-switch">
+                    <input type="checkbox" id="${id}-toggle" class="toggle-switch-input peer">
+                    <div class="toggle-switch-bg peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-primary/50 peer-checked:after:translate-x-full peer-checked:after:border-white peer-checked:bg-primary"></div>
+                </label>
+            </div>
+            <input type="number" id="${id}-input" min="0" max="10" step="0.1" placeholder="Min Score (0.0-10.0)" class="form-input mt-2" disabled>
+        </div>
+    `;
+
+    container.innerHTML = `
+        <h2 class="text-lg font-semibold text-text-headings">Filters</h2>
+        <div class="space-y-6 mt-4">
+            <div>
+                <label for="keywords-input" class="form-label">Keywords in Summary</label>
+                <input type="search" id="keywords-input" placeholder="e.g., 'async rust http'" class="form-input">
+            </div>
+            <div id="language-filter-container">
+                <label class="form-label">Languages</label>
+                <div class="mt-2 space-y-2 max-h-40 overflow-y-auto text-sm pr-2">
+                    ${availableLanguages.map(lang => `
+                        <label class="flex items-center gap-2 cursor-pointer">
+                            <input type="checkbox" value="${lang}" class="custom-checkbox language-checkbox">
+                            <span>${lang}</span>
+                        </label>
+                    `).join('')}
+                </div>
+            </div>
+            <div>
+                <label class="form-label">Token Count</label>
+                <div class="flex items-center gap-2 mt-2">
+                    <input type="number" id="min-tokens" placeholder="Min" min="0" class="form-input text-center">
+                    <span class="text-text-muted">-</span>
+                    <input type="number" id="max-tokens" placeholder="Max" min="0" class="form-input text-center">
+                </div>
+            </div>
+            ${scoreFilter('quality', 'Min Code Quality')}
+            ${scoreFilter('clarity', 'Min Clarity')}
+            ${scoreFilter('arch', 'Min Architecture')}
+            <div class="flex items-center gap-2 pt-2">
+                <button id="reset-filters-btn" class="btn btn-secondary w-1/3">Reset</button>
+                <button id="apply-filters-btn" class="btn btn-primary w-2/3">Apply Filters</button>
+            </div>
+        </div>
+    `;
+
+    document.querySelectorAll('.toggle-switch-input').forEach(toggle => {
+        const input = document.getElementById(`${toggle.id.replace('-toggle', '')}-input`);
+        toggle.addEventListener('change', () => {
+            input.disabled = !toggle.checked;
+        });
+    });
+}
+
+function handleResetFilters() {
+    document.getElementById('keywords-input').value = '';
+    document.querySelectorAll('.language-checkbox').forEach(cb => cb.checked = false);
+    document.getElementById('min-tokens').value = '';
+    document.getElementById('max-tokens').value = '';
+    document.querySelectorAll('.toggle-switch-input').forEach(toggle => {
+        toggle.checked = false;
+        const input = document.getElementById(`${toggle.id.replace('-toggle', '')}-input`);
+        input.value = '';
+        input.disabled = true;
+    });
+    handleSearch();
 }
 
 async function handleSearch() {
@@ -56,10 +142,15 @@ async function handleSearch() {
         const searchParams = {
             limit: 20,
             keywords: document.getElementById('keywords-input').value || null,
-            min_clarity: document.getElementById('clarity-slider').value / 100,
-            min_arch: document.getElementById('arch-slider').value / 100,
-            min_quality: document.getElementById('quality-slider').value / 100,
+            languages: Array.from(document.querySelectorAll('.language-checkbox:checked')).map(cb => cb.value),
+            min_tokens: document.getElementById('min-tokens').value ? parseInt(document.getElementById('min-tokens').value) : null,
+            max_tokens: document.getElementById('max-tokens').value ? parseInt(document.getElementById('max-tokens').value) : null,
+            min_clarity: document.getElementById('clarity-toggle').checked ? parseFloat(document.getElementById('clarity-input').value) : null,
+            min_arch: document.getElementById('arch-toggle').checked ? parseFloat(document.getElementById('arch-input').value) : null,
+            min_quality: document.getElementById('quality-toggle').checked ? parseFloat(document.getElementById('quality-input').value) : null,
         };
+        if(searchParams.languages.length === 0) searchParams.languages = null;
+
         const response = await api.post('/business/data/search', searchParams);
         const results = response.data;
 
@@ -205,30 +296,16 @@ export function renderDataExplorerPage() {
     }
 
     const pageHtml = `
+        <style>
+            #language-filter-container div::-webkit-scrollbar { width: 6px; }
+            #language-filter-container div::-webkit-scrollbar-track { background: #f1f5f9; }
+            #language-filter-container div::-webkit-scrollbar-thumb { background: #9ca3af; border-radius: 3px; }
+        </style>
         <div class="dashboard-container h-full">
             <div class="widget-card h-full flex flex-col">
                 <div class="flex-1 flex flex-col lg:flex-row min-h-0">
-                    <div class="w-full lg:w-80 flex-shrink-0 p-6 border-b lg:border-b-0 lg:border-r border-app-border">
-                        <h2 class="text-lg font-semibold text-text-headings">Filters</h2>
-                        <div class="space-y-6 mt-4">
-                            <div>
-                                <label for="keywords-input" class="form-label">Keywords</label>
-                                <input type="search" id="keywords-input" placeholder="e.g., 'async rust http'" class="form-input">
-                            </div>
-                            <div>
-                                <div class="flex justify-between items-center"><label for="clarity-slider" class="form-label">Min Clarity</label><span id="clarity-slider-value" class="text-sm font-mono text-text-headings">7.0</span></div>
-                                <input type="range" id="clarity-slider" min="0" max="100" value="70" class="w-full h-2 bg-app-bg rounded-lg appearance-none cursor-pointer filter-slider">
-                            </div>
-                            <div>
-                                <div class="flex justify-between items-center"><label for="arch-slider" class="form-label">Min Architecture</label><span id="arch-slider-value" class="text-sm font-mono text-text-headings">7.0</span></div>
-                                <input type="range" id="arch-slider" min="0" max="100" value="70" class="w-full h-2 bg-app-bg rounded-lg appearance-none cursor-pointer filter-slider">
-                            </div>
-                            <div>
-                                <div class="flex justify-between items-center"><label for="quality-slider" class="form-label">Min Code Quality</label><span id="quality-slider-value" class="text-sm font-mono text-text-headings">7.0</span></div>
-                                <input type="range" id="quality-slider" min="0" max="100" value="70" class="w-full h-2 bg-app-bg rounded-lg appearance-none cursor-pointer filter-slider">
-                            </div>
-                            <button id="apply-filters-btn" class="btn btn-primary w-full">Apply Filters</button>
-                        </div>
+                    <div id="filter-panel-container" class="w-full lg:w-80 flex-shrink-0 p-6 border-b lg:border-b-0 lg:border-r border-app-border">
+                         <!-- Filter panel is rendered dynamically -->
                     </div>
                     <div id="results-list" class="flex-1 p-6 border-b lg:border-b-0 lg:border-r border-app-border overflow-y-auto">
                          <div class="p-8 text-center text-text-muted">Run a search to see results.</div>
