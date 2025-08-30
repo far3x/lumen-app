@@ -34,7 +34,7 @@ export function renderLandingPage() {
                         </div>
                     </div>
                     <div class="lg:col-span-2 hidden lg:flex items-center justify-end h-96 w-96 bg-background rounded-lg overflow-hidden">
-                        <img src="/jellyfish.gif" alt="Abstract data animation" class="w-full h-full object-contain"/>
+                        <img src="/logo.gif" alt="Abstract data animation" class="w-full h-full object-contain"/>
                     </div>
                 </div>
             </div>

@@ -25,13 +25,13 @@ export default {
         'text-muted': '#6B7280',
         'text-tertiary': '#9CA3AF',
         
-        'primary': '#4f46e5',
+        'primary': '#B91C1C', // Deep Red
         
-        'accent-purple': '#8A2BE2',
-        'accent-pink': '#FF69B4',
+        'accent-red-light': '#F87171',
+        'accent-red-dark': '#991B1B',
       },
       backgroundImage: {
-        'accent-gradient': 'linear-gradient(to right, #4f46e5, #7c3aed)',
+        'accent-gradient': 'linear-gradient(to right, #B91C1C, #F87171)',
       },
       keyframes: {
         'fade-in-up': {

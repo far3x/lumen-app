@@ -56,6 +56,10 @@ task_routes = {
         'queue': 'default',
         'routing_key': 'task.default',
     },
+    'app.tasks.unlock_all_contributions_task': {
+        'queue': 'default',
+        'routing_key': 'task.default',
+    },
 }
 
 celery_app.conf.beat_schedule = {

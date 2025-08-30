@@ -9,6 +9,7 @@ from sqlalchemy.dialects import postgresql
 from fastapi import HTTPException, status
 from typing import Optional, List, Dict
 from datetime import datetime, timedelta, timezone
+import html
 
 from app.core import security, config
 from app import schemas, business_schemas
@@ -423,62 +424,117 @@ def revoke_api_key(db: Session, key_id: int, company_id: int):
     db.commit()
 
 def get_distinct_contribution_languages(db: Session) -> List[str]:
-    query = text("""
-        SELECT DISTINCT key as language
-        FROM contributions, jsonb_object_keys(valuation_results->'language_breakdown') as key
-        WHERE status = 'PROCESSED' AND jsonb_typeof(valuation_results->'language_breakdown') = 'object'
-    """)
-    result = db.execute(query).fetchall()
-    return sorted([row[0] for row in result])
+    results = db.query(models.ContributionLanguage.name).order_by(models.ContributionLanguage.name).all()
+    return [row[0] for row in results]
 
-def search_contributions(db: Session, company_id: int, limit: int, **kwargs) -> list[dict]:
-    unlocked_subquery = db.query(models.UnlockedContribution.contribution_id).filter(models.UnlockedContribution.company_id == company_id).subquery()
+def search_contributions(db: Session, company_id: int, skip: int, limit: int, **kwargs) -> dict:
+    print(f"\n--- [DEBUG] Starting search_contributions ---")
+    print(f"[DEBUG] Params: skip={skip}, limit={limit}, filters={kwargs}")
+
+    unlocked_subquery = sa.select(models.UnlockedContribution.contribution_id).filter(models.UnlockedContribution.company_id == company_id)
     
     query = db.query(
         models.Contribution,
         case((models.Contribution.id.in_(unlocked_subquery), True), else_=False).label("is_unlocked")
     ).filter(models.Contribution.status == "PROCESSED")
 
-    if kwargs.get('keywords'):
-        query = query.filter(models.Contribution.valuation_results['analysis_summary'].astext.ilike(f"%{kwargs['keywords']}%"))
+    all_matching_results = query.order_by(models.Contribution.created_at.desc()).all()
+    print(f"[DEBUG] Fetched {len(all_matching_results)} total processed records from DB before Python filtering.")
 
-    if kwargs.get('languages'):
-        # Use the ?| operator which checks if the JSONB object has any of the keys in the array
-        query = query.filter(models.Contribution.valuation_results['language_breakdown'].astext.cast(postgresql.JSONB).op('?|')(kwargs['languages']))
-    
-    if kwargs.get('min_tokens') is not None:
-        query = query.filter(models.Contribution.valuation_results['total_tokens'].astext.cast(sa.Integer) >= kwargs['min_tokens'])
-    if kwargs.get('max_tokens') is not None:
-        query = query.filter(models.Contribution.valuation_results['total_tokens'].astext.cast(sa.Integer) <= kwargs['max_tokens'])
+    filtered_previews = []
+    for i, (contrib, is_unlocked) in enumerate(all_matching_results):
+        print(f"\n[DEBUG] --- Python Processing record {i+1} (ID: {contrib.id}) ---")
+        
+        raw_details = contrib.valuation_results
+        
+        details = raw_details
+        try:
+            while isinstance(details, str):
+                details = json.loads(details)
+        except json.JSONDecodeError as e:
+            print(f"[DEBUG] ERROR: JSON decoding failed for record {contrib.id}. Skipping. Error: {e}")
+            continue
+        
+        if not isinstance(details, dict):
+            print(f"[DEBUG] SKIPPING record {contrib.id}: Parsed data is not a dictionary.")
+            continue
+        
+        analysis_summary = details.get("analysis_summary")
+        if isinstance(analysis_summary, str):
+            analysis_summary = html.unescape(analysis_summary)
+            print(f"[DEBUG] Unescaped summary for ID {contrib.id}: {analysis_summary[:100]}...")
+        
+        keywords_to_search = kwargs.get('keywords')
+        if keywords_to_search:
+            if not analysis_summary:
+                print(f"[DEBUG] SKIPPING record {contrib.id}: No summary to search for keywords.")
+                continue
+            
+            all_keywords_found = all(
+                keyword.lower() in analysis_summary.lower() 
+                for keyword in keywords_to_search.split()
+            )
+            if not all_keywords_found:
+                print(f"[DEBUG] SKIPPING record {contrib.id}: Did not match all keywords.")
+                continue
 
-    if kwargs.get('min_clarity') is not None:
-        query = query.filter(models.Contribution.valuation_results['project_clarity_score'].astext.cast(sa.Float) * 10 >= kwargs['min_clarity'])
-    if kwargs.get('min_arch') is not None:
-        query = query.filter(models.Contribution.valuation_results['architectural_quality_score'].astext.cast(sa.Float) * 10 >= kwargs['min_arch'])
-    if kwargs.get('min_quality') is not None:
-        query = query.filter(models.Contribution.valuation_results['code_quality_score'].astext.cast(sa.Float) * 10 >= kwargs['min_quality'])
-    
-    results = query.order_by(func.random()).limit(limit).all()
+        languages_to_search = kwargs.get('languages')
+        if languages_to_search:
+            lang_breakdown = details.get("language_breakdown", {})
+            if not lang_breakdown:
+                print(f"[DEBUG] SKIPPING record {contrib.id}: No language breakdown to search.")
+                continue
 
-    previews = []
-    for contrib, is_unlocked in results:
-        details = json.loads(contrib.valuation_results) if isinstance(contrib.valuation_results, str) else contrib.valuation_results
+            found_lang = any(
+                search_lang.lower() == existing_lang.lower()
+                for search_lang in languages_to_search
+                for existing_lang in lang_breakdown.keys()
+            )
+            if not found_lang:
+                print(f"[DEBUG] SKIPPING record {contrib.id}: Did not match any language.")
+                continue
+
+        if kwargs.get('min_tokens') is not None and details.get('total_tokens', 0) < kwargs['min_tokens']:
+            print(f"[DEBUG] SKIPPING record {contrib.id}: Fails min_tokens.")
+            continue
+        if kwargs.get('max_tokens') is not None and details.get('total_tokens', 0) > kwargs['max_tokens']:
+            print(f"[DEBUG] SKIPPING record {contrib.id}: Fails max_tokens.")
+            continue
+        if kwargs.get('min_clarity') is not None and (details.get('project_clarity_score', 0) or 0) * 10 < kwargs['min_clarity']:
+            print(f"[DEBUG] SKIPPING record {contrib.id}: Fails min_clarity.")
+            continue
+        if kwargs.get('min_arch') is not None and (details.get('architectural_quality_score', 0) or 0) * 10 < kwargs['min_arch']:
+            print(f"[DEBUG] SKIPPING record {contrib.id}: Fails min_arch.")
+            continue
+        if kwargs.get('min_quality') is not None and (details.get('code_quality_score', 0) or 0) * 10 < kwargs['min_quality']:
+            print(f"[DEBUG] SKIPPING record {contrib.id}: Fails min_quality.")
+            continue
+        
         first_lang = next(iter(details.get("language_breakdown", {"Unknown": 0})), "Unknown")
         
-        previews.append({
-            "id": contrib.id,
-            "created_at": contrib.created_at,
-            "language": first_lang,
+        files_preview = [{"path": "Full Project Preview", "content": "\n".join(contrib.raw_content.splitlines()[:50])}]
+        
+        filtered_previews.append({
+            "id": contrib.id, "created_at": contrib.created_at, "language": first_lang,
             "tokens": details.get("total_tokens", 0),
-            "clarity_score": details.get("project_clarity_score", 0) * 10,
-            "arch_score": details.get("architectural_quality_score", 0) * 10,
-            "quality_score": details.get("code_quality_score", 0) * 10,
-            "is_unlocked": is_unlocked,
-            "code_preview": "\n".join(contrib.raw_content.splitlines()[:20])
+            "clarity_score": (details.get("project_clarity_score", 0) or 0) * 10,
+            "arch_score": (details.get("architectural_quality_score", 0) or 0) * 10,
+            "quality_score": (details.get("code_quality_score", 0) or 0) * 10,
+            "is_unlocked": is_unlocked, "analysis_summary": analysis_summary or "AI analysis summary is not available for this contribution.",
+            "files_preview": files_preview,
+            "language_breakdown": details.get("language_breakdown", {})
         })
-    return previews
+        print(f"[DEBUG] Record {contrib.id} PASSED all filters.")
 
-def unlock_contribution(db: Session, company_id: int, contribution_id: int, api_key_id: int) -> models.Contribution:
+    total = len(filtered_previews)
+    print(f"[DEBUG] Total previews after Python filtering: {total}")
+
+    paginated_previews = filtered_previews[skip : skip + limit]
+    print(f"[DEBUG] Returning {len(paginated_previews)} previews for this page.")
+    print(f"--- [DEBUG] Ending search_contributions ---\n")
+    return {"items": paginated_previews, "total": total}
+
+def unlock_contribution(db: Session, company_id: int, contribution_id: int, api_key_id: Optional[int] = None) -> models.Contribution:
     company = db.query(models.Company).filter(models.Company.id == company_id).first()
     contribution = db.query(models.Contribution).filter(models.Contribution.id == contribution_id).first()
 
@@ -489,7 +545,10 @@ def unlock_contribution(db: Session, company_id: int, contribution_id: int, api_
     if is_unlocked:
         return contribution
 
-    details = json.loads(contribution.valuation_results) if isinstance(contribution.valuation_results, str) else contribution.valuation_results
+    details = contribution.valuation_results
+    while isinstance(details, str):
+        details = json.loads(details)
+    
     token_cost = details.get("total_tokens", 0)
     
     if company.token_balance < token_cost:
@@ -511,6 +570,53 @@ def unlock_contribution(db: Session, company_id: int, contribution_id: int, api_
     db.refresh(company)
 
     return contribution
+
+def unlock_all_contributions_for_company(db: Session, company_id: int):
+    company = db.query(models.Company).filter(models.Company.id == company_id).first()
+    if not company:
+        raise ValueError("Company not found")
+
+    unlocked_subquery = sa.select(models.UnlockedContribution.contribution_id).filter(
+        models.UnlockedContribution.company_id == company_id
+    )
+    
+    contributions_to_unlock = db.query(models.Contribution).filter(
+        models.Contribution.status == "PROCESSED",
+        ~models.Contribution.id.in_(unlocked_subquery)
+    ).all()
+
+    if not contributions_to_unlock:
+        return {"message": "All available contributions are already unlocked."}
+
+    total_cost = 0
+    for contrib in contributions_to_unlock:
+        details = contrib.valuation_results
+        while isinstance(details, str):
+            details = json.loads(details)
+        total_cost += details.get("total_tokens", 0)
+
+    if company.token_balance < total_cost:
+        raise HTTPException(status_code=status.HTTP_402_PAYMENT_REQUIRED, detail=f"Insufficient token balance. Required: {total_cost}, Available: {company.token_balance}")
+
+    company.token_balance -= total_cost
+    
+    for contrib in contributions_to_unlock:
+        new_unlock = models.UnlockedContribution(company_id=company_id, contribution_id=contrib.id)
+        db.add(new_unlock)
+        
+        details = contrib.valuation_results
+        while isinstance(details, str):
+            details = json.loads(details)
+        token_cost = details.get("total_tokens", 0)
+
+        usage_event = models.ApiKeyUsageEvent(
+            api_key_id=None,
+            company_id=company_id,
+            tokens_used=token_cost
+        )
+        db.add(usage_event)
+        
+    db.commit()
 
 def get_unlocked_contribution_content(db: Session, company_id: int, contribution_id: int) -> Optional[models.Contribution]:
     unlocked = db.query(models.UnlockedContribution).filter_by(company_id=company_id, contribution_id=contribution_id).first()
@@ -589,13 +695,16 @@ def get_recently_unlocked_contributions(db: Session, company_id: int, limit: int
     details = []
     for unlock in results:
         contrib = unlock.contribution
-        valuation = json.loads(contrib.valuation_results) if isinstance(contrib.valuation_results, str) else contrib.valuation_results
+        valuation = contrib.valuation_results
+        while isinstance(valuation, str):
+            valuation = json.loads(valuation)
+        
         details.append({
             "id": contrib.id,
             "unlocked_at": unlock.unlocked_at,
             "language": next(iter(valuation.get("language_breakdown", {"Unknown": 0})), "Unknown"),
             "tokens": valuation.get("total_tokens", 0),
-            "quality_score": valuation.get("code_quality_score", 0) * 10
+            "quality_score": (valuation.get("code_quality_score", 0) or 0) * 10
         })
     return details
 

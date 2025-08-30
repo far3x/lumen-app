@@ -70,7 +70,7 @@ export function renderLoginPage() {
         </div>
         <div class="hidden lg:flex flex-col items-center justify-center w-1/2 bg-gray-100 p-12 border-l border-border">
             <div class="text-center">
-                <img src="/jellyfish.gif" alt="Lumen Data Jellyfish" class="w-80 h-80 object-contain rounded-lg mx-auto">
+                <img src="/logo.gif" alt="Lumen Data Jellyfish" class="w-80 h-80 object-contain rounded-lg mx-auto">
                 <div class="mt-8 max-w-sm mx-auto">
                      <h3 class="text-2xl font-bold text-text-headings">The Strategic Data Advantage for AI</h3>
                      <p class="text-text-body mt-2">Unlock proprietary, ethically-sourced code to build world-class models without legal risk.</p>

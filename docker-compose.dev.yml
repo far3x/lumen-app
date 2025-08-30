@@ -7,34 +7,13 @@ services:
     volumes:
       - postgres_data:/var/lib/postgresql/data/
     env_file: ./.env
+    command: >
+      -c shared_buffers=128MB
+      -c effective_cache_size=256MB
+      -c maintenance_work_mem=64MB
+      -c work_mem=4MB
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
-      interval: 5s
-      timeout: 5s
-      retries: 5
-    restart: unless-stopped
-
-  pgbouncer:
-    image: bitnami/pgbouncer:latest
-    container_name: lumen_pgbouncer
-    ports:
-      - "6432:5432"
-    environment:
-      POSTGRESQL_HOST: db
-      POSTGRESQL_USERNAME: ${POSTGRES_USER}
-      POSTGRESQL_PASSWORD: ${POSTGRES_PASSWORD}
-      PGBOUNCER_PORT: 5432
-      PGBOUNCER_DATABASE: ${POSTGRES_DB}
-      PGBOUNCER_AUTH_TYPE: md5
-      PGBOUNCER_POOL_MODE: transaction
-      PGBOUNCER_SERVER_RESET_QUERY: "DISCARD ALL"
-      PGBOUNCER_USER: ${POSTGRES_USER}
-      PGBOUNCER_PASSWORD: ${POSTGRES_PASSWORD}
-    depends_on:
-      db:
-        condition: service_healthy
-    healthcheck:
-      test: ["CMD-SHELL", "pg_isready -h localhost -p 5432 -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
       interval: 5s
       timeout: 5s
       retries: 5
@@ -62,31 +41,31 @@ services:
       - ./backend:/usr/src/app
     env_file: ./.env
     environment:
-      DATABASE_URL: postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@pgbouncer:5432/${POSTGRES_DB}
+      DATABASE_URL: postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@db:5432/${POSTGRES_DB}
       BIRDEYE_API_KEY: ${BIRDEYE_API_KEY}
     ports:
       - "8000:8000"
     depends_on:
-      pgbouncer:
+      db:
         condition: service_healthy
       redis:
         condition: service_healthy
     restart: unless-stopped
 
-  worker_default:
-    container_name: lumen_worker_default
+  worker:
+    container_name: lumen_worker_dev
     build:
       context: ./backend
       dockerfile: Dockerfile.dev
-    command: celery -A app.core.celery_app.celery_app worker --loglevel=info -Q default --concurrency=4 -P eventlet
+    command: celery -A app.core.celery_app.celery_app worker --loglevel=info -Q default,high_priority --concurrency=1 -P eventlet
     volumes:
       - ./backend:/usr/src/app
     env_file: ./.env
     environment:
-      DATABASE_URL: postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@pgbouncer:5432/${POSTGRES_DB}
+      DATABASE_URL: postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@db:5432/${POSTGRES_DB}
       BIRDEYE_API_KEY: ${BIRDEYE_API_KEY}
     depends_on:
-      pgbouncer:
+      db:
         condition: service_healthy
       redis:
         condition: service_healthy
@@ -94,29 +73,8 @@ services:
         condition: service_started
     restart: unless-stopped
 
-  worker_priority:
-    container_name: lumen_worker_priority
-    build:
-      context: ./backend
-      dockerfile: Dockerfile.dev
-    command: celery -A app.core.celery_app.celery_app worker --loglevel=info -Q high_priority --concurrency=2 -P eventlet
-    volumes:
-      - ./backend:/usr/src/app
-    env_file: ./.env
-    environment:
-      DATABASE_URL: postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@pgbouncer:5432/${POSTGRES_DB}
-      BIRDEYE_API_KEY: ${BIRDEYE_API_KEY}
-    depends_on:
-      pgbouncer:
-        condition: service_healthy
-      redis:
-        condition: service_healthy
-      api:
-        condition: service_started
-    restart: unless-stopped
-
-  worker_beat:
-    container_name: lumen_worker_beat
+  beat:
+    container_name: lumen_beat_dev
     build:
       context: ./backend
       dockerfile: Dockerfile.dev
@@ -125,10 +83,10 @@ services:
       - ./backend:/usr/src/app
     env_file: ./.env
     environment:
-      DATABASE_URL: postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@pgbouncer:5432/${POSTGRES_DB}
+      DATABASE_URL: postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@db:5432/${POSTGRES_DB}
       BIRDEYE_API_KEY: ${BIRDEYE_API_KEY}
     depends_on:
-      pgbouncer:
+      db:
         condition: service_healthy
       redis:
         condition: service_healthy
@@ -149,6 +107,7 @@ services:
     environment:
       - VITE_API_URL=${API_URL} 
       - VITE_GOOGLE_RECAPTCHA_SITE_KEY=${GOOGLE_RECAPTCHA_SITE_KEY}
+      - NODE_OPTIONS=--max-old-space-size=512
     restart: unless-stopped
 
   business_frontend:
@@ -164,6 +123,7 @@ services:
     environment:
       - VITE_API_URL=${API_URL}
       - VITE_GOOGLE_RECAPTCHA_SITE_KEY=${GOOGLE_RECAPTCHA_SITE_KEY}
+      - NODE_OPTIONS=--max-old-space-size=512
     restart: unless-stopped
 
 volumes:

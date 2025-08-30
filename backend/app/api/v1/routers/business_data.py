@@ -7,9 +7,9 @@ from app.business_schemas import (
     ApiKeyInfo, ApiKeyCreate, ContributionSearchResult, ContributionPreview, 
     FullContribution, DashboardStats, UsageDataPoint, UnlockedContributionDetail,
     TeamMember, InviteCreate, CompanyUpdate, BusinessUserUpdate, BusinessUser as BusinessUserSchema,
-    Company as CompanySchema, ApiKeyUsageSummary
+    Company as CompanySchema, ApiKeyUsageSummary, PaginatedContributionPreview
 )
-from app.tasks import send_team_invitation_email_task
+from app.tasks import send_team_invitation_email_task, unlock_all_contributions_task
 from typing import List
 from datetime import datetime, timedelta
 import io
@@ -115,7 +115,7 @@ async def revoke_api_key(key_id: int, company: models.Company = Depends(get_curr
 async def get_contribution_languages(db: Session = Depends(database.get_db)):
     return crud.get_distinct_contribution_languages(db)
 
-@router.post("/data/search", response_model=List[ContributionPreview])
+@router.post("/data/search", response_model=PaginatedContributionPreview)
 async def search_contributions(
     search_params: ContributionSearchResult, 
     company: models.Company = Depends(get_current_company_from_user), 
@@ -127,6 +127,7 @@ async def search_contributions(
     results = crud.search_contributions(
         db, 
         company_id=company.id, 
+        skip=search_params.skip,
         limit=search_params.limit,
         keywords=search_params.keywords,
         languages=search_params.languages,
@@ -141,14 +142,14 @@ async def search_contributions(
 @router.post("/data/unlock/{contribution_id}", response_model=FullContribution)
 async def unlock_contribution(
     contribution_id: int, 
-    company: models.Company = Depends(get_current_company_from_user), 
-    api_key: models.ApiKey = Depends(get_current_company_from_api_key),
+    current_user: models.BusinessUser = Depends(get_current_business_user),
     db: Session = Depends(database.get_db)
 ):
     unlocked_contribution = crud.unlock_contribution(
-        db, company_id=company.id, 
+        db, 
+        company_id=current_user.company_id, 
         contribution_id=contribution_id, 
-        api_key_id=api_key.id
+        api_key_id=None  # Explicitly None for dashboard unlocks
     )
     return unlocked_contribution
 
@@ -162,6 +163,14 @@ async def get_unlocked_contribution(
     if not contribution:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Contribution not found or not unlocked.")
     return contribution
+
+@router.post("/data/unlock-all", status_code=status.HTTP_202_ACCEPTED)
+async def unlock_all_contributions(
+    admin_user: models.BusinessUser = Depends(get_current_admin_user)
+):
+    unlock_all_contributions_task.delay(company_id=admin_user.company_id)
+    return {"message": "A background task has been started to unlock all available contributions. This may take a few minutes."}
+
 
 @router.get("/data/download/{contribution_id}", response_class=StreamingResponse)
 async def download_unlocked_contribution(

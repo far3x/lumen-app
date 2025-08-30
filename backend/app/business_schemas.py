@@ -1,5 +1,5 @@
 from pydantic import BaseModel, EmailStr, Field
-from typing import Optional, List
+from typing import Optional, List, Dict
 from datetime import datetime, date
 
 class BusinessUserCreate(BaseModel):
@@ -67,6 +67,10 @@ class ApiKeyCreate(BaseModel):
     name: str = Field(..., min_length=3, max_length=50)
     key: Optional[str] = None
 
+class FilePreview(BaseModel):
+    path: str
+    content: str
+
 class ContributionPreview(BaseModel):
     id: int
     created_at: datetime
@@ -76,7 +80,9 @@ class ContributionPreview(BaseModel):
     arch_score: float
     quality_score: float
     is_unlocked: bool
-    code_preview: str
+    analysis_summary: Optional[str] = None
+    files_preview: List[FilePreview]
+    language_breakdown: Optional[Dict[str, int]] = None
 
 class FullContribution(BaseModel):
     id: int
@@ -92,6 +98,11 @@ class ContributionSearchResult(BaseModel):
     min_arch: Optional[float] = Field(None, ge=0, le=10)
     min_quality: Optional[float] = Field(None, ge=0, le=10)
     limit: int = 20
+    skip: int = 0
+
+class PaginatedContributionPreview(BaseModel):
+    items: List[ContributionPreview]
+    total: int
 
 class DashboardStats(BaseModel):
     token_balance: int

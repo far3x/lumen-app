@@ -202,7 +202,7 @@ class UnlockedContribution(Base):
 class ApiKeyUsageEvent(Base):
     __tablename__ = "api_key_usage_events"
     id = Column(Integer, primary_key=True, index=True)
-    api_key_id = Column(Integer, ForeignKey("api_keys.id", ondelete="CASCADE"), nullable=False)
+    api_key_id = Column(Integer, ForeignKey("api_keys.id", ondelete="CASCADE"), nullable=True)
     company_id = Column(Integer, ForeignKey("companies.id", ondelete="CASCADE"), nullable=False)
     tokens_used = Column(Integer, nullable=False)
     created_at = Column(DateTime(timezone=True), server_default=func.now(), index=True)
@@ -230,3 +230,8 @@ class TeamInvitation(Base):
     expires_at = Column(DateTime(timezone=True), nullable=False)
     created_at = Column(DateTime(timezone=True), server_default=func.now())
     company = relationship("Company", back_populates="invitations")
+
+class ContributionLanguage(Base):
+    __tablename__ = "contribution_languages"
+    id = Column(Integer, primary_key=True, index=True)
+    name = Column(String, unique=True, nullable=False)
