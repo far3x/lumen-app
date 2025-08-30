@@ -3,6 +3,8 @@ import json
 import numpy as np
 import logging
 import time
+from typing import List
+from sqlalchemy.orm import Session
 from app.core.celery_app import celery_app
 from app.core.config import settings
 from app.db.database import SessionLocal
@@ -18,8 +20,9 @@ from app.services.price_service import price_service
 import asyncio
 from fastapi_mail import MessageSchema
 from datetime import datetime, timezone
-from app.db.models import PayoutBatch, BatchPayout, Account
+from app.db.models import PayoutBatch, BatchPayout, Account, ContributionLanguage
 from sqlalchemy import func
+from sqlalchemy.exc import IntegrityError
 
 logger = logging.getLogger(__name__)
 
@@ -27,6 +30,20 @@ SIMILARITY_UPDATE_THRESHOLD = 0.85
 NEAR_PERFECT_SIMILARITY_THRESHOLD = 0.999
 DISTANCE_UPDATE_THRESHOLD = 1 - SIMILARITY_UPDATE_THRESHOLD
 NEAR_PERFECT_DISTANCE_THRESHOLD = 1 - NEAR_PERFECT_SIMILARITY_THRESHOLD
+
+@celery_app.task(name="app.tasks.unlock_all_contributions_task")
+def unlock_all_contributions_task(company_id: int):
+    logger.info(f"Starting bulk unlock task for company_id: {company_id}")
+    db = SessionLocal()
+    try:
+        crud.unlock_all_contributions_for_company(db, company_id)
+        logger.info(f"Successfully completed bulk unlock for company_id: {company_id}")
+    except Exception as e:
+        logger.error(f"Error during bulk unlock for company_id {company_id}: {e}", exc_info=True)
+        # Here you might want to add a notification to the user, e.g., via WebSocket or email.
+    finally:
+        db.close()
+
 
 @celery_app.task(name="app.tasks.recalculate_network_stats_task")
 def recalculate_network_stats_task():
@@ -305,6 +322,21 @@ def create_daily_payout_batch_task():
     finally:
         db.close()
 
+def _add_languages_to_db(db: Session, languages: List[str]):
+    for lang_name in languages:
+        if not lang_name:
+            continue
+        try:
+            exists = db.query(ContributionLanguage).filter_by(name=lang_name).first()
+            if not exists:
+                db.add(ContributionLanguage(name=lang_name))
+                db.commit()
+        except IntegrityError:
+            db.rollback()
+        except Exception as e:
+            logger.error(f"Error adding language '{lang_name}' to db: {e}")
+            db.rollback()
+
 @celery_app.task(bind=True)
 def process_contribution(self, user_id: int, codebase: str, contribution_db_id: int, source: str = 'cli'):
     db = SessionLocal()
@@ -417,6 +449,10 @@ def process_contribution(self, user_id: int, codebase: str, contribution_db_id: 
             quality_score = valuation_details.get("ai_weighted_multiplier", 0.0)
             total_lloc = valuation_details.get("total_lloc", 0)
             total_tokens = valuation_details.get("total_tokens", 0)
+            
+            languages = list(valuation_details.get("language_breakdown", {}).keys())
+            if languages:
+                _add_languages_to_db(db, languages)
 
             if avg_complexity > 0 or quality_score > 0:
                 crud.update_network_stats(

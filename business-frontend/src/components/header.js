@@ -29,7 +29,7 @@ export function renderHeader() {
                 <div class="flex items-center gap-10">
                     <a href="/" class="flex items-center gap-3">
                         <img src="/logo.png" alt="Lumen Logo" class="h-12 w-12">
-                        <span class="font-bold text-2xl text-text-headings">lumen</span>
+                        <span class="font-normal text-3xl text-primary tracking-tighter">lumen</span>
                     </a>
                     <nav class="hidden lg:flex items-center gap-8">
                         <a href="/why-lumen" class="${navLinkClasses}">Why Lumen</a>

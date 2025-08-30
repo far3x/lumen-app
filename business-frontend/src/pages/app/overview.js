@@ -110,8 +110,8 @@ function initializeChart(usageData) {
             datasets: [{
                 label: 'Tokens Unlocked',
                 data: dataPoints,
-                backgroundColor: '#4f46e5',
-                borderColor: '#4338ca',
+                backgroundColor: '#B91C1C',
+                borderColor: '#991B1B',
                 borderWidth: 1,
                 borderRadius: 4,
                 barPercentage: 0.5,
