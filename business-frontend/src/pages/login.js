@@ -36,7 +36,7 @@ export function renderLoginPage() {
              <div class="max-w-md w-full">
                 <div class="text-center">
                     <a href="/" class="inline-block mb-6">
-                        <img class="h-12 w-auto" src="/logo.png" alt="Lumen Logo">
+                        <img class="h-12 w-auto" src="/logo.png?v=2" alt="Lumen Logo">
                     </a>
                     <h2 class="text-3xl font-bold tracking-tight text-text-headings">Welcome Back</h2>
                     <p class="mt-2 text-text-body">
@@ -63,7 +63,7 @@ export function renderLoginPage() {
                         </div>
                     </form>
                     <p class="mt-6 text-center text-sm text-text-muted">
-                        Don't have an account? <a href="/signup" class="font-medium text-accent-purple hover:text-accent-pink">Create one</a>
+                        Don't have an account? <a href="/signup" class="font-medium text-primary hover:text-accent-red-dark">Create one</a>
                     </p>
                 </div>
             </div>
@@ -80,7 +80,7 @@ export function renderLoginPage() {
     </div>
     <style>
         .form-input {
-            @apply block w-full rounded-md border-0 py-2.5 px-3 text-text-body shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-accent-purple sm:text-sm sm:leading-6;
+            @apply block w-full rounded-md border-0 py-2.5 px-3 text-text-body shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-primary sm:text-sm sm:leading-6;
         }
     </style>
     `;
