@@ -20,7 +20,7 @@ export function renderSidebar() {
         <div class="flex flex-col h-full p-3">
             <div class="flex-shrink-0">
                  <a href="/" class="flex items-center gap-2 mb-6 px-2">
-                    <img src="/logo.png" alt="Lumen Logo" class="h-8 w-8">
+                    <img src="/logo.png?v=2" alt="Lumen Logo" class="h-8 w-8">
                     <span class="font-bold text-xl text-text-headings">Lumen</span>
                 </a>
                 <button class="w-full flex items-center justify-between text-left p-2 rounded-lg bg-app-bg border border-app-border hover:border-gray-300 transition-colors">

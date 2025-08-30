@@ -10,7 +10,7 @@ export function renderFooter() {
                 <div class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-8">
                     <div class="col-span-2 lg:col-span-2">
                          <a href="/" class="flex items-center gap-2">
-                            <img src="/logo.png" alt="Lumen Logo" class="h-8 w-8">
+                            <img src="/logo.png?v=2" alt="Lumen Logo" class="h-8 w-8">
                             <span class="font-bold text-xl text-text-headings">Lumen</span>
                         </a>
                         <p class="mt-4 text-text-muted max-w-xs">The strategic data advantage for world-class AI.</p>

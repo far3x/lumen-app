@@ -70,22 +70,22 @@ export function renderSignupPage() {
         <div class="hidden lg:flex flex-col w-2/5 bg-white p-12 lg:p-20 justify-between">
             <div>
                  <a href="/" class="flex items-center gap-3">
-                    <img src="/logo.png" alt="Lumen Logo" class="h-10 w-10">
+                    <img src="/logo.png?v=2" alt="Lumen Logo" class="h-10 w-10">
                     <span class="font-bold text-2xl text-text-headings">lumen</span>
                 </a>
                 <h2 class="text-3xl font-bold tracking-tight text-text-headings mt-12">The Strategic Data Advantage for AI</h2>
                 <p class="mt-4 text-text-body">Create an account to unlock proprietary, ethically-sourced code and build world-class models without legal risk.</p>
                 <ul class="mt-8 space-y-4 text-text-body">
                     <li class="flex items-start gap-3">
-                        <svg class="w-5 h-5 text-accent-purple shrink-0 mt-1" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+                        <svg class="w-5 h-5 text-primary shrink-0 mt-1" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
                         <span><strong>Access Proprietary Data:</strong> Gain a competitive edge with high-signal, human-written code not found on public repositories.</span>
                     </li>
                     <li class="flex items-start gap-3">
-                        <svg class="w-5 h-5 text-accent-purple shrink-0 mt-1" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+                        <svg class="w-5 h-5 text-primary shrink-0 mt-1" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
                         <span><strong>Manage Your Team:</strong> Invite members, manage API keys, and monitor usage from a unified dashboard.</span>
                     </li>
                      <li class="flex items-start gap-3">
-                        <svg class="w-5 h-5 text-accent-purple shrink-0 mt-1" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+                        <svg class="w-5 h-5 text-primary shrink-0 mt-1" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
                         <span><strong>Secure API Access:</strong> Integrate Lumen's data into your MLOps pipeline with secure, revocable API keys.</span>
                     </li>
                 </ul>
@@ -99,7 +99,7 @@ export function renderSignupPage() {
                         The first user to register for a company becomes its administrator.
                     </p>
                     <p class="mt-1 text-text-muted">
-                        Already have an account? <a href="/login" class="font-medium text-accent-purple hover:text-accent-pink">Sign in</a>
+                        Already have an account? <a href="/login" class="font-medium text-primary hover:text-accent-red-dark">Sign in</a>
                     </p>
                 </div>
                 <div class="mt-8">
@@ -157,7 +157,7 @@ export function renderSignupPage() {
         </div>
     </div>
     <style>
-        .form-input { @apply block w-full rounded-md border-0 py-2.5 px-3 bg-white text-text-body shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-accent-purple sm:text-sm sm:leading-6; }
+        .form-input { @apply block w-full rounded-md border-0 py-2.5 px-3 bg-white text-text-body shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-primary sm:text-sm sm:leading-6; }
         .form-label { @apply block text-sm font-medium leading-6 text-text-body; }
         .strength-bar-fill { @apply transition-all duration-300; }
     </style>

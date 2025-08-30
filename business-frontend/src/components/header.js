@@ -28,7 +28,7 @@ export function renderHeader() {
             <div class="flex justify-between items-center h-24">
                 <div class="flex items-center gap-10">
                     <a href="/" class="flex items-center gap-3">
-                        <img src="/logo.png" alt="Lumen Logo" class="h-12 w-12">
+                        <img src="/logo.png?v=2" alt="Lumen Logo" class="h-12 w-12">
                         <span class="font-normal text-3xl text-primary tracking-tighter">lumen</span>
                     </a>
                     <nav class="hidden lg:flex items-center gap-8">
