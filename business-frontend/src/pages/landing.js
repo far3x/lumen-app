@@ -82,7 +82,7 @@ export function renderLandingPage() {
                         </div>
                     </div>
                     <div class="bg-background rounded-lg border border-border shadow-xl overflow-hidden scroll-animate animate-delay-1" style="transform: translateY(2rem);">
-                         <img src="/dashboard-preview.png" alt="Lumen Business Dashboard Preview" class="w-full h-full object-cover object-top">
+                         <img src="/dashboard-preview2.png" alt="Lumen Business Dashboard Preview" class="w-full h-full object-cover object-top">
                     </div>
                 </div>
             </div>

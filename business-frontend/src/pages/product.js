@@ -72,7 +72,7 @@ export function renderProductPage() {
                         </ul>
                     </div>
                     <div class="bg-white rounded-lg border border-border shadow-2xl overflow-hidden">
-                        <img src="/dashboard-search.png" alt="Lumen Business Dashboard showing the powerful data explorer search functionality" class="w-full h-full object-cover">
+                        <img src="/dashboard-search2.png" alt="Lumen Business Dashboard showing the powerful data explorer search functionality" class="w-full h-full object-cover">
                     </div>
                 </div>
             </div>
