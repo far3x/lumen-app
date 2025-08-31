@@ -7,12 +7,14 @@ from app.business_schemas import (
     ApiKeyInfo, ApiKeyCreate, ContributionSearchResult, ContributionPreview, 
     FullContribution, DashboardStats, UsageDataPoint, UnlockedContributionDetail,
     TeamMember, InviteCreate, CompanyUpdate, BusinessUserUpdate, BusinessUser as BusinessUserSchema,
-    Company as CompanySchema, ApiKeyUsageSummary, PaginatedContributionPreview
+    Company as CompanySchema, ApiKeyUsageSummary, PaginatedContributionPreview, TeamInvitationInfo,
+    BusinessToken
 )
 from app.tasks import send_team_invitation_email_task, unlock_all_contributions_task
 from typing import List
 from datetime import datetime, timedelta
 import io
+from app.core import security, config
 
 router = APIRouter(prefix="/business", tags=["Business Data"])
 
@@ -66,6 +68,41 @@ async def invite_team_member(
 
     return {"message": "Invitation sent successfully."}
 
+@router.get("/team/invites/pending", response_model=List[TeamInvitationInfo])
+async def get_pending_invitations(
+    current_user: models.BusinessUser = Depends(get_current_business_user),
+    db: Session = Depends(database.get_db)
+):
+    return crud.get_pending_invitations_for_user(db, user=current_user)
+
+@router.post("/team/invites/accept/{token}", response_model=BusinessToken)
+async def accept_team_invitation(
+    token: str,
+    current_user: models.BusinessUser = Depends(get_current_business_user),
+    db: Session = Depends(database.get_db)
+):
+    updated_user = crud.accept_invitation(db, user=current_user, token=token)
+    
+    access_token_expires = timedelta(minutes=config.settings.ACCESS_TOKEN_EXPIRE_MINUTES)
+    access_token = security.create_access_token(
+        data={"sub": str(updated_user.id), "type": "business"}, expires_delta=access_token_expires
+    )
+    
+    return BusinessToken(
+        access_token=access_token,
+        token_type="bearer",
+        user=BusinessUserSchema.from_orm(updated_user),
+        company=CompanySchema.from_orm(updated_user.company)
+    )
+
+@router.post("/team/invites/decline/{token}", status_code=status.HTTP_204_NO_CONTENT)
+async def decline_team_invitation(
+    token: str,
+    current_user: models.BusinessUser = Depends(get_current_business_user),
+    db: Session = Depends(database.get_db)
+):
+    crud.decline_invitation(db, user=current_user, token=token)
+    return
 
 @router.delete("/team/{user_id}", status_code=status.HTTP_204_NO_CONTENT)
 async def remove_team_member(
@@ -149,7 +186,7 @@ async def unlock_contribution(
         db, 
         company_id=current_user.company_id, 
         contribution_id=contribution_id, 
-        api_key_id=None  # Explicitly None for dashboard unlocks
+        api_key_id=None
     )
     return unlocked_contribution
 

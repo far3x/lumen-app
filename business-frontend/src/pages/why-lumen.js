@@ -22,17 +22,17 @@ export function renderWhyLumenPage() {
                     <p class="mt-6 text-lg text-text-body">Training on publicly scraped data is no longer a viable strategy. It's a race to the bottom, exposing your models and your business to systemic risks.</p>
                 </div>
                 <div class="mt-20 grid md:grid-cols-3 gap-12 text-left">
-                    <div class="bg-background p-8 rounded-lg">
-                        <h3 class="font-bold text-xl text-text-headings">The Poisoned Well of Model Collapse</h3>
-                        <p class="mt-2 text-text-muted">Public data is saturated with low-quality tutorials, insecure code, and synthetic output from other AIs. Training on this noise fundamentally limits your model's reasoning capabilities.</p>
+                    <div class="bg-dark-surface p-8 rounded-lg">
+                        <h3 class="font-bold text-xl text-white">The Poisoned Well of Model Collapse</h3>
+                        <p class="mt-2 text-text-tertiary">Public data is saturated with low-quality tutorials, insecure code, and synthetic output from other AIs. Training on this noise fundamentally limits your model's reasoning capabilities.</p>
                     </div>
-                     <div class="bg-background p-8 rounded-lg">
-                        <h3 class="font-bold text-xl text-text-headings">The Ticking Clock of Legal Risk</h3>
-                        <p class="mt-2 text-text-muted">Using code without explicit consent is a legal and ethical minefield. Copyright infringement and license violations pose an existential threat to models built on scraped data.</p>
+                     <div class="bg-dark-surface p-8 rounded-lg">
+                        <h3 class="font-bold text-xl text-white">The Ticking Clock of Legal Risk</h3>
+                        <p class="mt-2 text-text-tertiary">Using code without explicit consent is a legal and ethical minefield. Copyright infringement and license violations pose an existential threat to models built on scraped data.</p>
                     </div>
-                     <div class="bg-background p-8 rounded-lg">
-                        <h3 class="font-bold text-xl text-text-headings">The Innovation Bottleneck</h3>
-                        <p class="mt-2 text-text-muted">The most valuable code, novel algorithms, complex architectures, and proprietary business logic is locked away in private repositories, completely inaccessible to your models.</p>
+                     <div class="bg-dark-surface p-8 rounded-lg">
+                        <h3 class="font-bold text-xl text-white">The Innovation Bottleneck</h3>
+                        <p class="mt-2 text-text-tertiary">The most valuable code, novel algorithms, complex architectures, and proprietary business logic is locked away in private repositories, completely inaccessible to your models.</p>
                     </div>
                 </div>
             </div>
@@ -51,7 +51,7 @@ export function renderWhyLumenPage() {
                     <!-- Pillar 1: Security -->
                     <div class="grid lg:grid-cols-2 gap-16 items-center">
                         <div class="w-full h-[28rem] bg-white rounded-lg border border-border flex items-center justify-center p-8">
-                           <img src="/shield.png" alt="A shield icon representing security and confidence" class="w-full h-full object-contain">
+                           <img src="/shield2.png" alt="A shield icon representing security and confidence" class="w-full h-full object-contain">
                         </div>
                         <div class="flex flex-col justify-center">
                              <h3 class="text-3xl font-bold text-text-headings">Operate with Unshakeable Confidence</h3>
@@ -61,7 +61,7 @@ export function renderWhyLumenPage() {
                     <!-- Pillar 2: Quality -->
                      <div class="grid lg:grid-cols-2 gap-16 items-center">
                         <div class="lg:order-2 w-full h-[28rem] bg-white rounded-lg border border-border flex items-center justify-center p-8">
-                           <img src="/gear.png" alt="A gear icon representing precision and quality control" class="w-full h-full object-contain">
+                           <img src="/gear2.png" alt="A gear icon representing precision and quality control" class="w-full h-full object-contain">
                         </div>
                         <div class="lg:order-1 flex flex-col justify-center">
                              <h3 class="text-3xl font-bold text-text-headings">Build with Unprecedented Precision</h3>
@@ -71,7 +71,7 @@ export function renderWhyLumenPage() {
                      <!-- Pillar 3: Exclusivity -->
                     <div class="grid lg:grid-cols-2 gap-16 items-center">
                         <div class="w-full h-[28rem] bg-white rounded-lg border border-border flex items-center justify-center p-8">
-                           <img src="/diamond.png" alt="A diamond icon representing exclusivity and unique value" class="w-full h-full object-contain">
+                           <img src="/diamond2.png" alt="A diamond icon representing exclusivity and unique value" class="w-full h-full object-contain">
                         </div>
                         <div class="flex flex-col justify-center">
                              <h3 class="text-3xl font-bold text-text-headings">Secure a Definitive Advantage</h3>

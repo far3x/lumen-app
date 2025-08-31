@@ -53,31 +53,43 @@ export function renderLandingPage() {
                     ${featurePillar(icons.security, 'Operate with Confidence', 'Mitigate legal risk with an ethically-sourced data pipeline. All contributions are anonymized locally and provided with explicit consent.')}
                     ${featurePillar(icons.quality, 'Build with Precision', 'Our valuation engine scores every contribution, allowing you to filter by quality, complexity, and architecture to build superior training sets.')}
                 </div>
-                <div class="mt-20 flex justify-center items-center gap-4 scroll-animate" style="transform: translateY(2rem);">
-                    <a href="/product" class="px-6 py-3 font-semibold text-white bg-text-headings hover:bg-opacity-90 rounded-md transition-colors">Explore the Platform</a>
-                    <a href="/docs" class="font-semibold text-text-body hover:text-text-headings transition-colors">View Documentation &rarr;</a>
+            </div>
+        </section>
+
+        <!-- NEW ADVANTAGE SECTION -->
+        <section class="py-24 md:py-32 bg-white">
+             <div class="container mx-auto px-6">
+                <div class="grid lg:grid-cols-2 gap-24 items-center">
+                    <div class="scroll-animate" style="transform: translateY(2rem);">
+                        <p class="section-label">THE LUMEN ADVANTAGE</p>
+                        <h2 class="text-3xl md:text-4xl font-bold text-text-headings mt-4">Data-Centric Intelligence</h2>
+                        <p class="mt-6 text-lg text-text-body">Great models are built with great data. Lumen provides the tools to create, filter, and deploy high-signal training sets with unparalleled control and privacy.</p>
+                        <ul class="mt-8 space-y-4">
+                            <li class="flex items-start gap-4"><svg class="w-6 h-6 text-primary shrink-0 mt-1" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg><span><strong>Unmatched Quality:</strong> Access ethically-sourced, human-written code, vetted by our AI valuation engine for quality and novelty.</span></li>
+                            <li class="flex items-start gap-4"><svg class="w-6 h-6 text-primary shrink-0 mt-1" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg><span><strong>Ethical Sourcing:</strong> Eliminate legal and copyright risks with a fully-transparent data pipeline built on explicit developer consent.</span></li>
+                            <li class="flex items-start gap-4"><svg class="w-6 h-6 text-primary shrink-0 mt-1" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg><span><strong>Strategic Advantage:</strong> Integrate seamlessly with your MLOps pipeline via our secure API to build a sustainable data advantage.</span></li>
+                        </ul>
+                    </div>
+                    <div class="bg-background rounded-lg border border-border shadow-xl overflow-hidden scroll-animate animate-delay-1" style="transform: translateY(2rem);">
+                         <img src="/platform-advantage.png" alt="Abstract visualization of the Lumen Platform providing a data advantage" class="w-full h-full object-cover object-top">
+                    </div>
                 </div>
             </div>
         </section>
         
         <!-- PRODUCT SHOWCASE -->
-        <section class="py-24 md:py-32 bg-white">
+        <section class="py-24 md:py-32 bg-gray-50">
             <div class="container mx-auto px-6">
                 <div class="text-center max-w-3xl mx-auto scroll-animate" style="transform: translateY(2rem);">
-                    <p class="section-label">Use Cases</p>
-                    <h2 class="text-4xl md:text-5xl font-bold text-text-headings">Data-Centric Intelligence</h2>
+                    <p class="section-label">PRODUCT PREVIEW</p>
+                    <h2 class="text-4xl md:text-5xl font-bold text-text-headings">Explore with Precision</h2>
                 </div>
                 <div class="mt-20 grid lg:grid-cols-2 gap-24 items-center">
                     <div class="scroll-animate" style="transform: translateY(2rem);">
-                        <h3 class="text-3xl font-bold text-text-headings">Build better AI with data you can trust</h3>
-                        <p class="mt-4 text-lg text-text-body">Great models are built with great data. Lumen provides the tools to create, filter, and deploy high-signal training sets with unparalleled control and privacy.</p>
-                        <ul class="mt-6 space-y-3">
-                            <li class="flex items-center gap-3 text-lg text-text-body"><svg class="w-5 h-5 text-accent-purple" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>Acquire ethically-sourced, human-written code.</li>
-                            <li class="flex items-center gap-3 text-lg text-text-body"><svg class="w-5 h-5 text-accent-purple" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>Filter datasets by language and AI-driven quality scores.</li>
-                            <li class="flex items-center gap-3 text-lg text-text-body"><svg class="w-5 h-5 text-accent-purple" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>Integrate seamlessly with your MLOps pipeline via our secure API.</li>
-                        </ul>
+                        <h3 class="text-3xl font-bold text-text-headings">The Data Explorer</h3>
+                        <p class="mt-4 text-lg text-text-body">Our intuitive dashboard allows your team to navigate the entire Lumen dataset with powerful, granular filters. Isolate high-signal code by language, token count, and our proprietary AI-driven scores for quality, clarity, and architecture.</p>
                         <div class="mt-10 flex items-center gap-6">
-                            <a href="/product" class="px-6 py-3 font-semibold text-white bg-text-headings hover:bg-opacity-90 rounded-md transition-colors">Explore the Data</a>
+                            <a href="/product" class="px-6 py-3 font-semibold text-white bg-text-headings hover:bg-opacity-90 rounded-md transition-colors">Explore the Product</a>
                             <a href="/docs" class="font-semibold text-text-body hover:text-text-headings transition-colors">View Documentation &rarr;</a>
                         </div>
                     </div>
@@ -89,17 +101,17 @@ export function renderLandingPage() {
         </section>
 
         <!-- CONTACT FORM -->
-        <section id="contact" class="py-24 md:py-32">
+        <section id="contact" class="py-24 md:py-32 bg-dark-surface">
              <div class="container mx-auto px-6 max-w-lg text-center">
                 <div class="scroll-animate" style="transform: translateY(2rem);">
-                    <h2 class="text-4xl font-bold text-text-headings">Ready to Get Started?</h2>
-                    <p class="mt-4 text-lg text-text-body">Book a demo or contact our team to learn how Lumen can provide your organization with a strategic data advantage.</p>
+                    <h2 class="text-4xl font-bold text-white">Ready to Get Started?</h2>
+                    <p class="mt-4 text-lg text-text-tertiary">Book a demo or contact our team to learn how Lumen can provide your organization with a strategic data advantage.</p>
                 </div>
                 <div class="mt-12 flex flex-col items-center gap-4 scroll-animate animate-delay-1" style="transform: translateY(2rem);">
                     <a href="/contact" class="w-full sm:w-auto px-8 py-3 font-semibold text-white bg-accent-gradient rounded-md transition-all duration-300 hover:scale-105 hover:brightness-110">
                         Contact Sales
                     </a>
-                    <p class="text-sm text-text-muted">or <a href="/product" class="text-text-body font-semibold hover:underline">explore our platform first</a>.</p>
+                    <p class="text-sm text-text-muted">or <a href="/product" class="text-white font-semibold hover:underline">explore our platform first</a>.</p>
                 </div>
             </div>
         </section>

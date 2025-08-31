@@ -12,6 +12,9 @@ import { renderFooter as renderMarketingFooter } from './components/footer.js';
 import { isAuthenticated } from './lib/auth.js';
 import { stateService } from './lib/state.js';
 import { renderProductPage } from './pages/product.js';
+import { renderAcceptInvitePage } from './pages/accept-invite.js';
+import { renderAboutPage } from './pages/about.js';
+import { renderDocsLayout } from './pages/docs/layout.js';
 
 const app = document.getElementById('app');
 const headerContainer = document.getElementById('header-container');
@@ -19,6 +22,7 @@ const contentContainer = document.getElementById('content-container');
 const footerContainer = document.getElementById('footer-container');
 
 const appRouteRegex = /^\/app(\/.*)?$/;
+const docsRouteRegex = /^\/docs(\/.*)?$/;
 
 const marketingRoutes = {
     '/': renderLandingPage,
@@ -28,9 +32,9 @@ const marketingRoutes = {
     '/signup': renderSignupPage,
     '/verify': renderVerifyPage,
     '/check-email': renderCheckEmailPage,
+    '/accept-invite': renderAcceptInvitePage,
     '/product': renderProductPage,
-    '/docs': () => renderPlaceholderPage('Documentation'),
-    '/about': () => renderPlaceholderPage('About Us'),
+    '/about': renderAboutPage,
     '/privacy': () => renderPlaceholderPage('Privacy Policy'),
 };
 
@@ -44,6 +48,7 @@ const handleLocation = async () => {
     stateService.init();
     const path = window.location.pathname;
     const isAppRoute = appRouteRegex.test(path);
+    const isDocsRoute = docsRouteRegex.test(path);
 
     window.scrollTo(0, 0);
 
@@ -58,7 +63,15 @@ const handleLocation = async () => {
         footerContainer.innerHTML = '';
         contentContainer.className = '';
         contentContainer.innerHTML = await renderDashboardLayout();
-    } else {
+    } else if (isDocsRoute) {
+        const pageId = path.split('/docs/')[1] || 'introduction';
+        app.className = 'relative min-h-screen flex flex-col bg-background text-text-body font-sans antialiased';
+        headerContainer.innerHTML = renderMarketingHeader();
+        footerContainer.innerHTML = renderMarketingFooter();
+        contentContainer.className = 'flex-grow pt-24';
+        contentContainer.innerHTML = await renderDocsLayout(pageId);
+    }
+    else {
         if (isAuthenticated() && (path === '/login' || path === '/signup')) {
             navigate('/app/overview');
             return;
