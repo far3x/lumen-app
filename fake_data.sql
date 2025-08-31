@@ -11,7 +11,7 @@ DECLARE
 BEGIN
     -- Update company with a healthy token balance for demo
     UPDATE companies
-    SET token_balance = 50000000 -- 50 Million tokens
+    SET token_balance = 25000000 -- 25 Million tokens
     WHERE id = target_company_id;
 
     -- Clean up any previous fake data from this script to allow re-running
