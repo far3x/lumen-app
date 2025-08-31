@@ -344,6 +344,8 @@ def get_business_user_by_email(db: Session, email: str) -> Optional[models.Busin
 
 def create_business_user(db: Session, user_data: business_schemas.BusinessUserCreate) -> models.BusinessUser:
     company = None
+    role = 'admin'
+
     if user_data.invite_token:
         invitation = db.query(models.TeamInvitation).filter(
             models.TeamInvitation.token == user_data.invite_token,
@@ -355,6 +357,7 @@ def create_business_user(db: Session, user_data: business_schemas.BusinessUserCr
             company = invitation.company
             invitation.status = 'accepted'
             db.add(invitation)
+            role = 'member' 
     
     if not company:
         company = models.Company(
@@ -376,7 +379,7 @@ def create_business_user(db: Session, user_data: business_schemas.BusinessUserCr
         full_name=user_data.full_name,
         job_title=user_data.job_title,
         company_id=company.id,
-        role='admin' if not user_data.invite_token else 'member'
+        role=role
     )
     
     expires = timedelta(hours=24)
@@ -777,3 +780,72 @@ def create_team_invitation(db: Session, company: models.Company, email: str) -> 
     db.commit()
     db.refresh(invitation)
     return invitation
+
+def get_pending_invitations_for_user(db: Session, user: models.BusinessUser) -> List[Dict]:
+    invitations = db.query(models.TeamInvitation).filter(
+        models.TeamInvitation.email == user.email,
+        models.TeamInvitation.status == 'pending',
+        models.TeamInvitation.expires_at > datetime.now(timezone.utc)
+    ).all()
+
+    results = []
+    for inv in invitations:
+        inviter = db.query(models.BusinessUser).filter(
+            models.BusinessUser.company_id == inv.company_id,
+            models.BusinessUser.role == 'admin'
+        ).first()
+        results.append({
+            "token": inv.token,
+            "company_name": inv.company.name,
+            "invited_by_name": inviter.full_name if inviter else "An admin",
+            "expires_at": inv.expires_at
+        })
+    return results
+
+
+def accept_invitation(db: Session, user: models.BusinessUser, token: str) -> models.BusinessUser:
+    invitation = db.query(models.TeamInvitation).filter(
+        models.TeamInvitation.token == token,
+        models.TeamInvitation.status == 'pending',
+        models.TeamInvitation.expires_at > datetime.now(timezone.utc)
+    ).first()
+
+    if not invitation or invitation.email != user.email:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Invitation not found or invalid.")
+
+    current_company = user.company
+    if current_company:
+        member_count = db.query(models.BusinessUser).filter(models.BusinessUser.company_id == current_company.id).count()
+        if member_count > 1:
+            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Cannot accept invitation. You are already part of a team. Please leave your current team first.")
+
+    old_company = user.company
+    user.company_id = invitation.company_id
+    user.role = 'member'
+    invitation.status = 'accepted'
+    
+    db.add(user)
+    db.add(invitation)
+    db.commit()
+
+    if old_company:
+        db.delete(old_company)
+        db.commit()
+    
+    db.refresh(user)
+    return user
+
+
+def decline_invitation(db: Session, user: models.BusinessUser, token: str):
+    invitation = db.query(models.TeamInvitation).filter(
+        models.TeamInvitation.token == token,
+        models.TeamInvitation.status == 'pending',
+        models.TeamInvitation.expires_at > datetime.now(timezone.utc)
+    ).first()
+
+    if not invitation or invitation.email != user.email:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Invitation not found or invalid.")
+
+    invitation.status = 'declined'
+    db.add(invitation)
+    db.commit()

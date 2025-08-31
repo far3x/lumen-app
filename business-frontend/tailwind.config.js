@@ -25,7 +25,7 @@ export default {
         'text-muted': '#6B7280',
         'text-tertiary': '#9CA3AF',
         
-        'primary': '#B91C1C', // Deep Red
+        'primary': '#B91C1C',
         
         'accent-red-light': '#F87171',
         'accent-red-dark': '#991B1B',
@@ -58,5 +58,7 @@ export default {
       }
     },
   },
-  plugins: [],
+  plugins: [
+    require('@tailwindcss/typography'),
+  ],
 }

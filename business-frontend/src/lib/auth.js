@@ -2,7 +2,7 @@ import api from './api.js';
 import { navigate } from '../router.js';
 import { stateService } from './state.js';
 
-const setAuthData = (data) => {
+export const setAuthData = (data) => {
     localStorage.setItem('business_token', data.access_token);
     localStorage.setItem('business_user', JSON.stringify(data.user));
     localStorage.setItem('business_company', JSON.stringify(data.company));
@@ -32,8 +32,8 @@ export const getCompany = () => {
     return storedCompany ? JSON.parse(storedCompany) : null;
 }
 
-export const register = async (fullName, email, password, companyName, jobTitle, companySize, industry, recaptcha_token) => {
-    const response = await api.post('/business/register', {
+export const register = async (fullName, email, password, companyName, jobTitle, companySize, industry, recaptcha_token, invite_token = null) => {
+    const payload = {
         full_name: fullName,
         email,
         password,
@@ -42,7 +42,11 @@ export const register = async (fullName, email, password, companyName, jobTitle,
         company_size: companySize,
         industry: industry,
         recaptcha_token: recaptcha_token,
-    });
+    };
+    if (invite_token) {
+        payload.invite_token = invite_token;
+    }
+    const response = await api.post('/business/register', payload);
     return response.data;
 };
 
