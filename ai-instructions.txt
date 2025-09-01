@@ -31,6 +31,12 @@ doppler run -- docker compose exec worker_default celery -A app.core.celery_app.
 locally :
 podman compose -f docker-compose.dev.yml exec worker_default celery -A app.core.celery_app.celery_app call app.tasks.recalculate_network_stats_task
 
+penalize copies or rewards by id:
+doppler run -- docker compose exec worker_priority celery -A app.core.celery_app.celery_app call app.tasks.penalize_contribution_task --args='[IDHERE]'
+
+locally :
+podman compose -f docker-compose.dev.yml exec worker_priority celery -A app.core.celery_app.celery_app call app.tasks.penalize_contribution_task --args='[IDHERE]'
+
 GEMINI PLEASE READ THIS - AI INSTRUCTIONS HERE - PLEASE READ !!
 
 little info if you are reading this as an ai model, the prod environment runs using doppler
