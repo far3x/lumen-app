@@ -31,6 +31,51 @@ NEAR_PERFECT_SIMILARITY_THRESHOLD = 0.999
 DISTANCE_UPDATE_THRESHOLD = 1 - SIMILARITY_UPDATE_THRESHOLD
 NEAR_PERFECT_DISTANCE_THRESHOLD = 1 - NEAR_PERFECT_SIMILARITY_THRESHOLD
 
+@celery_app.task(name="app.tasks.penalize_contribution_task")
+def penalize_contribution_task(contribution_id: int):
+    logger.info(f"Starting penalization task for contribution_id: {contribution_id}")
+    db = SessionLocal()
+    try:
+        contribution = db.query(models.Contribution).filter(models.Contribution.id == contribution_id).first()
+
+        if not contribution:
+            logger.error(f"Penalization failed: Contribution with ID {contribution_id} not found.")
+            return
+
+        if contribution.reward_amount == 0:
+            logger.warning(f"Contribution {contribution_id} has already been penalized or has a zero reward. No action taken.")
+            contribution.is_checked = True
+            db.commit()
+            return
+            
+        penalty_amount = contribution.reward_amount
+        user = contribution.user
+
+        if not user or not user.account:
+            logger.error(f"Penalization failed: User or account not found for contribution {contribution_id}.")
+            return
+
+        logger.info(f"Penalizing contribution {contribution_id} for user {user.id}. Amount: ${penalty_amount}")
+
+        user.account.usd_balance = max(0, user.account.usd_balance - penalty_amount)
+        user.account.total_usd_earned = max(0, user.account.total_usd_earned - penalty_amount)
+        
+        contribution.reward_amount = 0.0
+        contribution.status = "REJECTED_PLAGIARISM"
+        contribution.is_checked = True
+
+        db.commit()
+        logger.info(f"Successfully penalized contribution {contribution_id}. User {user.id} balance updated.")
+
+        logger.info("Triggering network stats recalculation after penalization.")
+        recalculate_network_stats_task.delay()
+        
+    except Exception as e:
+        logger.error(f"Error during penalization for contribution {contribution_id}: {e}", exc_info=True)
+        db.rollback()
+    finally:
+        db.close()
+
 @celery_app.task(name="app.tasks.unlock_all_contributions_task")
 def unlock_all_contributions_task(company_id: int):
     logger.info(f"Starting bulk unlock task for company_id: {company_id}")
@@ -40,7 +85,6 @@ def unlock_all_contributions_task(company_id: int):
         logger.info(f"Successfully completed bulk unlock for company_id: {company_id}")
     except Exception as e:
         logger.error(f"Error during bulk unlock for company_id {company_id}: {e}", exc_info=True)
-        # Here you might want to add a notification to the user, e.g., via WebSocket or email.
     finally:
         db.close()
 
@@ -56,7 +100,6 @@ def recalculate_network_stats_task():
             db.add(stats)
             logger.info("No existing network stats found. Created new record.")
         
-        # Reset all stats to their initial default values
         logger.info("Resetting current network stats to zero/defaults...")
         stats.total_usd_distributed = 0.0
         stats.total_contributions = 0

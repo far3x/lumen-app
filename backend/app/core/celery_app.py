@@ -60,6 +60,10 @@ task_routes = {
         'queue': 'default',
         'routing_key': 'task.default',
     },
+    'app.tasks.penalize_contribution_task': {
+        'queue': 'high_priority',
+        'routing_key': 'task.high_priority',
+    },
 }
 
 celery_app.conf.beat_schedule = {

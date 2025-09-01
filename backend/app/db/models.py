@@ -100,6 +100,7 @@ class Contribution(Base):
     content_embedding = Column(Vector(384), nullable=True)
     status = Column(String, default="PENDING", nullable=False)
     transaction_hash = Column(String, nullable=True, index=True)
+    is_checked = Column(Boolean, default=False, nullable=False)
     user = relationship("User", back_populates="contributions")
 
 class Feedback(Base):
