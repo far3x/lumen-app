@@ -3,7 +3,7 @@ import { renderModal } from './utils.js';
 import { navigate } from '../../../router.js';
 import { renderDashboardOverview, initializeChart, attachChartButtonListeners } from './overview.js';
 import { renderMyContributionsPage, attachContributionPageListeners, contributionsState, resetContributionsState } from './my-contributions.js';
-import { renderWebContributePage, attachWebContributeListeners } from './web-contribute.js';
+import { renderWebContributePage, attachWebContributeListeners, cleanupWebContribute } from './web-contribute.js';
 import { renderRecentActivityPage } from './network-feed.js';
 import { renderReferralPage, handleReferralNotifyClick } from './referral.js';
 import { renderSettingsPage, attachSettingsPageListeners } from './settings.js';
@@ -184,6 +184,13 @@ function loadContent(tabId) {
     if (!dashboardContentArea) return;
 
     resetContributionsState();
+    
+    // Clean up web-contribute timer if leaving that tab
+    const urlParams = new URLSearchParams(window.location.search);
+    const currentTab = urlParams.get('tab') || 'overview';
+    if (currentTab === 'web-contribute' && tabId !== 'web-contribute') {
+        cleanupWebContribute();
+    }
 
     let contentHTML = '';
     if (!dashboardState.user) {
