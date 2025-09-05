@@ -193,15 +193,39 @@ function render() {
                 .filter(c => 
                     new Date(c.created_at) > oneDayAgo &&
                     successfulStatuses.includes(c.status)
-                ).length;
+                );
             
-            const contributionsLeft = Math.max(0, 3 - contributionsToday);
+            const contributionsLeft = Math.max(0, 3 - contributionsToday.length);
+            
+            // Show individual timers for each contribution
+            const sortedContributions = contributionsToday
+                .sort((a, b) => new Date(a.created_at) - new Date(b.created_at));
+            
+            let timerHtml = '';
+            if (sortedContributions.length > 0) {
+                const firstContribution = sortedContributions[0];
+                timerHtml = `
+                    <div class="mt-2">
+                        <div class="text-xs text-yellow-400 cursor-pointer hover:text-yellow-300 transition-colors" onclick="this.nextElementSibling.classList.toggle('hidden')">
+                            Next contribution available in: <span id="contribution-timer-0" class="font-mono font-bold"></span>
+                        </div>
+                        <div class="hidden mt-1 space-y-1 pl-4">
+                            ${sortedContributions.slice(1).map((contribution, index) => `
+                                <div class="text-xs text-yellow-400">
+                                    Contribution #${contribution.id}: <span id="contribution-timer-${index + 1}" class="font-mono font-bold"></span>
+                                </div>
+                            `).join('')}
+                        </div>
+                    </div>
+                `;
+            }
             
             content = `
                 <div class="text-center mb-6">
                     <p class="text-sm font-medium ${contributionsLeft > 0 ? 'text-text-secondary' : 'text-yellow-400'}">
                         You have ${contributionsLeft} / 3 successful contributions remaining today.
                     </p>
+                    ${timerHtml}
                 </div>
                 <div id="drop-zone" class="drop-zone flex flex-col justify-center ${contributionsLeft === 0 ? 'opacity-50 cursor-not-allowed' : 'hover:border-accent-purple hover:bg-surface/50'}">
                     <div class="flex flex-col items-center">
@@ -222,7 +246,47 @@ function render() {
     attachListeners();
 }
 
+function updateContributionTimer() {
+    const oneDayAgo = new Date(Date.now() - 24 * 60 * 60 * 1000);
+    const successfulStatuses = ['PROCESSED', 'REJECTED_NO_NEW_CODE', 'REJECTED_NO_REWARD'];
+    
+    const contributionsToday = (currentDashboardState?.allUserContributions || [])
+        .filter(c => 
+            new Date(c.created_at) > oneDayAgo &&
+            successfulStatuses.includes(c.status)
+        )
+        .sort((a, b) => new Date(a.created_at) - new Date(b.created_at));
+    
+    if (contributionsToday.length === 0) return;
+
+    // Update each individual timer
+    contributionsToday.forEach((contribution, index) => {
+        const timerElement = document.getElementById(`contribution-timer-${index}`);
+        if (!timerElement) return;
+
+        const contributionTime = new Date(contribution.created_at);
+        const nextAvailableTime = new Date(contributionTime.getTime() + 24 * 60 * 60 * 1000);
+        const timeUntilReset = nextAvailableTime - new Date();
+        
+        if (timeUntilReset <= 0) {
+            timerElement.textContent = 'Available now';
+        } else {
+            const hours = Math.floor(timeUntilReset / (1000 * 60 * 60));
+            const minutes = Math.floor((timeUntilReset % (1000 * 60 * 60)) / (1000 * 60));
+            const seconds = Math.floor((timeUntilReset % (1000 * 60)) / 1000);
+            
+            timerElement.textContent = `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+        }
+    });
+}
+
 function attachListeners() {
+    // Clear any existing timer first
+    if (window.contributionTimerInterval) {
+        clearInterval(window.contributionTimerInterval);
+        window.contributionTimerInterval = null;
+    }
+
     if (state.view === 'upload') {
         const dropZone = document.getElementById('drop-zone');
         const folderInput = document.getElementById('folder-input');
@@ -241,6 +305,14 @@ function attachListeners() {
             folderInput.addEventListener('change', (e) => {
                 processFiles(e.target.files);
             });
+        }
+        
+        // Start timers if they exist
+        const timerElements = document.querySelectorAll('[id^="contribution-timer-"]');
+        if (timerElements.length > 0) {
+            updateContributionTimer();
+            // Update timers every second
+            window.contributionTimerInterval = setInterval(updateContributionTimer, 1000);
         }
     } else if (state.view === 'confirm') {
         document.getElementById('submit-btn')?.addEventListener('click', handleSubmit);
@@ -261,6 +333,12 @@ export function renderWebContributePage(dashboardState) {
     currentDashboardState = dashboardState;
     state = { view: 'upload', project: null, errorMessage: '' };
     
+    // Clean up any existing timer
+    if (window.contributionTimerInterval) {
+        clearInterval(window.contributionTimerInterval);
+        window.contributionTimerInterval = null;
+    }
+    
     return `
         <header>
             <h1 class="text-3xl font-bold">Web Contribute</h1>
@@ -270,4 +348,12 @@ export function renderWebContributePage(dashboardState) {
         <div id="web-contribute-container" class="bg-surface p-2 sm:p-6 rounded-lg border border-primary mt-8">
         </div>
     `;
+}
+
+export function cleanupWebContribute() {
+    // Clean up timer when leaving the page
+    if (window.contributionTimerInterval) {
+        clearInterval(window.contributionTimerInterval);
+        window.contributionTimerInterval = null;
+    }
 }
