@@ -217,7 +217,7 @@ class BillingHistory(Base):
     date = Column(DateTime(timezone=True), server_default=func.now(), nullable=False)
     description = Column(String, nullable=False)
     amount_usd = Column(Float, nullable=False)
-    status = Column(String, nullable=False, default="paid") # e.g., 'paid', 'pending', 'failed'
+    status = Column(String, nullable=False, default="paid")
     invoice_url = Column(String, nullable=True)
     company = relationship("Company", back_populates="billing_history")
 
@@ -227,7 +227,7 @@ class TeamInvitation(Base):
     company_id = Column(Integer, ForeignKey("companies.id", ondelete="CASCADE"), nullable=False)
     email = Column(String, nullable=False, index=True)
     token = Column(String, unique=True, index=True, nullable=False)
-    status = Column(String, nullable=False, server_default="pending") # 'pending', 'accepted', 'expired'
+    status = Column(String, nullable=False, server_default="pending")
     expires_at = Column(DateTime(timezone=True), nullable=False)
     created_at = Column(DateTime(timezone=True), server_default=func.now())
     company = relationship("Company", back_populates="invitations")

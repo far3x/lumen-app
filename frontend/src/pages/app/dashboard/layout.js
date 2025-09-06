@@ -185,7 +185,6 @@ function loadContent(tabId) {
 
     resetContributionsState();
     
-    // Clean up web-contribute timer if leaving that tab
     const urlParams = new URLSearchParams(window.location.search);
     const currentTab = urlParams.get('tab') || 'overview';
     if (currentTab === 'web-contribute' && tabId !== 'web-contribute') {

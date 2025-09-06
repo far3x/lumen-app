@@ -28,25 +28,17 @@ def create_access_token(data: dict, expires_delta: Optional[timedelta] = None) -
     return encoded_jwt
 
 def create_pat() -> tuple[str, str]:
-    """Generates a new PAT and its hash. Returns (raw_token, hashed_token)."""
     raw_token = f"lum_pat_{secrets.token_urlsafe(32)}"
     hashed_token = hashlib.sha256(raw_token.encode()).hexdigest()
     return raw_token, hashed_token
 
 def create_hmac_signature(challenge: str, timestamp: str, body: bytes, secret: str) -> str:
-    """
-    Creates an HMAC signature for a request using a provided secret (the user's PAT).
-    """
     body_hash = hashlib.sha256(body).hexdigest()
     string_to_sign = f"{challenge}:{timestamp}:{body_hash}".encode()
-    # Use the provided secret (the user's PAT)
     secret_bytes = secret.encode()
     signature = hmac.new(secret_bytes, string_to_sign, hashlib.sha256).hexdigest()
     return signature
 
 def verify_hmac_signature(signature: str, challenge: str, timestamp: str, body: bytes, secret: str) -> bool:
-    """
-    Verifies an incoming HMAC signature against a provided secret (the user's PAT).
-    """
     expected_signature = create_hmac_signature(challenge, timestamp, body, secret)
     return hmac.compare_digest(expected_signature, signature)

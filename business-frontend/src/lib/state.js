@@ -34,12 +34,12 @@ export const stateService = {
 
     setUser: (userData) => {
         state.user = userData;
-        stateService.notify(); // Changed from state.notify()
+        stateService.notify();
     },
 
     setCompany: (companyData) => {
         state.company = companyData;
-        stateService.notify(); // Changed from state.notify()
+        stateService.notify();
     },
 
     setStats: (statsData) => {
@@ -47,7 +47,7 @@ export const stateService = {
         if (state.company) {
             state.company.token_balance = statsData.token_balance;
         }
-        stateService.notify(); // Changed from state.notify()
+        stateService.notify();
     },
 
     fetchDashboardStats: async () => {

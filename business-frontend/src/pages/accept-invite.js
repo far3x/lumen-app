@@ -33,7 +33,7 @@ async function handleAccept() {
                 <p class="text-text-body mt-3">You have joined the team. Redirecting to your new dashboard...</p>
              `;
         }
-        setTimeout(() => window.location.reload(), 2000); // Reload to ensure all state is fresh
+        setTimeout(() => window.location.reload(), 2000);
     } catch (error) {
         if (container) {
              container.innerHTML = `
