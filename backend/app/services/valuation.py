@@ -141,14 +141,16 @@ class HybridValuationService:
                 result = subprocess.run(['scc', '--format', 'json', temp_dir], capture_output=True, text=True, check=True)
                 scc_results = json.loads(result.stdout)
                 
+                total_lloc_all_types = 0
                 for lang_summary in scc_results:
                     lang_name = lang_summary.get("Name")
                     if lang_name:
                         lloc = lang_summary.get("Code", 0)
                         file_count = lang_summary.get("Count", 0)
-                        analysis_data["language_breakdown"][lang_name] = analysis_data["language_breakdown"].get(lang_name, 0) + file_count
-                        analysis_data["total_lloc"] += lloc
                         
+                        analysis_data["language_breakdown"][lang_name] = analysis_data["language_breakdown"].get(lang_name, 0) + file_count
+                        total_lloc_all_types += lloc
+
                         if lang_name in CODE_LANGUAGES:
                             total_pure_code_lloc += lloc
 
@@ -156,6 +158,9 @@ class HybridValuationService:
                         if complexity > 0 and file_count > 0:
                             total_complexity += complexity
                             total_files_with_complexity += file_count
+                
+                analysis_data["total_lloc"] = total_pure_code_lloc
+
             except (subprocess.CalledProcessError, FileNotFoundError, json.JSONDecodeError) as e:
                 print(f"[VALUATION_ERROR] SCC execution failed or produced invalid JSON: {e}")
                 pass
@@ -171,8 +176,8 @@ class HybridValuationService:
             compressed_size = len(zlib.compress(all_content_str.encode('utf-8'), level=9))
             analysis_data["compression_ratio"] = compressed_size / original_size if original_size > 0 else 0
 
-        if analysis_data["total_lloc"] > 0:
-            analysis_data["code_ratio"] = total_pure_code_lloc / analysis_data["total_lloc"]
+        if total_lloc_all_types > 0:
+            analysis_data["code_ratio"] = total_pure_code_lloc / total_lloc_all_types
         else:
             analysis_data["code_ratio"] = 0.0
 
