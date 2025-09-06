@@ -21,7 +21,7 @@ import asyncio
 from fastapi_mail import MessageSchema
 from datetime import datetime, timezone
 from app.db.models import PayoutBatch, BatchPayout, Account, ContributionLanguage
-from sqlalchemy import func
+from sqlalchemy import func, desc
 from sqlalchemy.exc import IntegrityError
 
 logger = logging.getLogger(__name__)
@@ -29,6 +29,30 @@ logger = logging.getLogger(__name__)
 PLAGIARISM_THRESHOLD = 0.95
 INNOVATION_THRESHOLD = 0.75
 
+@celery_app.task(name="app.tasks.clear_last_contribution_embedding_task")
+def clear_last_contribution_embedding_task():
+    logger.info("Starting task to clear the last contribution's embedding for testing.")
+    db = SessionLocal()
+    try:
+        last_contribution = db.query(models.Contribution).order_by(desc(models.Contribution.id)).first()
+
+        if not last_contribution:
+            logger.warning("No contributions found. Nothing to clear.")
+            return
+
+        if last_contribution.content_embedding is None:
+            logger.info(f"Embedding for last contribution (ID: {last_contribution.id}) is already null. No action taken.")
+            return
+
+        last_contribution.content_embedding = None
+        db.commit()
+        logger.info(f"Successfully cleared content_embedding for the most recent contribution (ID: {last_contribution.id}).")
+
+    except Exception as e:
+        logger.error(f"Error clearing last contribution embedding: {e}", exc_info=True)
+        db.rollback()
+    finally:
+        db.close()
 
 @celery_app.task(name="app.tasks.penalize_contribution_task")
 def penalize_contribution_task(contribution_id: int):

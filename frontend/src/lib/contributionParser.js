@@ -19,7 +19,7 @@ const SKIPPED_FILES = [
 ];
 
 const ALLOWED_FILE_TYPES = [
-    ".R", ".ada", ".adb", ".adoc", ".ads", ".asciidoc", ".asm", ".asp", ".aspx", ".ascx",
+    ".r", ".ada", ".adb", ".adoc", ".ads", ".asciidoc", ".asm", ".asp", ".aspx", ".ascx",
     ".au3", ".avdl", ".avsc", ".babelrc", ".bash", ".bazel", ".bib", ".browserslistrc", ".c",
     ".cc", ".cfg", ".cg", ".cjs", ".clj", ".cljc", ".cljs", ".cls", ".cmake", ".cmd", ".comp",
     ".conf", ".cpp", ".cs", ".csproj", ".cshtml", ".css", ".dart", ".diff", ".conf", ".ino",
@@ -45,13 +45,14 @@ const ALLOWED_FILE_TYPES = [
     "browserslist", "build.gradle", "build.xml", "composer.json", "docker-compose.yml",
     "now.json", "package.json", "pom.xml", "pyproject.toml", "requirements.txt",
     "rollup.config.js", "setup.py", "tsconfig.json", "vercel.json", "webpack.config.js"
-];
+].map(ext => ext.toLowerCase());
 
 const PAYLOAD_SIZE_LIMIT_MB = 5;
 const PAYLOAD_SIZE_LIMIT_BYTES = PAYLOAD_SIZE_LIMIT_MB * 1024 * 1024;
 
 function shouldSkip(path) {
-    const parts = path.split('/');
+    const lowerPath = path.toLowerCase();
+    const parts = lowerPath.split('/');
     for (const part of parts) {
         if (SKIPPED_FOLDERS.includes(part)) return true;
         if (SKIPPED_FOLDERS.some(pattern => pattern.startsWith('*') && part.endsWith(pattern.substring(1)))) {

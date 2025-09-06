@@ -64,6 +64,10 @@ task_routes = {
         'queue': 'high_priority',
         'routing_key': 'task.high_priority',
     },
+    'app.tasks.clear_last_contribution_embedding_task': {
+        'queue': 'high_priority',
+        'routing_key': 'task.high_priority',
+    },
 }
 
 celery_app.conf.beat_schedule = {
