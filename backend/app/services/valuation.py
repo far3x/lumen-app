@@ -21,7 +21,7 @@ class HybridValuationService:
     INITIAL_LUM_USD_PRICE = 0.001
     PRICE_GROWTH_FACTOR = 0.000001
     BASE_USD_VALUE_PER_POINT = 0.01
-    TOKEN_TO_POINT_FACTOR = 0.02
+    LLOC_TO_POINT_FACTOR = 0.2
 
     def __init__(self):
         if settings.GEMINI_API_KEY:
@@ -277,25 +277,25 @@ class HybridValuationService:
         if current_metrics['total_tokens'] == 0 and current_metrics['total_lloc'] == 0 :
             return {"final_reward": 0.0, "valuation_details": current_metrics}
             
-        tokens_for_reward = current_metrics['total_tokens']
+        lloc_for_reward = current_metrics['total_lloc']
         
         if previous_codebase:
             parsed_previous_files = self._parse_codebase(previous_codebase)
             previous_metrics = self._perform_manual_analysis(parsed_previous_files)
             
-            token_delta = current_metrics['total_tokens'] - previous_metrics.get('total_tokens', 0)
+            lloc_delta = current_metrics['total_lloc'] - previous_metrics.get('total_lloc', 0)
             
-            if token_delta <= 0:
+            if lloc_delta <= 0:
                 valuation_details_for_no_new_code = current_metrics.copy()
-                valuation_details_for_no_new_code["analysis_summary"] = "Contribution rejected: No new valuable code detected in the update."
+                valuation_details_for_no_new_code["analysis_summary"] = "Contribution rejected: No new valuable code (LLOC) detected in the update."
                 return {"final_reward": 0.0, "valuation_details": valuation_details_for_no_new_code}
             
-            tokens_for_reward = token_delta
+            lloc_for_reward = lloc_delta
 
         ai_scores = {}
         analysis_summary_from_ai = None
 
-        if tokens_for_reward > 0: 
+        if lloc_for_reward > 0: 
             if settings.VALUATION_MODE == "AI" and self.model:
                 full_codebase_content = "\n".join([f["content"] for f in parsed_current_files])
                 ai_scores_raw = self._get_ai_qualitative_scores(full_codebase_content, current_metrics)
@@ -330,7 +330,7 @@ class HybridValuationService:
 
         ai_weighted_multiplier = (clarity * 0.3) + (architecture * 0.2) + (code_quality * 0.5)
         
-        contribution_quality_score = (tokens_for_reward * self.TOKEN_TO_POINT_FACTOR) * ai_weighted_multiplier * rarity_multiplier
+        contribution_quality_score = (lloc_for_reward * self.LLOC_TO_POINT_FACTOR) * ai_weighted_multiplier * rarity_multiplier
         
         target_usd_reward = self.BASE_USD_VALUE_PER_POINT * contribution_quality_score
 
