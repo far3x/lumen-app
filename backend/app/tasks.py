@@ -26,10 +26,9 @@ from sqlalchemy.exc import IntegrityError
 
 logger = logging.getLogger(__name__)
 
-SIMILARITY_UPDATE_THRESHOLD = 0.85 
-NEAR_PERFECT_SIMILARITY_THRESHOLD = 0.999
-DISTANCE_UPDATE_THRESHOLD = 1 - SIMILARITY_UPDATE_THRESHOLD
-NEAR_PERFECT_DISTANCE_THRESHOLD = 1 - NEAR_PERFECT_SIMILARITY_THRESHOLD
+PLAGIARISM_THRESHOLD = 0.95
+INNOVATION_THRESHOLD = 0.75
+
 
 @celery_app.task(name="app.tasks.penalize_contribution_task")
 def penalize_contribution_task(contribution_id: int):
@@ -420,47 +419,49 @@ def process_contribution(self, user_id: int, codebase: str, contribution_db_id: 
 
         nearest_neighbors = crud.get_nearest_neighbors(db, new_embedding, limit=5)
         
-        previous_codebase_for_valuation = None
-        rejection_reason = None
-
         nearest_neighbors = [res for res in nearest_neighbors if res[0].id != contribution_db_id]
+
+        innovation_multiplier = 1.0
 
         if nearest_neighbors:
             most_similar_contrib, min_distance = nearest_neighbors[0]
-            
             max_similarity_overall = 1 - min_distance
 
-            if max_similarity_overall > SIMILARITY_UPDATE_THRESHOLD:
-                if most_similar_contrib.user_id == user_id:
-                    logger.info(f"[SIMILARITY_UPDATE_CANDIDATE] Max similarity {max_similarity_overall:.4f} to own code (C_ID:{most_similar_contrib.id}). Checking for near-perfect match.")
-                    
-                    if min_distance <= NEAR_PERFECT_DISTANCE_THRESHOLD:
-                        logger.info(f"[SIMILARITY_UPDATE] Confirmed as update to user's own C_ID:{most_similar_contrib.id} (Similarity: {max_similarity_overall:.4f}).")
-                        previous_codebase_for_valuation = most_similar_contrib.raw_content
-                    else:
-                        logger.info(f"[SIMILARITY_PASS] User's own code similarity {max_similarity_overall:.4f} is not a near-perfect match. Treating as new, but will check plagiarism.")
-                        pass
-                else:
-                    logger.warning(f"[SIMILARITY_REJECT] High similarity ({max_similarity_overall:.4f}) to code from another user (C_ID:{most_similar_contrib.id}). Rejecting as potential plagiarism.")
-                    rejection_reason = "DUPLICATE_CROSS_USER"
-            else:
-                 logger.info(f"[SIMILARITY_PASS] Max overall similarity {max_similarity_overall:.4f} is below update threshold. Treating as new.")
+            if max_similarity_overall > PLAGIARISM_THRESHOLD and most_similar_contrib.user_id != user_id:
+                logger.warning(f"[PLAGIARISM_REJECT] High similarity ({max_similarity_overall:.4f}) to another user's C_ID:{most_similar_contrib.id}. Rejecting.")
+                crud.update_contribution_status(db, contribution_db_id, "DUPLICATE_CROSS_USER")
+                publish_contribution_update(db, contribution_db_id, user_id)
+                return
 
-        if rejection_reason:
-            crud.update_contribution_status(db, contribution_db_id, rejection_reason)
-            publish_contribution_update(db, contribution_db_id, user_id)
-            return
+            own_closest_neighbor = next((res for res in nearest_neighbors if res[0].user_id == user_id), None)
+            if own_closest_neighbor:
+                own_min_distance = own_closest_neighbor[1]
+                own_max_similarity = 1 - own_min_distance
+
+                if own_max_similarity > PLAGIARISM_THRESHOLD:
+                    logger.warning(f"[DUPLICATE_REJECT] High similarity ({own_max_similarity:.4f}) to own C_ID:{own_closest_neighbor[0].id}. Rejecting as duplicate.")
+                    crud.update_contribution_status(db, contribution_db_id, "DUPLICATE_HIGH_SIMILARITY")
+                    publish_contribution_update(db, contribution_db_id, user_id)
+                    return
+                elif own_max_similarity >= INNOVATION_THRESHOLD:
+                    innovation_multiplier = 1.0 - own_max_similarity
+                    logger.info(f"[INNOVATION_FACTOR] Found similar own contribution (C_ID:{own_closest_neighbor[0].id}) with {own_max_similarity:.4f} similarity. Applying innovation multiplier of {innovation_multiplier:.4f}.")
+                else:
+                    logger.info(f"[NEW_VERSION] Similarity to own work ({own_max_similarity:.4f}) is below innovation threshold. Treating as a major new version.")
+
+        logger.info(f"[UNIQUENESS_PASS] Contribution {contribution_db_id} is unique enough to proceed to valuation.")
         
-        logger.info(f"[UNIQUENESS_PASS] Contribution {contribution_db_id} is unique or a valid update. Proceeding to valuation...")
-        
-        valuation_result = hybrid_valuation_service.calculate(db, current_codebase=final_codebase, previous_codebase=previous_codebase_for_valuation)
+        valuation_result = hybrid_valuation_service.calculate(db, current_codebase=final_codebase)
         base_reward_usd = valuation_result.get("final_reward", 0.0)
         
         if source == 'web':
             base_reward_usd /= 3.0
             logger.info(f"[REWARD_MOD] Web contribution reward adjusted by 1/3. New base reward: ${base_reward_usd:.4f}")
 
+        final_base_reward_with_innovation = base_reward_usd * innovation_multiplier
+
         valuation_details = valuation_result.get("valuation_details", {})
+        valuation_details['innovation_multiplier'] = round(innovation_multiplier, 4)
 
         contribution_record = crud.get_contribution_by_id(db, contribution_db_id)
         if not contribution_record:
@@ -469,8 +470,8 @@ def process_contribution(self, user_id: int, codebase: str, contribution_db_id: 
 
         contribution_record.valuation_results = json.dumps(valuation_details)
         
-        if base_reward_usd > 0:
-            reward_with_multiplier = base_reward_usd * user.reward_multiplier
+        if final_base_reward_with_innovation > 0:
+            reward_with_multiplier = final_base_reward_with_innovation * user.reward_multiplier
             total_reward_for_account = reward_with_multiplier 
 
             if settings.BETA_MODE_ENABLED and user.id <= settings.BETA_MAX_USERS and not user.is_beta_bonus_claimed:
@@ -518,14 +519,10 @@ def process_contribution(self, user_id: int, codebase: str, contribution_db_id: 
         else:
             contribution_record.reward_amount = 0.0
             contribution_record.content_embedding = new_embedding
-            contribution_record.status = valuation_details.get("analysis_summary", "REJECTED_NO_REWARD")
-            if contribution_record.status == "Contribution rejected: No new valuable code detected in the update.":
-                contribution_record.status = "REJECTED_NO_NEW_CODE"
-            else:
-                contribution_record.status = "REJECTED_NO_REWARD"
+            contribution_record.status = "REJECTED_NO_REWARD"
             db.add(contribution_record)
             db.commit()
-            logger.warning(f"[REWARD] Contribution {contribution_db_id} was valued at $0.0 and status set to {contribution_record.status}.")
+            logger.warning(f"[REWARD] Contribution {contribution_db_id} was valued at $0.0 after multipliers and status set to {contribution_record.status}.")
         
         publish_contribution_update(db, contribution_db_id, user_id)
 

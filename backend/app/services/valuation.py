@@ -278,7 +278,7 @@ class HybridValuationService:
             print(f"[VALUATION_ERROR] Error calling Gemini API: {e}")
             return {"error": str(e)}
 
-    def calculate(self, db: Session, current_codebase: str, previous_codebase: str | None = None) -> dict:
+    def calculate(self, db: Session, current_codebase: str) -> dict:
         parsed_current_files = self._parse_codebase(current_codebase)
         if not parsed_current_files:
             return {"final_reward": 0.0, "valuation_details": {}}
@@ -300,19 +300,6 @@ class HybridValuationService:
             return {"final_reward": 0.0, "valuation_details": current_metrics}
             
         lloc_for_reward = current_metrics['total_lloc']
-        
-        if previous_codebase:
-            parsed_previous_files = self._parse_codebase(previous_codebase)
-            previous_metrics = self._perform_manual_analysis(parsed_previous_files)
-            
-            lloc_delta = current_metrics['total_lloc'] - previous_metrics.get('total_lloc', 0)
-            
-            if lloc_delta <= 0:
-                valuation_details_for_no_new_code = current_metrics.copy()
-                valuation_details_for_no_new_code["analysis_summary"] = "Contribution rejected: No new valuable code (LLOC) detected in the update."
-                return {"final_reward": 0.0, "valuation_details": valuation_details_for_no_new_code}
-            
-            lloc_for_reward = lloc_delta
 
         ai_scores = {}
         analysis_summary_from_ai = None

@@ -88,16 +88,21 @@ async def contribute_data(
     redis_service.delete(challenge_key)
     
     twenty_four_hours_ago = datetime.now(timezone.utc) - timedelta(days=1)
-    successful_contributions_count = db.query(models.Contribution).filter(
+    
+    counted_statuses = [
+        'PENDING', 'PROCESSING', 'PROCESSED'
+    ]
+    
+    contributions_in_last_24h = db.query(models.Contribution).filter(
         models.Contribution.user_id == current_user.id,
-        models.Contribution.status.in_(['PROCESSED', 'REJECTED_NO_NEW_CODE', 'REJECTED_NO_REWARD']),
+        models.Contribution.status.in_(counted_statuses),
         models.Contribution.created_at >= twenty_four_hours_ago
     ).count()
 
-    if successful_contributions_count >= 3:
+    if contributions_in_last_24h >= 3:
         raise HTTPException(
             status_code=status.HTTP_429_TOO_MANY_REQUESTS,
-            detail="You have reached your daily limit of 3 successful contributions. Please try again later."
+            detail="You have reached your daily limit of 3 successful or pending contributions. Please try again later."
         )
 
     if tokenizer:
