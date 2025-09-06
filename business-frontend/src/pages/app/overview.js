@@ -37,7 +37,6 @@ async function initializeOverview() {
         if(statTeamMembersContainer) statTeamMembersContainer.innerHTML = `<p class="text-sm font-medium text-text-muted">Team Members</p><p id="stat-team-members" class="text-3xl font-bold text-text-headings mt-1">${data.team_member_count}</p>`;
         if(statApiKeysContainer) statApiKeysContainer.innerHTML = `<p class="text-sm font-medium text-text-muted">Active API Keys</p><p id="stat-api-keys" class="text-3xl font-bold text-text-headings mt-1">${data.active_api_key_count}</p>`;
     } else {
-        // Handle failed stats fetch
         if(statTokenBalanceContainer) statTokenBalanceContainer.innerHTML = `<p class="text-sm text-text-muted">Token Balance</p><p class="text-3xl font-bold text-text-headings mt-1">Error</p>`;
     }
 
@@ -79,7 +78,7 @@ function initializeChart(usageData) {
 
     const dataMap = new Map();
     usageData.forEach(d => {
-        const monthKey = new Date(d.date).toISOString().slice(5, 7); // "MM"
+        const monthKey = new Date(d.date).toISOString().slice(5, 7);
         const yearMonthKey = `${new Date(d.date).getFullYear()}-${monthKey}`;
         dataMap.set(yearMonthKey, (dataMap.get(yearMonthKey) || 0) + d.tokens_used);
     });

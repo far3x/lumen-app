@@ -270,7 +270,6 @@ async function renderDetailView(item) {
     if (item.is_unlocked) {
         if (!item.raw_content) { 
             try {
-                // For unlocked content, we now must use the user's normal auth, not an API key.
                 const response = await api.post(`/business/data/unlock/${item.id}`);
                 item.raw_content = response.data.raw_content;
             } catch (e) {

@@ -2,12 +2,6 @@ export function renderDataHubPage() {
     const checkmarkIcon = `<svg class="w-5 h-5 text-green-400 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" /></svg>`;
     const contactEmail = 'contact@lumen.onl';
 
-    const sampleData = [
-        { lang: 'Rust', tokens: 850, quality: 0.92, code: `fn find_path(start: Point, goal: Point, grid: &Grid) -> Option<Vec<Point>> {\n    let mut open_set = BinaryHeap::new();\n    open_set.push(State { cost: 0, position: start });\n\n    let mut came_from = HashMap::new();\n    let mut cost_so_far = HashMap::new();\n    cost_so_far.insert(start, 0);\n\n    while let Some(State { cost, position }) = open_set.pop() {\n        if position == goal {\n            return Some(reconstruct_path(came_from, position));\n        }\n    }\n    None\n}` },
-        { lang: 'Python', tokens: 620, quality: 0.95, code: `class TransformerBlock(nn.Module):\n    def __init__(self, embed_dim, num_heads, ff_dim, rate=0.1):\n        super().__init__()\n        self.attn = nn.MultiheadAttention(embed_dim, num_heads, dropout=rate)\n        self.ffn = nn.Sequential(\n            nn.Linear(embed_dim, ff_dim),\n            nn.GELU(),\n            nn.Linear(ff_dim, embed_dim),\n        )\n\n    def forward(self, x):\n        attn_output, _ = self.attn(x, x, x)\n        x = self.norm1(x + self.dropout1(attn_output))\n        return self.norm2(x + self.dropout2(self.ffn(x)))` },
-        { lang: 'TypeScript', tokens: 450, quality: 0.89, code: `function createCRDTStore<T>(siteId: string) {\n  const state = new Map<string, T>();\n  const oplog: Operation<T>[] = [];\n\n  const apply = (op: Operation<T>) => {\n    oplog.push(op);\n    // ... apply logic to state\n  };\n\n  return { state, apply };\n}` },
-    ];
-
     const renderDataExplorer = () => `
         <div id="data-explorer" class="bg-surface/50 backdrop-blur-md border border-primary rounded-2xl shadow-2xl shadow-black/30 overflow-hidden">
             <div class="p-6 border-b border-primary">

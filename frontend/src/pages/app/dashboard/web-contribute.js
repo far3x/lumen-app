@@ -88,7 +88,6 @@ async function handleSubmit() {
             codebase: state.project.payload,
         });
 
-        // Create a placeholder and add it to the state immediately
         const placeholderContribution = {
             id: response.data.contribution_id,
             created_at: new Date().toISOString(),
@@ -197,7 +196,6 @@ function render() {
             
             const contributionsLeft = Math.max(0, 3 - contributionsToday.length);
             
-            // Show individual timers for each contribution
             const sortedContributions = contributionsToday
                 .sort((a, b) => new Date(a.created_at) - new Date(b.created_at));
             
@@ -259,7 +257,6 @@ function updateContributionTimer() {
     
     if (contributionsToday.length === 0) return;
 
-    // Update each individual timer
     contributionsToday.forEach((contribution, index) => {
         const timerElement = document.getElementById(`contribution-timer-${index}`);
         if (!timerElement) return;
@@ -281,7 +278,6 @@ function updateContributionTimer() {
 }
 
 function attachListeners() {
-    // Clear any existing timer first
     if (window.contributionTimerInterval) {
         clearInterval(window.contributionTimerInterval);
         window.contributionTimerInterval = null;
@@ -307,11 +303,9 @@ function attachListeners() {
             });
         }
         
-        // Start timers if they exist
         const timerElements = document.querySelectorAll('[id^="contribution-timer-"]');
         if (timerElements.length > 0) {
             updateContributionTimer();
-            // Update timers every second
             window.contributionTimerInterval = setInterval(updateContributionTimer, 1000);
         }
     } else if (state.view === 'confirm') {
@@ -333,7 +327,6 @@ export function renderWebContributePage(dashboardState) {
     currentDashboardState = dashboardState;
     state = { view: 'upload', project: null, errorMessage: '' };
     
-    // Clean up any existing timer
     if (window.contributionTimerInterval) {
         clearInterval(window.contributionTimerInterval);
         window.contributionTimerInterval = null;
@@ -351,7 +344,6 @@ export function renderWebContributePage(dashboardState) {
 }
 
 export function cleanupWebContribute() {
-    // Clean up timer when leaving the page
     if (window.contributionTimerInterval) {
         clearInterval(window.contributionTimerInterval);
         window.contributionTimerInterval = null;

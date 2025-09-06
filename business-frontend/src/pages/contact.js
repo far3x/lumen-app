@@ -27,7 +27,6 @@ export function renderContactPage() {
             };
 
             try {
-                // Use Vite's env variable system to switch between dev and prod URLs
                 const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:8000';
                 const response = await fetch(`${apiUrl}/api/v1/business/contact-sales`, {
                     method: 'POST',

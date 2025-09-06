@@ -19,7 +19,6 @@ async def handle_contact_sales(
         send_contact_sales_email_task.delay(name=payload.full_name, email=payload.work_email)
         return {"message": "Submission successful. Thank you for contacting us."}
     except Exception as e:
-        # Log the error properly in a real application
         print(f"Error in contact sales endpoint: {e}")
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
