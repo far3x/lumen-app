@@ -13,6 +13,17 @@ import tempfile
 from app.db import crud
 from app.core.config import settings
 
+CODE_LANGUAGES = {
+    "Ada", "Assembly", "AutoHotkey", "C", "C++", "C#", "Cg", "Clojure", "Crystal", "CSS",
+    "Dart", "Elm", "Erlang", "F#", "Fish", "Fortran", "GDScript", "Go", "GraphQL",
+    "Groovy", "Haskell", "Haxe", "HLSL", "HTML", "Java", "JavaScript", "Jython",
+    "Julia", "Kotlin", "Lisp", "LiveScript", "Lua", "MATLAB", "Metal", "Nim",
+    "Objective-C", "OCaml", "Pascal", "Perl", "PHP", "PowerShell", "Prolog",
+    "Python", "R", "Ruby", "Rust", "Scala", "Shell", "Solidity", "SQL", "Swift",
+    "TypeScript", "Vala", "Verilog", "VHDL", "Visual Basic", "Vue", "Zig"
+}
+
+
 class HybridValuationService:
     GARBAGE_COMPRESSION_THRESHOLD = 0.1
     TOKEN_LIMIT = 700_000
@@ -71,12 +82,14 @@ class HybridValuationService:
             "total_tokens": 0,
             "avg_complexity": 0.0,
             "compression_ratio": 0.0,
-            "language_breakdown": {}
+            "language_breakdown": {},
+            "code_ratio": 1.0,
         }
         
         all_content_str = ""
         total_complexity = 0
         total_files_with_complexity = 0
+        total_pure_code_lloc = 0
 
         with tempfile.TemporaryDirectory() as temp_dir:
             for file_data in parsed_files:
@@ -130,10 +143,14 @@ class HybridValuationService:
                 for lang_summary in scc_results:
                     lang_name = lang_summary.get("Name")
                     if lang_name:
+                        lloc = lang_summary.get("Code", 0)
                         file_count = lang_summary.get("Count", 0)
                         analysis_data["language_breakdown"][lang_name] = analysis_data["language_breakdown"].get(lang_name, 0) + file_count
-                        analysis_data["total_lloc"] += lang_summary.get("Code", 0)
+                        analysis_data["total_lloc"] += lloc
                         
+                        if lang_name in CODE_LANGUAGES:
+                            total_pure_code_lloc += lloc
+
                         complexity = lang_summary.get("Complexity", 0)
                         if complexity > 0 and file_count > 0:
                             total_complexity += complexity
@@ -152,6 +169,11 @@ class HybridValuationService:
             original_size = len(all_content_str.encode('utf-8'))
             compressed_size = len(zlib.compress(all_content_str.encode('utf-8'), level=9))
             analysis_data["compression_ratio"] = compressed_size / original_size if original_size > 0 else 0
+
+        if analysis_data["total_lloc"] > 0:
+            analysis_data["code_ratio"] = total_pure_code_lloc / analysis_data["total_lloc"]
+        else:
+            analysis_data["code_ratio"] = 0.0
 
         print(f"[VALUATION_STEP] Universal analysis finished: {analysis_data}")
         return analysis_data
@@ -330,7 +352,10 @@ class HybridValuationService:
 
         ai_weighted_multiplier = (clarity * 0.3) + (architecture * 0.2) + (code_quality * 0.5)
         
-        contribution_quality_score = (lloc_for_reward * self.LLOC_TO_POINT_FACTOR) * ai_weighted_multiplier * rarity_multiplier
+        code_ratio = current_metrics.get('code_ratio', 1.0)
+        code_ratio_multiplier = math.sqrt(code_ratio)
+        
+        contribution_quality_score = (lloc_for_reward * self.LLOC_TO_POINT_FACTOR) * ai_weighted_multiplier * rarity_multiplier * code_ratio_multiplier
         
         target_usd_reward = self.BASE_USD_VALUE_PER_POINT * contribution_quality_score
 
@@ -349,6 +374,7 @@ class HybridValuationService:
             "ai_weighted_multiplier": round(ai_weighted_multiplier, 4),
             "analysis_summary": sanitized_summary,
             "rarity_multiplier": round(rarity_multiplier, 4),
+            "code_ratio_multiplier": round(code_ratio_multiplier, 4),
             "simulated_lum_price_usd": round(simulated_lum_price, 6),
             "target_usd_reward": round(target_usd_reward, 4),
             "final_reward_usd": round(final_reward, 4)
