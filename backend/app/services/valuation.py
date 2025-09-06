@@ -28,6 +28,7 @@ class HybridValuationService:
     GARBAGE_COMPRESSION_THRESHOLD = 0.1
     TOKEN_LIMIT = 700_000
     BOOTSTRAP_CONTRIBUTIONS = 20
+    COMPLEXITY_THRESHOLD = 30.0
     
     INITIAL_LUM_USD_PRICE = 0.001
     PRICE_GROWTH_FACTOR = 0.000001
@@ -287,7 +288,13 @@ class HybridValuationService:
         
         raw_avg_complexity = current_metrics.get('avg_complexity', 0.0)
         if raw_avg_complexity > 0:
-            scaled_complexity = 10 * math.log10(raw_avg_complexity + 1)
+            if raw_avg_complexity <= self.COMPLEXITY_THRESHOLD:
+                scaled_complexity = 10 * math.log10(raw_avg_complexity + 1)
+            else:
+                base_scaled_complexity = 10 * math.log10(self.COMPLEXITY_THRESHOLD + 1)
+                excess_complexity = raw_avg_complexity - self.COMPLEXITY_THRESHOLD
+                nerfed_excess_complexity = math.log10(excess_complexity + 1)
+                scaled_complexity = base_scaled_complexity + nerfed_excess_complexity
             current_metrics['avg_complexity'] = scaled_complexity
         
         if current_metrics['compression_ratio'] < self.GARBAGE_COMPRESSION_THRESHOLD:
