@@ -263,6 +263,11 @@ class HybridValuationService:
         
         current_metrics = self._perform_manual_analysis(parsed_current_files)
         
+        raw_avg_complexity = current_metrics.get('avg_complexity', 0.0)
+        if raw_avg_complexity > 0:
+            scaled_complexity = 10 * math.log10(raw_avg_complexity + 1)
+            current_metrics['avg_complexity'] = scaled_complexity
+        
         if current_metrics['compression_ratio'] < self.GARBAGE_COMPRESSION_THRESHOLD:
             return {"final_reward": 0.0, "valuation_details": { "analysis_summary": "Contribution rejected due to extremely low entropy (highly repetitive content)." }}
         
