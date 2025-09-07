@@ -13,10 +13,10 @@ export function renderFooter(currentPath) {
                         <img src="/img/logo-v2.svg" alt="Lumen Logo" class="h-8 w-auto">
                     </a>
                     <div class="flex space-x-4 mt-4">
-                        <a href="/docs/introduction" aria-label="Book"><img src="/img/footer/book.svg" class="w-6 h-6"></a>
-                        <a href="https://dexscreener.com/solana/${contractAddress}" target="_blank" rel="noopener noreferrer" aria-label="Dex"><img src="/img/footer/dex.svg" class="w-6 h-6"></a>
-                        <a href="#" aria-label="Telegram"><img src="/img/footer/telegram.svg" class="w-6 h-6"></a>
-                        <a href="https://x.com/lumencli" target="_blank" rel="noopener noreferrer" aria-label="Twitter"><img src="/img/footer/twitter.svg" class="w-6 h-6"></a>
+                        <a href="/docs/introduction" aria-label="Book"><img src="/img/footer/book.svg" class="w-6 h-6 rounded-full"></a>
+                        <a href="https://dexscreener.com/solana/${contractAddress}" target="_blank" rel="noopener noreferrer" aria-label="Dex"><img src="/img/footer/dex.svg" class="w-6 h-6 rounded-full"></a>
+                        <a href="#" aria-label="Telegram"><img src="/img/footer/telegram.svg" class="w-6 h-6 rounded-full"></a>
+                        <a href="https://x.com/lumencli" target="_blank" rel="noopener noreferrer" aria-label="Twitter"><img src="/img/footer/twitter.svg" class="w-6 h-6 rounded-full"></a>
                     </div>
                      <p class="mt-4 text-sm text-gray-500">© ${year} Lumen. All rights reserved.</p>
                 </div>

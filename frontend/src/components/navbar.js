@@ -168,11 +168,11 @@ export function renderNavbar(currentPath) {
 
     const mobileNavHTML = `
         <div id="mobile-menu-overlay" class="fixed inset-0 bg-black/60 z-40 hidden lg:hidden" aria-hidden="true"></div>
-        <div id="mobile-menu-panel" class="fixed top-0 right-0 h-full w-72 bg-background z-50 transform translate-x-full transition-transform duration-300 ease-in-out lg:hidden">
+        <div id="mobile-menu-panel" class="fixed top-0 right-0 h-full w-72 bg-white z-50 transform translate-x-full transition-transform duration-300 ease-in-out lg:hidden">
             <div class="p-6 flex flex-col h-full">
                 <div class="flex justify-between items-center mb-8">
-                    <span class="font-bold text-lg">Menu</span>
-                    <button id="mobile-menu-close" type="button" class="p-2 text-text-secondary hover:text-text-main"><svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg></button>
+                    <span class="font-bold text-lg text-gray-800">Menu</span>
+                    <button id="mobile-menu-close" type="button" class="p-2 text-gray-600 hover:text-gray-900"><svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg></button>
                 </div>
                 <nav class="flex flex-col space-y-2">
                     <a href="${docsUrl}" class="${getMobileNavLinkClasses('/docs/introduction')}">Docs</a>
@@ -182,17 +182,17 @@ export function renderNavbar(currentPath) {
                 </nav>
                 <div class="mt-auto">
                     ${authed ? `
-                        <div class="border-t border-primary pt-4 space-y-4">
-                            <div class="p-3 rounded-lg bg-primary/50">
-                                <p class="text-xs text-text-secondary">Your Balance</p>
-                                <p class="font-mono text-lg gradient-text navbar-user-balance">... $LUMEN</p>
+                        <div class="border-t border-gray-200 pt-4 space-y-4">
+                            <div class="p-3 bg-gray-100">
+                                <p class="text-xs text-gray-500">Your Balance</p>
+                                <p class="font-mono text-lg font-bold text-red-600 navbar-user-balance">... $LUMEN</p>
                             </div>
                             <a href="${dashboardUrl}" class="${getMobileNavLinkClasses('/app/dashboard')}">Dashboard</a>
-                            <button id="logout-button-mobile" class="w-full text-left ${getMobileNavLinkClasses('')} text-red-400 hover:text-red-300">Log Out</button>
+                            <button id="logout-button-mobile" class="w-full text-left ${getMobileNavLinkClasses('')} text-red-600 hover:text-red-500">Log Out</button>
                         </div>` : `
                         <div class="space-y-3">
-                             <a href="${loginUrl}" class="block w-full text-center h-11 flex items-center justify-center px-6 bg-primary rounded-full text-sm font-medium text-text-secondary hover:bg-subtle transition-colors">Log In</a>
-                            <a href="${signupUrl}" class="block w-full text-center h-11 flex items-center justify-center px-6 text-sm font-bold text-white rounded-full bg-gradient-to-r from-accent-purple to-accent-pink">Sign Up</a>
+                             <a href="${loginUrl}" class="block w-full text-center h-11 flex items-center justify-center px-6 bg-gray-200 rounded-lg text-sm font-medium text-gray-800 hover:bg-gray-300 transition-colors">Log In</a>
+                            <a href="${signupUrl}" class="block w-full text-center h-11 flex items-center justify-center px-6 text-sm font-bold text-white rounded-lg bg-red-600 hover:bg-red-700">Sign Up</a>
                         </div>`}
                 </div>
             </div>
@@ -200,33 +200,33 @@ export function renderNavbar(currentPath) {
 
     const userAreaHTML = authed ? `
         <div class="hidden lg:block relative">
-            <button id="user-menu-button" class="flex items-center gap-x-3 h-11 pl-4 pr-2 bg-primary/50 hover:bg-primary/80 transition-colors border border-subtle/50 rounded-full">
-                <span class="text-sm font-medium text-text-main navbar-user-display-name">${user?.display_name ?? 'User'}</span>
-                <div class="w-px h-5 bg-subtle/50"></div>
-                <span class="text-sm font-bold gradient-text navbar-user-balance">... $LUMEN</span>
-                <svg class="w-5 h-5 text-text-secondary ml-1" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" /></svg>
+            <button id="user-menu-button" class="flex items-center gap-x-3 h-11 pl-4 pr-2 bg-[#EBEBEB] hover:bg-gray-200 transition-colors border border-gray-200 rounded-lg">
+                <span class="text-sm font-medium text-gray-800 navbar-user-display-name">${user?.display_name ?? 'User'}</span>
+                <div class="w-px h-5 bg-gray-200"></div>
+                <span class="text-sm font-bold text-red-600 navbar-user-balance">... $LUMEN</span>
+                <svg class="w-5 h-5 text-gray-500 ml-1" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" /></svg>
             </button>
-            <div id="user-menu-dropdown" class="absolute hidden top-full left-1/2 transform -translate-x-1/2 mt-2 w-56 origin-top bg-primary border border-subtle rounded-lg shadow-lg py-1 z-[60]">
-                <a href="${dashboardUrl}" class="w-full text-left block px-4 py-2 text-sm text-text-secondary hover:bg-surface hover:text-text-main">Dashboard</a>
-                <div class="my-1 h-px bg-subtle/50"></div>
+            <div id="user-menu-dropdown" class="absolute hidden top-full left-1/2 transform -translate-x-1/2 mt-2 w-56 origin-top bg-[#EBEBEB] border border-gray-200 shadow-lg py-1 z-[60] rounded-lg">
+                <a href="${dashboardUrl}" class="w-full text-left block px-4 py-2 text-sm text-gray-600 hover:bg-gray-200 hover:text-gray-800">Dashboard</a>
+                <div class="my-1 h-px bg-gray-200"></div>
                 <div id="wallet-dropdown-container"></div>
-                <div class="my-1 h-px bg-subtle/50"></div>
-                <button id="logout-button-desktop" class="w-full text-left block px-4 py-2 text-sm text-red-400 hover:bg-surface hover:text-red-300">Log Out</button>
+                <div class="my-1 h-px bg-gray-200"></div>
+                <button id="logout-button-desktop" class="w-full text-left block px-4 py-2 text-sm text-red-600 hover:bg-gray-200 hover:text-red-500">Log Out</button>
             </div>
         </div>
         <div class="flex lg:hidden items-center gap-x-4">
-            <span class="font-mono text-sm gradient-text navbar-user-balance">... $LUMEN</span>
-            <button id="mobile-menu-trigger" type="button" class="p-2 text-text-secondary hover:text-text-main"><svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path></svg></button>
+            <span class="font-mono text-sm font-bold text-red-600 navbar-user-balance">... $LUMEN</span>
+            <button id="mobile-menu-trigger" type="button" class="p-2 text-gray-600 hover:text-gray-900"><svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path></svg></button>
         </div>` : `
-        <div class="hidden lg:flex items-center h-11 p-1 rounded-full">
-            <a href="${loginUrl}" class="h-full flex items-center px-6 rounded-full text-sm font-medium text-gray-800 hover:bg-gray-200 transition-colors">Log In</a>
-            <a href="${signupUrl}" class="h-full flex items-center px-6 text-sm font-bold text-white rounded-lg bg-red-600 hover:bg-red-700">Sign Up</a>
+        <div class="hidden lg:flex items-center h-11 p-1">
+            <a href="${loginUrl}" class="h-full flex items-center px-6 text-sm font-medium text-gray-800 hover:bg-gray-200 rounded-lg">Log In</a>
+            <a href="${signupUrl}" class="h-full flex items-center px-6 text-sm font-bold text-white bg-red-600 hover:bg-red-700 rounded-lg">Sign Up</a>
         </div>
-        <button id="mobile-menu-trigger" type="button" class="p-2 text-text-secondary hover:text-text-main lg:hidden"><svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path></svg></button>`;
+        <button id="mobile-menu-trigger" type="button" class="p-2 text-gray-600 hover:text-gray-900 lg:hidden"><svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path></svg></button>`;
 
     return `
     <header class="fixed top-4 w-full z-50 px-4">
-        <div class="container mx-auto h-20 flex items-center justify-between px-6 bg-[#f0f0f0]/80 backdrop-blur-xl">
+        <div class="container mx-auto h-20 flex items-center justify-between px-6 bg-[#f0f0f0]/80 backdrop-blur-xl rounded-lg">
             <div class="flex-1 flex justify-start">
                 <a href="${homeUrl}" class="flex items-center gap-x-2" title="Lumen Home">
                     <img src="/img/logo-v2.svg" alt="Lumen Logo" class="h-8 w-auto">
