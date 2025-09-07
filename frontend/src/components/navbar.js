@@ -218,26 +218,27 @@ export function renderNavbar(currentPath) {
             <span class="font-mono text-sm gradient-text navbar-user-balance">... $LUMEN</span>
             <button id="mobile-menu-trigger" type="button" class="p-2 text-text-secondary hover:text-text-main"><svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path></svg></button>
         </div>` : `
-        <div class="hidden lg:flex items-center h-11 p-1 bg-primary/50 border border-subtle/50 rounded-full">
-            <a href="${loginUrl}" class="h-full flex items-center px-6 rounded-full text-sm font-medium text-text-secondary hover:bg-subtle/50 transition-colors">Log In</a>
-            <a href="${signupUrl}" class="h-full flex items-center px-6 text-sm font-bold text-white rounded-full bg-gradient-to-r from-accent-purple to-accent-pink">Sign Up</a>
+        <div class="hidden lg:flex items-center h-11 p-1 rounded-full">
+            <a href="${loginUrl}" class="h-full flex items-center px-6 rounded-full text-sm font-medium text-gray-800 hover:bg-gray-200 transition-colors">Log In</a>
+            <a href="${signupUrl}" class="h-full flex items-center px-6 text-sm font-bold text-white rounded-lg bg-red-600 hover:bg-red-700">Sign Up</a>
         </div>
         <button id="mobile-menu-trigger" type="button" class="p-2 text-text-secondary hover:text-text-main lg:hidden"><svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path></svg></button>`;
 
     return `
-    <header class="fixed top-4 left-1/2 -translate-x-1/2 w-[95%] max-w-7xl z-50">
-        <div class="relative w-full h-14 bg-surface/10 border border-white/10 backdrop-blur-xl rounded-full flex items-center justify-between px-2">
+    <header class="fixed top-4 w-full z-50 px-4">
+        <div class="container mx-auto h-20 flex items-center justify-between px-6 bg-[#f0f0f0]/80 backdrop-blur-xl">
             <div class="flex-1 flex justify-start">
                 <a href="${homeUrl}" class="flex items-center gap-x-2" title="Lumen Home">
-                    <img src="${logoUrl}" alt="Lumen Logo" class="h-8 w-8">
-                    <span class="hidden sm:block text-xl font-bold text-text-main">Lumen</span>
+                    <img src="/img/logo-v2.svg" alt="Lumen Logo" class="h-8 w-auto">
                 </a>
             </div>
-            <nav class="hidden lg:flex items-center justify-center text-sm font-medium">
+            <nav class="hidden lg:flex items-center justify-center text-sm font-medium text-gray-600 gap-x-8">
+                <a href="${homeUrl}" class="${getNavLinkClasses('/')}">Home</a>
+                <a href="#" class="${getNavLinkClasses('/features')}">Features</a>
                 <a href="${docsUrl}" class="${getNavLinkClasses('/docs/introduction')}">Docs</a>
                 <a href="${leaderboardUrl}" class="${getNavLinkClasses('/leaderboard')}">Leaderboard</a>
                 <a href="${roadmapUrl}" class="${getNavLinkClasses('/docs/roadmap')}">Roadmap</a>
-                <a href="https://github.com/Far3000-YT/lumen" target="_blank" rel="noopener noreferrer" data-external="true" class="${getNavLinkClasses('')}">GitHub ${externalLinkIcon}</a>
+                <a href="https://github.com/Far3000-YT/lumen" target="_blank" rel="noopener noreferrer" data-external="true" class="${getNavLinkClasses('/github')}">Github</a>
             </nav>
             <div class="flex-1 flex justify-end">
                 ${userAreaHTML}
