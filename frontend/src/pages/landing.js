@@ -9,22 +9,29 @@ export function renderLandingPage() {
         <!-- Hero Section -->
         <section class="container mx-auto border-2 border-[#C4C4C4]">
             <div class="grid md:grid-cols-2 items-center">
-                <div class="text-left p-12">
-                    <h1 class="text-4xl md:text-6xl font-bold tracking-tighter">
-                        Monetize Your Code.
-                        <br>
-                        Power the <span class="text-red-600">Future of AI.</span>
-                    </h1>
-                    <p class="mt-6 text-lg text-gray-600 max-w-lg">
-                        The code on your local machine is one of the most valuable datasets on the planet. Stop letting it sit there. Start earning what it's worth.
-                    </p>
-                    <div class="mt-10 flex items-center gap-4">
-                        <a href="${startEarningUrl}" class="px-8 py-3 font-bold bg-red-600 text-white hover:bg-red-700">Start Earning Now</a>
-                        <a href="/docs/introduction" class="px-8 py-3 font-bold bg-gray-200 text-gray-800 hover:bg-gray-300">Read docs</a>
+                <div class="text-left p-6 md:p-12 flex flex-col h-full">
+                    <div class="flex-grow flex flex-col justify-center">
+                        <h1 class="text-4xl md:text-6xl font-bold tracking-tighter">
+                            Monetize Your Code.
+                            <br>
+                            Power the <span class="text-red-600">Future of AI.</span>
+                        </h1>
+                        <p class="mt-6 text-lg text-gray-600 max-w-lg">
+                            The code on your local machine is one of the most valuable datasets on the planet. Stop letting it sit there. Start earning what it's worth.
+                        </p>
+                        <div class="mt-10 flex items-center gap-4">
+                            <a href="${startEarningUrl}" class="px-8 py-3 font-bold bg-red-600 text-white hover:bg-red-700">Start Earning Now</a>
+                            <a href="/docs/introduction" class="px-8 py-3 font-bold bg-gray-200 text-gray-800 hover:bg-gray-300">Read docs</a>
+                        </div>
+                    </div>
+                    <div class="hidden md:flex mt-auto" style="gap: 250px;">
+                        <span class="block w-2 h-2 bg-red-600"></span>
+                        <span class="block w-2 h-2 bg-red-600"></span>
+                        <span class="block w-2 h-2 bg-red-600"></span>
                     </div>
                 </div>
-                <div class="relative self-stretch h-full min-h-[750px] overflow-hidden">
-                    <img src="/img/landing/logo-big.png" alt="Logo Big" class="absolute top-1/2 -translate-y-1/2 -left-80 w-auto h-[120%] max-w-none mix-blend-color-burn">
+                <div class="relative self-stretch h-full min-h-[400px] md:min-h-[750px] overflow-hidden">
+                    <img src="/img/landing/logo-big.png" alt="Logo Big" class="absolute top-1/2 -translate-y-1/2 -left-24 md:-left-80 w-auto h-full md:h-[120%] max-w-none mix-blend-color-burn">
                 </div>
             </div>
         </section>
@@ -71,7 +78,14 @@ export function renderLandingPage() {
         <!-- Lumen Sets It Free Section -->
         <section class="py-12">
             <div class="container mx-auto px-6 text-left">
-                <h2 class="text-3xl font-bold mb-4">> Lumen Sets It <span class="text-red-600">Free</span>.</h2>
+                <div class="flex items-center justify-between mb-4">
+                    <h2 class="text-3xl font-bold">> Lumen Sets It <span class="text-red-600">Free</span>.</h2>
+                    <div class="hidden md:flex" style="gap: 300px;">
+                        <span class="block w-2 h-2 bg-red-600"></span>
+                        <span class="block w-2 h-2 bg-red-600"></span>
+                        <span class="block w-2 h-2 bg-red-600"></span>
+                    </div>
+                </div>
                 <p class="text-gray-600 mb-12 max-w-none">
                     We provide the bridge between your private work and the new data economy, transforming your code into a secure, high-value, and reward-generating asset.
                 </p>
@@ -116,7 +130,7 @@ export function renderLandingPage() {
                     <div class="text-left p-12 relative">
                         <h2 class="text-3xl font-bold">Become a Genesis Contributor</h2>
                         <p class="text-gray-600 mt-4">Contribute during our Genesis Phase to earn your stake in the network and receive a permanent reward multiplier.</p>
-                        <a href="#" class="mt-8 inline-block px-8 py-3 font-bold bg-red-600 text-white hover:bg-red-700">Claim your spot</a>
+                        <a href="${startEarningUrl}" class="mt-8 inline-block px-8 py-3 font-bold bg-red-600 text-white hover:bg-red-700">Claim your spot</a>
                     </div>
                 </div>
             </div>
@@ -126,13 +140,12 @@ export function renderLandingPage() {
         <section class="py-12">
             <div class="container mx-auto px-6">
                 <h2 class="text-3xl font-bold text-center mb-12">Frequently Asked Questions</h2>
-                <div class="space-y-2">
-                    <details class="group p-6 bg-[#EBEBEB] transition-colors hover:bg-gray-200 open:bg-[#DFDFDF]"><summary class="font-bold cursor-pointer list-none">Can I use Spline for free?</summary><p class="mt-4 text-gray-600">Yes, totally! The Basic plan is free. You can have unlimited personal files and Re-exports. Maximum 1 team project can be created with 2 team files and 2 editors. You also have access to the Spline Library and computation (our servers) with a Spline logo.</p></details>
-                    <details class="group p-6 bg-[#EBEBEB] transition-colors hover:bg-gray-200 open:bg-[#DFDFDF]"><summary class="font-bold cursor-pointer list-none">Why should I upgrade to Super or Super Team?</summary><p class="mt-4 text-gray-600">...</p></details>
-                    <details class="group p-6 bg-[#EBEBEB] transition-colors hover:bg-gray-200 open:bg-[#DFDFDF]"><summary class="font-bold cursor-pointer list-none">Why should I upgrade to Super or Super Team?</summary><p class="mt-4 text-gray-600">...</p></details>
-                    <details class="group p-6 bg-[#EBEBEB] transition-colors hover:bg-gray-200 open:bg-[#DFDFDF]"><summary class="font-bold cursor-pointer list-none">Why should I upgrade to Super or Super Team?</summary><p class="mt-4 text-gray-600">...</p></details>
-                    <details class="group p-6 bg-[#EBEBEB] transition-colors hover:bg-gray-200 open:bg-[#DFDFDF]"><summary class="font-bold cursor-pointer list-none">Why should I upgrade to Super or Super Team?</summary><p class="mt-4 text-gray-600">...</p></details>
+                <div class="space-y-4">
+                    <details class="group p-6 bg-[#EBEBEB] transition-colors hover:bg-gray-200 open:bg-[#DFDFDF]"><summary class="font-bold cursor-pointer list-none flex items-center justify-between">Is contributing my code safe?<svg class="w-5 h-5 text-gray-500 transform transition-transform duration-300 group-open:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" /></svg></summary><p class="mt-4 text-gray-600">Yes. Security is our paramount concern. The entire anonymization process runs locally on your machine via our open-source CLI. Sensitive data like secrets, PII, and API keys are scrubbed anything is ever uploaded. You can audit the code yourself for full transparency.</p></details>
+                    <details class="group p-6 bg-[#EBEBEB] transition-colors hover:bg-gray-200 open:bg-[#DFDFDF]"><summary class="font-bold cursor-pointer list-none flex items-center justify-between">What kind of code is most valuable?<svg class="w-5 h-5 text-gray-500 transform transition-transform duration-300 group-open:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" /></svg></summary><p class="mt-4 text-gray-600">Value is determined by <strong>uniqueness, quality, and complexity</strong>, not a specific programming language. The protocol is designed to reward thoughtful engineering. A unique project with novel logic and a well-designed architecture will always be valued more highly than a simple script from a public tutorial. The protocol values quality over sheer quantity.</p></details>
+                    <details class="group p-6 bg-[#EBEBEB] transition-colors hover:bg-gray-200 open:bg-[#DFDFDF]"><summary class="font-bold cursor-pointer list-none flex items-center justify-between">Do I lose ownership of my code?<svg class="w-5 h-5 text-gray-500 transform transition-transform duration-300 group-open:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" /></svg></summary><p class="mt-4 text-gray-600">Absolutely not. You retain 100% ownership and all rights to your original work. By contributing, you grant a license for the *anonymized version* of your code to be used in Lumen's datasets. You are free to develop, license, or sell your original project as you see fit.</p></details>
                 </div>
+                 <div class="text-center mt-12"><a href="/docs/faq" class="text-red-600 hover:underline">See all FAQs →</a></div>
             </div>
         </section>
 
@@ -145,7 +158,12 @@ export function renderLandingPage() {
                     <div class="text-left p-12 relative">
                         <h2 class="text-3xl font-bold">Ready to Join the Data Economy?</h2>
                         <p class="text-gray-600 mt-4">Start contributing your anonymized code in minutes and get rewarded with $LUMEN tokens.</p>
-                        <a href="#" class="mt-8 inline-block px-8 py-3 font-bold bg-red-600 text-white hover:bg-red-700">Get Started now</a>
+                        <a href="${startEarningUrl}" class="mt-8 inline-block px-8 py-3 font-bold bg-red-600 text-white hover:bg-red-700">Get Started now</a>
+                        <div class="hidden md:flex mt-8" style="gap: 300px;">
+                            <span class="block w-2 h-2 bg-red-600"></span>
+                            <span class="block w-2 h-2 bg-red-600"></span>
+                            <span class="block w-2 h-2 bg-red-600"></span>
+                        </div>
                     </div>
                 </div>
             </div>
