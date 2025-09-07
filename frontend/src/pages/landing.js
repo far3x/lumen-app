@@ -159,11 +159,6 @@ export function renderLandingPage() {
                         <h2 class="text-3xl font-bold">Ready to Join the Data Economy?</h2>
                         <p class="text-gray-600 mt-4">Start contributing your anonymized code in minutes and get rewarded with $LUMEN tokens.</p>
                         <a href="${startEarningUrl}" class="mt-8 inline-block px-8 py-3 font-bold bg-red-600 text-white hover:bg-red-700">Get Started now</a>
-                        <div class="hidden md:flex mt-8" style="gap: 300px;">
-                            <span class="block w-2 h-2 bg-red-600"></span>
-                            <span class="block w-2 h-2 bg-red-600"></span>
-                            <span class="block w-2 h-2 bg-red-600"></span>
-                        </div>
                     </div>
                 </div>
             </div>
