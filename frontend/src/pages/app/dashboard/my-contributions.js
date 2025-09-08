@@ -224,7 +224,7 @@ function renderPayoutHistory(payouts) {
                         <td class="py-4 px-4">${getPayoutStatus(payout.status)}</td>
                         <td class="py-4 px-4 text-right font-mono text-accent-cyan">$${payout.amount_usd.toFixed(4)}</td>
                         <td class="py-4 px-4 text-center">
-                            ${payout.transaction_hash ? `<a href="https://solscan.io/tx/${payout.transaction_hash}?cluster=devnet" target="_blank" rel="noopener noreferrer" class="text-accent-cyan hover:underline">View</a>` : '<span class="text-subtle">-</span>'}
+                            ${payout.transaction_hash ? `<a href="https://solscan.io/tx/${payout.transaction_hash}" target="_blank" rel="noopener noreferrer" class="text-accent-cyan hover:underline">View</a>` : '<span class="text-subtle">-</span>'}
                         </td>
                     </tr>
                 `).join('') : `<tr><td colspan="4" class="py-12 text-center text-text-secondary">
