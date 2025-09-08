@@ -1,12 +1,10 @@
 from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from starlette.middleware.sessions import SessionMiddleware
-from slowapi.errors import RateLimitExceeded
 from app.core.limiter import limiter
 from app.core.config import settings
-from app.db.database import Base, engine, SessionLocal
+from app.db.database import engine, SessionLocal
 from app.api.v1.routers import auth, cli, users, public, security, contributions, websockets, business, business_auth, business_data
-from app.core.celery_app import celery_app
 import logging
 from slowapi.middleware import SlowAPIMiddleware
 import asyncio

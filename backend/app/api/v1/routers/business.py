@@ -1,6 +1,6 @@
 from fastapi import APIRouter, Depends, HTTPException, status, Request
 from sqlalchemy.orm import Session
-from app.db import crud, models, database
+from app.db import crud, database
 from app.schemas import ContactSalesCreate
 from app.tasks import send_contact_sales_email_task
 from app.core.limiter import limiter
