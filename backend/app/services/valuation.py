@@ -188,17 +188,23 @@ class HybridValuationService:
         validated = {
             "project_clarity_score": 0.5,
             "architectural_quality_score": 0.5,
-            "code_quality_score": 0.5
+            "code_quality_score": 0.5,
+            "plagiarism_check_files": []
         }
         if not isinstance(raw_scores, dict):
             return validated
 
-        for key in validated:
+        for key in ["project_clarity_score", "architectural_quality_score", "code_quality_score"]:
             try:
                 score = float(raw_scores.get(key, 0.5))
                 validated[key] = max(0.0, min(1.0, score))
             except (ValueError, TypeError):
                 pass
+        
+        files = raw_scores.get("plagiarism_check_files", [])
+        if isinstance(files, list) and all(isinstance(f, str) for f in files):
+            validated["plagiarism_check_files"] = files
+
         return validated
 
     def _get_ai_qualitative_scores(self, full_codebase: str, manual_metrics: dict) -> dict:
@@ -228,15 +234,23 @@ class HybridValuationService:
           "project_clarity_score": "float",
           "architectural_quality_score": "float",
           "code_quality_score": "float",
-          "analysis_summary": "string"
+          "analysis_summary": "string",
+          "plagiarism_check_files": "array[string]"
         }}
 
-        Guidelines for scoring (0.0 to 1.0):
-        - `project_clarity_score`: How original, clear, and non-generic is the project's purpose? A simple 'to-do app' is 0.1. A specialized, domain-specific tool is 0.9.
-        - `architectural_quality_score`: How well is the code structured? Does it follow good design patterns? A single monolithic file is 0.1. A well-organized, modular project is 0.9.
-        - `code_quality_score`: How clean is the code itself? Assess variable names, and potential for bugs. Clean, maintainable code is 0.9. Messy, hard-to-read code is 0.1.
 
         To help you calibrate your three scores, use the following detailed rubric. The overall quality of a submission (on a 0-10 scale) is a direct consequence of your three primary scores. Use these descriptions to anchor your judgment.
+
+        1.  **Guidelines for scoring (0.0 to 1.0):**
+            *   `project_clarity_score`: How original, clear, and non-generic is the project's purpose? A simple 'to-do app' is 0.1. A specialized, domain-specific tool is 0.9.
+            *   `architectural_quality_score`: How well is the code structured? Does it follow good design patterns? A single monolithic file is 0.1. A well-organized, modular project is 0.9.
+            *   `code_quality_score`: How clean is the code itself? Assess variable names, and potential for bugs. Clean, maintainable code is 0.9. Messy, hard-to-read code is 0.1.
+
+        2.  **Plagiarism Check File Selection:**
+            *   Identify up to 3 files that are most representative of the project's core logic.
+            *   These files will be checked against public code repositories.
+            *   **Crucially, select files that appear complete and have not been altered by our sanitization process (i.e., do not contain "[REDACTED_SECRET]" or other placeholders).**
+            *   Provide their full, exact paths as an array of strings for the `plagiarism_check_files` key (don't take into account the delimiter "---lum--new--file--" that is here only for lumen's own backend to seperate files, remove it from the path you output).
 
         *   **Score 0: Unsafe, Malicious, or Spam.**
             *   Assign this score if the code is harmful, intentionally obfuscated spam, or poses a security risk. Your three scores should all be 0.0.
@@ -315,13 +329,19 @@ class HybridValuationService:
 
         ai_scores = {}
         analysis_summary_from_ai = None
+        plagiarism_check_files = []
 
         if lloc_for_reward > 0: 
             if settings.VALUATION_MODE == "AI" and self.model:
                 full_codebase_content = "\n".join([f["content"] for f in parsed_current_files])
                 ai_scores_raw = self._get_ai_qualitative_scores(full_codebase_content, current_metrics)
                 
-                ai_scores = self._validate_ai_scores(ai_scores_raw)
+                if "error" in ai_scores_raw:
+                     return {"final_reward": 0.0, "valuation_details": ai_scores_raw}
+
+                ai_scores_validated = self._validate_ai_scores(ai_scores_raw)
+                ai_scores = {k: v for k, v in ai_scores_validated.items() if k != "plagiarism_check_files"}
+                plagiarism_check_files = ai_scores_validated.get("plagiarism_check_files", [])
                 analysis_summary_from_ai = ai_scores_raw.get("analysis_summary")
 
             else:
@@ -376,7 +396,8 @@ class HybridValuationService:
             "code_ratio_multiplier": round(code_ratio_multiplier, 4),
             "simulated_lum_price_usd": round(simulated_lum_price, 6),
             "target_usd_reward": round(target_usd_reward, 4),
-            "final_reward_usd": round(final_reward, 4)
+            "final_reward_usd": round(final_reward, 4),
+            "plagiarism_check_files": plagiarism_check_files
         })
 
         return {"final_reward": final_reward, "valuation_details": valuation_details}

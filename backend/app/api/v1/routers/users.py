@@ -15,12 +15,11 @@ from fastapi_mail import FastMail, MessageSchema, ConnectionConfig
 from app.db import crud, models, database
 from app.api.v1 import dependencies
 from app.schemas import User as UserSchema, AccountDetails, ContributionResponse, UserUpdate, ValuationMetrics, AiAnalysis, ChangePasswordRequest, WalletLinkRequest, BatchPayoutResponse, SetWalletAddressRequest, UserDeletePayload, LeaderboardEntry, ContributionCreate
-from pydantic import BaseModel, constr
+from pydantic import BaseModel
 from typing import List, Optional
 from app.core import security, config
 from app.core.limiter import limiter
 from app.tasks import process_contribution
-from app.services.redis_service import redis_service
 
 class PaginatedContributions(BaseModel):
     items: List[ContributionResponse]

@@ -4,7 +4,7 @@ from sqlalchemy.orm import Session
 from app.db import crud, models, database
 from app.api.v1.dependencies import get_current_company_from_user, get_current_business_user, get_current_admin_user, get_current_company_from_api_key
 from app.business_schemas import (
-    ApiKeyInfo, ApiKeyCreate, ContributionSearchResult, ContributionPreview, 
+    ApiKeyInfo, ApiKeyCreate, ContributionSearchResult, 
     FullContribution, DashboardStats, UsageDataPoint, UnlockedContributionDetail,
     TeamMember, InviteCreate, CompanyUpdate, BusinessUserUpdate, BusinessUser as BusinessUserSchema,
     Company as CompanySchema, ApiKeyUsageSummary, PaginatedContributionPreview, TeamInvitationInfo,

@@ -1,5 +1,3 @@
-import asyncio
-import json
 from fastapi import APIRouter, WebSocket, WebSocketDisconnect, Depends
 from app.services.websocket_manager import manager
 from app.api.v1 import dependencies

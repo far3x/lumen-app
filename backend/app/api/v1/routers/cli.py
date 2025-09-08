@@ -3,16 +3,15 @@ import hashlib
 import tiktoken
 from fastapi import APIRouter, Depends, HTTPException, status, Request
 from sqlalchemy.orm import Session
-from sqlalchemy import text
 from app.core import config
 from app.db import database, crud, models
 from app.db.database import SessionLocal
-from app.schemas import DeviceAuthResponse, Token, ContributionCreate, ContributionStatus, ContributionCliResponse
+from app.schemas import DeviceAuthResponse, ContributionCreate, ContributionStatus, ContributionCliResponse
 from app.services.redis_service import redis_service
 from app.api.v1 import dependencies
 from app.tasks import process_contribution, create_daily_payout_batch_task, reconcile_failed_payouts_task, recalculate_network_stats_task
 from app.core.limiter import limiter
-from typing import List, Optional
+from typing import List
 from datetime import datetime, timezone, timedelta
 
 router = APIRouter(prefix="/cli", tags=["CLI", "Dev"])

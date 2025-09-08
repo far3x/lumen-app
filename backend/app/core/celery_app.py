@@ -1,7 +1,6 @@
 from celery import Celery
 from kombu import Queue
 from app.core.config import settings
-from celery.schedules import crontab
 
 celery_app = Celery(
     "tasks",
@@ -68,6 +67,10 @@ task_routes = {
         'queue': 'high_priority',
         'routing_key': 'task.high_priority',
     },
+    'app.tasks.retry_pending_ai_analysis_task': {
+        'queue': 'default',
+        'routing_key': 'task.default',
+    },
 }
 
 celery_app.conf.beat_schedule = {
@@ -77,6 +80,10 @@ celery_app.conf.beat_schedule = {
     },
     'reconcile-failed-payouts-hourly': {
         'task': 'app.tasks.reconcile_failed_payouts_task',
+        'schedule': 3600.0,
+    },
+    'retry-failed-ai-analysis-hourly': {
+        'task': 'app.tasks.retry_pending_ai_analysis_task',
         'schedule': 3600.0,
     },
 }

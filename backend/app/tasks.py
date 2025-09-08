@@ -1,4 +1,3 @@
-import math
 import json
 import numpy as np
 import logging
@@ -17,11 +16,11 @@ from app.services.solana_service import solana_service
 from app.services.email_service import email_service
 from app.services.sanitization_service import sanitization_service
 from app.services.price_service import price_service
+from app.services.github_service import github_service
 import asyncio
-from fastapi_mail import MessageSchema
 from datetime import datetime, timezone
 from app.db.models import PayoutBatch, BatchPayout, Account, ContributionLanguage
-from sqlalchemy import func, desc
+from sqlalchemy import desc
 from sqlalchemy.exc import IntegrityError
 
 logger = logging.getLogger(__name__)
@@ -403,6 +402,34 @@ def _add_languages_to_db(db: Session, languages: List[str]):
             logger.error(f"Error adding language '{lang_name}' to db: {e}")
             db.rollback()
 
+async def _check_for_open_source(parsed_files, files_to_check):
+    is_open_source = False
+    if not files_to_check:
+        return False
+    
+    file_map = {f['path']: f['content'] for f in parsed_files}
+
+    for file_path in files_to_check:
+        if file_path in file_map:
+            content = file_map[file_path]
+            lines = [line for line in content.splitlines() if line.strip()]
+            if not lines:
+                continue
+
+            snippet = ""
+            if len(lines) < 15:
+                snippet = "\n".join(lines)
+            else:
+                middle_start = (len(lines) - 10) // 2
+                snippet = "\n".join(lines[middle_start : middle_start + 10])
+            
+            logger.info(f"Checking snippet from {file_path} for open-source...")
+            if await github_service.search_code_snippet(snippet):
+                logger.warning(f"OPEN SOURCE DETECTED in file: {file_path}")
+                is_open_source = True
+                break
+    return is_open_source
+
 @celery_app.task(bind=True)
 def process_contribution(self, user_id: int, codebase: str, contribution_db_id: int, source: str = 'cli'):
     db = SessionLocal()
@@ -476,15 +503,29 @@ def process_contribution(self, user_id: int, codebase: str, contribution_db_id: 
         logger.info(f"[UNIQUENESS_PASS] Contribution {contribution_db_id} is unique enough to proceed to valuation.")
         
         valuation_result = hybrid_valuation_service.calculate(db, current_codebase=final_codebase)
+        
+        if "error" in valuation_result.get("valuation_details", {}):
+            logger.error(f"AI analysis failed for contribution {contribution_db_id}. Setting status to AI_ANALYSIS_PENDING for retry.")
+            crud.update_contribution_status(db, contribution_db_id, "AI_ANALYSIS_PENDING")
+            publish_contribution_update(db, contribution_db_id, user_id)
+            return
+
         base_reward_usd = valuation_result.get("final_reward", 0.0)
         
         if source == 'web':
             base_reward_usd /= 3.0
             logger.info(f"[REWARD_MOD] Web contribution reward adjusted by 1/3. New base reward: ${base_reward_usd:.4f}")
+        
+        valuation_details = valuation_result.get("valuation_details", {})
+        files_to_check = valuation_details.get("plagiarism_check_files", [])
+        is_open_source = asyncio.run(_check_for_open_source(parsed_files, files_to_check))
+        valuation_details["is_open_source"] = is_open_source
+
+        if is_open_source:
+            base_reward_usd /= 50.0
+            logger.warning(f"[REWARD_PENALTY] Open source detected. Reward nerfed by 50x. New base reward: ${base_reward_usd:.4f}")
 
         final_base_reward_with_innovation = base_reward_usd * innovation_multiplier
-
-        valuation_details = valuation_result.get("valuation_details", {})
         valuation_details['innovation_multiplier'] = round(innovation_multiplier, 4)
 
         contribution_record = crud.get_contribution_by_id(db, contribution_db_id)
@@ -554,5 +595,26 @@ def process_contribution(self, user_id: int, codebase: str, contribution_db_id: 
         logger.error(f"Unhandled error in process_contribution for c_id {contribution_db_id}: {e}", exc_info=True)
         crud.update_contribution_status(db, contribution_db_id, "FAILED")
         publish_contribution_update(db, contribution_db_id, user_id)
+    finally:
+        db.close()
+
+@celery_app.task(name="app.tasks.retry_pending_ai_analysis_task")
+def retry_pending_ai_analysis_task():
+    logger.info("Starting hourly task to retry contributions pending AI analysis...")
+    db = SessionLocal()
+    try:
+        contributions_to_retry = db.query(models.Contribution).filter(models.Contribution.status == 'AI_ANALYSIS_PENDING').all()
+        
+        if not contributions_to_retry:
+            logger.info("No contributions found in AI_ANALYSIS_PENDING state. Nothing to retry.")
+            return
+
+        logger.info(f"Found {len(contributions_to_retry)} contributions to re-queue for AI analysis.")
+        for contrib in contributions_to_retry:
+            logger.info(f"Re-queuing contribution ID: {contrib.id} for user ID: {contrib.user_id}")
+            process_contribution.delay(contrib.user_id, contrib.raw_content, contrib.id, source='cli')
+
+    except Exception as e:
+        logger.error(f"Error during AI analysis retry task: {e}", exc_info=True)
     finally:
         db.close()

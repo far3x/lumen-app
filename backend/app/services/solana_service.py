@@ -3,9 +3,7 @@ import logging
 from solders.keypair import Keypair
 from solders.pubkey import Pubkey
 from solders.transaction import Transaction
-from solders.message import Message
 from solders.instruction import Instruction
-from spl.token.client import Token
 from spl.token.constants import TOKEN_PROGRAM_ID
 from spl.token.instructions import create_associated_token_account, get_associated_token_address, transfer as spl_transfer, TransferParams
 

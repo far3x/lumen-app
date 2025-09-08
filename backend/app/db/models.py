@@ -1,10 +1,8 @@
-import hashlib
 from sqlalchemy import Column, Integer, String, Float, ForeignKey, DateTime, Boolean, BigInteger, Text, Enum
 from sqlalchemy.orm import relationship
 from sqlalchemy.sql import func
 from sqlalchemy.dialects.postgresql import JSONB
 from sqlalchemy.ext.hybrid import hybrid_property
-from datetime import datetime
 from pgvector.sqlalchemy import Vector
 
 from .database import Base

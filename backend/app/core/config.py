@@ -26,6 +26,7 @@ class AppSettings(BaseSettings):
 
     GITHUB_CLIENT_ID: str = os.getenv("GITHUB_CLIENT_ID")
     GITHUB_CLIENT_SECRET: str = os.getenv("GITHUB_CLIENT_SECRET")
+    GITHUB_SEARCH_PAT: str = os.getenv("GITHUB_SEARCH_PAT")
 
     REDIS_URL: str = os.getenv("REDIS_URL", "redis://localhost:6379/0")
 

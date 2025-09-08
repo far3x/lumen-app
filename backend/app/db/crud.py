@@ -4,7 +4,7 @@ import re
 import secrets
 import sqlalchemy as sa
 from sqlalchemy.orm import Session
-from sqlalchemy import func, text, case, and_, desc, or_
+from sqlalchemy import func, text, case, desc
 from sqlalchemy.dialects import postgresql
 from fastapi import HTTPException, status
 from typing import Optional, List, Dict
@@ -14,7 +14,6 @@ import html
 from app.core import security, config
 from app import schemas, business_schemas
 from . import models
-from app.services.redis_service import redis_service
 
 
 def get_user(db: Session, user_id: int):
@@ -523,7 +522,9 @@ def search_contributions(db: Session, company_id: int, skip: int, limit: int, **
             "clarity_score": (details.get("project_clarity_score", 0) or 0) * 10,
             "arch_score": (details.get("architectural_quality_score", 0) or 0) * 10,
             "quality_score": (details.get("code_quality_score", 0) or 0) * 10,
-            "is_unlocked": is_unlocked, "analysis_summary": analysis_summary or "AI analysis summary is not available for this contribution.",
+            "is_unlocked": is_unlocked,
+            "is_open_source": details.get("is_open_source", False),
+            "analysis_summary": analysis_summary or "AI analysis summary is not available for this contribution.",
             "files_preview": files_preview,
             "language_breakdown": details.get("language_breakdown", {})
         })

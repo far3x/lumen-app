@@ -8,7 +8,7 @@ from pydantic import BaseModel
 from sqlalchemy.orm import Session
 from fastapi_mail import FastMail, MessageSchema, ConnectionConfig
 
-from app.db import database, crud, models
+from app.db import database, models
 from app.api.v1 import dependencies
 from app.schemas import TwoFactorSetupResponse, TwoFactorEnableRequest, TwoFactorDisableRequest
 from app.services.encryption import encryption_service

@@ -102,6 +102,7 @@ class ContributionPreview(BaseModel):
     arch_score: float
     quality_score: float
     is_unlocked: bool
+    is_open_source: bool = False
     analysis_summary: Optional[str] = None
     files_preview: List[FilePreview]
     language_breakdown: Optional[Dict[str, int]] = None
