@@ -121,6 +121,7 @@ class ContributionResponse(BaseModel):
     manual_metrics: Optional[ValuationMetrics] = None
     ai_analysis: Optional[AiAnalysis] = None
     user_display_name: Optional[str] = None
+    is_open_source: bool = False
 
     class Config:
         from_attributes = True

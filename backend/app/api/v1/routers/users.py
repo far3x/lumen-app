@@ -358,6 +358,8 @@ def get_my_all_contributions(
             analysis_summary=valuation_data.get('analysis_summary')
         )
 
+        is_open_source = valuation_data.get('is_open_source', False)
+
         response_list.append(ContributionResponse(
             id=contrib.id,
             created_at=contrib.created_at,
@@ -365,7 +367,8 @@ def get_my_all_contributions(
             status=contrib.status,
             valuation_details=valuation_data,
             manual_metrics=manual_metrics,
-            ai_analysis=ai_analysis
+            ai_analysis=ai_analysis,
+            is_open_source=is_open_source
         ))
     
     return response_list
@@ -410,6 +413,8 @@ def get_my_contributions(
             analysis_summary=valuation_data.get('analysis_summary')
         )
 
+        is_open_source = valuation_data.get('is_open_source', False)
+
         response_list.append(ContributionResponse(
             id=contrib.id,
             created_at=contrib.created_at,
@@ -417,7 +422,8 @@ def get_my_contributions(
             status=contrib.status,
             valuation_details=valuation_data,
             manual_metrics=manual_metrics,
-            ai_analysis=ai_analysis
+            ai_analysis=ai_analysis,
+            is_open_source=is_open_source
         ))
     
     return PaginatedContributions(items=response_list, total=total_count)

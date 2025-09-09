@@ -247,7 +247,7 @@ class HybridValuationService:
             *   `code_quality_score`: How clean is the code itself? Assess variable names, and potential for bugs. Clean, maintainable code is 0.9. Messy, hard-to-read code is 0.1.
 
         2.  **Plagiarism Check File Selection:**
-            *   Identify up to 3 files that are most representative of the project's core logic.
+            *   Identify up to 3 files that are most representative of the project's core logic (you can't pick .ipynb files).
             *   These files will be checked against public code repositories.
             *   **Crucially, select files that appear complete and have not been altered by our sanitization process (i.e., do not contain "[REDACTED_SECRET]" or other placeholders).**
             *   Provide their full, exact paths as an array of strings for the `plagiarism_check_files` key (don't take into account the delimiter "---lum--new--file--" that is here only for lumen's own backend to seperate files, remove it from the path you output).
