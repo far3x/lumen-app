@@ -90,10 +90,11 @@ async def contribute_data_from_web(
         valuation_results={},
         reward=0.0,
         embedding=None,
-        initial_status="PENDING"
+        initial_status="PENDING",
+        source='web'
     )
 
-    process_contribution.delay(current_user.id, payload.codebase, new_contribution.id, source='web')
+    process_contribution.delay(current_user.id, new_contribution.id)
 
     return {"message": "Contribution received and is being processed.", "contribution_id": new_contribution.id}
 

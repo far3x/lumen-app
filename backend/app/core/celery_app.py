@@ -18,6 +18,10 @@ celery_app.conf.task_default_queue = 'default'
 celery_app.conf.task_default_exchange = 'default'
 celery_app.conf.task_default_routing_key = 'task.default'
 
+celery_app.conf.worker_log_format = '%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+celery_app.conf.worker_task_log_format = '%(asctime)s - %(task_name)s[%(task_id)s] - %(levelname)s - %(message)s'
+
+
 task_routes = {
     'app.tasks.process_contribution': {
         'queue': 'default',
@@ -70,6 +74,10 @@ task_routes = {
     'app.tasks.retry_pending_ai_analysis_task': {
         'queue': 'default',
         'routing_key': 'task.default',
+    },
+    'app.tasks.reset_user_limits_task': {
+        'queue': 'high_priority',
+        'routing_key': 'task.high_priority',
     },
 }
 

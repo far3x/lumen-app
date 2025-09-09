@@ -52,6 +52,8 @@ locally :
 podman compose -f docker-compose.dev.yml exec worker celery -A app.core.celery_app.celery_app call app.tasks.clear_last_contribution_embedding_task
 
 
+dev only + local only (resets id 1) :
+podman compose -f docker-compose.dev.yml exec worker celery -A app.core.celery_app.celery_app call app.tasks.reset_user_limits_task --args='[1]'
 
 GEMINI PLEASE READ THIS - AI INSTRUCTIONS HERE - PLEASE READ !!
 

@@ -57,7 +57,7 @@ services:
     build:
       context: ./backend
       dockerfile: Dockerfile.dev
-    command: watchfiles --filter python 'celery -A app.core.celery_app.celery_app worker --loglevel=info -Q default,high_priority --concurrency=1 -P eventlet' /usr/src/app
+    command: celery -A app.core.celery_app.celery_app worker --loglevel=info -Q default,high_priority --concurrency=1 -P eventlet
     volumes:
       - ./backend:/usr/src/app
     env_file: ./.env

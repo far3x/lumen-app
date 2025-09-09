@@ -238,14 +238,15 @@ def update_contribution_status(db: Session, contribution_id: int, status: str):
         db.refresh(contribution)
     return contribution
 
-def create_contribution_record(db: Session, user: models.User, codebase: str, valuation_results: dict, reward: float, embedding: list[float] | None, initial_status: str = "PENDING"):
+def create_contribution_record(db: Session, user: models.User, codebase: str, valuation_results: dict, reward: float, embedding: list[float] | None, initial_status: str = "PENDING", source: str = "cli"):
     db_contribution = models.Contribution(
         user_id=user.id,
         raw_content=codebase,
         valuation_results=json.dumps(valuation_results),
         reward_amount=reward,
         content_embedding=embedding,
-        status=initial_status
+        status=initial_status,
+        source=source
     )
     db.add(db_contribution)
     db.commit()
