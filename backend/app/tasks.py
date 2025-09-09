@@ -301,7 +301,8 @@ def publish_contribution_update(db, contribution_id: int, user_id: int):
     
     response_data = ContributionResponse(
         id=contrib.id, created_at=contrib.created_at, reward_amount=contrib.reward_amount, status=contrib.status,
-        valuation_details=valuation_data, manual_metrics=manual_metrics, ai_analysis=ai_analysis, transaction_hash=contrib.transaction_hash
+        valuation_details=valuation_data, manual_metrics=manual_metrics, ai_analysis=ai_analysis, transaction_hash=contrib.transaction_hash,
+        is_open_source=valuation_data.get('is_open_source', False)
     )
     account_details = crud.get_account_details(db, user_id=user_id)
     new_payload = { "contribution": json.loads(response_data.model_dump_json()) }
@@ -461,24 +462,32 @@ async def _check_for_open_source(parsed_files, files_to_check):
     
     file_map = {f['path']: f['content'] for f in parsed_files}
 
-    for file_path in files_to_check:
-        if file_path in file_map:
-            content = file_map[file_path]
-            print(content, file=sys.stderr)
+    for ai_file_path in files_to_check:
+        full_path = next((fp for fp in file_map if fp.endswith(ai_file_path)), None)
+
+        if full_path:
+            content = file_map[full_path]
+            print(f"[GITHUB_SERVICE_DEBUG] Checking content of file: {full_path}", file=sys.stderr)
+            print("\n".join(content.splitlines()[:5]), file=sys.stderr)
+            
             lines = [line.strip() for line in content.splitlines() if line.strip()]
             
             if len(lines) < 5:
-                print(f"[GITHUB_SERVICE_DEBUG] Skipping file {file_path}: not enough significant lines.", file=sys.stderr)
+                print(f"[GITHUB_SERVICE_DEBUG] Skipping file {full_path}: not enough significant lines.", file=sys.stderr)
                 continue
 
             query_lines = lines[:15]
             search_query = " ".join('"' + line.replace('"', '\\"') + '"' for line in query_lines)
-            print(search_query, file=sys.stderr)
+
+            print(f"[GITHUB_SERVICE_DEBUG] Search query for {full_path}:\n{search_query}", file=sys.stderr)
  
             if await github_service.search_code_snippet(search_query):
-                print(f"[GITHUB_SERVICE_WARNING] OPEN SOURCE DETECTED in file: {file_path}", file=sys.stderr)
+                print(f"[GITHUB_SERVICE_WARNING] OPEN SOURCE DETECTED in file: {full_path}", file=sys.stderr)
                 is_open_source = True
                 break
+        else:
+            print(f"[GITHUB_SERVICE_DEBUG] Could not find a matching file for '{ai_file_path}' in the contribution.", file=sys.stderr)
+
     
     print(f"[GITHUB_SERVICE_DEBUG] Open source check complete. Found public match: {is_open_source}", file=sys.stderr)
     return is_open_source

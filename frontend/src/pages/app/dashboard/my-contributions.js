@@ -99,6 +99,12 @@ function renderContributionDetailModal(item) {
     const rewardUsd = item.reward_amount ?? 0;
     const lumenEquivalent = (details.simulated_lum_price_usd && details.simulated_lum_price_usd > 0) ? (rewardUsd / details.simulated_lum_price_usd) : 0;
 
+    const openSourceWarningHtml = item.is_open_source ? `
+        <div class="mb-6 p-4 bg-orange-900/30 border border-orange-500/30 text-orange-200 rounded-md text-sm">
+            <strong>Public Code Detected:</strong> Our uniqueness engine found a high similarity between this contribution and code available in public repositories. To ensure fairness and prioritize novel data, the reward for this submission has been significantly reduced.
+        </div>
+    ` : '';
+
     const renderKeyMetric = (label, value) => `
         <div class="flex justify-between items-center text-sm py-2 border-b border-primary/50">
             <span class="text-text-secondary">${label}</span>
@@ -108,6 +114,7 @@ function renderContributionDetailModal(item) {
     
     const content = `
         <div class="text-text-main">
+            ${openSourceWarningHtml}
             <div class="text-center mb-8">
                 <p class="text-sm font-bold text-text-secondary uppercase tracking-widest">Contribution Value</p>
                 <p class="text-5xl lg:text-6xl font-bold gradient-text mt-1">$${rewardUsd.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 4})}</p>
@@ -158,7 +165,7 @@ function renderSingleContributionRow(item) {
     return `
     <tr class="contribution-row" data-id="${item.id}">
         <td class="py-4 px-4 text-text-secondary">${new Date(item.created_at).toLocaleDateString()}</td>
-        <td class="py-4 px-4"><span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getStatusClasses(item.status)}">${getStatusText(item.status)}</span></td>
+        <td class="py-4 px-4"><span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getStatusClasses(item.status, item.is_open_source)}">${getStatusText(item.status, item.is_open_source)}</span></td>
         <td class="py-4 px-4 text-right font-mono ${item.reward_amount > 0 ? 'text-green-400' : 'text-text-secondary'}">${item.reward_amount > 0 ? `+$${item.reward_amount.toFixed(4)}` : '...'}</td>
         <td class="py-4 px-4 text-center">
             <button class="details-btn text-text-secondary hover:brightness-150 transition-all disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:brightness-100" data-id="${item.id}" ${item.status !== 'PROCESSED' ? 'disabled' : ''}>

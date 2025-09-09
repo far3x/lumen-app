@@ -209,7 +209,10 @@ export const icons = {
     errorCircle: `<svg class="w-12 h-12" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>`
 };
 
-export function getStatusClasses(status) {
+export function getStatusClasses(status, is_open_source = false) {
+    if (status === 'PROCESSED' && is_open_source) {
+        return 'bg-orange-900/50 text-orange-300';
+    }
     const statuses = {
         PROCESSED: 'bg-green-900/50 text-green-300',
         PENDING: 'bg-yellow-900/50 text-yellow-300 animate-pulse',
@@ -226,7 +229,10 @@ export function getStatusClasses(status) {
     return statuses[status] || 'bg-gray-700/50 text-gray-300';
 }
 
-export function getStatusText(status) {
+export function getStatusText(status, is_open_source = false) {
+    if (status === 'PROCESSED' && is_open_source) {
+        return 'Processed (Public)';
+    }
     const statusTexts = {
         PROCESSED: 'Complete', PENDING: 'Pending', PROCESSING: 'Processing',
         REJECTED_EMPTY: 'Rejected: Empty', REJECTED_NO_REWARD: 'Rejected: No Reward',
