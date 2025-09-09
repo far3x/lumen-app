@@ -453,10 +453,10 @@ def _add_languages_to_db(db: Session, languages: List[str]):
             db.rollback()
 
 async def _check_for_open_source(parsed_files, files_to_check):
-    logger.info(f"Starting open source check. AI selected {len(files_to_check)} file(s) for analysis: {files_to_check}")
+    print(f"[GITHUB_SERVICE_DEBUG] Starting open source check. AI selected {len(files_to_check)} file(s): {files_to_check}", file=sys.stderr)
     is_open_source = False
     if not files_to_check:
-        logger.info("No files selected for open source check. Skipping.")
+        print("[GITHUB_SERVICE_DEBUG] No files selected for open source check. Skipping.", file=sys.stderr)
         return False
     
     file_map = {f['path']: f['content'] for f in parsed_files}
@@ -464,25 +464,23 @@ async def _check_for_open_source(parsed_files, files_to_check):
     for file_path in files_to_check:
         if file_path in file_map:
             content = file_map[file_path]
-            lines = [line for line in content.splitlines() if line.strip() and not line.strip().startswith(('#', '//', '/*', '*/'))]
+            print(content, file=sys.stderr)
+            lines = [line.strip() for line in content.splitlines() if line.strip()]
             
             if len(lines) < 5:
-                logger.info(f"Skipping file {file_path} for OS check: not enough significant lines of code.")
+                print(f"[GITHUB_SERVICE_DEBUG] Skipping file {file_path}: not enough significant lines.", file=sys.stderr)
                 continue
 
-            snippet_line_count = min(20, len(lines))
-            middle_start = (len(lines) - snippet_line_count) // 2
-            snippet_lines = lines[middle_start : middle_start + snippet_line_count]
-            
-            snippet = "\n".join(snippet_lines)
-            logger.debug(f"[DEBUG_SNIPPET] Sending snippet to GitHub: {snippet!r}", file=sys.stderr)
-            
-            if await github_service.search_code_snippet(snippet):
-                logger.warning(f"OPEN SOURCE DETECTED in file: {file_path}")
+            query_lines = lines[:15]
+            search_query = " ".join('"' + line.replace('"', '\\"') + '"' for line in query_lines)
+            print(search_query, file=sys.stderr)
+ 
+            if await github_service.search_code_snippet(search_query):
+                print(f"[GITHUB_SERVICE_WARNING] OPEN SOURCE DETECTED in file: {file_path}", file=sys.stderr)
                 is_open_source = True
                 break
     
-    logger.info(f"Open source check complete. Found public match: {is_open_source}")
+    print(f"[GITHUB_SERVICE_DEBUG] Open source check complete. Found public match: {is_open_source}", file=sys.stderr)
     return is_open_source
 
 @celery_app.task(bind=True)
@@ -608,6 +606,8 @@ def process_contribution(self, user_id: int, contribution_db_id: int):
 
                 user.is_beta_bonus_claimed = True
                 db.add(user)
+                db.commit()
+                db.refresh(user)
                 logger.info(f"[REWARD] Awarded Genesis Bonus of {settings.BETA_GENESIS_BONUS} LUMEN to user {user_id}.")
 
             crud.apply_reward_to_user(db, user, total_reward_for_account)

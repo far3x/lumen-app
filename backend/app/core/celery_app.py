@@ -1,6 +1,23 @@
+import logging
 from celery import Celery
+from celery.signals import after_setup_logger
 from kombu import Queue
 from app.core.config import settings
+
+@after_setup_logger.connect
+def setup_loggers(logger, **kwargs):
+    root_logger = logging.getLogger()
+    
+    root_logger.setLevel(logging.INFO)
+    
+    if not root_logger.handlers:
+        handler = logging.StreamHandler()
+        formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+        handler.setFormatter(formatter)
+        root_logger.addHandler(handler)
+    
+    logger.info("Root logger configured for Celery worker.")
+
 
 celery_app = Celery(
     "tasks",
