@@ -5,33 +5,35 @@ export const renderRoadmap = () => `
     <div class="mt-12 space-y-16">
         <div class="relative pl-12">
             <div class="absolute left-4 top-1 h-full w-0.5 bg-primary -translate-x-1/2" aria-hidden="true"></div>
-            <div class="absolute left-4 top-1 w-4 h-4 rounded-full bg-accent-purple border-2 border-background ring-4 ring-accent-purple/30 animate-pulse -translate-x-1/2"></div>
+            <div class="absolute left-4 top-1 w-4 h-4 rounded-full bg-accent-purple border-2 border-background ring-4 ring-accent-purple/30 -translate-x-1/2"></div>
             
-            <p class="text-sm font-bold text-accent-purple">PHASE 1: LAUNCH & MARKET VALIDATION (CURRENT FOCUS)</p>
+            <p class="text-sm font-bold text-accent-purple">PHASE 1: LAUNCH & MARKET VALIDATION (COMPLETE)</p>
             <h3 id="phase-one" class="text-xl font-bold mt-1">Bootstrap the Data Economy & Prove the Model</h3>
             <p class="text-text-secondary mt-1">Focus: Execute a rapid launch, validate both the supply (developer contributions) and demand (AI company interest) sides of the marketplace, and secure pre-seed funding to accelerate growth.</p>
             <ul class="list-none text-text-secondary mt-2 space-y-2">
                 <li class="flex items-start gap-3"><span>✅</span><span class="text-green-400"><strong>Core Protocol & Valuation Engine:</strong> Developed and deployed the full backend infrastructure, including the hybrid valuation engine, asynchronous task processing, and the high-performance pgvector database for uniqueness checks.</span></li>
                 <li class="flex items-start gap-3"><span>✅</span><span class="text-green-400"><strong>Contributor Dashboard & Web App:</strong> Launched the complete user-facing application, featuring secure authentication, a real-time dashboard, contribution history, and account management.</span></li>
                 <li class="flex items-start gap-3"><span>✅</span><span class="text-green-400"><strong>Secure, Open-Source CLI:</strong> Released the <code>pylumen</code> command-line tool with robust local-first anonymization, secure device authorization, and a comprehensive suite of commands.</span></li>
-                <li class="flex items-start gap-3"><span>✅</span><span class="text-green-400"><strong>Secure Strategic Launch Partnership:</strong> Formalize our partnership with *** to ensure a successful launch, immediate distribution, and a high-quality initial supply of contributions.</span></li>
+                <li class="flex items-start gap-3"><span>✅</span><span class="text-green-400"><strong>Secure Strategic Launch Partnership:</strong> Formalize our partnership with Heaven to ensure a successful launch, immediate distribution, and a high-quality initial supply of contributions.</span></li>
                 <li class="flex items-start gap-3"><span>✅</span><span class="text-green-400"><strong>Whitepaper & Pitch Deck:</strong> Finalize a comprehensive whitepaper detailing the protocol's technology and business model, alongside a professional pitch deck for fundraising.</span></li>
-                <li class="flex items-start gap-3"><span>▶️</span><span class="text-yellow-400"><strong>Genesis Contributor Program:</strong> Onboard the first 200 developers via the limited Beta Program to build the foundational dataset.</span></li>
-                <li class="flex items-start gap-3"><span>▶️</span><span class="text-yellow-400"><strong>Establish Initial Reward Stakes:</strong> Finalize the on-chain reward mechanism. All contributions made during the Genesis Phase will be recorded, securing your stake and reward multiplier for when the public token launch is activated.</span></li>
-                <li class="flex items-start gap-3"><span>▶️</span><span class="text-yellow-400"><strong>Secure First Data Partnerships:</strong> Convert our pipeline of interested AI companies into our first signed Letters of Intent (LOIs), providing concrete validation of market demand for our proprietary data.</span></li>
+                <li class="flex items-start gap-3"><span>✅</span><span class="text-green-400"><strong>Genesis Contributor Program:</strong> Onboard the first 200 developers via the limited Beta Program to build the foundational dataset.</span></li>
+                <li class="flex items-start gap-3"><span>✅</span><span class="text-green-400"><strong>Establish Initial Reward Stakes:</strong> Finalize the on-chain reward mechanism. All contributions made during the Genesis Phase will be recorded, securing your stake and reward multiplier for when the public token launch is activated.</span></li>
             </ul>
         </div>
         
         <div class="relative pl-12">
             <div class="absolute left-4 top-1 h-full w-0.5 bg-primary -translate-x-1/2" aria-hidden="true"></div>
-            <div class="absolute left-4 top-1 w-4 h-4 rounded-full bg-accent-pink border-2 border-background ring-4 ring-accent-pink/30 -translate-x-1/2"></div>
+            <div class="absolute left-4 top-1 w-4 h-4 rounded-full bg-accent-pink border-2 border-background ring-4 ring-accent-pink/30 animate-pulse -translate-x-1/2"></div>
 
-            <p class="text-sm font-bold text-accent-pink">PHASE 2: SCALE & ECOSYSTEM GROWTH (POST-FUNDING)</p>
+            <p class="text-sm font-bold text-accent-pink">PHASE 2: SCALE & ECOSYSTEM GROWTH (CURRENT FOCUS)</p>
             <h3 id="phase-two" class="text-xl font-bold mt-1">Activate the Marketplace & Expand the Toolchain</h3>
-            <p class="text-text-secondary mt-1">Focus: Following a successful funding round, aggressively scale the team, launch the commercial data marketplace, and deeply integrate Lumen into the developer workflow.</p>
+            <p class="text-text-secondary mt-1">Focus: With the core protocol validated, we are now scaling our commercial operations, expanding the team, and enhancing the developer toolchain.</p>
             <ul class="list-none text-text-secondary mt-2 space-y-2">
+                <li class="flex items-start gap-3"><span>✅</span><span class="text-green-400"><strong>Launch Data Marketplace (business.lumen.onl):</strong> Go live with the commercial data portal, allowing enterprise clients to access data via secure APIs and generate the first wave of protocol revenue.</span></li>
+                <li class="flex items-start gap-3"><span>✅</span><span class="text-green-400"><strong>Algorithm V2 & Infrastructure Upgrade:</strong> Deployed a major upgrade to the valuation engine using Gemini Flash Lite, resulting in a 15x performance increase and more intelligent, cost-effective analysis. The entire backend stack has been hardened for scalability.</span></li>
+                <li class="flex items-start gap-3"><span>▶️</span><span class="text-yellow-400"><strong>Secure Seed Funding via Starseed:</strong> In partnership with the Heaven launchpad, we are initiating our first formal funding round through their Starseed program to secure the capital needed for aggressive scaling.</span></li>
+                <li class="flex items-start gap-3"><span>▶️</span><span class="text-yellow-400"><strong>Secure First Data Partnerships:</strong> Convert our pipeline of interested AI companies into our first signed Letters of Intent (LOIs), providing concrete validation of market demand for our proprietary data.</span></li>
                 <li class="flex items-start gap-3"><span class="text-subtle">●</span><span><strong>Team Expansion:</strong> Scale the organization from a founder-led project to a dedicated team, hiring key personnel in Engineering, Business Development, and Marketing.</span></li>
-                <li class="flex items-start gap-3"><span class="text-subtle">●</span><span><strong>Launch Data Marketplace (business.lumen.onl):</strong> Go live with the commercial data portal, allowing enterprise clients to access data via secure APIs and generate the first wave of protocol revenue.</span></li>
                 <li class="flex items-start gap-3"><span class="text-subtle">●</span><span><strong>Developer Ecosystem Tools:</strong> Release official SDKs (Python, TypeScript) and IDE extensions (VS Code, JetBrains) to make contributing a seamless, one-click part of the development workflow.</span></li>
                 <li class="flex items-start gap-3"><span class="text-subtle">●</span><span><strong>Community Growth & Incentive Programs:</strong> Launch the official referral program, contribution bounties for specific data types, and weekly/monthly leaderboards with bonus rewards to accelerate network growth.</span></li>
                 <li class="flex items-start gap-3"><span class="text-subtle">●</span><span><strong>Governance V1:</strong> Launch the Lumen Governance Forum and introduce the Lumen Improvement Proposal (LIP) framework, empowering the community to shape the future of the protocol.</span></li>
