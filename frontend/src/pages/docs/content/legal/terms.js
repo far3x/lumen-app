@@ -96,12 +96,12 @@ export const renderTermsAndConditions = () => `
     <p>We will maintain certain data that you transmit to the Services for the purpose of managing their performance. Although we perform regular routine backups of data, you are solely responsible for all data that you transmit. You agree that we shall have no liability to you for any loss or corruption of any such data, and you hereby waive any right of action against us arising from any such loss or corruption.</p>
     
     <h2 id="protocol-terms">19. Protocol-Specific Terms</h2>
+    <h3>Reward Mechanism</h3>
+    <p>You acknowledge that any rewards for Contributions are calculated by our proprietary Valuation Engine. The value is calculated in USD and paid out in the USDC stablecoin to a Solana wallet address you provide. We do not guarantee any specific value or reward for any Contribution. All valuations are final.</p>
     <h3>Cryptocurrency and Blockchain Risks</h3>
-    <p>You understand and acknowledge that the value of the $LUMEN token is subject to high volatility and market risks. The Lumen Protocol does not offer financial advice. All transactions recorded on the Solana blockchain are final and irreversible. You are solely responsible for the security of your personal cryptocurrency wallet and its private keys.</p>
+    <p>While rewards are paid in USDC, the protocol has a native utility token, $LUMEN. You understand that the value of any cryptocurrency, including $LUMEN, is highly volatile. All transactions on the Solana blockchain are final and irreversible. You are solely responsible for the security of your personal cryptocurrency wallet and its private keys.</p>
     <h3>Data Contribution License</h3>
     <p>By submitting any source code or related materials ("Data") to the protocol, you confirm that you have the full right and authority to do so. You retain complete ownership of your original Data. You grant the Lumen Protocol a perpetual, irrevocable, worldwide, royalty-free, non-exclusive license to use, reproduce, modify, and distribute the anonymized version of your contributed Data for the purpose of creating datasets for training artificial intelligence models and for sublicensing this anonymized data to third parties.</p>
-    <h3>"As-Is" Service</h3>
-    <p>The Lumen Protocol's services and its valuation engine are provided on an "as-is" and "as-available" basis without any warranties. We do not guarantee any specific value or reward for any contribution submitted to the protocol.</p>
     
     <h2 id="contact">20. Contact Us</h2>
     <p>In order to resolve a complaint regarding the Services or to receive further information regarding use of the Services, please contact us at: <a href="mailto:contact@lumen.onl" class="text-accent-cyan hover:underline">contact@lumen.onl</a></p>

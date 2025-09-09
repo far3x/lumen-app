@@ -2,13 +2,16 @@ export const renderTokenomics = () => `
     <h1 id="protocol-economy">The Protocol Economy</h1>
     <p class="lead text-xl text-text-secondary">Lumen's tokenomy is the engine of our ecosystem. It is designed for long term sustainability and is fueled by real world utility. The system ensures that every participant, from individual developers to enterprise data consumers, is incentivized to contribute to the network's growth.</p>
 
+    <blockquote>
+        <strong>Note on Rewards:</strong> To provide stability and immediate real-world value to our contributors, all rewards on the Lumen Protocol are calculated in USD and paid out in <strong>USDC</strong>, a stablecoin pegged 1:1 to the US Dollar. The $LUMEN token is reserved for protocol utility and governance.
+    </blockquote>
+
     <h2 id="genesis-phase">Phase 1: The Genesis Phase (Current State)</h2>
     <p>We are currently in the Genesis Phase, a critical period of strategic data acquisition. Unlike protocols that rely on future promises, we are actively deploying our own capital to reward contributors with real world value today. Our private investors are funding a robust rewards pool to build the foundational dataset that will power the entire network.</p>
     <ul>
-        <li><strong>Immediate USDC Rewards:</strong> Your contributions are appraised by our valuation engine and assigned a direct USD value. This value accrues in your account and is paid out automatically in USDC, a stablecoin pegged 1:1 to the US Dollar. The value you earn is the value you receive.</li>
+        <li><strong>Immediate USDC Rewards:</strong> Your contributions are appraised by our valuation engine and assigned a direct USD value. This value accrues in your account and is paid out automatically in USDC. The value you earn is the value you receive.</li>
         <li><strong>Permanent Reward Multiplier:</strong> As a reward for your early belief in our vision, all Genesis Contributors receive a permanent boost to their account's reward multiplier. This means you will continue to earn more for your contributions, forever.</li>
     </ul>
-    <blockquote>Contributing now is a unique opportunity. You are not just a user; you are a foundational partner, earning immediate rewards while securing an enhanced stake in the future success of the network.</blockquote>
 
     <h2 id="sustainable-economy">Phase 2: The Sustainable Economy</h2>
     <p>The current investment in data acquisition is the bridge to our long term, self sustaining economic model. Once the protocol's dataset reaches critical mass and enterprise sales begin, this powerful economic flywheel will be activated.</p>
