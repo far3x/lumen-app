@@ -9,7 +9,7 @@ from app.db.database import SessionLocal
 from app.schemas import DeviceAuthResponse, ContributionCreate, ContributionStatus, ContributionCliResponse
 from app.services.redis_service import redis_service
 from app.api.v1 import dependencies
-from app.tasks import process_contribution, create_daily_payout_batch_task, reconcile_failed_payouts_task, recalculate_network_stats_task
+from app.tasks import process_contribution, create_daily_payout_batch_task, reconcile_failed_payouts_task, recalculate_network_stats_task, reset_user_limits_task
 from app.core.limiter import limiter
 from typing import List
 from datetime import datetime, timezone, timedelta
@@ -119,10 +119,11 @@ async def contribute_data(
         valuation_results={},
         reward=0.0,
         embedding=None,
-        initial_status="PENDING"
+        initial_status="PENDING",
+        source='cli'
     )
     
-    process_contribution.delay(current_user.id, payload.codebase, new_contribution.id, source='cli')
+    process_contribution.delay(current_user.id, new_contribution.id)
 
     return {"message": "Contribution received and is being processed.", "contribution_id": new_contribution.id}
 
@@ -171,3 +172,13 @@ async def trigger_reconciliation(request: Request):
 async def trigger_recalculate_stats(request: Request):
     task = recalculate_network_stats_task.delay()
     return {"message": "Network stats recalculation task has been triggered.", "task_id": task.id}
+
+@router.post("/dev/reset-user-limits/{user_id}", status_code=status.HTTP_202_ACCEPTED, dependencies=[Depends(dependencies.verify_dev_mode)])
+async def dev_reset_user_limits(request: Request, user_id: int):
+    """
+    (DEV ONLY) Resets all contribution and rate limits for a specific user.
+    - Deletes recent contributions to reset the 24-hour logical limit.
+    - Clears all Redis keys associated with the user for slowapi rate limiting.
+    """
+    task = reset_user_limits_task.delay(user_id)
+    return {"message": f"User limit reset task has been triggered for user ID {user_id}.", "task_id": task.id}

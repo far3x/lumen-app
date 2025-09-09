@@ -2,6 +2,7 @@ import json
 import numpy as np
 import logging
 import time
+import sys
 from typing import List
 from sqlalchemy.orm import Session
 from app.core.celery_app import celery_app
@@ -18,7 +19,7 @@ from app.services.sanitization_service import sanitization_service
 from app.services.price_service import price_service
 from app.services.github_service import github_service
 import asyncio
-from datetime import datetime, timezone
+from datetime import datetime, timezone, timedelta
 from app.db.models import PayoutBatch, BatchPayout, Account, ContributionLanguage
 from sqlalchemy import desc
 from sqlalchemy.exc import IntegrityError
@@ -27,6 +28,50 @@ logger = logging.getLogger(__name__)
 
 PLAGIARISM_THRESHOLD = 0.95
 INNOVATION_THRESHOLD = 0.75
+
+@celery_app.task(name="app.tasks.reset_user_limits_task")
+def reset_user_limits_task(user_id: int):
+    logger.info(f"Starting development task to reset all limits for user_id: {user_id}")
+    db = SessionLocal()
+    try:
+        user = db.query(models.User).filter(models.User.id == user_id).first()
+        if not user:
+            logger.error(f"User with ID {user_id} not found. Aborting.")
+            return
+
+        one_day_ago = datetime.now(timezone.utc) - timedelta(days=1)
+        
+        recent_contributions = db.query(models.Contribution).filter(
+            models.Contribution.user_id == user_id,
+            models.Contribution.created_at >= one_day_ago
+        ).all()
+
+        if recent_contributions:
+            logger.info(f"Found and deleting {len(recent_contributions)} recent contributions for user {user_id} to reset daily limit.")
+            for contrib in recent_contributions:
+                db.delete(contrib)
+            db.commit()
+        else:
+            logger.info(f"No recent contributions found for user {user_id} within the last 24 hours. Daily limit is clear.")
+
+        keys_to_delete = []
+        for key in redis_service.r.scan_iter(match=f"LIMITER/*/{user_id}/*"):
+            keys_to_delete.append(key)
+        
+        if keys_to_delete:
+            logger.info(f"Found and deleting {len(keys_to_delete)} Redis rate limit keys for user {user_id}.")
+            redis_service.r.delete(*keys_to_delete)
+        else:
+            logger.info(f"No Redis rate limit keys found for user {user_id}.")
+
+        logger.info(f"Successfully reset all limits for user {user_id}.")
+
+    except Exception as e:
+        logger.error(f"Error during user limit reset for user {user_id}: {e}", exc_info=True)
+        db.rollback()
+    finally:
+        db.close()
+
 
 @celery_app.task(name="app.tasks.clear_last_contribution_embedding_task")
 def clear_last_contribution_embedding_task():
@@ -39,13 +84,18 @@ def clear_last_contribution_embedding_task():
             logger.warning("No contributions found. Nothing to clear.")
             return
 
+        user_id_of_last_contrib = last_contribution.user_id
+
         if last_contribution.content_embedding is None:
             logger.info(f"Embedding for last contribution (ID: {last_contribution.id}) is already null. No action taken.")
-            return
+        else:
+            last_contribution.content_embedding = None
+            db.commit()
+            logger.info(f"Successfully cleared content_embedding for the most recent contribution (ID: {last_contribution.id}).")
 
-        last_contribution.content_embedding = None
-        db.commit()
-        logger.info(f"Successfully cleared content_embedding for the most recent contribution (ID: {last_contribution.id}).")
+        if user_id_of_last_contrib == 1:
+            logger.info(f"Last contribution belonged to user 1. Triggering limit reset for this user.")
+            reset_user_limits_task.delay(user_id_of_last_contrib)
 
     except Exception as e:
         logger.error(f"Error clearing last contribution embedding: {e}", exc_info=True)
@@ -403,8 +453,10 @@ def _add_languages_to_db(db: Session, languages: List[str]):
             db.rollback()
 
 async def _check_for_open_source(parsed_files, files_to_check):
+    logger.info(f"Starting open source check. AI selected {len(files_to_check)} file(s) for analysis: {files_to_check}")
     is_open_source = False
     if not files_to_check:
+        logger.info("No files selected for open source check. Skipping.")
         return False
     
     file_map = {f['path']: f['content'] for f in parsed_files}
@@ -412,28 +464,39 @@ async def _check_for_open_source(parsed_files, files_to_check):
     for file_path in files_to_check:
         if file_path in file_map:
             content = file_map[file_path]
-            lines = [line for line in content.splitlines() if line.strip()]
-            if not lines:
+            lines = [line for line in content.splitlines() if line.strip() and not line.strip().startswith(('#', '//', '/*', '*/'))]
+            
+            if len(lines) < 5:
+                logger.info(f"Skipping file {file_path} for OS check: not enough significant lines of code.")
                 continue
 
-            snippet = ""
-            if len(lines) < 15:
-                snippet = "\n".join(lines)
-            else:
-                middle_start = (len(lines) - 10) // 2
-                snippet = "\n".join(lines[middle_start : middle_start + 10])
+            snippet_line_count = min(20, len(lines))
+            middle_start = (len(lines) - snippet_line_count) // 2
+            snippet_lines = lines[middle_start : middle_start + snippet_line_count]
             
-            logger.info(f"Checking snippet from {file_path} for open-source...")
+            snippet = "\n".join(snippet_lines)
+            logger.debug(f"[DEBUG_SNIPPET] Sending snippet to GitHub: {snippet!r}", file=sys.stderr)
+            
             if await github_service.search_code_snippet(snippet):
                 logger.warning(f"OPEN SOURCE DETECTED in file: {file_path}")
                 is_open_source = True
                 break
+    
+    logger.info(f"Open source check complete. Found public match: {is_open_source}")
     return is_open_source
 
 @celery_app.task(bind=True)
-def process_contribution(self, user_id: int, codebase: str, contribution_db_id: int, source: str = 'cli'):
+def process_contribution(self, user_id: int, contribution_db_id: int):
     db = SessionLocal()
     try:
+        contribution_record = crud.get_contribution_by_id(db, contribution_db_id)
+        if not contribution_record:
+            logger.error(f"Contribution {contribution_db_id} not found. Aborting task.")
+            return
+
+        codebase = contribution_record.raw_content
+        source = contribution_record.source
+        
         crud.update_contribution_status(db, contribution_db_id, "PROCESSING")
         publish_contribution_update(db, contribution_db_id, user_id)
         
@@ -528,11 +591,6 @@ def process_contribution(self, user_id: int, codebase: str, contribution_db_id: 
         final_base_reward_with_innovation = base_reward_usd * innovation_multiplier
         valuation_details['innovation_multiplier'] = round(innovation_multiplier, 4)
 
-        contribution_record = crud.get_contribution_by_id(db, contribution_db_id)
-        if not contribution_record:
-            logger.error(f"Failed to retrieve contribution record {contribution_db_id} before final update.")
-            return
-
         contribution_record.valuation_results = json.dumps(valuation_details)
         
         if final_base_reward_with_innovation > 0:
@@ -612,7 +670,7 @@ def retry_pending_ai_analysis_task():
         logger.info(f"Found {len(contributions_to_retry)} contributions to re-queue for AI analysis.")
         for contrib in contributions_to_retry:
             logger.info(f"Re-queuing contribution ID: {contrib.id} for user ID: {contrib.user_id}")
-            process_contribution.delay(contrib.user_id, contrib.raw_content, contrib.id, source='cli')
+            process_contribution.delay(contrib.user_id, contrib.id)
 
     except Exception as e:
         logger.error(f"Error during AI analysis retry task: {e}", exc_info=True)
