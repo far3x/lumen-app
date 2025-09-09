@@ -367,7 +367,7 @@ class HybridValuationService:
         if stats and stats.total_contributions >= self.BOOTSTRAP_CONTRIBUTIONS:
             if current_metrics['avg_complexity'] > 0 and stats.std_dev_complexity > 0:
                 z_score = (current_metrics['avg_complexity'] - stats.mean_complexity) / stats.std_dev_complexity
-                rarity_multiplier = 1.0 + (0.5 * math.tanh(z_score))
+                rarity_multiplier = 1.0 + math.tanh(z_score)
 
         ai_weighted_multiplier = (clarity * 0.3) + (architecture * 0.2) + (code_quality * 0.5)
         
@@ -381,7 +381,7 @@ class HybridValuationService:
         total_usd_distributed = stats.total_usd_distributed if stats else 0
         simulated_lum_price = self.INITIAL_LUM_USD_PRICE + (self.PRICE_GROWTH_FACTOR * math.sqrt(total_usd_distributed))
         
-        final_reward = target_usd_reward
+        final_reward = target_usd_reward * 1.2
         
         sanitized_summary = html.escape(analysis_summary_from_ai) if analysis_summary_from_ai else None
         
