@@ -30,6 +30,12 @@ podman compose -f docker-compose.dev.yml exec db psql -U lumen_user -d lumen_exc
 to run batch:
 doppler run -- docker compose exec worker_priority celery -A app.core.celery_app.celery_app call app.tasks.create_daily_payout_batch_task
 
+to run batch SIMULATOR (read-only check):
+doppler run -- docker compose exec worker_default celery -A app.core.celery_app.celery_app call app.tasks.simulate_daily_payout_batch_task
+
+locally:
+podman compose -f docker-compose.dev.yml exec worker celery -A app.core.celery_app.celery_app call app.tasks.simulate_daily_payout_batch_task
+
 
 to run network stats recalculation (after deletion, changes, manual fixes... etc):
 doppler run -- docker compose exec worker_default celery -A app.core.celery_app.celery_app call app.tasks.recalculate_network_stats_task

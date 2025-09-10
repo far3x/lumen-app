@@ -20,7 +20,7 @@ from app.services.price_service import price_service
 from app.services.github_service import github_service
 import asyncio
 from datetime import datetime, timezone, timedelta
-from app.db.models import PayoutBatch, BatchPayout, Account, ContributionLanguage
+from app.db.models import PayoutBatch, BatchPayout, Account, ContributionLanguage, User
 from sqlalchemy import desc
 from sqlalchemy.exc import IntegrityError
 
@@ -683,5 +683,36 @@ def retry_pending_ai_analysis_task():
 
     except Exception as e:
         logger.error(f"Error during AI analysis retry task: {e}", exc_info=True)
+    finally:
+        db.close()
+
+@celery_app.task(name="app.tasks.simulate_daily_payout_batch_task")
+def simulate_daily_payout_batch_task():
+    logger.info("Starting daily payout batch SIMULATION...")
+    db = SessionLocal()
+    try:
+        users_to_pay_query = db.query(Account).join(User).filter(
+            Account.usd_balance > 0,
+            User.solana_address.isnot(None)
+        )
+        
+        users_to_pay = users_to_pay_query.all()
+        
+        total_simulation_amount_usd = 0
+        eligible_user_count = 0
+        
+        if users_to_pay:
+            for account in users_to_pay:
+                total_simulation_amount_usd += account.usd_balance
+                eligible_user_count += 1
+
+        logger.info("--- Payout Simulation Results ---")
+        logger.info(f"Eligible users (balance > 0 and wallet linked): {eligible_user_count}")
+        logger.info(f"Total simulated payout amount: ${total_simulation_amount_usd:.4f} USD")
+        logger.info("--- End of Simulation ---")
+        logger.info("NOTE: No database records were created or modified.")
+
+    except Exception as e:
+        logger.error(f"Error during payout simulation task: {e}", exc_info=True)
     finally:
         db.close()

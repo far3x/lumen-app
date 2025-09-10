@@ -64,6 +64,10 @@ task_routes = {
         'queue': 'high_priority',
         'routing_key': 'task.high_priority',
     },
+    'app.tasks.simulate_daily_payout_batch_task': {
+        'queue': 'default',
+        'routing_key': 'task.default',
+    },
     'app.tasks.process_payout_batch': {
         'queue': 'default',
         'routing_key': 'task.default',
