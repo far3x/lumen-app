@@ -381,7 +381,7 @@ class HybridValuationService:
         total_usd_distributed = stats.total_usd_distributed if stats else 0
         simulated_lum_price = self.INITIAL_LUM_USD_PRICE + (self.PRICE_GROWTH_FACTOR * math.sqrt(total_usd_distributed))
         
-        final_reward = target_usd_reward * 1.2
+        final_reward = target_usd_reward
         
         sanitized_summary = html.escape(analysis_summary_from_ai) if analysis_summary_from_ai else None
         
