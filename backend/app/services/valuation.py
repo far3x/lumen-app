@@ -78,20 +78,42 @@ class HybridValuationService:
 
         HIGH_VALUE_EXTENSIONS = {
             ".ada", ".adb", ".ads", ".asm", ".s", ".c", ".h", ".cpp", ".cc", ".hpp", ".hh", ".cs", 
-            ".cg", ".clj", ".cljc", ".cljs", ".crystal", ".cr", ".css", ".dart", ".elm", ".erl", 
-            ".hrl", ".fs", ".fsi", ".fsx", ".fsscript", ".f", ".f90", ".for", ".gd", ".go", 
+            ".cg", ".clj", ".cljc", ".cljs", ".crystal", ".cr", ".dart", ".elm", ".erl", 
+            ".hrl", ".fs", ".fsi", ".fsx", ".fsscript", ".f", ".f90", ".for", ".go", 
             ".groovy", ".gvy", ".gy", ".gsh", ".hs", ".lhs", ".hx", ".hlsl", ".java", ".js", 
             ".cjs", ".mjs", ".jsx", ".kt", ".kts", ".lisp", ".cl", ".lsp", ".lua", ".m", ".metal", 
             ".nim", ".mm", ".ml", ".mli", ".pas", ".p", ".pp", ".pl", ".pm", ".pro", ".py", 
-            ".pyi", ".r", ".rb", ".rs", ".scala", ".sc", ".sh", ".sol", ".sql", ".swift", ".ts", 
-            ".tsx", ".vala", ".v", ".sv", ".vhdl", ".vhd", ".vb", ".vue", ".zig"
+            ".pyi", ".r", ".rb", ".rs", ".scala", ".sc", ".sh", ".sol", ".swift", ".ts", 
+            ".tsx", ".vala", ".v", ".sv", ".vhdl", ".vhd", ".vb", ".zig",
+            ".au3", ".bash", ".fish", ".livescript", ".tcl", ".ps1", ".gd", ".gdshader"
         }
         
         all_content_str = ""
         total_complexity = 0
         total_files_with_complexity = 0
-        total_lloc_all_types = 0
-        total_pure_code_lloc = 0
+        total_tokens_all_types = 0
+        total_pure_code_tokens = 0
+
+        if self.tokenizer:
+            for file_data in parsed_files:
+                content = file_data.get("content", "")
+                path = file_data.get("path", "")
+                
+                file_token_count = len(self.tokenizer.encode(content))
+                total_tokens_all_types += file_token_count
+                
+                _, extension = os.path.splitext(path)
+                if extension.lower() in HIGH_VALUE_EXTENSIONS:
+                    total_pure_code_tokens += file_token_count
+                
+                all_content_str += content + "\n"
+
+        analysis_data["total_tokens"] = total_tokens_all_types
+        if total_tokens_all_types > 0:
+            analysis_data["code_ratio"] = total_pure_code_tokens / total_tokens_all_types
+        else:
+            analysis_data["code_ratio"] = 0.0
+
 
         with tempfile.TemporaryDirectory() as temp_dir:
             for file_data in parsed_files:
@@ -100,80 +122,41 @@ class HybridValuationService:
                     path_normalized_separators = original_path.replace('\\', '/')
                     relative_path = path_normalized_separators.lstrip('/')
 
-                    if '..' in relative_path.split('/'):
-                        print(f"[VALUATION_WARNING] Path traversal attempt in '{original_path}', skipping.")
-                        continue
-                    
-                    if not relative_path:
-                        print(f"[VALUATION_WARNING] Empty path after processing '{original_path}', skipping.")
-                        continue
+                    if '..' in relative_path.split('/'): continue
+                    if not relative_path: continue
 
                     final_relative_path = os.path.normpath(relative_path)
                     full_path = os.path.join(temp_dir, final_relative_path)
 
-                    if not os.path.realpath(full_path).startswith(os.path.realpath(temp_dir)):
-                        print(f"[VALUATION_SECURITY] Path '{full_path}' (original: '{original_path}') resolved outside temp_dir '{temp_dir}', skipping.")
-                        continue
+                    if not os.path.realpath(full_path).startswith(os.path.realpath(temp_dir)): continue
                     
                     os.makedirs(os.path.dirname(full_path), exist_ok=True)
                     
-                    with open(full_path, 'w', encoding='utf-8') as f:
-                        f.write(file_data["content"])
+                    with open(full_path, 'w', encoding='utf-8') as f: f.write(file_data["content"])
+                except Exception: continue
+
+            if any(os.scandir(temp_dir)):
+                try:
+                    result = subprocess.run(['scc', '--format', 'json', temp_dir], capture_output=True, text=True, check=True)
+                    scc_results = json.loads(result.stdout)
                     
-                    all_content_str += file_data["content"] + "\n"
-                except (OSError, TypeError) as e:
-                    print(f"[VALUATION_ERROR] OSError/TypeError for path '{file_data.get('path', 'N/A')}': {e}")
-                    continue
-                except Exception as e:
-                    print(f"[VALUATION_ERROR] Unexpected error for path '{file_data.get('path', 'N/A')}': {e}")
-                    continue
-
-            if not any(os.scandir(temp_dir)):
-                print("[VALUATION_WARNING] No files were written to temporary directory for analysis.")
-                if self.tokenizer:
-                    analysis_data["total_tokens"] = len(self.tokenizer.encode(all_content_str))
-                if all_content_str:
-                    original_size = len(all_content_str.encode('utf-8'))
-                    compressed_size = len(zlib.compress(all_content_str.encode('utf-8'), level=9))
-                    analysis_data["compression_ratio"] = compressed_size / original_size if original_size > 0 else 0
-                return analysis_data
-
-            try:
-                result = subprocess.run(['scc', '--by-file', '--format', 'json', temp_dir], capture_output=True, text=True, check=True)
-                scc_results_by_file = json.loads(result.stdout)
-                
-                language_file_counts = {}
-
-                for file_summary in scc_results_by_file:
-                    lang_name = file_summary.get("Language")
-                    if lang_name:
-                        file_path = file_summary.get("Location")
-                        lloc = file_summary.get("Code", 0)
-                        complexity = file_summary.get("Complexity", 0)
-
-                        total_lloc_all_types += lloc
+                    total_lloc = 0
+                    for lang_summary in scc_results:
+                        lloc = lang_summary.get("Code", 0)
+                        complexity = lang_summary.get("Complexity", 0)
+                        file_count = lang_summary.get("Count", 0)
                         
-                        if lang_name not in language_file_counts:
-                            language_file_counts[lang_name] = 0
-                        language_file_counts[lang_name] += 1
-                        
-                        _, extension = os.path.splitext(file_path)
-                        if extension.lower() in HIGH_VALUE_EXTENSIONS:
-                            total_pure_code_lloc += lloc
-                        
-                        if complexity > 0:
+                        total_lloc += lloc
+                        if complexity > 0 and file_count > 0:
                             total_complexity += complexity
-                            total_files_with_complexity += 1
-                
-                analysis_data["language_breakdown"] = language_file_counts
-                analysis_data["total_lloc"] = total_pure_code_lloc
-
-            except (subprocess.CalledProcessError, FileNotFoundError, json.JSONDecodeError) as e:
-                print(f"[VALUATION_ERROR] SCC execution failed or produced invalid JSON: {e}")
-                pass
-
-        if self.tokenizer:
-            analysis_data["total_tokens"] = len(self.tokenizer.encode(all_content_str))
+                            total_files_with_complexity += file_count
+                        
+                        lang_name = lang_summary.get("Name")
+                        if lang_name:
+                            analysis_data["language_breakdown"][lang_name] = analysis_data["language_breakdown"].get(lang_name, 0) + file_count
+                    
+                    analysis_data["total_lloc"] = total_lloc
+                except (subprocess.CalledProcessError, FileNotFoundError, json.JSONDecodeError): pass
 
         if total_files_with_complexity > 0:
             analysis_data["avg_complexity"] = total_complexity / total_files_with_complexity
@@ -182,11 +165,6 @@ class HybridValuationService:
             original_size = len(all_content_str.encode('utf-8'))
             compressed_size = len(zlib.compress(all_content_str.encode('utf-8'), level=9))
             analysis_data["compression_ratio"] = compressed_size / original_size if original_size > 0 else 0
-
-        if total_lloc_all_types > 0:
-            analysis_data["code_ratio"] = total_pure_code_lloc / total_lloc_all_types
-        else:
-            analysis_data["code_ratio"] = 0.0
 
         print(f"[VALUATION_STEP] Universal analysis finished: {analysis_data}")
         return analysis_data
