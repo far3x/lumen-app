@@ -357,7 +357,7 @@ class HybridValuationService:
         ai_weighted_multiplier = (clarity * 0.3) + (architecture * 0.2) + (code_quality * 0.5)
         
         code_ratio = current_metrics.get('code_ratio', 1.0)
-        code_ratio_multiplier = code_ratio ** 2
+        code_ratio_multiplier = (math.tanh(6 * code_ratio - 3) + 1) / 2
         
         contribution_quality_score = (lloc_for_reward * self.LLOC_TO_POINT_FACTOR) * ai_weighted_multiplier * rarity_multiplier * code_ratio_multiplier
         
