@@ -13,17 +13,6 @@ import tempfile
 from app.db import crud
 from app.core.config import settings
 
-CODE_LANGUAGES = {
-    "Ada", "Assembly", "AutoHotkey", "C", "C++", "C#", "Cg", "Clojure", "Crystal", "CSS",
-    "Dart", "Elm", "Erlang", "F#", "Fish", "Fortran", "GDScript", "Go", "GraphQL",
-    "Groovy", "Haskell", "Haxe", "HLSL", "HTML", "Java", "JavaScript", "Jython",
-    "Julia", "Kotlin", "Lisp", "LiveScript", "Lua", "MATLAB", "Metal", "Nim",
-    "Objective-C", "OCaml", "Pascal", "Perl", "PHP", "PowerShell", "Prolog",
-    "Python", "R", "Ruby", "Rust", "Scala", "Shell", "Solidity", "SQL", "Swift",
-    "TypeScript", "Vala", "Verilog", "VHDL", "Visual Basic", "Vue", "Zig"
-}
-
-
 class HybridValuationService:
     GARBAGE_COMPRESSION_THRESHOLD = 0.1
     TOKEN_LIMIT = 700_000
@@ -86,10 +75,22 @@ class HybridValuationService:
             "language_breakdown": {},
             "code_ratio": 1.0,
         }
+
+        HIGH_VALUE_EXTENSIONS = {
+            ".ada", ".adb", ".ads", ".asm", ".s", ".c", ".h", ".cpp", ".cc", ".hpp", ".hh", ".cs", 
+            ".cg", ".clj", ".cljc", ".cljs", ".crystal", ".cr", ".css", ".dart", ".elm", ".erl", 
+            ".hrl", ".fs", ".fsi", ".fsx", ".fsscript", ".f", ".f90", ".for", ".gd", ".go", 
+            ".groovy", ".gvy", ".gy", ".gsh", ".hs", ".lhs", ".hx", ".hlsl", ".java", ".js", 
+            ".cjs", ".mjs", ".jsx", ".kt", ".kts", ".lisp", ".cl", ".lsp", ".lua", ".m", ".metal", 
+            ".nim", ".mm", ".ml", ".mli", ".pas", ".p", ".pp", ".pl", ".pm", ".pro", ".py", 
+            ".pyi", ".r", ".rb", ".rs", ".scala", ".sc", ".sh", ".sol", ".sql", ".swift", ".ts", 
+            ".tsx", ".vala", ".v", ".sv", ".vhdl", ".vhd", ".vb", ".vue", ".zig"
+        }
         
         all_content_str = ""
         total_complexity = 0
         total_files_with_complexity = 0
+        total_lloc_all_types = 0
         total_pure_code_lloc = 0
 
         with tempfile.TemporaryDirectory() as temp_dir:
@@ -138,27 +139,33 @@ class HybridValuationService:
                 return analysis_data
 
             try:
-                result = subprocess.run(['scc', '--format', 'json', temp_dir], capture_output=True, text=True, check=True)
-                scc_results = json.loads(result.stdout)
+                result = subprocess.run(['scc', '--by-file', '--format', 'json', temp_dir], capture_output=True, text=True, check=True)
+                scc_results_by_file = json.loads(result.stdout)
                 
-                total_lloc_all_types = 0
-                for lang_summary in scc_results:
-                    lang_name = lang_summary.get("Name")
+                language_file_counts = {}
+
+                for file_summary in scc_results_by_file:
+                    lang_name = file_summary.get("Language")
                     if lang_name:
-                        lloc = lang_summary.get("Code", 0)
-                        file_count = lang_summary.get("Count", 0)
-                        
-                        analysis_data["language_breakdown"][lang_name] = analysis_data["language_breakdown"].get(lang_name, 0) + file_count
+                        file_path = file_summary.get("Location")
+                        lloc = file_summary.get("Code", 0)
+                        complexity = file_summary.get("Complexity", 0)
+
                         total_lloc_all_types += lloc
-
-                        if lang_name in CODE_LANGUAGES:
+                        
+                        if lang_name not in language_file_counts:
+                            language_file_counts[lang_name] = 0
+                        language_file_counts[lang_name] += 1
+                        
+                        _, extension = os.path.splitext(file_path)
+                        if extension.lower() in HIGH_VALUE_EXTENSIONS:
                             total_pure_code_lloc += lloc
-
-                        complexity = lang_summary.get("Complexity", 0)
-                        if complexity > 0 and file_count > 0:
+                        
+                        if complexity > 0:
                             total_complexity += complexity
-                            total_files_with_complexity += file_count
+                            total_files_with_complexity += 1
                 
+                analysis_data["language_breakdown"] = language_file_counts
                 analysis_data["total_lloc"] = total_pure_code_lloc
 
             except (subprocess.CalledProcessError, FileNotFoundError, json.JSONDecodeError) as e:
