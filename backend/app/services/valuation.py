@@ -352,12 +352,12 @@ class HybridValuationService:
         if stats and stats.total_contributions >= self.BOOTSTRAP_CONTRIBUTIONS:
             if current_metrics['avg_complexity'] > 0 and stats.std_dev_complexity > 0:
                 z_score = (current_metrics['avg_complexity'] - stats.mean_complexity) / stats.std_dev_complexity
-                rarity_multiplier = 1.0 + math.tanh(z_score)
+                rarity_multiplier = 1.0 + (0.5 * math.tanh(z_score))
 
         ai_weighted_multiplier = (clarity * 0.3) + (architecture * 0.2) + (code_quality * 0.5)
         
         code_ratio = current_metrics.get('code_ratio', 1.0)
-        code_ratio_multiplier = math.sqrt(code_ratio)
+        code_ratio_multiplier = code_ratio ** 2
         
         contribution_quality_score = (lloc_for_reward * self.LLOC_TO_POINT_FACTOR) * ai_weighted_multiplier * rarity_multiplier * code_ratio_multiplier
         
