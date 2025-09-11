@@ -14,7 +14,7 @@ from fastapi_mail import FastMail, MessageSchema, ConnectionConfig
 from app.core import security, config
 from app.db import crud, models, database
 from app.api.v1 import dependencies
-from app.schemas import User as UserCreate, ApproveDeviceRequest, ForgotPasswordRequest, ResetPasswordRequest, TwoFactorLoginRequest, TwoFactorBackupCodeLoginRequest
+from app.schemas import UserCreate, ApproveDeviceRequest, ForgotPasswordRequest, ResetPasswordRequest, TwoFactorLoginRequest, TwoFactorBackupCodeLoginRequest
 from app.services.redis_service import redis_service
 from app.core.limiter import limiter
 from app.services.encryption import encryption_service
