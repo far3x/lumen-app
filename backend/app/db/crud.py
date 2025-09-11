@@ -56,11 +56,6 @@ def create_user(db: Session, user: schemas.UserCreate):
     db.commit()
     db.refresh(db_user)
 
-    if config.settings.BETA_MODE_ENABLED and db_user.id <= config.settings.BETA_MAX_USERS:
-        db_user.reward_multiplier = 2.0
-        db.commit()
-        db.refresh(db_user)
-
     create_account_for_user(db, db_user)
     return db_user
 
@@ -124,11 +119,6 @@ def create_oauth_user(db: Session, provider: str, user_info: dict):
     db.add(db_user)
     db.commit()
     db.refresh(db_user)
-
-    if config.settings.BETA_MODE_ENABLED and db_user.id <= config.settings.BETA_MAX_USERS:
-        db_user.reward_multiplier = 2.0
-        db.commit()
-        db.refresh(db_user)
 
     create_account_for_user(db, db_user)
     return db_user
