@@ -215,6 +215,7 @@ export function getStatusClasses(status, is_open_source = false) {
     }
     const statuses = {
         PROCESSED: 'bg-green-900/50 text-green-300',
+        PROCESSED_UPDATE: 'bg-blue-900/50 text-blue-300',
         PENDING: 'bg-yellow-900/50 text-yellow-300 animate-pulse',
         PROCESSING: 'bg-blue-900/50 text-blue-300 animate-pulse',
         REJECTED_EMPTY: 'bg-red-900/50 text-red-300',
@@ -234,11 +235,18 @@ export function getStatusText(status, is_open_source = false) {
         return 'Processed (Public)';
     }
     const statusTexts = {
-        PROCESSED: 'Complete', PENDING: 'Pending', PROCESSING: 'Processing',
-        REJECTED_EMPTY: 'Rejected: Empty', REJECTED_NO_REWARD: 'Rejected: No Reward',
-        DUPLICATE_HIGH_SIMILARITY: 'Rejected: Duplicate', DUPLICATE_CROSS_USER: 'Rejected: Plagiarism',
-        REJECTED_NO_NEW_CODE: 'Rejected: No Changes', FAILED: 'Failed',
-        FAILED_EMBEDDING: 'Failed: Embedding', FAILED_DIFF_PROCESSING: 'Failed: Diff',
+        PROCESSED: 'Complete',
+        PROCESSED_UPDATE: 'Update Processed',
+        PENDING: 'Pending',
+        PROCESSING: 'Processing',
+        REJECTED_EMPTY: 'Rejected: Empty',
+        REJECTED_NO_REWARD: 'Rejected: No Reward',
+        DUPLICATE_HIGH_SIMILARITY: 'Rejected: Duplicate',
+        DUPLICATE_CROSS_USER: 'Rejected: Plagiarism',
+        REJECTED_NO_NEW_CODE: 'Rejected: No Changes',
+        FAILED: 'Failed',
+        FAILED_EMBEDDING: 'Failed: Embedding',
+        FAILED_DIFF_PROCESSING: 'Failed: Diff',
     };
     return statusTexts[status] || status;
 }
