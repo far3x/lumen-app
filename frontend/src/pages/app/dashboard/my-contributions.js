@@ -168,7 +168,7 @@ function renderSingleContributionRow(item) {
         <td class="py-4 px-4"><span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getStatusClasses(item.status, item.is_open_source)}">${getStatusText(item.status, item.is_open_source)}</span></td>
         <td class="py-4 px-4 text-right font-mono ${item.reward_amount > 0 ? 'text-green-400' : 'text-text-secondary'}">${item.reward_amount > 0 ? `+$${item.reward_amount.toFixed(4)}` : '...'}</td>
         <td class="py-4 px-4 text-center">
-            <button class="details-btn text-text-secondary hover:brightness-150 transition-all disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:brightness-100" data-id="${item.id}" ${item.status !== 'PROCESSED' ? 'disabled' : ''}>
+            <button class="details-btn text-text-secondary hover:brightness-150 transition-all disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:brightness-100" data-id="${item.id}" ${item.status !== 'PROCESSED' && item.status !== 'PROCESSED_UPDATE' ? 'disabled' : ''}>
                 ${icons.view}
             </button>
         </td>
@@ -278,7 +278,7 @@ async function changeContributionsPage(direction, dashboardState) {
         
         dashboardState.paginatedContributions = result.items;
 
-        document.getElementById('contributions-view').innerHTML = renderContributionHistory(result.items);
+        document.getElementById('contributions-table-container').innerHTML = renderContributionHistory(result.items);
         attachDetailModalListeners();
     } catch (error) {
         console.error("Failed to fetch new page of contributions:", error);
