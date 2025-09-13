@@ -543,6 +543,7 @@ def process_contribution(self, user_id: int, contribution_db_id: int):
         nearest_neighbors = [res for res in nearest_neighbors if res[0].id != contribution_db_id]
 
         innovation_multiplier = 1.0
+        is_update = False
 
         if nearest_neighbors:
             most_similar_contrib, min_distance = nearest_neighbors[0]
@@ -565,6 +566,7 @@ def process_contribution(self, user_id: int, contribution_db_id: int):
                     publish_contribution_update(db, contribution_db_id, user_id)
                     return
                 elif own_max_similarity >= INNOVATION_THRESHOLD:
+                    is_update = True
                     innovation_multiplier = 1.0 - own_max_similarity
                     logger.info(f"[INNOVATION_FACTOR] Found similar own contribution (C_ID:{own_closest_neighbor[0].id}) with {own_max_similarity:.4f} similarity. Applying innovation multiplier of {innovation_multiplier:.4f}.")
                 else:
@@ -604,7 +606,7 @@ def process_contribution(self, user_id: int, contribution_db_id: int):
             reward_with_multiplier = final_base_reward_with_innovation * user.reward_multiplier
             total_reward_for_account = reward_with_multiplier 
 
-            if settings.BETA_MODE_ENABLED and user.id <= settings.BETA_MAX_USERS and not user.is_beta_bonus_claimed:
+            if settings.BETA_MODE_ENABLED and user.id <= 200 and not user.is_beta_bonus_claimed:
                 bonus_reward_lumen = settings.BETA_GENESIS_BONUS
 
                 lum_price_str = redis_service.r.get("token_price:lumen_usd")
@@ -642,12 +644,14 @@ def process_contribution(self, user_id: int, contribution_db_id: int):
             
             contribution_record.reward_amount = reward_with_multiplier
             contribution_record.content_embedding = new_embedding
-            contribution_record.status = "PROCESSED"
+            
+            final_status = "PROCESSED_UPDATE" if is_update else "PROCESSED"
+            contribution_record.status = final_status
             
             db.add(contribution_record)
             db.commit()
             
-            logger.info(f"[REWARD] Successfully processed. Contribution {contribution_db_id} valued at ${reward_with_multiplier:.4f}. Total account credit: ${total_reward_for_account:.4f}.")
+            logger.info(f"[REWARD] Successfully processed. Contribution {contribution_db_id} valued at ${reward_with_multiplier:.4f}. Total account credit: ${total_reward_for_account:.4f}. Status: {final_status}")
         else:
             contribution_record.reward_amount = 0.0
             contribution_record.content_embedding = new_embedding
