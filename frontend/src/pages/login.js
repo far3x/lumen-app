@@ -41,7 +41,7 @@ function displayUrlErrors() {
     const errorMessageElement = document.getElementById('form-error-message');
 
     if (error === 'oauth_email_exists' && errorMessageElement) {
-        errorMessageElement.innerHTML = `An account with this email already exists with a password. Please sign in with your password, or <a href="/forgot-password" class="font-medium text-accent-cyan hover:underline">reset it</a> to link your account.`;
+        errorMessageElement.innerHTML = `An account with this email already exists with a password. Please sign in with your password, or <a href="/forgot-password" class="font-medium text-accent-primary hover:underline">reset it</a> to link your account.`;
         errorMessageElement.classList.remove('hidden');
         window.history.replaceState({}, document.title, "/login");
     }
@@ -181,7 +181,7 @@ function renderLoginForm(successMessage = '') {
     if (formState === 'totp' || formState === 'backup') {
         formContentHtml = `
             <div class="text-center mb-6">
-                <h1 class="text-2xl font-bold text-white">Two-Factor Authentication</h1>
+                <h1 class="text-2xl font-bold text-text-main">Two-Factor Authentication</h1>
                 <p class="text-text-secondary mt-2 text-sm">${formState === 'totp' ? 'Enter the code from your authenticator app.' : 'Enter one of your 10 backup codes.'}</p>
             </div>
             <div id="form-error-message" class="hidden text-red-400 bg-red-900/50 p-3 rounded-md mb-4 text-sm"></div>
@@ -189,33 +189,33 @@ function renderLoginForm(successMessage = '') {
                 <form id="2fa-form">
                     <div class="flex justify-center gap-2 my-6">
                         ${Array(6).fill(0).map((_, i) => `
-                            <input type="text" inputmode="numeric" pattern="[0-9]*" maxlength="1" id="code-input-${i}" class="code-input w-12 h-14 text-center text-2xl font-mono bg-primary border border-subtle rounded-md text-text-main focus:ring-2 focus:ring-accent-purple focus:outline-none" autocomplete="one-time-code">
+                            <input type="text" inputmode="numeric" pattern="[0-9]*" maxlength="1" id="code-input-${i}" class="code-input w-12 h-14 text-center text-2xl font-mono bg-primary border border-subtle rounded-md text-text-main focus:ring-2 focus:ring-accent-primary focus:outline-none" autocomplete="one-time-code">
                         `).join('')}
                     </div>
-                     <button type="submit" class="w-full flex justify-center py-3 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-gradient-to-r from-accent-purple to-accent-pink hover:opacity-90 transition-opacity">
+                     <button type="submit" class="w-full flex justify-center py-3 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-accent-primary hover:bg-red-700 transition-colors">
                         Verify
                     </button>
                 </form>
             ` : `
                 <form id="backup-code-form" class="space-y-4">
-                    <input type="text" id="backup-code" name="backup-code" placeholder="xxxx-xxxx" required class="block w-full text-center tracking-widest font-mono bg-primary border border-subtle rounded-md px-3 py-3 text-text-main focus:ring-2 focus:ring-accent-purple focus:outline-none" autocomplete="one-time-code">
-                    <button type="submit" class="w-full flex justify-center py-3 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-gradient-to-r from-accent-purple to-accent-pink hover:opacity-90 transition-opacity">
+                    <input type="text" id="backup-code" name="backup-code" placeholder="xxxx-xxxx" required class="block w-full text-center tracking-widest font-mono bg-primary border border-subtle rounded-md px-3 py-3 text-text-main focus:ring-2 focus:ring-accent-primary focus:outline-none" autocomplete="one-time-code">
+                    <button type="submit" class="w-full flex justify-center py-3 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-accent-primary hover:bg-red-700 transition-colors">
                         Verify Backup Code
                     </button>
                 </form>
             `}
             <p class="mt-6 text-center text-sm">
-                <button id="toggle-2fa-method" class="font-medium text-accent-cyan hover:underline">
+                <button id="toggle-2fa-method" class="font-medium text-accent-primary hover:underline">
                     ${formState === 'totp' ? 'Use a backup code' : 'Use an authenticator app'}
                 </button>
                  | 
-                <button id="back-to-password" class="font-medium text-accent-cyan hover:underline">Back</button>
+                <button id="back-to-password" class="font-medium text-accent-primary hover:underline">Back</button>
             </p>
         `;
     } else {
         formContentHtml = `
             <div class="text-center mb-6">
-                <h1 class="text-2xl font-bold text-white">Sign In to Lumen</h1>
+                <h1 class="text-2xl font-bold text-text-main">Sign In to Lumen</h1>
                 <p class="text-text-secondary mt-2 text-sm">Sign in to access your dashboard.</p>
             </div>
             <div class="space-y-3">
@@ -226,7 +226,7 @@ function renderLoginForm(successMessage = '') {
             </div>
             <div class="my-6 flex items-center">
                 <div class="flex-grow border-t border-primary"></div>
-                <span class="flex-shrink mx-4 text-xs text-subtle uppercase">Or sign in with email</span>
+                <span class="flex-shrink mx-4 text-xs text-text-secondary uppercase">Or sign in with email</span>
                 <div class="flex-grow border-t border-primary"></div>
             </div>
             <div id="form-error-message" class="hidden text-red-400 bg-red-900/50 p-3 rounded-md mb-4 text-sm"></div>
@@ -234,46 +234,45 @@ function renderLoginForm(successMessage = '') {
             <form id="login-form" class="space-y-4" novalidate>
                 <div>
                     <label for="email" class="text-sm font-medium text-text-secondary">Email</label>
-                    <input id="email" name="email" type="email" autocomplete="email" required class="mt-1 block w-full bg-primary border border-subtle rounded-md px-3 py-2 text-text-main focus:ring-2 focus:ring-accent-purple focus:outline-none">
+                    <input id="email" name="email" type="email" autocomplete="email" required class="mt-1 block w-full bg-primary border border-subtle rounded-md px-3 py-2 text-text-main focus:ring-2 focus:ring-accent-primary focus:outline-none">
                 </div>
                 <div>
                     <label for="password" class="text-sm font-medium text-text-secondary">Password</label>
-                    <input id="password" name="password" type="password" autocomplete="current-password" required class="mt-1 block w-full bg-primary border border-subtle rounded-md px-3 py-2 text-text-main focus:ring-2 focus:ring-accent-purple focus:outline-none">
+                    <input id="password" name="password" type="password" autocomplete="current-password" required class="mt-1 block w-full bg-primary border border-subtle rounded-md px-3 py-2 text-text-main focus:ring-2 focus:ring-accent-primary focus:outline-none">
                 </div>
                 <div class="flex items-center justify-between text-sm">
                     <div class="flex items-center">
                         <input id="remember-me" name="remember-me" type="checkbox" class="custom-checkbox">
                         <label for="remember-me" class="ml-3 block text-text-secondary cursor-pointer">Remember me</label>
                     </div>
-                    <a href="/forgot-password" class="font-medium text-accent-cyan hover:underline">Forgot password?</a>
+                    <a href="/forgot-password" class="font-medium text-accent-primary hover:underline">Forgot password?</a>
                 </div>
-                <button type="submit" class="w-full flex justify-center py-3 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-gradient-to-r from-accent-purple to-accent-pink hover:opacity-90 transition-opacity">
+                <button type="submit" class="w-full flex justify-center py-3 px-4 border border-transparent rounded-lg shadow-sm text-sm font-medium text-white bg-accent-primary hover:bg-red-700 transition-colors">
                     Sign In
                 </button>
             </form>
              <p class="mt-6 text-center text-sm text-text-secondary">
                 Don't have an account?
-                <a href="/signup" class="font-medium text-accent-cyan hover:underline">Create one</a>
+                <a href="/signup" class="font-medium text-accent-primary hover:underline">Create one</a>
             </p>
         `;
     }
 
     container.innerHTML = `
-        <div class="w-full max-w-6xl mx-auto grid lg:grid-cols-2 gap-16 items-center">
-            <div class="hidden lg:flex flex-col justify-center text-left pr-10">
-                <a href="/" class="inline-flex items-center space-x-3 mb-8">
-                    <img src="/logo.png" alt="Lumen Logo" class="h-12 w-12">
-                    <span class="text-3xl font-bold text-text-main">Lumen</span>
-                </a>
-                <h1 class="text-5xl font-bold tracking-tight text-white leading-tight">Welcome Back.</h1>
-                <p class="mt-4 text-lg text-text-secondary">
-                    Sign in to access your dashboard, check your rewards, and see the impact of your contributions.
-                </p>
-            </div>
+        <div class="w-full max-w-6xl mx-auto grid lg:grid-cols-2 gap-24 items-center">
             <div class="w-full max-w-md mx-auto">
-                <div class="bg-surface/80 backdrop-blur-md p-8 rounded-xl border border-primary shadow-2xl shadow-black/20">
+                <div class="bg-surface p-8 rounded-xl border border-primary shadow-2xl shadow-black/5">
                     ${formContentHtml}
                 </div>
+            </div>
+            <div class="hidden lg:flex flex-col justify-center text-center space-y-12 pl-10">
+                 <div>
+                    <h1 class="text-5xl font-bold tracking-tight text-accent-primary leading-tight">Welcome Back.</h1>
+                    <p class="mt-4 text-lg text-text-secondary">
+                        Sign in to access your dashboard, check your rewards, and see the impact of your contributions.
+                    </p>
+                </div>
+                <img src="/bg.gif" alt="Lumen network visualization" class="w-full h-auto max-w-sm mx-auto" />
             </div>
         </div>
     `;
@@ -297,16 +296,7 @@ export function renderLoginPage() {
     const successMessage = registrationSuccess ? 'Registration successful! Please log in.' : '';
 
     const content = `
-    <main class="relative flex-grow flex items-center justify-center p-6 isolate min-h-screen">
-        <video
-            autoplay
-            loop
-            muted
-            playsinline
-            class="absolute top-0 left-0 w-full h-full object-cover -z-20"
-            src="/plexus-bg.mp4"
-        ></video>
-        <div class="absolute top-0 left-0 w-full h-full bg-black/50 -z-10"></div>
+    <main class="relative flex-grow flex items-center justify-center p-6 bg-background min-h-screen">
         <div id="login-container" class="w-full"></div>
     </main>`;
     
