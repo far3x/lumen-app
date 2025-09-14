@@ -214,4 +214,27 @@
   .custom-checkbox:checked {
     @apply bg-accent-primary border-accent-primary;
   }
+
+  @keyframes text-shimmer {
+    0%   { background-position: 150% 0; }
+    45%  { background-position: -150% 0; }
+    100% { background-position: -150% 0; }
+  }
+
+  .shimmer-text {
+    color: transparent;
+    background-size: 200% 100%;
+    background-clip: text;
+    -webkit-background-clip: text;
+    background-image: linear-gradient(
+        90deg,
+        theme('colors.accent-primary') 0%,
+        theme('colors.accent-primary') 45%,
+        #ffffff 50%,
+        theme('colors.accent-primary') 55%,
+        theme('colors.accent-primary') 100%
+    );
+    animation: text-shimmer 6s infinite linear;
+    animation-delay: 1.5s;
+  }
 }

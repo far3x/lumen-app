@@ -1,5 +1,5 @@
 import { api, fetchContributions, fetchPayouts } from '../../../lib/auth.js';
-import { getStatusClasses, getStatusText, renderModal, escapeHtml, icons, renderFeedbackModal } from './utils.js';
+import { getStatusClasses, getStatusText, escapeHtml, icons, renderFeedbackModal } from './utils.js';
 
 export let contributionsState = {
     currentPage: 1,
@@ -86,13 +86,16 @@ function renderScoreBar(label, score) {
                 <span class="font-mono font-bold text-text-main">${scoreText}<span class="text-text-secondary font-sans">/10</span></span>
             </div>
             <div class="w-full bg-primary rounded-full h-2.5">
-                <div class="bg-gradient-to-r from-accent-purple to-accent-pink h-2.5 rounded-full" style="width: ${percentage}%"></div>
+                <div class="bg-accent-primary h-2.5 rounded-full" style="width: ${percentage}%"></div>
             </div>
         </div>
     `;
 }
 
-function renderContributionDetailModal(item) {
+function renderAndOpenDetailPanel(item) {
+    const panelId = `detail-panel-${item.id}`;
+    if (document.getElementById(panelId)) return;
+
     const details = item.valuation_details || {};
     const languageBreakdown = details.language_breakdown || {};
     const languageEntries = Object.entries(languageBreakdown);
@@ -100,8 +103,8 @@ function renderContributionDetailModal(item) {
     const lumenEquivalent = (details.simulated_lum_price_usd && details.simulated_lum_price_usd > 0) ? (rewardUsd / details.simulated_lum_price_usd) : 0;
 
     const openSourceWarningHtml = item.is_open_source ? `
-        <div class="mb-6 p-4 bg-orange-900/30 border border-orange-500/30 text-orange-200 rounded-md text-sm">
-            <strong>Public Code Detected:</strong> Our uniqueness engine found a high similarity between this contribution and code available in public repositories. To ensure fairness and prioritize novel data, the reward for this submission has been significantly reduced.
+        <div class="mb-6 p-4 bg-yellow-400/10 border border-yellow-500/20 text-yellow-700 rounded-md text-sm">
+            <strong>Public Code Detected:</strong> Our engine found a high similarity with public code. To prioritize novel data, the reward for this submission has been significantly reduced.
         </div>
     ` : '';
 
@@ -112,53 +115,108 @@ function renderContributionDetailModal(item) {
         </div>
     `;
     
-    const content = `
-        <div class="text-text-main">
-            ${openSourceWarningHtml}
-            <div class="text-center mb-8">
-                <p class="text-sm font-bold text-text-secondary uppercase tracking-widest">Contribution Value</p>
-                <p class="text-5xl lg:text-6xl font-bold gradient-text mt-1">$${rewardUsd.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 4})}</p>
-                <p class="text-lg font-medium text-text-secondary mt-1">≈ ${lumenEquivalent.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})} $LUMEN</p>
-            </div>
+    const panelHtml = `
+        <div id="${panelId}" class="fixed inset-0 z-50 overflow-hidden" aria-labelledby="slide-over-title" role="dialog" aria-modal="true">
+            <div class="absolute inset-0 overflow-hidden">
+                <div class="absolute inset-0 bg-gray-500 bg-opacity-75 transition-opacity" aria-hidden="true"></div>
+                <div class="fixed inset-y-0 right-0 pl-10 max-w-full flex">
+                    <div class="w-screen max-w-4xl transform transition ease-in-out duration-300 translate-x-full">
+                        <div class="h-full flex flex-col bg-surface shadow-xl">
+                            <header class="p-6 bg-primary/50 border-b border-primary">
+                                <div class="flex items-start justify-between">
+                                    <div class="flex-grow">
+                                        <h2 class="text-lg font-bold text-text-main" id="slide-over-title">Contribution Details</h2>
+                                        <p class="text-sm text-text-secondary">Valuation report for submission #${item.id}</p>
+                                    </div>
+                                    <div class="ml-3 h-7 flex items-center">
+                                        <button type="button" class="close-panel-btn bg-surface rounded-md text-text-secondary hover:text-text-main focus:outline-none focus:ring-2 focus:ring-accent-primary">
+                                            <span class="sr-only">Close panel</span>
+                                            <svg class="h-6 w-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg>
+                                        </button>
+                                    </div>
+                                </div>
+                            </header>
+                            <div class="relative flex-1 p-6 overflow-y-auto" data-lenis-prevent>
+                                ${openSourceWarningHtml}
+                                <div class="text-center mb-8 p-6 bg-primary rounded-lg border border-subtle">
+                                    <p class="text-sm font-bold text-text-secondary uppercase tracking-widest">Contribution Value</p>
+                                    <p class="text-5xl lg:text-6xl font-bold text-accent-primary mt-1">$${rewardUsd.toLocaleString(undefined, {minimumFractionDigits: 4, maximumFractionDigits: 4})}</p>
+                                    <p class="text-lg font-medium text-text-secondary mt-1">≈ ${lumenEquivalent.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})} $LUMEN</p>
+                                </div>
 
-            <div class="grid grid-cols-1 lg:grid-cols-5 gap-8">
-                <div class="lg:col-span-3 bg-surface p-6 rounded-xl border border-primary flex flex-col">
-                    <h3 class="font-bold text-lg text-text-main mb-2 flex-shrink-0">AI Analysis Summary</h3>
-                    <div class="prose prose-base prose-invert max-w-none leading-relaxed text-text-secondary flex-grow">
-                        ${details.analysis_summary ? `<p>${escapeHtml(details.analysis_summary).replace(/\n/g, '</p><p>')}</p>` : '<p>No summary provided by the AI analysis.</p>'}
-                    </div>
-                    ${languageEntries.length > 0 ? `
-                        <div class="border-t border-primary pt-4 mt-6 flex-shrink-0">
-                            <h4 class="font-bold text-text-secondary mb-3">Languages Detected</h4>
-                            <div class="flex flex-wrap gap-2">
-                                ${languageEntries.map(([lang, count]) => `<span class="lang-tag">${lang}</span>`).join('')}
+                                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                                    <div class="bg-primary/50 p-6 rounded-lg border border-primary flex flex-col">
+                                        <h3 class="font-bold text-lg text-text-main mb-2 flex-shrink-0">AI Analysis Summary</h3>
+                                        <div class="prose prose-sm prose-p:text-text-secondary max-w-none leading-relaxed flex-grow">
+                                            ${details.analysis_summary ? `<p>${escapeHtml(details.analysis_summary).replace(/\n/g, '</p><p>')}</p>` : '<p>No summary provided by the AI analysis.</p>'}
+                                        </div>
+                                    </div>
+
+                                    <div class="space-y-6">
+                                        <div class="bg-primary/50 p-6 rounded-lg border border-primary">
+                                            <h3 class="font-bold text-lg text-text-main mb-4">Valuation Scores</h3>
+                                            <div class="space-y-4">
+                                                ${renderScoreBar('Project Clarity', details.project_clarity_score)}
+                                                ${renderScoreBar('Architecture', details.architectural_quality_score)}
+                                                ${renderScoreBar('Code Quality', details.code_quality_score)}
+                                            </div>
+                                        </div>
+                                        <div class="bg-primary/50 p-6 rounded-lg border border-primary">
+                                            <h3 class="font-bold text-lg text-text-main mb-3">Key Metrics</h3>
+                                            <div class="space-y-1">
+                                                ${renderKeyMetric('Tokens Analyzed', details.total_tokens?.toLocaleString() ?? 'N/A')}
+                                                ${renderKeyMetric('Avg. Complexity', details.avg_complexity?.toFixed(2) ?? 'N/A')}
+                                                ${renderKeyMetric('Uniqueness Multiplier', `${details.rarity_multiplier?.toFixed(2) ?? 'N/A'}x`)}
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                ${languageEntries.length > 0 ? `
+                                    <div class="mt-6 bg-primary/50 p-6 rounded-lg border border-primary">
+                                        <h3 class="font-bold text-lg text-text-main mb-3">Language Breakdown</h3>
+                                        <div class="space-y-1 text-sm">
+                                            ${languageEntries.map(([lang, count]) => `
+                                                <div class="flex justify-between items-center py-1 border-b border-primary/50">
+                                                    <span class="text-text-secondary">${lang}</span>
+                                                    <span class="font-mono text-text-main">${count.toLocaleString()} ${count === 1 ? 'file' : 'files'}</span>
+                                                </div>
+                                            `).join('')}
+                                        </div>
+                                    </div>
+                                ` : ''}
                             </div>
-                        </div>
-                    `: ''}
-                </div>
-
-                <div class="lg:col-span-2 space-y-6">
-                    <div class="bg-surface p-6 rounded-xl border border-primary">
-                        <h3 class="font-bold text-lg text-text-main mb-4">Valuation Scores</h3>
-                        <div class="space-y-4">
-                            ${renderScoreBar('Project Clarity', details.project_clarity_score)}
-                            ${renderScoreBar('Architecture', details.architectural_quality_score)}
-                            ${renderScoreBar('Code Quality', details.code_quality_score)}
-                        </div>
-                    </div>
-                    <div class="bg-surface p-6 rounded-xl border border-primary">
-                        <h3 class="font-bold text-lg text-text-main mb-3">Key Metrics</h3>
-                        <div class="space-y-1">
-                            ${renderKeyMetric('Tokens Analyzed', details.total_tokens?.toLocaleString() ?? 'N/A')}
-                            ${renderKeyMetric('Avg. Complexity', details.avg_complexity?.toFixed(2) ?? 'N/A')}
-                            ${renderKeyMetric('Uniqueness Multiplier', `${details.rarity_multiplier?.toFixed(2) ?? 'N/A'}x`)}
                         </div>
                     </div>
                 </div>
             </div>
         </div>
     `;
-    renderModal(`Contribution #${item.id} Details`, content, { size: '3xl' });
+
+    document.body.insertAdjacentHTML('beforeend', panelHtml);
+    document.body.classList.add('modal-open');
+    const panel = document.getElementById(panelId);
+    const panelContent = panel.querySelector('.w-screen');
+    const overlay = panel.querySelector('.bg-opacity-75');
+
+    const closePanel = () => {
+        panelContent.classList.add('translate-x-full');
+        overlay.classList.replace('opacity-100', 'opacity-0');
+        setTimeout(() => {
+            panel.remove();
+            if (document.querySelectorAll('.fixed.inset-0').length === 0) {
+                document.body.classList.remove('modal-open');
+            }
+        }, 300);
+    };
+
+    setTimeout(() => {
+        panelContent.classList.remove('translate-x-full');
+        overlay.classList.add('opacity-100');
+    }, 10);
+
+    panel.querySelector('.close-panel-btn').addEventListener('click', closePanel);
+    overlay.addEventListener('click', closePanel);
 }
 
 function renderSingleContributionRow(item) {
@@ -166,9 +224,9 @@ function renderSingleContributionRow(item) {
     <tr class="contribution-row" data-id="${item.id}">
         <td class="py-4 px-4 text-text-secondary">${new Date(item.created_at).toLocaleDateString()}</td>
         <td class="py-4 px-4"><span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getStatusClasses(item.status, item.is_open_source)}">${getStatusText(item.status, item.is_open_source)}</span></td>
-        <td class="py-4 px-4 text-right font-mono ${item.reward_amount > 0 ? 'text-green-400' : 'text-text-secondary'}">${item.reward_amount > 0 ? `+$${item.reward_amount.toFixed(4)}` : '...'}</td>
+        <td class="py-4 px-4 text-right font-mono ${item.reward_amount > 0 ? 'text-green-600' : 'text-text-secondary'}">${item.reward_amount > 0 ? `+$${item.reward_amount.toFixed(4)}` : '...'}</td>
         <td class="py-4 px-4 text-center">
-            <button class="details-btn text-text-secondary hover:brightness-150 transition-all disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:brightness-100" data-id="${item.id}" ${item.status !== 'PROCESSED' && item.status !== 'PROCESSED_UPDATE' ? 'disabled' : ''}>
+            <button class="details-btn text-text-secondary hover:text-accent-primary transition-colors disabled:opacity-50 disabled:cursor-not-allowed" data-id="${item.id}" ${item.status !== 'PROCESSED' && item.status !== 'PROCESSED_UPDATE' ? 'disabled' : ''}>
                 ${icons.view}
             </button>
         </td>
@@ -180,7 +238,7 @@ function renderContributionHistory(contributions) {
     return `
         <div class="overflow-x-auto">
             <table class="w-full text-left text-sm">
-                <thead class="text-xs text-subtle uppercase border-b border-primary">
+                <thead class="text-xs text-text-secondary uppercase border-b border-primary">
                     <tr>
                         <th class="py-3 px-4">Date</th>
                         <th class="py-3 px-4">Status</th>
@@ -191,9 +249,9 @@ function renderContributionHistory(contributions) {
                 <tbody class="divide-y divide-primary">
                 ${contributions.length > 0 ? contributions.map(renderSingleContributionRow).join('') : `<tr><td colspan="4" class="py-12 text-center text-text-secondary">
                     <div class="flex flex-col items-center">
-                        <div class="w-12 h-12 text-accent-purple mb-4">${icons.contributions}</div>
+                        <div class="w-12 h-12 text-subtle mb-4">${icons.contributions}</div>
                         <p>No contributions found yet.</p>
-                        <a href="/docs/contributing" class="mt-2 text-sm font-semibold gradient-text hover:brightness-125 transition">Learn how to contribute</a>
+                        <a href="/docs/contributing" class="mt-2 text-sm font-semibold text-accent-primary hover:text-red-700 transition">Learn how to contribute</a>
                     </div>
                 </td></tr>`}
                 </tbody>
@@ -205,18 +263,18 @@ function renderContributionHistory(contributions) {
 function renderPayoutHistory(payouts) {
     const getPayoutStatus = (status) => {
         const classes = {
-            COMPLETED: 'bg-green-900/50 text-green-300',
-            PENDING: 'bg-yellow-900/50 text-yellow-300',
-            FAILED: 'bg-red-900/50 text-red-300',
-            RECONCILED: 'bg-blue-900/50 text-blue-300'
+            COMPLETED: 'bg-green-500/10 text-green-600',
+            PENDING: 'bg-yellow-500/10 text-yellow-600',
+            FAILED: 'bg-red-500/10 text-red-600',
+            RECONCILED: 'bg-blue-500/10 text-blue-600'
         };
-        return `<span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${classes[status] || 'bg-gray-700/50 text-gray-300'}">${status}</span>`;
+        return `<span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${classes[status] || 'bg-gray-500/10 text-gray-600'}">${status}</span>`;
     };
 
     return `
         <div class="overflow-x-auto">
             <table class="w-full text-left text-sm">
-                <thead class="text-xs text-subtle uppercase border-b border-primary">
+                <thead class="text-xs text-text-secondary uppercase border-b border-primary">
                     <tr>
                         <th class="py-3 px-4">Date</th>
                         <th class="py-3 px-4">Status</th>
@@ -229,14 +287,14 @@ function renderPayoutHistory(payouts) {
                     <tr>
                         <td class="py-4 px-4 text-text-secondary">${new Date(payout.created_at).toLocaleDateString()}</td>
                         <td class="py-4 px-4">${getPayoutStatus(payout.status)}</td>
-                        <td class="py-4 px-4 text-right font-mono text-accent-cyan">$${payout.amount_usd.toFixed(4)}</td>
+                        <td class="py-4 px-4 text-right font-mono text-accent-primary">$${payout.amount_usd.toFixed(4)}</td>
                         <td class="py-4 px-4 text-center">
-                            ${payout.transaction_hash ? `<a href="https://solscan.io/tx/${payout.transaction_hash}" target="_blank" rel="noopener noreferrer" class="text-accent-cyan hover:underline">View</a>` : '<span class="text-subtle">-</span>'}
+                            ${payout.transaction_hash ? `<a href="https://solscan.io/tx/${payout.transaction_hash}" target="_blank" rel="noopener noreferrer" class="text-accent-primary hover:underline">View</a>` : '<span class="text-subtle">-</span>'}
                         </td>
                     </tr>
                 `).join('') : `<tr><td colspan="4" class="py-12 text-center text-text-secondary">
                     <div class="flex flex-col items-center">
-                        <div class="w-12 h-12 text-accent-cyan mb-4">${icons.dashboard}</div>
+                        <div class="w-12 h-12 text-subtle mb-4">${icons.dashboard}</div>
                         <p>No payouts have been processed yet.</p>
                         <p class="text-xs mt-1">Your first payout will appear here after the next batch.</p>
                     </div>
@@ -311,12 +369,12 @@ function attachDetailModalListeners() {
             }
             const contributionItem = window.dashboardState.allUserContributions.find(c => c.id === id);
             if (contributionItem) {
-                renderContributionDetailModal(contributionItem);
+                renderAndOpenDetailPanel(contributionItem);
             } else {
                  console.warn(`Contribution with id ${id} not found in master list. Trying paginated list as a fallback.`);
                  const fallbackItem = window.dashboardState.paginatedContributions.find(c => c.id === id);
                  if (fallbackItem) {
-                    renderContributionDetailModal(fallbackItem);
+                    renderAndOpenDetailPanel(fallbackItem);
                  } else {
                     console.error(`Contribution with id ${id} not found in any available list.`);
                  }
@@ -335,18 +393,18 @@ export async function attachContributionPageListeners(dashboardState) {
     tabs.forEach(clickedTab => {
         clickedTab.addEventListener('click', async () => {
             tabs.forEach(tab => {
-                tab.classList.remove('border-accent-cyan', 'text-text-main');
+                tab.classList.remove('border-accent-primary', 'text-text-main');
                 tab.classList.add('border-transparent', 'text-text-secondary');
             });
             clickedTab.classList.remove('border-transparent', 'text-text-secondary');
-            clickedTab.classList.add('border-accent-cyan', 'text-text-main');
+            clickedTab.classList.add('border-accent-primary', 'text-text-main');
             
             views.forEach(view => view.classList.add('hidden'));
             const targetView = document.getElementById(clickedTab.dataset.view);
             targetView.classList.remove('hidden');
 
             if (clickedTab.dataset.view === 'payouts-view' && !targetView.dataset.loaded) {
-                targetView.innerHTML = `<div class="text-center p-8"><span class="animate-spin inline-block w-8 h-8 border-4 border-transparent border-t-accent-purple rounded-full"></span></div>`;
+                targetView.innerHTML = `<div class="text-center p-8"><span class="animate-spin inline-block w-8 h-8 border-4 border-transparent border-t-accent-primary rounded-full"></span></div>`;
                 const payouts = await fetchPayouts();
                 targetView.innerHTML = renderPayoutHistory(payouts);
                 targetView.dataset.loaded = 'true';
@@ -373,7 +431,7 @@ export function renderMyContributionsPage(initialContributions) {
         <div class="mt-8">
             <div class="border-b border-primary mb-6">
                 <nav class="flex space-x-6">
-                    <button data-view="contributions-view" class="history-tab-btn pb-3 border-b-2 border-accent-cyan text-text-main font-semibold">Contributions</button>
+                    <button data-view="contributions-view" class="history-tab-btn pb-3 border-b-2 border-accent-primary text-text-main font-semibold">Contributions</button>
                     <button data-view="payouts-view" class="history-tab-btn pb-3 border-b-2 border-transparent text-text-secondary hover:text-text-main font-semibold">Payouts</button>
                 </nav>
             </div>
