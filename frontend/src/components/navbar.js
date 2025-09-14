@@ -174,6 +174,7 @@ export function renderNavbar(currentPath) {
                     <button id="mobile-menu-close" type="button" class="p-2 text-gray-600 hover:text-gray-900"><svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg></button>
                 </div>
                 <nav class="flex flex-col space-y-2">
+                    <a href="${homeUrl}" class="${getMobileNavLinkClasses('/')}">Home</a>
                     <a href="${docsUrl}" class="${getMobileNavLinkClasses('/docs/introduction')}">Docs</a>
                     <a href="${leaderboardUrl}" class="${getMobileNavLinkClasses('/leaderboard')}">Leaderboard</a>
                     <a href="${roadmapUrl}" class="${getMobileNavLinkClasses('/docs/roadmap')}">Roadmap</a>
