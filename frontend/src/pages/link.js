@@ -76,58 +76,57 @@ function setupEventListeners() {
 
 export function renderLinkPage() {
     const content = `
-    <main class="flex-grow flex items-center justify-center p-6 isolate min-h-screen">
-        <video
-            autoplay
-            loop
-            muted
-            playsinline
-            class="absolute top-0 left-0 w-full h-full object-cover -z-20"
-            src="/plexus-bg.mp4"
-        ></video>
-        <div class="absolute top-0 left-0 w-full h-full bg-black/50 -z-10"></div>
-        
-        <div class="w-full max-w-md mx-auto">
-            <div class="relative bg-surface/80 backdrop-blur-md p-8 rounded-xl border border-primary shadow-2xl shadow-black/20 text-center">
-                <button id="close-link-page" class="absolute top-3 right-3 p-2 text-text-secondary hover:text-text-main rounded-full hover:bg-primary transition-colors" aria-label="Close and go to dashboard">
-                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
-                </button>
-
-                <a href="/" class="inline-flex items-center space-x-3 mb-6">
-                    <img src="/logo.png" alt="Lumen Logo" class="h-10 w-10">
-                    <span class="text-2xl font-bold text-text-main">Lumen Protocol</span>
-                </a>
-                
-                <div id="form-container">
-                    <h1 class="text-2xl font-bold text-white">Authorize New Device</h1>
-                    <p class="text-text-secondary mt-2 text-sm">Enter the code displayed in your terminal to link your Lumen CLI.</p>
-                    
-                    <div id="error-message" class="hidden text-red-400 bg-red-900/50 p-3 rounded-md my-4 text-sm text-left"></div>
-
-                    <form id="link-form" class="space-y-4 mt-6">
-                        <div>
-                            <label for="user_code" class="sr-only">User Code</label>
-                            <input id="user_code" name="user_code" type="text" required
-                                   class="block w-full bg-primary border border-subtle rounded-md px-3 py-3 text-text-main text-center text-lg tracking-widest font-mono uppercase focus:ring-2 focus:ring-accent-purple focus:outline-none"
-                                   placeholder="XXXX-XXXX">
-                        </div>
-                        <button type="submit" class="w-full flex justify-center py-3 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-gradient-to-r from-accent-purple to-accent-pink hover:opacity-90 transition-opacity">
-                            Authorize CLI
+    <main class="flex-grow bg-background text-text-main">
+        <div class="min-h-screen flex items-center justify-center p-6">
+            <div class="container mx-auto grid lg:grid-cols-2 gap-12 items-center">
+                <div class="w-full max-w-md mx-auto">
+                    <div class="relative bg-surface p-8 rounded-xl border border-primary shadow-2xl shadow-black/5 text-center">
+                        <button id="close-link-page" class="absolute top-3 right-3 p-2 text-text-secondary hover:text-text-main rounded-full hover:bg-primary transition-colors" aria-label="Close and go to dashboard">
+                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
                         </button>
-                    </form>
-                </div>
 
-                <div id="success-message" class="hidden">
-                    <svg class="w-16 h-16 mx-auto text-green-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                    </svg>
-                    <h1 class="text-2xl font-bold text-white mt-4">Device Authorized!</h1>
-                    <p class="text-text-secondary mt-2">You can now safely close this tab and return to your terminal.</p>
-                    <p id="countdown-message" class="text-sm text-text-secondary mt-2"></p>
+                        <a href="/" class="inline-flex items-center space-x-3 mb-6">
+                            <img src="/logo.png" alt="Lumen Logo" class="h-10 w-10">
+                            <span class="text-2xl font-bold text-text-main">Lumen Protocol</span>
+                        </a>
+                        
+                        <div id="form-container">
+                            <h1 class="text-2xl font-bold text-text-main">Authorize New Device</h1>
+                            <p class="text-text-secondary mt-2 text-sm">Enter the code displayed in your terminal to link your Lumen CLI.</p>
+                            
+                            <div id="error-message" class="hidden text-red-400 bg-red-900/50 p-3 rounded-md my-4 text-sm text-left"></div>
+
+                            <form id="link-form" class="space-y-4 mt-6">
+                                <div>
+                                    <label for="user_code" class="sr-only">User Code</label>
+                                    <input id="user_code" name="user_code" type="text" required
+                                           class="block w-full bg-primary border border-subtle rounded-md px-3 py-3 text-text-main text-center text-lg tracking-widest font-mono uppercase focus:ring-2 focus:ring-accent-primary focus:outline-none"
+                                           placeholder="XXXX-XXXX">
+                                </div>
+                                <button type="submit" class="w-full flex justify-center py-3 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-accent-primary hover:bg-red-700 transition-colors">
+                                    Authorize CLI
+                                </button>
+                            </form>
+                        </div>
+
+                        <div id="success-message" class="hidden">
+                            <svg class="w-16 h-16 mx-auto text-green-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                            </svg>
+                            <h1 class="text-2xl font-bold text-text-main mt-4">Device Authorized!</h1>
+                            <p class="text-text-secondary mt-2">You can now safely close this tab and return to your terminal.</p>
+                            <p id="countdown-message" class="text-sm text-text-secondary mt-2"></p>
+                        </div>
+                         <p class="mt-6 text-center text-sm">
+                            <a href="/app/dashboard" class="font-medium text-accent-primary hover:underline">Back to Dashboard</a>
+                        </p>
+                    </div>
                 </div>
-                 <p class="mt-6 text-center text-sm">
-                    <a href="/app/dashboard" class="font-medium text-accent-cyan hover:underline">Back to Dashboard</a>
-                </p>
+                <div class="hidden lg:block">
+                    <div class="bg-surface p-2 rounded-lg border-2 border-primary">
+                        <img src="/bg.gif" alt="Lumen network visualization" class="w-full h-auto rounded-md" />
+                    </div>
+                </div>
             </div>
         </div>
     </main>

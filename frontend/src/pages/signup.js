@@ -67,7 +67,7 @@ function setupEventListeners() {
         try {
             grecaptcha.render(recaptchaContainer, {
                 'sitekey' : import.meta.env.VITE_GOOGLE_RECAPTCHA_SITE_KEY,
-                'theme' : 'dark'
+                'theme' : 'light'
             });
         } catch(e) {
             console.error("reCAPTCHA rendering error:", e);
@@ -132,24 +132,23 @@ function setupEventListeners() {
 function renderSignupForm() {
     const container = document.getElementById('signup-container');
     container.innerHTML = `
-        <div class="w-full max-w-6xl mx-auto grid lg:grid-cols-2 gap-16 items-center">
+        <div class="w-full max-w-6xl mx-auto grid lg:grid-cols-2 gap-24 items-center">
             
-            <div class="hidden lg:flex flex-col justify-center text-left pr-10">
-                <a href="/" class="inline-flex items-center space-x-3 mb-8">
-                    <img src="/logo.png" alt="Lumen Logo" class="h-12 w-12">
-                    <span class="text-3xl font-bold text-text-main">Lumen</span>
-                </a>
-                <h1 class="text-5xl font-bold tracking-tight text-white leading-tight">Create Your Account.</h1>
-                <p class="mt-4 text-lg text-text-secondary">
-                    Join the decentralized data economy and start earning rewards for your anonymized code contributions today.
-                </p>
+            <div class="hidden lg:flex flex-col justify-center space-y-12 pr-10">
+                <div>
+                    <h1 class="text-5xl font-bold tracking-tight text-accent-primary leading-tight">Create Your Account.</h1>
+                    <p class="mt-4 text-lg text-text-secondary">
+                        Join the decentralized data economy and start earning rewards for your anonymized code contributions today.
+                    </p>
+                </div>
+                <img src="/bg.gif" alt="Lumen network visualization" class="w-full h-auto max-w-sm mx-auto" />
             </div>
             
             <div class="w-full max-w-md mx-auto">
-                <div class="bg-surface/80 backdrop-blur-md p-6 rounded-xl border border-primary shadow-2xl shadow-black/20">
-                    <div class="text-center mb-4">
-                        <h1 class="text-2xl font-bold text-white">Get Started with Lumen</h1>
-                        <p class="text-text-secondary mt-2 text-sm">And start earning $LUMEN today.</p>
+                <div class="bg-surface p-8 rounded-xl border border-primary shadow-2xl shadow-black/5">
+                    <div class="text-center mb-6">
+                        <h1 class="text-2xl font-bold text-text-main">Get Started with Lumen</h1>
+                        <p class="text-text-secondary mt-2 text-sm">And start earning for your code today.</p>
                     </div>
 
                     <div class="space-y-3">
@@ -159,9 +158,9 @@ function renderSignupForm() {
                         </button>
                     </div>
                     
-                    <div class="my-4 flex items-center">
+                    <div class="my-6 flex items-center">
                         <div class="flex-grow border-t border-primary"></div>
-                        <span class="flex-shrink mx-4 text-xs text-subtle uppercase">Or create an account with email</span>
+                        <span class="flex-shrink mx-4 text-xs text-text-secondary uppercase">Or create an account with email</span>
                         <div class="flex-grow border-t border-primary"></div>
                     </div>
 
@@ -170,33 +169,33 @@ function renderSignupForm() {
                     <form id="signup-form" class="space-y-3" novalidate>
                         <div>
                             <label for="email" class="text-sm font-medium text-text-secondary">Email</label>
-                            <input id="email" name="email" type="email" autocomplete="email" required class="mt-1 block w-full bg-primary border border-subtle rounded-md px-3 py-2 text-text-main focus:ring-2 focus:ring-accent-purple focus:outline-none">
+                            <input id="email" name="email" type="email" autocomplete="email" required class="mt-1 block w-full bg-primary border border-subtle rounded-md px-3 py-2 text-text-main focus:ring-2 focus:ring-accent-primary focus:outline-none">
                             <div id="email-error" class="error-text h-4"></div>
                         </div>
                         <div class="space-y-2">
                             <div>
                                 <label for="password" class="text-sm font-medium text-text-secondary">Password</label>
-                                <input id="password" name="password" type="password" required class="mt-1 block w-full bg-primary border border-subtle rounded-md px-3 py-2 text-text-main focus:ring-2 focus:ring-accent-purple focus:outline-none">
+                                <input id="password" name="password" type="password" required class="mt-1 block w-full bg-primary border border-subtle rounded-md px-3 py-2 text-text-main focus:ring-2 focus:ring-accent-primary focus:outline-none">
                                 <div class="strength-bar"><div id="strength-bar-fill" class="strength-bar-fill"></div></div>
                                 <div id="password-error" class="error-text h-4"><span id="strength-text" class="text-xs text-subtle"></span></div>
                             </div>
                             <div>
                                 <label for="confirmPassword" class="text-sm font-medium text-text-secondary">Confirm Password</label>
-                                <input id="confirmPassword" name="confirmPassword" type="password" required class="mt-1 block w-full bg-primary border border-subtle rounded-md px-3 py-2 text-text-main focus:ring-2 focus:ring-accent-purple focus:outline-none">
+                                <input id="confirmPassword" name="confirmPassword" type="password" required class="mt-1 block w-full bg-primary border border-subtle rounded-md px-3 py-2 text-text-main focus:ring-2 focus:ring-accent-primary focus:outline-none">
                                 <div id="confirmPassword-error" class="error-text h-4"></div>
                             </div>
                         </div>
-                        <div id="recaptcha-widget-container" class="!mt-2 flex justify-center"></div>
+                        <div id="recaptcha-widget-container" class="!mt-4 flex justify-center"></div>
                         <div class="pt-2">
-                            <button type="submit" class="w-full flex justify-center py-3 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-gradient-to-r from-accent-purple to-accent-pink hover:opacity-90 transition-opacity">
+                            <button type="submit" class="w-full flex justify-center py-3 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-accent-primary hover:bg-red-700 transition-colors">
                                 Create Account
                             </button>
                         </div>
                     </form>
 
-                    <p class="mt-4 text-center text-sm text-text-secondary">
+                    <p class="mt-6 text-center text-sm text-text-secondary">
                         Already have an account?
-                        <a href="/login" class="font-medium text-accent-cyan hover:underline">Sign In</a>
+                        <a href="/login" class="font-medium text-accent-primary hover:underline">Sign In</a>
                     </p>
                 </div>
             </div>
@@ -207,16 +206,7 @@ function renderSignupForm() {
 
 export function renderSignupPage() {
     const content = `
-    <main class="relative flex-grow flex justify-center p-6 py-28 isolate min-h-screen">
-        <video
-            autoplay
-            loop
-            muted
-            playsinline
-            class="absolute top-0 left-0 w-full h-full object-cover -z-20"
-            src="/plexus-bg.mp4"
-        ></video>
-        <div class="absolute top-0 left-0 w-full h-full bg-black/50 -z-10"></div>
+    <main class="relative flex-grow flex items-center justify-center p-6 bg-background min-h-screen">
         <div id="signup-container" class="w-full"></div>
     </main>`;
     

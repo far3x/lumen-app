@@ -26,8 +26,8 @@ export function renderLandingPage() {
             const centerX = offsetWidth / 2;
             const centerY = offsetHeight / 2;
 
-            const moveX = (clientX - centerX) / centerX * -1;
-            const moveY = (clientY - centerY) / centerY * -1;
+            const moveX = (clientX - centerX) / centerX * -2;
+            const moveY = (clientY - centerY) / centerY * -2;
 
             requestAnimationFrame(() => {
                 parallaxImage.style.transform = `translate(${moveX}px, ${moveY}px)`;
