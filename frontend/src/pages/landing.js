@@ -9,7 +9,17 @@ export function renderLandingPage() {
 
         if (!parallaxImage || !heroSection) return;
 
+        if (heroSection.dataset.listenersAttached) return;
+        heroSection.dataset.listenersAttached = 'true';
+
         const handleMouseMove = (e) => {
+            if (window.innerWidth < 1024) {
+                requestAnimationFrame(() => {
+                    parallaxImage.style.transform = 'translate(0, 0)';
+                });
+                return;
+            };
+
             const { clientX, clientY } = e;
             const { offsetWidth, offsetHeight } = heroSection;
 
@@ -23,7 +33,7 @@ export function renderLandingPage() {
                 parallaxImage.style.transform = `translate(${moveX}px, ${moveY}px)`;
             });
         };
-
+        
         document.addEventListener('mousemove', handleMouseMove, { passive: true });
     };
 
@@ -33,25 +43,29 @@ export function renderLandingPage() {
     <main id="content-root" class="flex-grow bg-[#f0f0f0] text-gray-800 pt-28">
 
         <section class="container mx-auto border-2 border-[#C4C4C4] rounded-lg overflow-hidden">
-            <div class="grid md:grid-cols-2 items-center">
-                <div class="text-left p-12">
-                    <h1 class="text-4xl md:text-6xl font-bold tracking-tighter">
+            <div class="lg:grid lg:grid-cols-2 lg:items-center">
+                <div class="text-center lg:text-left p-8 lg:p-12">
+                    <h1 class="text-4xl md:text-5xl lg:text-6xl font-bold tracking-tighter">
                             Monetize Your Code.
                             <br>
                             Power the <span class="text-red-600">Future of AI.</span>
                         </h1>
-                        <p class="mt-6 text-lg text-gray-600 max-w-lg">
+                        <p class="mt-6 text-lg text-gray-600 max-w-lg mx-auto lg:mx-0">
                             The code on your local machine is one of the most valuable datasets on the planet. Stop letting it sit there. Start earning what it's worth.
                         </p>
-                        <div class="mt-10 flex items-center gap-4">
-                            <a href="${startEarningUrl}" class="px-8 py-3 font-bold bg-red-600 text-white hover:bg-red-700 rounded-lg shadow-md hover:shadow-lg transform hover:-translate-y-0.5 transition-all duration-200 ease-out">Start Earning Now</a>
-                            <a href="/docs/introduction" class="px-8 py-3 font-bold bg-gray-200 text-gray-800 hover:bg-gray-300 rounded-lg shadow-md hover:shadow-lg transform hover:-translate-y-0.5 transition-all duration-200 ease-out">Read docs</a>
-            </div>
-        </div>
-                <div class="relative self-stretch h-full min-h-[750px] overflow-hidden">
-                    <img id="hero-parallax-image" src="/img/landing/logo-big.png" alt="Logo Big" class="absolute bottom-0 -right-1/4 h-[110%] w-auto max-w-none mix-blend-color-burn transition-transform duration-300 ease-out">
+                        <div class="mt-10 flex flex-col sm:flex-row items-center justify-center lg:justify-start gap-4">
+                            <a href="${startEarningUrl}" class="w-full sm:w-auto px-8 py-3 font-bold bg-red-600 text-white hover:bg-red-700 rounded-lg shadow-md hover:shadow-lg transform hover:-translate-y-0.5 transition-all duration-200 ease-out">Start Earning Now</a>
+                            <a href="/docs/introduction" class="w-full sm:w-auto px-8 py-3 font-bold bg-gray-200 text-gray-800 hover:bg-gray-300 rounded-lg shadow-md hover:shadow-lg transform hover:-translate-y-0.5 transition-all duration-200 ease-out">Read docs</a>
+                        </div>
                 </div>
-    </div>
+                
+                <div class="hidden lg:block lg:relative lg:self-stretch lg:h-full lg:min-h-[750px]">
+                    <img id="hero-parallax-image" src="/img/landing/logo-big.png" alt="Logo Big" 
+                         class="mix-blend-color-burn transition-transform duration-300 ease-out 
+                                w-full h-96 object-contain p-8
+                                lg:absolute lg:h-[110%] lg:w-auto lg:max-w-none lg:p-0 lg:bottom-0 lg:-right-1/4">
+                </div>
+            </div>
         </section>
 
         <section class="py-12 mt-12">
