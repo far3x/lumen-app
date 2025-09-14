@@ -61,8 +61,8 @@ export function renderLandingPage() {
                     Billions of lines of high-signal, human-written code are locked away in private repositories. This is a vast, untapped reservoir of value. Until now.
                 </p>
                 <div class="grid md:grid-cols-3 gap-8">
-                    <div class="group shadow-lg overflow-hidden border-2 border-[#C4C4C4] relative h-80 rounded-lg">
-                        <div class="absolute inset-0"><img src="/img/landing/1.png" alt="Card 1" class="w-full h-full object-cover transition-transform duration-300 ease-out group-hover:scale-105"></div>
+                    <div class="shadow-lg overflow-hidden border-2 border-[#C4C4C4] relative h-80 rounded-lg transition-all duration-300 ease-in-out hover:scale-101 hover:shadow-xl">
+                        <div class="absolute inset-0"><img src="/img/landing/1.png" alt="Card 1" class="w-full h-full object-cover transition-transform duration-300 ease-out"></div>
                         <div class="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent"></div>
                         <div class="p-8 absolute bottom-0 left-0 text-white">
                              <img src="/img/landing/neige.svg" alt="Icon" class="w-8 h-8 mb-2">
@@ -70,8 +70,8 @@ export function renderLandingPage() {
                             <p>Generating zero Value for You Or<br/>the Ecosystem.</p>
                         </div>
                     </div>
-                    <div class="group shadow-lg overflow-hidden border-2 border-[#C4C4C4] relative h-80 rounded-lg">
-                        <div class="absolute inset-0"><img src="/img/landing/2.png" alt="Card 2" class="w-full h-full object-cover transition-transform duration-300 ease-out group-hover:scale-105"></div>
+                    <div class="shadow-lg overflow-hidden border-2 border-[#C4C4C4] relative h-80 rounded-lg transition-all duration-300 ease-in-out hover:scale-101 hover:shadow-xl">
+                        <div class="absolute inset-0"><img src="/img/landing/2.png" alt="Card 2" class="w-full h-full object-cover transition-transform duration-300 ease-out"></div>
                         <div class="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent"></div>
                         <div class="p-8 absolute bottom-0 left-0 text-white">
                              <img src="/img/landing/neige.svg" alt="Icon" class="w-8 h-8 mb-2">
@@ -79,8 +79,8 @@ export function renderLandingPage() {
                             <p>Exposed to being Scraped Without<br/>Credit Or Compensation.</p>
                         </div>
                     </div>
-                    <div class="group shadow-lg overflow-hidden border-2 border-[#C4C4C4] relative h-80 rounded-lg">
-                        <div class="absolute inset-0"><img src="/img/landing/3.png" alt="Card 3" class="w-full h-full object-cover transition-transform duration-300 ease-out group-hover:scale-105"></div>
+                    <div class="shadow-lg overflow-hidden border-2 border-[#C4C4C4] relative h-80 rounded-lg transition-all duration-300 ease-in-out hover:scale-101 hover:shadow-xl">
+                        <div class="absolute inset-0"><img src="/img/landing/3.png" alt="Card 3" class="w-full h-full object-cover transition-transform duration-300 ease-out"></div>
                         <div class="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent"></div>
                         <div class="p-8 absolute bottom-0 left-0 text-white">
                              <img src="/img/landing/neige.svg" alt="Icon" class="w-8 h-8 mb-2">
@@ -106,8 +106,8 @@ export function renderLandingPage() {
                     We provide the bridge between your private work and the new data economy, transforming your code into a secure, high-value, and reward-generating asset.
                 </p>
                 <div class="grid md:grid-cols-3 gap-8">
-                    <div class="group shadow-lg overflow-hidden border-2 border-[#C4C4C4] relative h-80 rounded-lg">
-                        <div class="absolute inset-0"><img src="/img/landing/4.png" alt="Card 4" class="w-full h-full object-cover transition-transform duration-300 ease-out group-hover:scale-105"></div>
+                    <div class="shadow-lg overflow-hidden border-2 border-[#C4C4C4] relative h-80 rounded-lg transition-all duration-300 ease-in-out hover:scale-101 hover:shadow-xl">
+                        <div class="absolute inset-0"><img src="/img/landing/4.png" alt="Card 4" class="w-full h-full object-cover transition-transform duration-300 ease-out"></div>
                         <div class="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent"></div>
                         <div class="p-8 absolute bottom-0 left-0 text-white">
                              <img src="/img/landing/neige.svg" alt="Icon" class="w-8 h-8 mb-2">
@@ -115,8 +115,8 @@ export function renderLandingPage() {
                             <p>Your Raw Code And Secrets Never<br/>Leave Your Machine.</p>
                         </div>
                     </div>
-                    <div class="group shadow-lg overflow-hidden border-2 border-[#C4C4C4] relative h-80 rounded-lg">
-                        <div class="absolute inset-0"><img src="/img/landing/5.png" alt="Card 5" class="w-full h-full object-cover transition-transform duration-300 ease-out group-hover:scale-105"></div>
+                    <div class="shadow-lg overflow-hidden border-2 border-[#C4C4C4] relative h-80 rounded-lg transition-all duration-300 ease-in-out hover:scale-101 hover:shadow-xl">
+                        <div class="absolute inset-0"><img src="/img/landing/5.png" alt="Card 5" class="w-full h-full object-cover transition-transform duration-300 ease-out"></div>
                         <div class="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent"></div>
                         <div class="p-8 absolute bottom-0 left-0 text-white">
                              <img src="/img/landing/neige.svg" alt="Icon" class="w-8 h-8 mb-2">
@@ -124,8 +124,8 @@ export function renderLandingPage() {
                             <p>Our Engine Ensures Fair Rewards<br/>Based On Quality.</p>
                         </div>
                     </div>
-                     <div class="group shadow-lg overflow-hidden border-2 border-[#C4C4C4] relative h-80 rounded-lg">
-                        <div class="absolute inset-0"><img src="/img/landing/6.png" alt="Card 6" class="w-full h-full object-cover transition-transform duration-300 ease-out group-hover:scale-105"></div>
+                     <div class="shadow-lg overflow-hidden border-2 border-[#C4C4C4] relative h-80 rounded-lg transition-all duration-300 ease-in-out hover:scale-101 hover:shadow-xl">
+                        <div class="absolute inset-0"><img src="/img/landing/6.png" alt="Card 6" class="w-full h-full object-cover transition-transform duration-300 ease-out"></div>
                         <div class="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent"></div>
                         <div class="p-8 absolute bottom-0 left-0 text-white">
                              <img src="/img/landing/neige.svg" alt="Icon" class="w-8 h-8 mb-2">
@@ -139,8 +139,8 @@ export function renderLandingPage() {
 
         <section class="py-12">
             <div class="container mx-auto px-6">
-                <div class="shadow-lg border-2 border-[#C4C4C4] mx-auto grid md:grid-cols-2 items-center overflow-hidden relative h-96 rounded-lg transition-all duration-300 ease-in-out hover:scale-102 hover:shadow-xl">
-                     <div class="absolute inset-0"><img src="/img/landing/7.png" alt="Genesis Contributor" class="w-full h-full object-cover"></div>
+                <div class="shadow-lg border-2 border-[#C4C4C4] mx-auto grid md:grid-cols-2 items-center overflow-hidden relative h-96 rounded-lg transition-all duration-300 ease-in-out hover:scale-101 hover:shadow-xl">
+                     <div class="absolute inset-0"><img src="/img/landing/7.png" alt="Genesis Contributor" class="w-full h-full object-cover scale-105"></div>
                      <div class="absolute inset-0 bg-gradient-to-r from-[#f0f0f0] via-[#f0f0f0]/80 to-transparent"></div>
                     <div class="text-left p-12 relative">
                         <h2 class="text-3xl font-bold">Become a Genesis Contributor</h2>
@@ -165,8 +165,8 @@ export function renderLandingPage() {
 
         <section class="py-12">
              <div class="container mx-auto px-6">
-                 <div class="shadow-lg border-2 border-[#C4C4C4] mx-auto grid md:grid-cols-2 items-center overflow-hidden relative h-96 rounded-lg transition-all duration-300 ease-in-out hover:scale-102 hover:shadow-xl">
-                    <div class="absolute inset-0"><img src="/img/landing/8.png" alt="Join the Data Economy" class="w-full h-full object-cover"></div>
+                 <div class="shadow-lg border-2 border-[#C4C4C4] mx-auto grid md:grid-cols-2 items-center overflow-hidden relative h-96 rounded-lg transition-all duration-300 ease-in-out hover:scale-101 hover:shadow-xl">
+                    <div class="absolute inset-0"><img src="/img/landing/8.png" alt="Join the Data Economy" class="w-full h-full object-cover scale-105"></div>
                     <div class="absolute inset-0 bg-gradient-to-r from-[#f0f0f0] via-[#f0f0f0]/80 to-transparent"></div>
                     <div class="text-left p-12 relative flex flex-col h-full">
                         <div>
