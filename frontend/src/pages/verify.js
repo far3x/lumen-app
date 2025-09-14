@@ -66,7 +66,7 @@ export function renderVerifyPage() {
     return `
     <main class="flex-grow bg-background text-text-main">
         <div class="min-h-screen flex items-center justify-center p-6">
-            <div class="container mx-auto grid lg:grid-cols-2 gap-12 items-center">
+            <div class="container mx-auto grid lg:grid-cols-2 gap-24 items-center">
                 <div class="w-full max-w-md mx-auto text-center">
                     <div id="verify-content-box" class="bg-surface p-8 rounded-xl border border-primary shadow-2xl shadow-black/5">
                         <span class="animate-spin inline-block w-12 h-12 border-4 border-transparent border-t-accent-primary rounded-full mb-6"></span>
@@ -74,10 +74,8 @@ export function renderVerifyPage() {
                         <p class="text-text-secondary mt-3">Please wait a moment.</p>
                     </div>
                 </div>
-                <div class="hidden lg:block">
-                     <div class="bg-surface p-2 rounded-lg border-2 border-primary">
-                        <img src="/bg.gif" alt="Lumen network visualization" class="w-full h-auto rounded-md" />
-                    </div>
+                <div class="hidden lg:flex justify-center">
+                     <img src="/bg.gif" alt="Lumen network visualization" class="w-full h-auto max-w-sm" />
                 </div>
             </div>
         </div>

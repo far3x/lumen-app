@@ -78,7 +78,7 @@ export function renderLinkPage() {
     const content = `
     <main class="flex-grow bg-background text-text-main">
         <div class="min-h-screen flex items-center justify-center p-6">
-            <div class="container mx-auto grid lg:grid-cols-2 gap-12 items-center">
+            <div class="container mx-auto grid lg:grid-cols-2 gap-24 items-center">
                 <div class="w-full max-w-md mx-auto">
                     <div class="relative bg-surface p-8 rounded-xl border border-primary shadow-2xl shadow-black/5 text-center">
                         <button id="close-link-page" class="absolute top-3 right-3 p-2 text-text-secondary hover:text-text-main rounded-full hover:bg-primary transition-colors" aria-label="Close and go to dashboard">
@@ -122,10 +122,8 @@ export function renderLinkPage() {
                         </p>
                     </div>
                 </div>
-                <div class="hidden lg:block">
-                    <div class="bg-surface p-2 rounded-lg border-2 border-primary">
-                        <img src="/bg.gif" alt="Lumen network visualization" class="w-full h-auto rounded-md" />
-                    </div>
+                <div class="hidden lg:flex justify-center">
+                     <img src="/bg.gif" alt="Lumen network visualization" class="w-full h-auto max-w-sm" />
                 </div>
             </div>
         </div>
