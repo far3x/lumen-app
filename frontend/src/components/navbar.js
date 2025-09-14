@@ -141,7 +141,7 @@ export function setupNavbarEventListeners() {
 export function renderNavbar(currentPath) {
     const authed = isAuthenticated();
     const user = getUser();
-    const externalLinkIcon = `<svg xmlns="http://www.w3.org/2000/svg" class="inline-block h-4 w-4 ml-1.5 opacity-60 group-hover:opacity-100" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" /></svg>`;
+    const externalLinkIcon = `<svg xmlns="http://www.w3.org/2000/svg" class="inline-block h-4 w-4 ml-1 opacity-60 group-hover:opacity-100 transition-opacity" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" /></svg>`;
 
     const isDocsSubdomain = window.location.hostname.startsWith('docs.');
 
@@ -152,18 +152,17 @@ export function renderNavbar(currentPath) {
     const loginUrl = isDocsSubdomain ? 'https://lumen.onl/login' : '/login';
     const signupUrl = isDocsSubdomain ? 'https://lumen.onl/signup' : '/signup';
     const dashboardUrl = isDocsSubdomain ? 'https://lumen.onl/app/dashboard' : '/app/dashboard';
-    const logoUrl = 'https://lumen.onl/logo.png'; 
 
     const getNavLinkClasses = (path) => {
-        const baseClasses = 'group px-4 py-2 text-text-secondary hover:text-text-main transition-colors duration-200 flex items-center';
+        const baseClasses = 'group px-4 py-2 text-gray-600 hover:text-gray-900 transition-all duration-200 flex items-center transform hover:scale-105';
         const isActive = currentPath === path || (currentPath.startsWith('/docs') && path.startsWith('/docs')) || (isDocsSubdomain && path.startsWith('/introduction'));
-        return isActive ? `${baseClasses} text-text-main` : baseClasses;
+        return isActive ? `${baseClasses} text-gray-900 font-semibold` : baseClasses;
     };
 
     const getMobileNavLinkClasses = (path) => {
-        const baseClasses = `group block w-full text-left py-3 px-4 rounded-md text-sm text-text-secondary hover:bg-primary hover:text-text-main transition-colors flex items-center`;
+        const baseClasses = `group block w-full text-left py-3 px-4 rounded-lg text-sm text-gray-600 hover:bg-gray-100 hover:text-gray-900 transition-colors flex items-center`;
         const isActive = currentPath === path || (currentPath.startsWith('/docs') && path.startsWith('/docs')) || (isDocsSubdomain && path.startsWith('/introduction'));
-        return isActive ? `${baseClasses} bg-primary text-text-main` : baseClasses;
+        return isActive ? `${baseClasses} bg-gray-100 text-gray-900 font-semibold` : baseClasses;
     };
 
     const mobileNavHTML = `
@@ -183,16 +182,16 @@ export function renderNavbar(currentPath) {
                 <div class="mt-auto">
                     ${authed ? `
                         <div class="border-t border-gray-200 pt-4 space-y-4">
-                            <div class="p-3 bg-gray-100">
+                            <div class="p-3 bg-gray-100 rounded-lg">
                                 <p class="text-xs text-gray-500">Your Balance</p>
                                 <p class="font-mono text-lg font-bold text-red-600 navbar-user-balance">... $LUMEN</p>
                             </div>
                             <a href="${dashboardUrl}" class="${getMobileNavLinkClasses('/app/dashboard')}">Dashboard</a>
                             <button id="logout-button-mobile" class="w-full text-left ${getMobileNavLinkClasses('')} text-red-600 hover:text-red-500">Log Out</button>
                         </div>` : `
-                        <div class="space-y-3">
-                             <a href="${loginUrl}" class="block w-full text-center h-11 flex items-center justify-center px-6 bg-gray-200 rounded-lg text-sm font-medium text-gray-800 hover:bg-gray-300 transition-colors">Log In</a>
-                            <a href="${signupUrl}" class="block w-full text-center h-11 flex items-center justify-center px-6 text-sm font-bold text-white rounded-lg bg-red-600 hover:bg-red-700">Sign Up</a>
+                        <div class="flex items-center justify-center gap-x-4">
+                             <a href="${loginUrl}" class="px-6 py-2 text-sm font-medium text-gray-800 hover:bg-gray-200/50 rounded-lg">Log In</a>
+                             <a href="${signupUrl}" class="px-6 py-2 text-sm font-bold text-white bg-red-600 hover:bg-red-700 rounded-lg">Sign Up</a>
                         </div>`}
                 </div>
             </div>
@@ -218,9 +217,9 @@ export function renderNavbar(currentPath) {
             <span class="font-mono text-sm font-bold text-red-600 navbar-user-balance">... $LUMEN</span>
             <button id="mobile-menu-trigger" type="button" class="p-2 text-gray-600 hover:text-gray-900"><svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path></svg></button>
         </div>` : `
-        <div class="hidden lg:flex items-center h-11 p-1">
-            <a href="${loginUrl}" class="h-full flex items-center px-6 text-sm font-medium text-gray-800 hover:bg-gray-200 rounded-lg">Log In</a>
-            <a href="${signupUrl}" class="h-full flex items-center px-6 text-sm font-bold text-white bg-red-600 hover:bg-red-700 rounded-lg">Sign Up</a>
+        <div class="hidden lg:flex items-center h-11 gap-x-4">
+            <a href="${loginUrl}" class="h-full flex items-center px-6 text-sm font-semibold text-gray-800 hover:bg-gray-200/50 rounded-lg transition-colors">Log In</a>
+            <a href="${signupUrl}" class="h-full flex items-center px-6 text-sm font-bold text-white bg-red-600 hover:bg-red-700 rounded-lg transition-transform hover:scale-105">Sign Up</a>
         </div>
         <button id="mobile-menu-trigger" type="button" class="p-2 text-gray-600 hover:text-gray-900 lg:hidden"><svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path></svg></button>`;
 
@@ -232,13 +231,12 @@ export function renderNavbar(currentPath) {
                     <img src="/img/logo-v2.svg" alt="Lumen Logo" class="h-8 w-auto">
                 </a>
             </div>
-            <nav class="hidden lg:flex items-center justify-center text-sm font-medium text-gray-600 gap-x-8">
+            <nav class="hidden lg:flex items-center justify-center text-sm font-medium gap-x-8">
                 <a href="${homeUrl}" class="${getNavLinkClasses('/')}">Home</a>
-                <a href="#" class="${getNavLinkClasses('/features')}">Features</a>
                 <a href="${docsUrl}" class="${getNavLinkClasses('/docs/introduction')}">Docs</a>
                 <a href="${leaderboardUrl}" class="${getNavLinkClasses('/leaderboard')}">Leaderboard</a>
                 <a href="${roadmapUrl}" class="${getNavLinkClasses('/docs/roadmap')}">Roadmap</a>
-                <a href="https://github.com/Far3000-YT/lumen" target="_blank" rel="noopener noreferrer" data-external="true" class="${getNavLinkClasses('/github')}">Github</a>
+                <a href="https://github.com/Far3000-YT/lumen" target="_blank" rel="noopener noreferrer" data-external="true" class="${getNavLinkClasses('/github')}">Github ${externalLinkIcon}</a>
             </nav>
             <div class="flex-1 flex justify-end">
                 ${userAreaHTML}
