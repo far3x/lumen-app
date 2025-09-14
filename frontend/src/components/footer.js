@@ -14,7 +14,6 @@ export function renderFooter(currentPath) {
                         <img src="/img/logo-v2.svg" alt="Lumen Logo" class="h-8 w-auto">
                     </a>
                     <div class="flex space-x-4 mt-4">
-                        <a href="/docs/introduction" aria-label="Documentation"><img src="/img/footer/book.svg" class="w-6 h-6 rounded-full" alt="Docs"></a>
                         <a href="https://dexscreener.com/solana/${contractAddress}" target="_blank" rel="noopener noreferrer" aria-label="DexScreener"><img src="/img/footer/dex.svg" class="w-6 h-6 rounded-full" alt="DexScreener"></a>
                         <a href="https://t.me/lumenclient" target="_blank" rel="noopener noreferrer" aria-label="Telegram"><img src="/img/footer/telegram.svg" class="w-6 h-6 rounded-full" alt="Telegram"></a>
                         <a href="https://github.com/Far3000-YT/lumen" target="_blank" rel="noopener noreferrer" aria-label="GitHub"><img src="/img/footer/github.svg" class="w-6 h-6 rounded-full" alt="GitHub"></a>
