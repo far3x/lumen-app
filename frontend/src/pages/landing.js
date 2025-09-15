@@ -80,7 +80,7 @@ export function renderLandingPage() {
                         <div class="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent"></div>
                         <div class="p-8 absolute bottom-0 left-0 text-white">
                              <img src="/img/landing/neige.svg" alt="Icon" class="w-8 h-8 mb-2">
-                            <h3 class="font-bold text-xl">* Sitting Idle</h3>
+                            <h3 class="font-bold text-xl">~ Sitting Idle</h3>
                             <p>Generating zero Value for You Or<br/>the Ecosystem.</p>
                         </div>
                     </div>
@@ -89,7 +89,7 @@ export function renderLandingPage() {
                         <div class="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent"></div>
                         <div class="p-8 absolute bottom-0 left-0 text-white">
                              <img src="/img/landing/neige.svg" alt="Icon" class="w-8 h-8 mb-2">
-                            <h3 class="font-bold text-xl">* At Risk</h3>
+                            <h3 class="font-bold text-xl">~ At Risk</h3>
                             <p>Exposed to being Scraped Without<br/>Credit Or Compensation.</p>
                         </div>
                     </div>
@@ -98,7 +98,7 @@ export function renderLandingPage() {
                         <div class="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent"></div>
                         <div class="p-8 absolute bottom-0 left-0 text-white">
                              <img src="/img/landing/neige.svg" alt="Icon" class="w-8 h-8 mb-2">
-                            <h3 class="font-bold text-xl">* Undervalued</h3>
+                            <h3 class="font-bold text-xl">~ Undervalued</h3>
                             <p>Fundamentally Mispriced by the<br/>Entire AI Market.</p>
                     </div>
                 </div>
@@ -125,7 +125,7 @@ export function renderLandingPage() {
                         <div class="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent"></div>
                         <div class="p-8 absolute bottom-0 left-0 text-white">
                              <img src="/img/landing/neige.svg" alt="Icon" class="w-8 h-8 mb-2">
-                            <h3 class="font-bold text-xl">* Anonymized Locally</h3>
+                            <h3 class="font-bold text-xl">~ Anonymized Locally</h3>
                             <p>Your Raw Code And Secrets Never<br/>Leave Your Machine.</p>
                         </div>
                     </div>
@@ -134,7 +134,7 @@ export function renderLandingPage() {
                         <div class="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent"></div>
                         <div class="p-8 absolute bottom-0 left-0 text-white">
                              <img src="/img/landing/neige.svg" alt="Icon" class="w-8 h-8 mb-2">
-                            <h3 class="font-bold text-xl">* Valued Transparently</h3>
+                            <h3 class="font-bold text-xl">~ Valued Transparently</h3>
                             <p>Our Engine Ensures Fair Rewards<br/>Based On Quality.</p>
                         </div>
                     </div>
@@ -143,7 +143,7 @@ export function renderLandingPage() {
                         <div class="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent"></div>
                         <div class="p-8 absolute bottom-0 left-0 text-white">
                              <img src="/img/landing/neige.svg" alt="Icon" class="w-8 h-8 mb-2">
-                            <h3 class="font-bold text-xl">* Rewarded On-Chain</h3>
+                            <h3 class="font-bold text-xl">~ Rewarded On-Chain</h3>
                             <p>You Own Your Rewards On A<br/>Public, Decentralized Network.</p>
                     </div>
                 </div>
@@ -171,7 +171,7 @@ export function renderLandingPage() {
                 <div class="space-y-2">
                     <details class="group p-6 bg-[#EBEBEB] transition-colors hover:bg-gray-200 open:bg-[#DFDFDF] rounded-lg"><summary class="flex items-center justify-between font-bold cursor-pointer list-none">Is contributing my code safe?<svg class="w-5 h-5 text-gray-500 transform transition-transform duration-300 group-open:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" /></svg></summary><p class="mt-4 text-gray-600">Yes. Security is our paramount concern. The entire anonymization process runs locally on your machine via our open-source CLI. Sensitive data like secrets, PII, and API keys are scrubbed anything is ever uploaded. You can audit the code yourself for full transparency.</p></details>
                     <details class="group p-6 bg-[#EBEBEB] transition-colors hover:bg-gray-200 open:bg-[#DFDFDF] rounded-lg"><summary class="flex items-center justify-between font-bold cursor-pointer list-none">What kind of code is most valuable?<svg class="w-5 h-5 text-gray-500 transform transition-transform duration-300 group-open:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" /></svg></summary><p class="mt-4 text-gray-600">Value is determined by <strong>uniqueness, quality, and complexity</strong>, not a specific programming language. The protocol is designed to reward thoughtful engineering. A unique project with novel logic and a well-designed architecture will always be valued more highly than a simple script from a public tutorial. The protocol values quality over sheer quantity.</p></details>
-                    <details class="group p-6 bg-[#EBEBEB] transition-colors hover:bg-gray-200 open:bg-[#DFDFDF] rounded-lg"><summary class="flex items-center justify-between font-bold cursor-pointer list-none">Do I lose ownership of my code?<svg class="w-5 h-5 text-gray-500 transform transition-transform duration-300 group-open:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" /></svg></summary><p class="mt-4 text-gray-600">Absolutely not. You retain 100% ownership and all rights to your original work. By contributing, you grant a license for the *anonymized version* of your code to be used in Lumen's datasets. You are free to develop, license, or sell your original project as you see fit.</p></details>
+                    <details class="group p-6 bg-[#EBEBEB] transition-colors hover:bg-gray-200 open:bg-[#DFDFDF] rounded-lg"><summary class="flex items-center justify-between font-bold cursor-pointer list-none">Do I lose ownership of my code?<svg class="w-5 h-5 text-gray-500 transform transition-transform duration-300 group-open:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" /></svg></summary><p class="mt-4 text-gray-600">Absolutely not. You retain 100% ownership and all rights to your original work. By contributing, you grant a license for the anonymized version of your code to be used in Lumen's datasets. You are free to develop, license, or sell your original project as you see fit.</p></details>
                 </div>
                  <div class="text-center mt-12"><a href="/docs/faq" class="text-red-600 hover:underline">See all FAQs →</a></div>
                         </div>
@@ -185,7 +185,7 @@ export function renderLandingPage() {
                     <div class="text-left p-12 relative flex flex-col h-full">
                         <div>
                             <h2 class="text-3xl font-bold">Ready to Join the Data Economy?</h2>
-                            <p class="text-gray-600 mt-4">Start contributing your anonymized code in minutes and get rewarded with $LUMEN tokens.</p>
+                            <p class="text-gray-600 mt-4">Start contributing your anonymized code in minutes and get rewarded with $USDC tokens.</p>
                             <a href="${startEarningUrl}" class="mt-8 inline-block px-8 py-3 font-bold bg-red-600 text-white hover:bg-red-700 rounded-lg shadow-md hover:shadow-lg transform hover:-translate-y-0.5 transition-all duration-200 ease-out">Get Started now</a>
                         </div>
                         <div class="hidden md:flex mt-auto" style="gap: 250px;">
