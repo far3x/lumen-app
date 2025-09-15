@@ -86,7 +86,7 @@ export function renderLinkPage() {
                         </button>
 
                         <a href="/" class="inline-flex items-center space-x-3 mb-6">
-                            <img src="/logo.png" alt="Lumen Logo" class="h-10 w-10">
+                            <img src="/logo.png?v=1" alt="Lumen Logo" class="h-10 w-10">
                             <span class="text-2xl font-bold text-text-main">Lumen Protocol</span>
                         </a>
                         
