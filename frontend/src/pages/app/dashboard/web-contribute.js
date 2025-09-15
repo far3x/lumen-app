@@ -230,7 +230,7 @@ function render() {
                         <span class="font-bold text-lg text-text-main">Drag & drop your project folder here</span>
                         <span class="text-text-secondary mt-1">or</span>
                         <label for="folder-input" class="mt-2 font-semibold text-accent-primary hover:underline cursor-pointer">
-                            select a folder
+                            Select a folder
                             <input type="file" id="folder-input" webkitdirectory directory class="sr-only" ${contributionsLeft === 0 ? 'disabled' : ''}>
                         </label>
                         <p class="text-xs text-text-secondary mt-4">Max project size: 5 MB. All processing is done in your browser before upload.</p>
