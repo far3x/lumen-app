@@ -56,7 +56,7 @@ function renderRecentActivityFeed(contributions) {
                                 <strong class="font-bold">${item.user_display_name}</strong> contributed new code to the network.
                             </p>
                             <p class="text-text-secondary mt-1">
-                                Reward: <strong class="font-medium text-red-600">+$${item.reward_amount.toFixed(4)} USD</strong>
+                                Reward: <strong class="font-medium text-green-600">+$${item.reward_amount.toFixed(4)} USD</strong>
                             </p>
                         </div>
                         <span class="text-xs text-text-secondary font-mono whitespace-nowrap pt-1 shrink-0">${DateTime.fromISO(item.created_at).toRelative()}</span>
