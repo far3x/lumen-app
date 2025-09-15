@@ -5,10 +5,7 @@ export const renderContributing = () => `
     <h2 id="the-contribution-process">The Primary Contribution Process (CLI)</h2>
     <p>After you have <a href="/docs/installation">installed</a> and <a href="/docs/authentication">authenticated</a> the CLI, contributing is a single command. Navigate to the root directory of your project and run:</p>
     <div class="code-block">
-        <div class="code-block-header">
-            <div class="traffic-lights"><div class="traffic-light light-red"></div><div class="traffic-light light-yellow"></div><div class="traffic-light light-green"></div></div>
-            <div class="flex-grow text-center text-xs font-mono">bash</div>
-        </div>
+        <div class="code-block-header"><div class="flex-grow text-center text-xs font-mono">bash</div></div>
         <div class="code-block-content">
             <p><span class="command">cd path/to/your/project</span></p>
             <p><span class="command">lum contribute</span></p>
@@ -16,7 +13,7 @@ export const renderContributing = () => `
             <p><span class="output"> 1. Assembling file structure...</span></p>
             <p><span class="output"> 2. Sanitizing code and preparing payload...</span></p>
             <p><span class="output"> 3. Submitting to Lumen network...</span></p>
-            <p><span class="output text-green-400">✅ Contribution successful! (ID: xxx)</span></p>
+            <p><span class="output text-green-600">✅ Contribution successful! (ID: xxx)</span></p>
             <p class="output">Your submission is now in the processing queue.</p>
             <p class="output">You can check its status at any time with 'lum history'.</p>
         </div>
@@ -45,32 +42,26 @@ export const renderContributing = () => `
     <ol>
         <li><strong>Identify Large Files:</strong> First, run the <code>lum local -l</code> command from your project's root. This will show you a leaderboard of the most "token-heavy" files, which are the primary cause of exceeding the limit.
             <div class="code-block">
-                <div class="code-block-header">
-                    <div class="traffic-lights"><div class="traffic-light light-red"></div><div class="traffic-light light-yellow"></div><div class="traffic-light light-green"></div></div>
-                    <div class="flex-grow text-center text-xs font-mono">bash</div>
-                </div>
+                <div class="code-block-header"><div class="flex-grow text-center text-xs font-mono">bash</div></div>
                 <div class="code-block-content"><span class="command">lum local -l 10</span></div>
             </div>
         </li>
         <li><strong>Exclude Unnecessary Assets:</strong> Look for assets that aren't core to your project's logic. Common culprits include database dumps (<code>.sql</code> files), large log files, cached assets (<code>.cache/</code> folders), or bundled media.</li>
         <li><strong>Update Your Configuration:</strong> Use the <code>lum config --edit</code> command to open your configuration file. Add the identified files or folders to the <code>skipped_files</code> or <code>skipped_folders</code> lists.
             <div class="code-block">
-                <div class="code-block-header">
-                    <div class="traffic-lights"><div class="traffic-light light-red"></div><div class="traffic-light light-yellow"></div><div class="traffic-light light-green"></div></div>
-                    <div class="flex-grow text-center text-xs font-mono">~/.lum/config.json</div>
-                </div>
+                <div class="code-block-header"><div class="flex-grow text-center text-xs font-mono">~/.lum/config.json</div></div>
                 <div class="code-block-content">
 <pre>{
     "skipped_folders": [
         ".git",
         "__pycache__",
         "node_modules",
-        <span class="text-green-400">"dumps/",       // Example: Add a folder to skip</span>
-        <span class="text-green-400">"*.cache"     // Example: Skip any folder ending in .cache</span>
+        <span class="text-green-600">"dumps/",       // Example: Add a folder to skip</span>
+        <span class="text-green-600">"*.cache"     // Example: Skip any folder ending in .cache</span>
     ],
     "skipped_files": [
         "package-lock.json",
-        <span class="text-green-400">"large_asset.log"  // Example: Add a specific file to skip</span>
+        <span class="text-green-600">"large_asset.log"  // Example: Add a specific file to skip</span>
     ],
     ...
 }</pre>

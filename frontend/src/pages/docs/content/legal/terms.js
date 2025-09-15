@@ -3,9 +3,9 @@ export const renderTermsAndConditions = () => `
     <p class="lead text-xl text-text-secondary">Last updated: July 23, 2025</p>
     <p>Welcome to Lumen Protocol. These Legal Terms constitute a legally binding agreement made between you, whether personally or on behalf of an entity (“you”), and Lumen Protocol (“we,” “us,” or “our”), concerning your access to and use of the Services.</p>
 
-    <div class="my-8 p-6 bg-surface border border-primary rounded-lg">
+    <div class="my-8 p-6 bg-white border border-gray-200 rounded-lg">
         <h3 class="font-bold text-lg text-text-main mb-4">Table of Contents</h3>
-        <ol class="list-decimal list-inside space-y-2 text-accent-cyan">
+        <ol class="list-decimal list-inside space-y-2 text-red-600">
             <li><a href="#agreement" class="hover:underline">Agreement to our Legal Terms</a></li>
             <li><a href="#services" class="hover:underline">Our Services</a></li>
             <li><a href="#ip" class="hover:underline">Intellectual Property Rights</a></li>
@@ -104,5 +104,5 @@ export const renderTermsAndConditions = () => `
     <p>By submitting any source code or related materials ("Data") to the protocol, you confirm that you have the full right and authority to do so. You retain complete ownership of your original Data. You grant the Lumen Protocol a perpetual, irrevocable, worldwide, royalty-free, non-exclusive license to use, reproduce, modify, and distribute the anonymized version of your contributed Data for the purpose of creating datasets for training artificial intelligence models and for sublicensing this anonymized data to third parties.</p>
     
     <h2 id="contact">20. Contact Us</h2>
-    <p>In order to resolve a complaint regarding the Services or to receive further information regarding use of the Services, please contact us at: <a href="mailto:contact@lumen.onl" class="text-accent-cyan hover:underline">contact@lumen.onl</a></p>
+    <p>In order to resolve a complaint regarding the Services or to receive further information regarding use of the Services, please contact us at: <a href="mailto:contact@lumen.onl" class="text-red-600 hover:underline">contact@lumen.onl</a></p>
 `;

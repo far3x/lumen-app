@@ -9,15 +9,12 @@ export const renderAuthentication = () => `
     <h3>Step 1: Initiate Login from the CLI</h3>
     <p>In your terminal, run the <code>login</code> command. This begins the authorization handshake.</p>
     <div class="code-block">
-        <div class="code-block-header">
-            <div class="traffic-lights"><div class="traffic-light light-red"></div><div class="traffic-light light-yellow"></div><div class="traffic-light light-green"></div></div>
-            <div class="flex-grow text-center text-xs font-mono">bash</div>
-        </div>
+        <div class="code-block-header"><div class="flex-grow text-center text-xs font-mono">bash</div></div>
         <div class="code-block-content">
             <p><span class="command">lum login</span></p>
             <p class="mt-2"><span class="output">To link this device, please complete the following steps:</span></p>
-            <p><span class="output">1. Open your browser and go to: <strong class="text-accent-cyan">https://lumen.onl/link</strong></span></p>
-            <p><span class="output">2. Enter this one-time code: <strong class="text-accent-cyan">ABCD-EFGH</strong></span></p>
+            <p><span class="output">1. Open your browser and go to: <strong class="text-red-600">https://lumen.onl/link</strong></span></p>
+            <p><span class="output">2. Enter this one-time code: <strong class="text-red-600">ABCD-EFGH</strong></span></p>
             <p><span class="output">Waiting for authorization...</span></p>
         </div>
     </div>
@@ -30,12 +27,9 @@ export const renderAuthentication = () => `
     <h3>Step 3: Confirmation and Token Issuance</h3>
     <p>Once you approve in the browser, the Lumen servers notify the waiting CLI. Your terminal will update with a success message:</p>
     <div class="code-block">
-        <div class="code-block-header">
-             <div class="traffic-lights"><div class="traffic-light light-red"></div><div class="traffic-light light-yellow"></div><div class="traffic-light light-green"></div></div>
-            <div class="flex-grow text-center text-xs font-mono">bash</div>
-        </div>
+        <div class="code-block-header"><div class="flex-grow text-center text-xs font-mono">bash</div></div>
         <div class="code-block-content">
-             <p><span class="output text-green-400">✅ Success! Device authorized. You can now use 'lum contribute'.</span></p>
+             <p><span class="output text-green-600">✅ Success! Device authorized. You can now use 'lum contribute'.</span></p>
         </div>
     </div>
     <p>The CLI securely stores the issued Personal Access Token (PAT) in its local configuration. This token will be used for all future contributions from this device, until you explicitly log out.</p>

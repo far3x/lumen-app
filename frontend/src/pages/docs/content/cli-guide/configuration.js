@@ -8,10 +8,7 @@ export const renderConfiguration = () => `
     <h2 id="default-configuration">Default Configuration Explained</h2>
     <p>Here is an example of the default configuration file, with explanations for each key setting.</p>
     <div class="code-block">
-        <div class="code-block-header">
-             <div class="traffic-lights"><div class="traffic-light light-red"></div><div class="traffic-light light-yellow"></div><div class="traffic-light light-green"></div></div>
-             <div class="flex-grow text-center text-xs">~/.lum/config.json</div>
-        </div>
+        <div class="code-block-header"><div class="flex-grow text-center text-xs">~/.lum/config.json</div></div>
         <div class="code-block-content">
 <pre>{
     "skipped_folders": [

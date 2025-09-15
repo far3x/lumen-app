@@ -2,7 +2,7 @@ export const renderContributorAgreement = () => `
     <h1 id="contributor-license-agreement">Contributor License Agreement (CLA)</h1>
     <p class="lead text-xl text-text-secondary">Last updated: July 23, 2025</p>
     <p>By submitting a contribution of source code or any related materials ("Contribution") to the Lumen Protocol ("we," "us," or "our"), you, on behalf of yourself and any entity you represent, accept and agree to the following terms and conditions. This Contributor License Agreement ("Agreement") is a legally binding document.</p>
-    <p>You and we acknowledge that this Agreement is in addition to our main <a href="/docs/terms" class="text-accent-cyan hover:underline">Terms and Conditions</a>. In case of any conflict between the Terms and Conditions and this Agreement regarding Contributions, the terms of this Agreement shall prevail.</p>
+    <p>You and we acknowledge that this Agreement is in addition to our main <a href="/docs/terms" class="text-red-600 hover:underline">Terms and Conditions</a>. In case of any conflict between the Terms and Conditions and this Agreement regarding Contributions, the terms of this Agreement shall prevail.</p>
 
     <h2 id="definitions">1. Definitions</h2>
     <ul>

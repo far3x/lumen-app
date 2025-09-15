@@ -22,7 +22,7 @@ export const renderValuation = () => `
         </li>
     </ol>
     
-    <div class="my-8 p-6 bg-surface border border-primary rounded-lg">
+    <div class="my-8 p-6 bg-white border border-gray-200 rounded-lg">
         <h3 class="font-bold text-lg text-text-main mb-2">Our Key Differentiator: Holistic Context Analysis</h3>
         <p class="text-text-secondary">Unlike systems that analyze isolated snippets, our AI review engine is provided with the <strong>entire context</strong> of your contribution. This allows for a much deeper and more accurate understanding of architectural quality and project clarity, resulting in a valuation that is fundamentally fairer and more precise.</p>
     </div>
