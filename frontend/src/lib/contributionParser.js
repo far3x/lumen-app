@@ -53,13 +53,21 @@ const PAYLOAD_SIZE_LIMIT_BYTES = PAYLOAD_SIZE_LIMIT_MB * 1024 * 1024;
 function shouldSkip(path) {
     const lowerPath = path.toLowerCase();
     const parts = lowerPath.split('/');
+    
     for (const part of parts) {
+        if (part.startsWith('.')) return true;
+        
         if (SKIPPED_FOLDERS.includes(part)) return true;
+        
         if (SKIPPED_FOLDERS.some(pattern => pattern.startsWith('*') && part.endsWith(pattern.substring(1)))) {
             return true;
         }
     }
+
     const fileName = parts[parts.length - 1];
+    
+    if (fileName.startsWith('.')) return true;
+    
     if (SKIPPED_FILES.includes(fileName)) return true;
     
     const extension = '.' + fileName.split('.').pop();

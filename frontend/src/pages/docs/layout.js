@@ -227,7 +227,7 @@ function renderSidebarContent(activePage) {
         const isActive = id === activePage;
         return `
             <a href="${getDocPath(id)}" class="block py-2 px-3 rounded-md text-sm transition-colors 
-                ${isActive ? 'bg-primary font-bold text-accent-cyan' : 'text-text-secondary hover:bg-surface hover:text-text-main'}">
+                ${isActive ? 'bg-white font-semibold text-red-600 shadow-sm' : 'text-gray-600 hover:bg-gray-100 hover:text-gray-900'}">
                 ${name}
             </a>
         `;
@@ -236,14 +236,14 @@ function renderSidebarContent(activePage) {
     return `
         <nav class="space-y-6">
             <div>
-                <h4 class="px-3 text-xs font-bold uppercase text-subtle tracking-wider mb-2">Getting Started</h4>
+                <h4 class="px-3 text-xs font-bold uppercase text-gray-500 tracking-wider mb-2">Getting Started</h4>
                 <div class="space-y-1">
                     ${navLink('introduction', 'Introduction')}
                     ${navLink('why-lumen', 'Why Lumen?')}
                 </div>
             </div>
             <div>
-                <h4 class="px-3 text-xs font-bold uppercase text-subtle tracking-wider mb-2">CLI Guide</h4>
+                <h4 class="px-3 text-xs font-bold uppercase text-gray-500 tracking-wider mb-2">CLI Guide</h4>
                 <div class="space-y-1">
                     ${navLink('installation', 'Installation')}
                     ${navLink('authentication', 'Authentication')}
@@ -252,7 +252,7 @@ function renderSidebarContent(activePage) {
                 </div>
             </div>
              <div>
-                <h4 class="px-3 text-xs font-bold uppercase text-subtle tracking-wider mb-2">Protocol</h4>
+                <h4 class="px-3 text-xs font-bold uppercase text-gray-500 tracking-wider mb-2">Protocol</h4>
                 <div class="space-y-1">
                     ${navLink('contributing', 'Contributing Data')}
                     ${navLink('valuation', 'The Valuation Engine')}
@@ -263,14 +263,14 @@ function renderSidebarContent(activePage) {
                 </div>
             </div>
             <div>
-                <h4 class="px-3 text-xs font-bold uppercase text-subtle tracking-wider mb-2">Community & Ecosystem</h4>
+                <h4 class="px-3 text-xs font-bold uppercase text-gray-500 tracking-wider mb-2">Community & Ecosystem</h4>
                 <div class="space-y-1">
                     ${navLink('roadmap', 'Roadmap & Vision')}
                     ${navLink('faq', 'FAQ')}
                 </div>
             </div>
             <div>
-                <h4 class="px-3 text-xs font-bold uppercase text-subtle tracking-wider mb-2">Legal</h4>
+                <h4 class="px-3 text-xs font-bold uppercase text-gray-500 tracking-wider mb-2">Legal</h4>
                 <div class="space-y-1">
                     ${navLink('terms', 'Terms & Conditions')}
                     ${navLink('privacy-policy', 'Privacy Policy')}
@@ -288,11 +288,11 @@ function renderOnPageNavContent(pageId) {
 
     return `
         <nav>
-            <h4 class="text-sm font-bold text-text-main mb-4">On this page</h4>
+            <h4 class="text-sm font-bold text-gray-900 mb-4">On this page</h4>
             <ul class="space-y-2">
                 ${toc.map(item => `
                     <li>
-                        <a href="#${item.id}" class="block text-sm text-text-secondary hover:text-text-main transition-colors">${item.title}</a>
+                        <a href="#${item.id}" class="block text-sm text-gray-500 hover:text-gray-900 transition-colors">${item.title}</a>
                     </li>
                 `).join('')}
             </ul>
@@ -306,11 +306,11 @@ function renderMobileDocsNav(pageId, activePage) {
 
     return `
         <div id="docs-mobile-overlay" class="fixed inset-0 bg-black/50 z-40 hidden lg:hidden" aria-hidden="true"></div>
-        <div id="docs-mobile-panel" class="fixed top-0 left-0 w-64 h-full bg-background z-50 transform -translate-x-full transition-transform duration-300 ease-in-out lg:hidden">
+        <div id="docs-mobile-panel" class="fixed top-0 left-0 w-64 h-full bg-white z-50 transform -translate-x-full transition-transform duration-300 ease-in-out lg:hidden">
             <div class="h-full overflow-y-auto p-6">
                 <div class="flex justify-between items-center mb-6">
                     <span class="font-bold text-lg">Menu</span>
-                    <button id="docs-mobile-close" type="button" class="p-2 text-text-secondary hover:text-text-main">
+                    <button id="docs-mobile-close" type="button" class="p-2 text-gray-500 hover:text-gray-900">
                         <span class="sr-only">Close menu</span>
                         <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
                     </button>
@@ -318,7 +318,7 @@ function renderMobileDocsNav(pageId, activePage) {
                 <div class="space-y-8">
                     ${onPageContent}
                     <div>
-                        <h4 class="text-sm font-bold text-text-main mb-4 ${onPageContent ? 'pt-8 border-t border-primary' : ''}">Browse Docs</h4>
+                        <h4 class="text-sm font-bold text-gray-900 mb-4 ${onPageContent ? 'pt-8 border-t border-gray-200' : ''}">Browse Docs</h4>
                         ${sidebarContent}
                     </div>
                 </div>
@@ -333,23 +333,23 @@ function renderDocsNavigationButtons(pageKey) {
     const nextKey = currentIndex < orderedDocKeys.length - 1 ? orderedDocKeys[currentIndex + 1] : null;
 
     const prevButton = prevKey ? `
-        <a href="${getDocPath(prevKey)}" class="group flex items-center gap-4 p-4 rounded-lg bg-surface border border-primary hover:border-subtle/80 transition-colors text-left">
-            <svg class="w-6 h-6 shrink-0" fill="none" viewBox="0 0 24 24" stroke="url(#dashboard-icon-gradient)" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7" /></svg>
+        <a href="${getDocPath(prevKey)}" class="group flex items-center gap-4 p-4 rounded-lg bg-white border border-gray-200 hover:border-gray-300 transition-colors text-left">
+            <svg class="w-6 h-6 shrink-0 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7" /></svg>
             <div class="flex-grow min-w-0">
-                <p class="truncate text-sm"><span class="text-text-secondary">Previous:</span> <span class="font-semibold text-text-main">${docPages[prevKey].title}</span></p>
+                <p class="truncate text-sm"><span class="text-gray-500">Previous:</span> <span class="font-semibold text-gray-800">${docPages[prevKey].title}</span></p>
             </div>
         </a>` : '<div></div>';
 
     const nextButton = nextKey ? `
-        <a href="${getDocPath(nextKey)}" class="group flex items-center justify-end gap-4 p-4 rounded-lg bg-surface border border-primary hover:border-subtle/80 transition-colors text-right">
+        <a href="${getDocPath(nextKey)}" class="group flex items-center justify-end gap-4 p-4 rounded-lg bg-white border border-gray-200 hover:border-gray-300 transition-colors text-right">
              <div class="flex-grow min-w-0">
-                <p class="truncate text-sm"><span class="text-text-secondary">Next:</span> <span class="font-semibold text-text-main">${docPages[nextKey].title}</span></p>
+                <p class="truncate text-sm"><span class="text-gray-500">Next:</span> <span class="font-semibold text-gray-800">${docPages[nextKey].title}</span></p>
             </div>
-            <svg class="w-6 h-6 shrink-0" fill="none" viewBox="0 0 24 24" stroke="url(#dashboard-icon-gradient)" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" /></svg>
+            <svg class="w-6 h-6 shrink-0 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" /></svg>
         </a>` : '<div></div>';
 
     return `
-        <div class="mt-16 pt-8 border-t border-primary/50 grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div class="mt-16 pt-8 border-t border-gray-200 grid grid-cols-1 md:grid-cols-2 gap-4">
             ${prevButton}
             ${nextButton}
         </div>
@@ -363,20 +363,11 @@ export async function renderDocsLayout(pageId) {
     const contentHtml = await page.content();
 
     return `
-        <main class="flex-grow bg-docs-gradient pt-28">
-            <svg aria-hidden="true" style="position: absolute; width: 0; height: 0; overflow: hidden;">
-              <defs>
-                <linearGradient id="dashboard-icon-gradient" x1="0%" y1="0%" x2="100%" y2="100%">
-                  <stop offset="0%" style="stop-color: #8A2BE2;" />
-                  <stop offset="50%" style="stop-color: #FF69B4;" />
-                  <stop offset="100%" style="stop-color: #00D9D9;" />
-                </linearGradient>
-              </defs>
-            </svg>
+        <main class="flex-grow bg-[#f0f0f0] text-gray-800 pt-28">
             <div class="container mx-auto px-6">
                 <div class="relative flex lg:gap-8">
                     <aside class="hidden lg:block w-64 flex-shrink-0 pr-8">
-                        <div class="sticky top-20 h-[calc(100vh-5rem)] overflow-y-auto py-10 independent-scroll">
+                        <div class="sticky top-28 h-[calc(100vh-7rem)] overflow-y-auto py-10 independent-scroll">
                             ${renderSidebarContent(pageKey)}
                         </div>
                     </aside>
@@ -387,7 +378,7 @@ export async function renderDocsLayout(pageId) {
                     </article>
 
                     <aside class="hidden xl:block w-64 flex-shrink-0 pl-8">
-                        <div class="sticky top-20 h-[calc(100vh-5rem)] overflow-y-auto py-10 independent-scroll">
+                        <div class="sticky top-28 h-[calc(100vh-7rem)] overflow-y-auto py-10 independent-scroll">
                             ${renderOnPageNavContent(pageKey)}
                         </div>
                     </aside>
@@ -397,7 +388,7 @@ export async function renderDocsLayout(pageId) {
             ${renderMobileDocsNav(pageKey, pageKey)}
 
             <div class="lg:hidden fixed bottom-4 left-1/2 -translate-x-1/2 z-30">
-                <button id="docs-mobile-trigger" type="button" class="flex items-center gap-x-2 bg-surface text-text-main font-bold px-5 py-3 rounded-full border border-primary shadow-2xl shadow-black">
+                <button id="docs-mobile-trigger" type="button" class="flex items-center gap-x-2 bg-white text-gray-800 font-bold px-5 py-3 rounded-full border border-gray-200 shadow-lg">
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path></svg>
                     Menu
                 </button>
