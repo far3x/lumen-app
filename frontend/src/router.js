@@ -91,7 +91,7 @@ export const navigate = (path) => {
 const renderFullPageLoader = () => {
     return `
         <div class="flex-grow flex flex-col items-center justify-center">
-            <img src="/logo.png" alt="Lumen Logo" class="h-16 w-16 mb-6 animate-pulse">
+            <img src="/logo.png?v=1" alt="Lumen Logo" class="h-16 w-16 mb-6 animate-pulse">
             <span class="animate-spin inline-block w-8 h-8 border-4 border-transparent border-t-accent-purple rounded-full"></span>
             <p class="text-text-secondary mt-4 text-sm">Loading Lumen...</p>
         </div>

@@ -13,7 +13,7 @@ export const renderIntroduction = () => `
     <h2 id="lumen-the-strategic-solution">The Strategic Solution: Lumen</h2>
 
     <div class="my-8">
-        <img src="/docs/lumen-banner.png" alt="Lumen Protocol Banner" class="w-full rounded-xl ring-1 ring-white/10 shadow-2xl shadow-black/50">
+        <img src="/docs/lumen-banner.png?v=1" alt="Lumen Protocol Banner" class="w-full rounded-xl ring-1 ring-white/10 shadow-2xl shadow-black/50">
     </div>
 
     <p>Lumen is not another marketplace; we are core infrastructure for the future of AI, built on three foundational pillars that you can verify and use today.</p>
