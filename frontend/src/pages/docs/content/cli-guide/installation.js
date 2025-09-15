@@ -12,29 +12,20 @@ export const renderInstallation = () => `
     <h2 id="install-with-pip">Standard Installation with pip</h2>
     <p>With your terminal open (and your virtual environment activated), run the following command. This fetches the latest stable version of the Lumen CLI from the Python Package Index (PyPI) and installs it.</p>
     <div class="code-block">
-        <div class="code-block-header">
-            <div class="traffic-lights"><div class="traffic-light light-red"></div><div class="traffic-light light-yellow"></div><div class="traffic-light light-green"></div></div>
-            <div class="flex-grow text-center text-xs font-mono">bash</div>
-        </div>
+        <div class="code-block-header"><div class="flex-grow text-center text-xs font-mono">bash</div></div>
         <div class="code-block-content"><span class="command">pip install pylumen</span></div>
     </div>
     
     <p>To update the CLI to the latest version in the future, simply add the <code>--upgrade</code> flag:</p>
     <div class="code-block">
-        <div class="code-block-header">
-            <div class="traffic-lights"><div class="traffic-light light-red"></div><div class="traffic-light light-yellow"></div><div class="traffic-light light-green"></div></div>
-            <div class="flex-grow text-center text-xs font-mono">bash</div>
-        </div>
+        <div class="code-block-header"><div class="flex-grow text-center text-xs font-mono">bash</div></div>
         <div class="code-block-content"><span class="command">pip install --upgrade pylumen</span></div>
     </div>
 
     <h2 id="verifying">Verifying the Installation</h2>
     <p>Once the installation is complete, verify that the <code>lum</code> command is accessible in your system's PATH by checking its version.</p>
     <div class="code-block">
-        <div class="code-block-header">
-            <div class="traffic-lights"><div class="traffic-light light-red"></div><div class="traffic-light light-yellow"></div><div class="traffic-light light-green"></div></div>
-            <div class="flex-grow text-center text-xs font-mono">bash</div>
-        </div>
+        <div class="code-block-header"><div class="flex-grow text-center text-xs font-mono">bash</div></div>
         <div class="code-block-content">
             <p><span class="command">lum version</span></p>
             <p><span class="output">pylumen, version 1.0.0</span></p>

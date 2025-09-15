@@ -24,11 +24,11 @@ function renderPrinciplesOfValue() {
     return `
     <div class="mt-8">
         <h3 class="font-bold text-lg text-text-main mb-4">Principles of Value</h3>
-        <div class="relative bg-surface rounded-xl border border-primary overflow-hidden">
-            <div class="flex flex-col md:flex-row">
+        <div class="bg-surface rounded-lg border border-primary overflow-hidden">
+            <div class="grid md:grid-cols-3">
             ${principles.map((principle, index) => `
-                <div class="flex-1 p-6 relative ${index > 0 ? 'md:border-l md:border-primary' : ''}">
-                    <span class="absolute top-4 right-4 text-5xl font-bold gradient-text opacity-10">${principle.number}</span>
+                <div class="p-6 relative ${index < 2 ? 'md:border-r md:border-primary' : ''}">
+                    <span class="absolute top-4 right-4 text-5xl font-bold text-accent-primary opacity-10">${principle.number}</span>
                     <div class="relative">
                         <h4 class="font-bold text-text-main">${principle.title}</h4>
                         <p class="text-sm text-text-secondary mt-1">${principle.text}</p>
@@ -54,13 +54,13 @@ function buildFileTreeHtml(tree) {
     for (const [name, children] of entries) {
         const isFolder = name.endsWith('/');
         const cleanName = isFolder ? name.slice(0, -1) : name;
-        const icon = isFolder ? icons.folder : icons.file;
+        const icon = isFolder ? icons.folder.replace('text-accent-cyan', 'text-accent-primary') : icons.file;
 
         if (isFolder) {
-            html += `<li>
+            html += `<li class="mt-1">
                 <details open>
                     <summary class="folder-item file-item">${icon} ${cleanName}</summary>
-                    ${buildFileTreeHtml(children)}
+                    <ul class="pl-4">${buildFileTreeHtml(children)}</ul>
                 </details>
             </li>`;
         } else {
@@ -122,7 +122,7 @@ function render() {
         case 'analyzing':
             content = `
                 <div class="text-center p-12">
-                    <span class="animate-spin inline-block w-12 h-12 border-4 border-transparent border-t-accent-purple rounded-full"></span>
+                    <span class="animate-spin inline-block w-12 h-12 border-4 border-transparent border-t-accent-primary rounded-full"></span>
                     <p class="mt-4 text-text-secondary font-medium">Analyzing project locally...</p>
                     <p class="text-xs text-subtle mt-1">Your code has not left your browser.</p>
                 </div>
@@ -134,7 +134,7 @@ function render() {
                 <h2 class="text-2xl font-bold mb-1">Confirm Your Contribution</h2>
                 <p class="text-text-secondary mb-6">Review the project structure that will be submitted. Our filters have been applied.</p>
                 <div class="grid lg:grid-cols-3 gap-6">
-                    <div data-lenis-prevent class="lg:col-span-1 h-96 overflow-y-auto bg-primary/50 p-4 rounded-lg border border-subtle file-tree">
+                    <div data-lenis-prevent class="lg:col-span-1 h-96 overflow-y-auto bg-primary p-4 rounded-lg border border-subtle file-tree">
                         ${buildFileTreeHtml(state.project.fileTree)}
                     </div>
                     <div class="lg:col-span-2 bg-primary/50 p-6 rounded-lg border border-subtle flex flex-col justify-between">
@@ -145,13 +145,13 @@ function render() {
                                 <div class="flex justify-between"><span>Files/Folders excluded:</span><strong class="font-mono">${state.project.excludedCount}</strong></div>
                                 <div class="flex justify-between"><span>Final payload size:</span><strong class="font-mono">${(state.project.totalSize / 1024 / 1024).toFixed(2)} MB</strong></div>
                             </div>
-                            <div class="mt-4 text-xs p-3 bg-yellow-900/30 border border-yellow-500/30 text-yellow-200 rounded-md">
+                            <div class="mt-4 text-xs p-3 bg-amber-500/10 border border-amber-500/20 text-amber-700 rounded-md">
                                 <strong>Reward Notice:</strong> To encourage use of the secure, open-source CLI, contributions made via the web interface receive a modified reward (1/3 of the standard rate).
                             </div>
                         </div>
                         <div class="flex items-center gap-4 mt-6">
                              <button id="cancel-btn" class="w-1/3 py-3 text-sm font-bold bg-primary hover:bg-subtle/80 rounded-lg transition-colors">Cancel</button>
-                            <button id="submit-btn" class="w-2/3 py-3 text-sm font-bold bg-gradient-to-r from-accent-purple to-accent-pink text-white rounded-lg transition-all duration-300 hover:scale-105 hover:brightness-110">Confirm & Contribute</button>
+                            <button id="submit-btn" class="w-2/3 py-3 text-sm font-bold bg-accent-primary text-white rounded-lg transition-all duration-300 hover:bg-red-700">Confirm & Contribute</button>
                         </div>
                     </div>
                 </div>
@@ -160,24 +160,24 @@ function render() {
             
         case 'submitting':
              content = `<div class="text-center p-12">
-                <span class="animate-spin inline-block w-12 h-12 border-4 border-transparent border-t-accent-purple rounded-full"></span>
+                <span class="animate-spin inline-block w-12 h-12 border-4 border-transparent border-t-accent-primary rounded-full"></span>
                 <p class="mt-4 text-text-secondary font-medium">Submitting securely to the network...</p>
             </div>`;
             break;
             
         case 'success':
             content = `<div class="text-center p-12">
-                <div class="w-20 h-20 mx-auto mb-6 bg-green-900/50 text-green-300 rounded-full flex items-center justify-center">${icons.checkCircle}</div>
-                <h2 class="text-2xl font-bold text-white">Contribution Received!</h2>
-                <p class="text-text-secondary mt-2">Your submission (ID: #${state.project.id}) is now in the processing queue. You can track its status on the "My Contributions" page.</p>
-                <button id="contribute-again-btn" class="mt-8 px-8 py-3 font-bold bg-gradient-to-r from-accent-purple to-accent-pink text-white rounded-lg">Contribute Another Project</button>
+                <div class="w-20 h-20 mx-auto mb-6 bg-green-500/10 text-green-600 rounded-full flex items-center justify-center">${icons.checkCircle}</div>
+                <h2 class="text-2xl font-bold text-text-main">Contribution Received!</h2>
+                <p class="text-text-secondary mt-2">Your submission (ID: #${state.project.id}) is now in the processing queue. You can track its status on the "History" page.</p>
+                <button id="contribute-again-btn" class="mt-8 px-8 py-3 font-bold bg-accent-primary text-white rounded-lg hover:bg-red-700">Contribute Another Project</button>
             </div>`;
             break;
 
         case 'error':
              content = `<div class="text-center p-12">
-                <div class="w-20 h-20 mx-auto mb-6 bg-red-900/50 text-red-300 rounded-full flex items-center justify-center">${icons.errorCircle}</div>
-                <h2 class="text-2xl font-bold text-white">An Error Occurred</h2>
+                <div class="w-20 h-20 mx-auto mb-6 bg-red-500/10 text-red-600 rounded-full flex items-center justify-center">${icons.errorCircle}</div>
+                <h2 class="text-2xl font-bold text-text-main">An Error Occurred</h2>
                 <p class="text-text-secondary mt-2">${state.errorMessage}</p>
                 <button id="try-again-btn" class="mt-8 px-8 py-3 font-bold bg-primary hover:bg-subtle/80 rounded-lg transition-colors">Try Again</button>
             </div>`;
@@ -201,15 +201,14 @@ function render() {
             
             let timerHtml = '';
             if (sortedContributions.length > 0) {
-                const firstContribution = sortedContributions[0];
                 timerHtml = `
                     <div class="mt-2">
-                        <div class="text-xs text-yellow-400 cursor-pointer hover:text-yellow-300 transition-colors" onclick="this.nextElementSibling.classList.toggle('hidden')">
+                        <div class="text-xs text-amber-600 cursor-pointer hover:text-amber-500 transition-colors" onclick="this.nextElementSibling.classList.toggle('hidden')">
                             Next contribution available in: <span id="contribution-timer-0" class="font-mono font-bold"></span>
                         </div>
                         <div class="hidden mt-1 space-y-1 pl-4">
                             ${sortedContributions.slice(1).map((contribution, index) => `
-                                <div class="text-xs text-yellow-400">
+                                <div class="text-xs text-amber-600">
                                     Contribution #${contribution.id}: <span id="contribution-timer-${index + 1}" class="font-mono font-bold"></span>
                                 </div>
                             `).join('')}
@@ -220,22 +219,22 @@ function render() {
             
             content = `
                 <div class="text-center mb-6">
-                    <p class="text-sm font-medium ${contributionsLeft > 0 ? 'text-text-secondary' : 'text-yellow-400'}">
+                    <p class="text-sm font-medium ${contributionsLeft > 0 ? 'text-text-secondary' : 'text-amber-600'}">
                         You have ${contributionsLeft} / 3 successful contributions remaining today.
                     </p>
                     ${timerHtml}
                 </div>
-                <div id="drop-zone" class="drop-zone flex flex-col justify-center ${contributionsLeft === 0 ? 'opacity-50 cursor-not-allowed' : 'hover:border-accent-purple hover:bg-surface/50'}">
+                <div id="drop-zone" class="drop-zone flex flex-col justify-center ${contributionsLeft === 0 ? 'opacity-50 cursor-not-allowed' : 'hover:border-accent-primary hover:bg-surface/50'}">
                     <div class="flex flex-col items-center">
-                        <div class="w-16 h-16 text-accent-purple mb-4 flex items-center justify-center">${icons.upload}</div>
+                        <div class="w-16 h-16 text-accent-primary mb-4 flex items-center justify-center">${icons.upload}</div>
                         <span class="font-bold text-lg text-text-main">Drag & drop your project folder here</span>
                         <span class="text-text-secondary mt-1">or</span>
-                        <label for="folder-input" class="mt-2 font-semibold text-accent-cyan hover:underline cursor-pointer">
-                            select a folder
+                        <label for="folder-input" class="mt-2 font-semibold text-accent-primary hover:underline cursor-pointer">
+                            Select a folder
                             <input type="file" id="folder-input" webkitdirectory directory class="sr-only" ${contributionsLeft === 0 ? 'disabled' : ''}>
                         </label>
-                        <p class="text-xs text-subtle mt-4">Max project size: 5 MB. All processing is done in your browser before upload.</p>
-                        <p class="text-xs text-yellow-400 mt-2">Please note: This tool only accepts project folders, not individual files.</p>
+                        <p class="text-xs text-text-secondary mt-4">Max project size: 5 MB. All processing is done in your browser before upload.</p>
+                        <p class="text-xs text-amber-600 mt-2">Please note: This tool only accepts project folders, not individual files.</p>
                     </div>
                 </div>
             `;

@@ -6,9 +6,9 @@ export const renderPrivacyPolicy = () => `
         <li>Visit our website at https://lumen.onl, or any website of ours that links to this privacy notice.</li>
         <li>Engage with us in other related ways, including any sales, marketing, or events.</li>
     </ul>
-    <p>Reading this privacy notice will help you understand your privacy rights and choices. If you do not agree with our policies and practices, please do not use our Services. If you still have any questions or concerns, please contact us at <a href="mailto:contact@lumen.onl" class="text-accent-cyan hover:underline">contact@lumen.onl</a>.</p>
+    <p>Reading this privacy notice will help you understand your privacy rights and choices. If you do not agree with our policies and practices, please do not use our Services. If you still have any questions or concerns, please contact us at <a href="mailto:contact@lumen.onl" class="text-red-600 hover:underline">contact@lumen.onl</a>.</p>
 
-    <div class="my-8 p-6 bg-surface border border-primary rounded-lg">
+    <div class="my-8 p-6 bg-white border border-gray-200 rounded-lg">
         <h3 class="font-bold text-lg text-text-main mb-4">Summary of Key Points</h3>
         <p class="text-text-secondary">This summary provides key points from our privacy notice, but you can find out more details about any of these topics by using our table of contents below to find the section you are looking for.</p>
         <ul class="list-disc list-inside mt-4 space-y-2 text-text-secondary">
@@ -22,9 +22,9 @@ export const renderPrivacyPolicy = () => `
         </ul>
     </div>
     
-    <div class="my-8 p-6 bg-surface border border-primary rounded-lg">
+    <div class="my-8 p-6 bg-white border border-gray-200 rounded-lg">
         <h3 class="font-bold text-lg text-text-main mb-4">Table of Contents</h3>
-        <ol class="list-decimal list-inside space-y-2 text-accent-cyan">
+        <ol class="list-decimal list-inside space-y-2 text-red-600">
             <li><a href="#what-info" class="hover:underline">What Information Do We Collect?</a></li>
             <li><a href="#how-info" class="hover:underline">How Do We Process Your Information?</a></li>
             <li><a href="#legal-bases" class="hover:underline">What Legal Bases Do We Rely On to Process Your Information?</a></li>
@@ -96,5 +96,5 @@ export const renderPrivacyPolicy = () => `
     <p>We may update this privacy notice from time to time. The updated version will be indicated by an updated "Last updated" date and the updated version will be effective as soon as it is accessible. We encourage you to review this privacy notice frequently to be informed of how we are protecting your information.</p>
 
     <h2 id="contact-info">13. How Can You Contact Us About This Notice?</h2>
-    <p>If you have questions or comments about this notice, you may email us at <a href="mailto:contact@lumen.onl" class="text-accent-cyan hover:underline">contact@lumen.onl</a>.</p>
+    <p>If you have questions or comments about this notice, you may email us at <a href="mailto:contact@lumen.onl" class="text-red-600 hover:underline">contact@lumen.onl</a>.</p>
 `;

@@ -3,12 +3,12 @@ import { icons } from './utils.js';
 function renderActivityItem(item) {
     if (item.type === 'CONTRIBUTION') {
         const rewardText = item.reward_amount > 0 
-            ? `<strong class="font-medium text-green-400">+$${item.reward_amount.toFixed(4)}</strong>`
+            ? `<strong class="font-medium text-green-600">+$${item.reward_amount.toFixed(4)}</strong>`
             : `<strong class="font-medium text-text-secondary">No reward granted</strong>`;
 
         return `
             <li class="flex items-start space-x-4 animate-fade-in-up">
-                <div class="p-3 bg-primary rounded-full mt-1 text-accent-purple">${icons.contributions}</div>
+                <div class="p-3 bg-primary rounded-lg mt-1 text-accent-primary">${icons.contributions}</div>
                 <div class="flex-grow text-sm">
                     <p class="text-text-main">
                         <strong class="font-bold">You</strong> contributed new code to the network.
@@ -17,43 +17,43 @@ function renderActivityItem(item) {
                         Valuation: ${rewardText}
                     </p>
                 </div>
-                <span class="text-xs text-subtle font-mono whitespace-nowrap">${new Date(item.created_at).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' })}</span>
+                <span class="text-xs text-text-secondary font-mono whitespace-nowrap">${new Date(item.created_at).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' })}</span>
             </li>
         `;
     }
 
     if (item.type === 'PAYOUT') {
         const isSuccess = item.status === 'COMPLETED';
-        const iconColor = isSuccess ? 'text-green-400' : 'text-red-400';
+        const iconColor = isSuccess ? 'text-green-600' : 'text-red-600';
         const titleText = isSuccess ? 'A payout was processed to your wallet.' : `A payout of $${item.amount_usd.toFixed(4)} has failed.`;
         
         let detailsHtml = '';
         if (isSuccess) {
             detailsHtml = `
                 <p class="text-text-secondary mt-1">
-                    Amount: <strong class="font-medium text-accent-cyan">$${item.amount_usd.toFixed(4)} USDC</strong>
+                    Amount: <strong class="font-medium text-accent-primary">$${item.amount_usd.toFixed(4)} USDC</strong>
                 </p>
-                ${item.transaction_hash ? `<a href="https://solscan.io/tx/${item.transaction_hash}" target="_blank" rel="noopener noreferrer" class="text-xs text-accent-cyan hover:underline">View on Solscan</a>` : ''}
+                ${item.transaction_hash ? `<a href="https://solscan.io/tx/${item.transaction_hash}" target="_blank" rel="noopener noreferrer" class="text-xs text-accent-primary hover:underline">View on Solscan</a>` : ''}
             `;
         } else {
             detailsHtml = `
                 <p class="text-text-secondary mt-1">
-                    Status: <strong class="font-medium text-red-300">${item.status}</strong>
+                    Status: <strong class="font-medium text-red-600">${item.status}</strong>
                 </p>
-                ${item.error_message ? `<p class="text-xs text-red-400/80 mt-1">${item.error_message}</p>` : ''}
+                ${item.error_message ? `<p class="text-xs text-red-500/80 mt-1">${item.error_message}</p>` : ''}
             `;
         }
 
         return `
             <li class="flex items-start space-x-4 animate-fade-in-up">
-                <div class="p-3 bg-primary rounded-full mt-1 ${iconColor}">${icons.dashboard}</div>
+                <div class="p-3 bg-primary rounded-lg mt-1 ${iconColor}">${icons.dashboard}</div>
                 <div class="flex-grow text-sm">
                     <p class="text-text-main">
                         <strong class="font-bold">${titleText}</strong>
                     </p>
                     ${detailsHtml}
                 </div>
-                <span class="text-xs text-subtle font-mono whitespace-nowrap">${new Date(item.created_at).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' })}</span>
+                <span class="text-xs text-text-secondary font-mono whitespace-nowrap">${new Date(item.created_at).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' })}</span>
             </li>
         `;
     }
@@ -67,9 +67,9 @@ function renderFeed(events) {
             ${events.length > 0 ? events.map(renderActivityItem).join('') : `
                 <li class="text-text-secondary text-center p-8">
                     <div class="flex flex-col items-center">
-                        <div class="text-accent-purple mb-4">${icons.feed}</div>
+                        <div class="text-subtle mb-4">${icons.feed}</div>
                         <p>No personal activity found yet.</p>
-                        <a href="/docs/contributing" class="mt-2 text-sm text-accent-cyan hover:underline">Learn how to contribute</a>
+                        <a href="/docs/contributing" class="mt-2 text-sm text-accent-primary hover:underline">Learn how to contribute</a>
                     </div>
                 </li>`}
         </ul>

@@ -32,17 +32,15 @@ function renderSidebar(activeTab, user) {
     ];
 
     return `
-    <div class="p-4 bg-surface rounded-xl border border-primary">
+    <div class="p-4 bg-surface rounded-lg border border-primary">
         <div class="text-center mb-6">
-            <div class="w-20 h-20 rounded-full mx-auto mb-3 bg-surface p-4 border-2 border-primary flex items-center justify-center">
-                <img src="/logo.png" alt="Lumen Logo" class="h-10 w-10">
-            </div>
+            <img src="/logo.png" alt="Lumen Logo" class="h-12 w-12 mx-auto mb-4">
             <h3 class="font-bold text-lg text-text-main">${user?.display_name ?? 'User'}</h3>
-            <a href="/leaderboard" class="font-semibold gradient-text hover:brightness-125 transition">View Leaderboard</a>
+            <a href="/leaderboard" class="font-semibold text-accent-primary hover:text-red-700 transition">View Leaderboard</a>
         </div>
         <nav class="flex flex-col space-y-1">
              ${sidebarButtons.map(btn => `
-                <button id="sidebar-button-${btn.id}" data-tab="${btn.id}" class="sidebar-button flex-shrink-0 w-full text-left py-2.5 px-4 rounded-lg text-sm font-bold flex items-center gap-3 transition-colors ${activeTab === btn.id ? 'bg-primary text-text-main' : 'text-text-secondary hover:bg-primary hover:text-text-main'}">
+                <button id="sidebar-button-${btn.id}" data-tab="${btn.id}" class="sidebar-button flex-shrink-0 w-full text-left py-2.5 px-4 rounded-md text-sm font-bold flex items-center gap-3 transition-colors ${activeTab === btn.id ? 'bg-primary text-text-main' : 'text-text-secondary hover:bg-primary hover:text-text-main'}">
                     ${btn.icon}
                     <span>${btn.label}</span>
                 </button>
@@ -82,7 +80,7 @@ async function refreshDashboardData(isInitialLoad = false) {
     const dashboardContentArea = document.getElementById('dashboard-content-area');
 
     if (isInitialLoad) {
-        dashboardContentArea.innerHTML = `<div class="flex justify-center items-center h-64"><span class="animate-spin inline-block w-8 h-8 border-4 border-transparent border-t-accent-purple rounded-full"></span><p class="ml-4 text-text-secondary">Loading dashboard data...</p></div>`;
+        dashboardContentArea.innerHTML = `<div class="flex justify-center items-center h-64"><span class="animate-spin inline-block w-8 h-8 border-4 border-transparent border-t-accent-primary rounded-full"></span><p class="ml-4 text-text-secondary">Loading dashboard data...</p></div>`;
     }
 
     try {
@@ -244,9 +242,9 @@ async function setupDashboard() {
     const dashboardSidebarArea = document.getElementById('dashboard-sidebar-area');
 
     if (dashboardSidebarArea && !dashboardSidebarArea.querySelector('.sidebar-button')) {
-        dashboardSidebarArea.innerHTML = `<div class="flex justify-center items-center h-64"><span class="animate-spin inline-block w-8 h-8 border-4 border-transparent border-t-accent-purple rounded-full"></span><p class="ml-4 text-text-secondary">Loading sidebar...</p></div>`;
+        dashboardSidebarArea.innerHTML = `<div class="flex justify-center items-center h-64"><span class="animate-spin inline-block w-8 h-8 border-4 border-transparent border-t-accent-primary rounded-full"></span></div>`;
     }
-    dashboardContentArea.innerHTML = `<div class="flex justify-center items-center h-64"><span class="animate-spin inline-block w-8 h-8 border-4 border-transparent border-t-accent-purple rounded-full"></span><p class="ml-4 text-text-secondary">Fetching account details...</p></div>`;
+    dashboardContentArea.innerHTML = `<div class="flex justify-center items-center h-64"><span class="animate-spin inline-block w-8 h-8 border-4 border-transparent border-t-accent-primary rounded-full"></span><p class="ml-4 text-text-secondary">Fetching account details...</p></div>`;
 
     const urlParams = new URLSearchParams(window.location.search);
     let currentTabId = urlParams.get('tab') || 'overview';
@@ -296,25 +294,16 @@ export function renderDashboardLayout() {
     activeTimeRange = 'all';
     disconnectUserWebSocket();
     const content = `
-    <main class="flex-grow bg-abyss-dark pt-28">
-        <svg aria-hidden="true" style="position: absolute; width: 0; height: 0; overflow: hidden;">
-          <defs>
-            <linearGradient id="dashboard-icon-gradient" x1="0%" y1="0%" x2="100%" y2="100%">
-              <stop offset="0%" style="stop-color: #8A2BE2;" />
-              <stop offset="50%" style="stop-color: #FF69B4;" />
-              <stop offset="100%" style="stop-color: #00D9D9;" />
-            </linearGradient>
-          </defs>
-        </svg>
+    <main class="flex-grow bg-background pt-28">
         <div class="container mx-auto px-6 pb-20 flex flex-col lg:flex-row lg:gap-8 lg:items-start">
             <aside id="dashboard-sidebar-area" class="w-full lg:w-64 flex-shrink-0 mb-8 lg:mb-0">
                 <div class="flex justify-center items-center h-64">
-                    <span class="animate-spin inline-block w-8 h-8 border-4 border-transparent border-t-accent-purple rounded-full"></span>
+                    <span class="animate-spin inline-block w-8 h-8 border-4 border-transparent border-t-accent-primary rounded-full"></span>
                 </div>
             </aside>
             <div id="dashboard-content-area" class="flex-1 min-w-0">
                 <div class="flex justify-center items-center h-64">
-                    <span class="animate-spin inline-block w-8 h-8 border-4 border-transparent border-t-accent-purple rounded-full"></span>
+                    <span class="animate-spin inline-block w-8 h-8 border-4 border-transparent border-t-accent-primary rounded-full"></span>
                 </div>
             </div>
         </div>

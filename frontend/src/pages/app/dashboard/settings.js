@@ -26,7 +26,7 @@ async function handleLinkPhantomWallet(user) {
     if (!walletService.isWalletConnected() || !walletService.getAdapter() || walletService.getAdapter().name !== 'Phantom') {
         if (messageEl) {
             messageEl.textContent = 'Please connect your Phantom wallet first.';
-            messageEl.className = 'block text-sm p-3 rounded-md bg-red-900/50 text-red-300 mt-4';
+            messageEl.className = 'block text-sm p-3 rounded-md bg-red-500/10 text-red-700 mt-4';
             messageEl.classList.remove('hidden');
         }
         renderWalletSelectionModal();
@@ -56,7 +56,7 @@ async function handleLinkPhantomWallet(user) {
         
         if (messageEl) {
             messageEl.textContent = 'Wallet linked successfully! Reloading page to reflect changes...';
-            messageEl.className = 'block text-sm p-3 rounded-md bg-green-900/50 text-green-300 mt-4';
+            messageEl.className = 'block text-sm p-3 rounded-md bg-green-500/10 text-green-600 mt-4';
             messageEl.classList.remove('hidden');
         }
         setTimeout(() => window.location.reload(), 2000);
@@ -70,7 +70,7 @@ async function handleLinkPhantomWallet(user) {
         }
         if (messageEl) {
             messageEl.textContent = detail;
-            messageEl.className = 'block text-sm p-3 rounded-md bg-red-900/50 text-red-300 mt-4';
+            messageEl.className = 'block text-sm p-3 rounded-md bg-red-500/10 text-red-700 mt-4';
             messageEl.classList.remove('hidden');
         }
         if (button) {
@@ -98,7 +98,7 @@ async function handleSaveManualWalletAddress(e) {
     } catch (err) {
         if (messageEl) {
             messageEl.textContent = 'Invalid Solana address format.';
-            messageEl.className = 'block text-sm p-3 rounded-md bg-red-900/50 text-red-300 mt-4';
+            messageEl.className = 'block text-sm p-3 rounded-md bg-red-500/10 text-red-700 mt-4';
             messageEl.classList.remove('hidden');
         }
         if (button) {
@@ -113,7 +113,7 @@ async function handleSaveManualWalletAddress(e) {
         await fetchAndStoreUser();
         if (messageEl) {
             messageEl.textContent = 'Wallet address saved successfully! Reloading page...';
-            messageEl.className = 'block text-sm p-3 rounded-md bg-green-900/50 text-green-300 mt-4';
+            messageEl.className = 'block text-sm p-3 rounded-md bg-green-500/10 text-green-600 mt-4';
             messageEl.classList.remove('hidden');
         }
         setTimeout(() => window.location.reload(), 2000);
@@ -121,7 +121,7 @@ async function handleSaveManualWalletAddress(e) {
         const detail = error.response?.data?.detail || 'Failed to save address. Please try again.';
         if (messageEl) {
             messageEl.textContent = detail;
-            messageEl.className = 'block text-sm p-3 rounded-md bg-red-900/50 text-red-300 mt-4';
+            messageEl.className = 'block text-sm p-3 rounded-md bg-red-500/10 text-red-700 mt-4';
             messageEl.classList.remove('hidden');
         }
         if (button) {
@@ -138,7 +138,7 @@ function renderWalletManagementCard(user) {
     const linkedRewardsAddress = user?.solana_address;
 
     let content = '';
-    const primaryWalletActionClasses = "w-full flex justify-center py-2.5 px-6 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-gradient-to-r from-accent-purple to-accent-pink hover:opacity-90 transition-opacity";
+    const primaryWalletActionClasses = "w-full flex justify-center py-2.5 px-6 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-accent-primary hover:bg-red-700 transition-colors";
     const secondaryWalletActionClasses = "w-full flex justify-center py-2.5 px-6 border border-subtle rounded-md text-sm font-medium text-text-main bg-primary hover:bg-subtle transition-colors";
 
     if (linkedRewardsAddress) {
@@ -147,14 +147,14 @@ function renderWalletManagementCard(user) {
             <p class="text-sm text-text-secondary mt-1 mb-2">Your rewards will be sent to this permanent address:</p>
             <div class="bg-primary p-4 rounded-lg flex items-center justify-between">
                 <div class="flex items-center gap-3">
-                    <svg class="w-6 h-6 text-green-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                    <svg class="w-6 h-6 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
                     <span class="font-mono text-text-main">${truncatedRewardsAddress}</span>
                 </div>
             </div>
             <p class="text-xs text-text-secondary text-center mt-4">To ensure fairness and prevent abuse, wallet addresses cannot be changed. Please contact support if you have lost access to this wallet.</p>
         `;
     } else {
-        content = `<p class="text-sm text-text-secondary mt-1 mb-4 text-center">Link a Solana wallet to receive your $LUMEN rewards. This is a permanent, one-time action.</p>`;
+        content = `<p class="text-sm text-text-secondary mt-1 mb-4 text-center">Link a Solana wallet to receive your rewards. This is a permanent, one-time action.</p>`;
         
         if (isPhantomSiteConnected) {
             const truncatedSiteAddress = `${siteConnectedPhantomAddress.slice(0,6)}...${siteConnectedPhantomAddress.slice(-6)}`;
@@ -180,7 +180,7 @@ function renderWalletManagementCard(user) {
             </div>
             <form id="manual-wallet-form">
                 <p class="text-sm text-text-secondary mt-1 mb-2 text-center">Enter any Solana address manually:</p>
-                <input type="text" id="manual-solana-address" placeholder="Your Solana Address" class="w-full bg-primary border border-subtle rounded-md px-3 py-2 text-text-main focus:ring-2 focus:ring-accent-purple focus:outline-none">
+                <input type="text" id="manual-solana-address" placeholder="Your Solana Address" class="w-full bg-primary border border-subtle rounded-md px-3 py-2 text-text-main focus:ring-2 focus:ring-accent-primary focus:outline-none">
                 <button id="save-manual-wallet-btn" type="submit" class="mt-3 ${secondaryWalletActionClasses}">
                     Save Address
                 </button>
@@ -189,11 +189,9 @@ function renderWalletManagementCard(user) {
     }
 
     return `
-        <div class="p-6 h-full flex flex-col">
-            <h3 class="font-bold text-lg">Rewards Wallet</h3>
-            <div id="wallet-management-message" class="hidden mt-4"></div>
-            <div class="mt-1 mb-6 flex-grow flex flex-col justify-center">${content}</div>
-        </div>
+        <h3 class="font-bold text-lg">Rewards Wallet</h3>
+        <div id="wallet-management-message" class="hidden mt-4"></div>
+        <div class="mt-1 mb-6 flex-grow flex flex-col justify-center">${content}</div>
     `;
 }
 
@@ -229,7 +227,7 @@ async function handleProfileSettingsSubmit(e, dashboardState) {
         if (dashboardState) dashboardState.user = user;
         if (msgEl) {
             msgEl.textContent = 'Settings updated successfully!';
-            msgEl.className = 'block text-sm text-center text-green-300';
+            msgEl.className = 'block text-sm text-center text-green-600';
             msgEl.classList.remove('hidden');
         }
         
@@ -243,7 +241,7 @@ async function handleProfileSettingsSubmit(e, dashboardState) {
     } catch (error) {
         if (msgEl) {
             msgEl.textContent = error.response?.data?.detail || 'Failed to update settings.';
-            msgEl.className = 'block text-sm text-center text-red-300';
+            msgEl.className = 'block text-sm text-center text-red-600';
             msgEl.classList.remove('hidden');
         }
     } finally {
@@ -269,7 +267,7 @@ async function handleChangePasswordSubmit(e) {
     if (newPassword !== confirmPassword) {
         if (msgEl) {
             msgEl.textContent = "New passwords do not match.";
-            msgEl.className = 'block text-sm text-center text-red-300';
+            msgEl.className = 'block text-sm text-center text-red-600';
             msgEl.classList.remove('hidden');
         }
         return;
@@ -279,7 +277,7 @@ async function handleChangePasswordSubmit(e) {
     if (strength.score < 2) {
         if (msgEl) {
             msgEl.textContent = strength.feedback.warning || "New password is too weak.";
-            msgEl.className = 'block text-sm text-center text-red-300';
+            msgEl.className = 'block text-sm text-center text-red-600';
             msgEl.classList.remove('hidden');
         }
         return;
@@ -298,7 +296,7 @@ async function handleChangePasswordSubmit(e) {
     } catch (error) {
         if (msgEl) {
             msgEl.textContent = error.response?.data?.detail || 'Failed to change password.';
-            msgEl.className = 'block text-sm text-center text-red-300';
+            msgEl.className = 'block text-sm text-center text-red-600';
             msgEl.classList.remove('hidden');
         }
         if (btnEl) {
@@ -338,7 +336,7 @@ async function handleDisable2FASubmit(e, dashboardState) {
     } catch (error) {
         if (msgEl) {
             msgEl.textContent = error.response?.data?.detail || 'Failed to disable 2FA.';
-            msgEl.className = 'block text-sm p-2 rounded-md bg-red-900/50 text-red-300 mt-2 text-center';
+            msgEl.className = 'block text-sm p-2 rounded-md bg-red-500/10 text-red-700 mt-2 text-center';
             msgEl.classList.remove('hidden');
         }
         if (btnEl) {
@@ -355,10 +353,10 @@ function renderBackupCodesModal(backupCodes) {
     
     const content = `
         <div class="text-center">
-             <div class="w-16 h-16 mx-auto mb-4 bg-yellow-900/50 text-yellow-300 rounded-full flex items-center justify-center">
+             <div class="w-16 h-16 mx-auto mb-4 bg-yellow-500/10 text-yellow-600 rounded-full flex items-center justify-center">
                 <svg class="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" /></svg>
             </div>
-            <h3 class="font-bold text-lg text-white">Save Your Backup Codes</h3>
+            <h3 class="font-bold text-lg text-text-main">Save Your Backup Codes</h3>
             <p class="text-text-secondary mt-2 mb-4">
                 <strong>This is the only time you will see these codes.</strong> Store them somewhere extremely safe. If you lose your phone, these codes are the only way to get back into your account.
             </p>
@@ -371,12 +369,12 @@ function renderBackupCodesModal(backupCodes) {
 
             <div class="my-4 p-4 bg-primary rounded-lg">
                 <label for="backup-codes-checkbox" class="flex items-center justify-center cursor-pointer">
-                    <input type="checkbox" id="backup-codes-checkbox" class="h-4 w-4 rounded bg-surface border-subtle text-accent-purple focus:ring-accent-purple focus:ring-offset-surface">
+                    <input type="checkbox" id="backup-codes-checkbox" class="custom-checkbox">
                     <span class="ml-3 text-sm text-text-secondary">I have securely saved my backup codes.</span>
                 </label>
             </div>
 
-            <button id="backup-codes-close-btn" class="w-full flex justify-center py-3 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-gradient-to-r from-accent-purple to-accent-pink transition-opacity disabled:opacity-50 disabled:cursor-not-allowed" disabled>
+            <button id="backup-codes-close-btn" class="w-full flex justify-center py-3 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-accent-primary transition-opacity disabled:opacity-50 disabled:cursor-not-allowed" disabled>
                 Done
             </button>
         </div>
@@ -465,9 +463,9 @@ async function show2FASetupModal(dashboardState) {
                 <form id="enable-2fa-form" class="mt-6">
                     <label for="2fa-verification-code" class="text-sm font-medium text-text-secondary">Enter the 6-digit code from your app to confirm:</label>
                     <input type="text" id="2fa-verification-code" required autocomplete="one-time-code"
-                           class="mt-1 block w-full bg-primary border border-subtle rounded-md px-3 py-2 text-text-main text-center text-2xl tracking-widest font-mono focus:ring-2 focus:ring-accent-purple focus:outline-none">
-                    <div id="enable-2fa-message" class="hidden text-sm p-3 rounded-md bg-red-900/50 text-red-300 mt-4 text-center"></div>
-                    <button type="submit" class="mt-4 w-full flex justify-center py-3 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-gradient-to-r from-accent-purple to-accent-pink hover:opacity-90 transition-opacity">
+                           class="mt-1 block w-full bg-primary border border-subtle rounded-md px-3 py-2 text-text-main text-center text-2xl tracking-widest font-mono focus:ring-2 focus:ring-accent-primary focus:outline-none">
+                    <div id="enable-2fa-message" class="hidden text-sm p-3 rounded-md bg-red-500/10 text-red-700 mt-4 text-center"></div>
+                    <button type="submit" class="mt-4 w-full flex justify-center py-3 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-accent-primary hover:bg-red-700 transition-colors">
                         Verify & Enable
                     </button>
                 </form>
@@ -495,9 +493,9 @@ async function handleDeleteAccount(user) {
                 <li>Your email, display name, and social account links will be permanently deleted.</li>
                 <li>Your account balance and rewards will be forfeited.</li>
                 <li>All login sessions and access tokens will be invalidated.</li>
-                <li>Your past contributions will be retained but fully dissociated from you. To request deletion of contribution data, you must contact <a href="mailto:contact@lumen.onl" class="text-accent-cyan hover:underline">contact@lumen.onl</a>.</li>
+                <li>Your past contributions will be retained but fully dissociated from you. To request deletion of contribution data, you must contact <a href="mailto:contact@lumen.onl" class="text-accent-primary hover:underline">contact@lumen.onl</a>.</li>
             </ul>
-            <div id="delete-account-message" class="hidden text-sm p-3 rounded-md bg-red-900/50 text-red-300 my-4 text-center"></div>
+            <div id="delete-account-message" class="hidden text-sm p-3 rounded-md bg-red-500/10 text-red-700 my-4 text-center"></div>
     `;
 
     if (user.has_password) {
@@ -505,11 +503,11 @@ async function handleDeleteAccount(user) {
             <form id="delete-account-form">
                 <div class="mb-4">
                     <label for="delete-password" class="block text-sm font-medium text-text-secondary mb-1">Confirm with your password</label>
-                    <input type="password" id="delete-password" required class="w-full bg-primary border border-subtle rounded-md px-3 py-2 text-text-main focus:ring-2 focus:ring-accent-purple focus:outline-none">
+                    <input type="password" id="delete-password" required class="w-full bg-primary border border-subtle rounded-md px-3 py-2 text-text-main focus:ring-2 focus:ring-accent-primary focus:outline-none">
                 </div>
                 <label for="delete-confirmation" class="block text-sm font-medium text-text-secondary mb-1">To confirm, type "<strong class="text-text-main">${confirmationPhrase}</strong>" in the box below.</label>
-                <input type="text" id="delete-confirmation" required autocomplete="off" class="w-full bg-primary border border-subtle rounded-md px-3 py-2 text-text-main focus:ring-2 focus:ring-accent-purple focus:outline-none">
-                <button type="submit" id="final-delete-btn" class="mt-6 w-full flex justify-center py-3 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-red-800 hover:bg-red-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed">
+                <input type="text" id="delete-confirmation" required autocomplete="off" class="w-full bg-primary border border-subtle rounded-md px-3 py-2 text-text-main focus:ring-2 focus:ring-accent-primary focus:outline-none">
+                <button type="submit" id="final-delete-btn" class="mt-6 w-full flex justify-center py-3 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-red-700 hover:bg-red-800 transition-colors disabled:opacity-50 disabled:cursor-not-allowed">
                     Permanently Delete My Account
                 </button>
             </form>
@@ -517,7 +515,7 @@ async function handleDeleteAccount(user) {
     } else {
         modalContent += `
             <p class="text-center text-text-secondary">Because you use a social login, we must verify your identity by sending a confirmation link to your registered email address.</p>
-            <button id="send-deletion-link-btn" class="mt-6 w-full flex justify-center py-3 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-red-800 hover:bg-red-700 transition-colors">
+            <button id="send-deletion-link-btn" class="mt-6 w-full flex justify-center py-3 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-red-700 hover:bg-red-800 transition-colors">
                 Send Deletion Email
             </button>
         </div>
@@ -551,7 +549,7 @@ async function handleDeleteAccount(user) {
                 if (modalBody) {
                     modalBody.innerHTML = `
                         <div class="text-center transition-all animate-fade-in-up">
-                            <h3 class="font-bold text-lg text-green-300">Account Deleted</h3>
+                            <h3 class="font-bold text-lg text-green-600">Account Deleted</h3>
                             <p class="text-text-secondary mt-2">You will be logged out and redirected shortly.</p>
                         </div>
                     `;
@@ -580,7 +578,7 @@ async function handleDeleteAccount(user) {
                 if (modalBody) {
                     modalBody.innerHTML = `
                         <div class="text-center">
-                            <h3 class="font-bold text-lg text-green-300">Email Sent!</h3>
+                            <h3 class="font-bold text-lg text-green-600">Email Sent!</h3>
                             <p class="text-text-secondary mt-2">Please check your inbox and click the link to finalize your account deletion.</p>
                         </div>
                     `;
@@ -651,7 +649,7 @@ export async function attachSettingsPageListeners(dashboardState) {
         }
         
         linkMessageEl.textContent = message;
-        linkMessageEl.className = `block text-sm p-3 rounded-md mb-4 ${isSuccess ? 'bg-green-900/50 text-green-300' : 'bg-red-900/50 text-red-300'}`;
+        linkMessageEl.className = `block text-sm p-3 rounded-md mb-4 ${isSuccess ? 'bg-green-500/10 text-green-600' : 'bg-red-500/10 text-red-700'}`;
         linkMessageEl.classList.remove('hidden');
         
         const newUrl = new URL(window.location);
@@ -684,14 +682,14 @@ export async function attachSettingsPageListeners(dashboardState) {
             await api.post('/security/2fa/request-disable');
             if (msgEl) {
                 msgEl.textContent = 'Disable link sent! Please check your email.';
-                msgEl.className = 'block text-sm p-3 rounded-md bg-green-900/50 text-green-300 mt-4 text-center';
+                msgEl.className = 'block text-sm p-3 rounded-md bg-green-500/10 text-green-600 mt-4 text-center';
                 msgEl.classList.remove('hidden');
             }
             btnEl.classList.add('hidden');
         } catch (error) {
             if (msgEl) {
                 msgEl.textContent = error.response?.data?.detail || 'Failed to send disable link.';
-                msgEl.className = 'block text-sm p-3 rounded-md bg-red-900/50 text-red-300 mt-4 text-center';
+                msgEl.className = 'block text-sm p-3 rounded-md bg-red-500/10 text-red-700 mt-4 text-center';
                 msgEl.classList.remove('hidden');
             }
             btnEl.disabled = false;
@@ -708,7 +706,7 @@ export async function attachSettingsPageListeners(dashboardState) {
         newUrl.searchParams.delete('token');
         window.history.replaceState({}, '', newUrl);
 
-        const { modalId, closeModal } = renderModal('Disabling 2FA', `<div class="text-center p-8"><span class="animate-spin inline-block w-8 h-8 border-4 border-transparent border-t-accent-purple rounded-full"></span><p class="mt-4 text-text-secondary">Processing your request...</p></div>`);
+        const { modalId, closeModal } = renderModal('Disabling 2FA', `<div class="text-center p-8"><span class="animate-spin inline-block w-8 h-8 border-4 border-transparent border-t-accent-primary rounded-full"></span><p class="mt-4 text-text-secondary">Processing your request...</p></div>`);
         const modalBody = document.getElementById(`modal-body-${modalId}`);
 
         try {
@@ -718,7 +716,7 @@ export async function attachSettingsPageListeners(dashboardState) {
 
             if(modalBody) {
                 modalBody.innerHTML = `<div class="text-center transition-all animate-fade-in-up">
-                    <div class="w-16 h-16 mx-auto mb-4 bg-green-900/50 text-green-300 rounded-full flex items-center justify-center">
+                    <div class="w-16 h-16 mx-auto mb-4 bg-green-500/10 text-green-600 rounded-full flex items-center justify-center">
                         <svg class="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
                     </div>
                     <h3 class="font-bold text-lg text-text-main">2FA Disabled</h3>
@@ -737,7 +735,7 @@ export async function attachSettingsPageListeners(dashboardState) {
             if(modalBody) {
                 const errorMessage = error.response?.data?.detail || 'An unknown error occurred.';
                 modalBody.innerHTML = `<div class="text-center transition-all animate-fade-in-up">
-                    <div class="w-16 h-16 mx-auto mb-4 bg-red-900/50 text-red-300 rounded-full flex items-center justify-center">
+                    <div class="w-16 h-16 mx-auto mb-4 bg-red-500/10 text-red-700 rounded-full flex items-center justify-center">
                         <svg class="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
                     </div>
                     <h3 class="font-bold text-lg text-text-main">Disable Failed</h3>
@@ -754,7 +752,7 @@ export async function attachSettingsPageListeners(dashboardState) {
         newUrl.searchParams.delete('token');
         window.history.replaceState({}, '', newUrl);
 
-        const { modalId } = renderModal('Confirming Deletion', `<div class="text-center p-8"><span class="animate-spin inline-block w-8 h-8 border-4 border-transparent border-t-accent-purple rounded-full"></span><p class="mt-4 text-text-secondary">Processing your account deletion...</p></div>`);
+        const { modalId } = renderModal('Confirming Deletion', `<div class="text-center p-8"><span class="animate-spin inline-block w-8 h-8 border-4 border-transparent border-t-accent-primary rounded-full"></span><p class="mt-4 text-text-secondary">Processing your account deletion...</p></div>`);
         const modalBody = document.getElementById(`modal-body-${modalId}`);
         try {
             await api.delete('/users/me', { data: { token } });
@@ -762,7 +760,7 @@ export async function attachSettingsPageListeners(dashboardState) {
             if (modalBody) {
                 modalBody.innerHTML = `
                     <div class="text-center transition-all animate-fade-in-up">
-                        <h3 class="font-bold text-lg text-green-300">Account Deleted</h3>
+                        <h3 class="font-bold text-lg text-green-600">Account Deleted</h3>
                         <p class="text-text-secondary mt-2">You have been logged out. Redirecting now...</p>
                     </div>
                 `;
@@ -775,7 +773,7 @@ export async function attachSettingsPageListeners(dashboardState) {
             if (modalBody) {
                 const errorMessage = error.response?.data?.detail || 'An unknown error occurred.';
                 modalBody.innerHTML = `<div class="text-center transition-all animate-fade-in-up">
-                    <h3 class="font-bold text-lg text-red-300">Deletion Failed</h3>
+                    <h3 class="font-bold text-lg text-red-600">Deletion Failed</h3>
                     <p class="text-text-secondary mt-2">${errorMessage}</p>
                 </div>`;
             }
@@ -787,36 +785,34 @@ function render2FACardContent(user) {
     if (!user) return '<p>Loading security settings...</p>';
     const hasPasswordAuth = user.has_password;
     return `
-        <div class="p-6 h-full flex flex-col">
-            <h3 class="font-bold text-lg">Two-Factor Authentication (2FA)</h3>
-            <div class="mt-2 flex-grow flex flex-col justify-center">
-            ${user.is_two_factor_enabled ? `
-                <p class="text-sm text-green-400">2FA is currently <strong>enabled</strong> on your account.</p>
-                ${hasPasswordAuth ? `
-                    <form id="disable-2fa-form" class="mt-4">
-                        <p class="text-xs text-text-secondary mb-2">To disable 2FA, please enter your password.</p>
-                        <div class="flex items-start gap-4">
-                            <div class="flex-grow">
-                                <input type="password" id="disable-2fa-password" required placeholder="Current Password" class="w-full bg-primary border border-subtle rounded-md px-3 py-2 text-text-main focus:ring-2 focus:ring-accent-purple focus:outline-none">
-                                <div id="disable-2fa-message" class="hidden mt-2 text-sm text-center"></div>
-                            </div>
-                            <button type="submit" class="py-2 px-4 text-sm font-medium text-red-400 bg-red-900/30 hover:bg-red-900/60 rounded-md transition-colors">Disable 2FA</button>
+        <h3 class="font-bold text-lg">Two-Factor Authentication (2FA)</h3>
+        <p class="text-sm text-text-secondary mt-1">Add an extra layer of security to your account using an authenticator app.</p>
+        <div class="mt-4 flex-grow flex flex-col justify-center">
+        ${user.is_two_factor_enabled ? `
+            <p class="text-sm text-green-600">2FA is currently <strong>enabled</strong> on your account.</p>
+            ${hasPasswordAuth ? `
+                <form id="disable-2fa-form" class="mt-4">
+                    <p class="text-xs text-text-secondary mb-2">To disable 2FA, please enter your password.</p>
+                    <div class="flex items-start gap-4">
+                        <div class="flex-grow">
+                            <input type="password" id="disable-2fa-password" required placeholder="Current Password" class="w-full bg-primary border border-subtle rounded-md px-3 py-2 text-text-main focus:ring-2 focus:ring-accent-primary focus:outline-none">
+                            <div id="disable-2fa-message" class="hidden mt-2 text-sm text-center"></div>
                         </div>
-                    </form>
-                ` : `
-                    <p class="text-sm text-text-secondary mt-4">To disable 2FA for a passwordless account, we need to send a confirmation link to your registered email.</p>
-                    <button id="request-disable-2fa-link-btn" class="mt-4 w-full flex justify-center py-2.5 px-6 border border-subtle rounded-md text-sm font-medium text-text-main bg-primary hover:bg-subtle transition-colors">
-                        Send Disable Link to Email
-                    </button>
-                    <div id="disable-2fa-message" class="hidden mt-2 text-sm text-center"></div>
-                `}
+                        <button type="submit" class="py-2 px-4 text-sm font-medium text-red-700 bg-red-500/10 hover:bg-red-500/20 rounded-md transition-colors">Disable 2FA</button>
+                    </div>
+                </form>
             ` : `
-                <p class="text-sm text-text-secondary">Add an extra layer of security to your account using an authenticator app.</p>
-                <button id="enable-2fa-btn" class="mt-4 w-full flex justify-center py-2.5 px-6 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-gradient-to-r from-accent-purple to-accent-pink hover:opacity-90 transition-opacity">
-                    Enable 2FA
+                <p class="text-sm text-text-secondary mt-4">To disable 2FA for a passwordless account, we need to send a confirmation link to your registered email.</p>
+                <button id="request-disable-2fa-link-btn" class="mt-4 w-full flex justify-center py-2.5 px-6 border border-subtle rounded-md text-sm font-medium text-text-main bg-primary hover:bg-subtle transition-colors">
+                    Send Disable Link to Email
                 </button>
+                <div id="disable-2fa-message" class="hidden mt-2 text-sm text-center"></div>
             `}
-            </div>
+        ` : `
+            <button id="enable-2fa-btn" class="mt-4 w-full flex justify-center py-2.5 px-6 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-accent-primary hover:bg-red-700 transition-colors">
+                Enable 2FA
+            </button>
+        `}
         </div>
     `;
 }
@@ -825,21 +821,19 @@ function renderLinkedAccountsCard(user) {
     if (!user) return '<p>Loading account settings...</p>';
 
     return `
-        <div class="p-6 h-full flex flex-col">
-            <h3 class="font-bold text-lg">Linked Accounts</h3>
-            <p class="text-sm text-text-secondary mt-1 mb-6">Connect a social account for quick and easy login.</p>
-            <div id="link-accounts-message" class="hidden"></div>
-            <div class="space-y-4 flex-grow flex flex-col justify-center">
-                <div class="flex items-center justify-between bg-primary p-4 rounded-lg">
-                     <div class="flex items-center gap-4">
-                        <svg class="w-6 h-6 text-white" fill="currentColor" viewBox="0 0 24 24"><path fill-rule="evenodd" d="M12 2C6.477 2 2 6.477 2 12c0 4.418 2.865 8.165 6.839 9.49.5.092.682-.217.682-.482 0-.237-.009-.868-.014-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.531 1.032 1.531 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.031-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.203 2.398.1 2.651.64.7 1.03 1.595 1.03 2.688 0 3.848-2.338 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.001 10.001 0 0022 12c0-5.523-4.477-10-10-10z" clip-rule="evenodd" /></svg>
-                        <span class="font-medium">GitHub</span>
-                    </div>
-                    ${user.github_id
-                        ? `<span class="text-sm font-medium text-green-400">Connected</span>`
-                        : `<button data-provider="github" class="link-oauth-btn text-sm font-medium py-1 px-4 rounded-md bg-surface hover:bg-subtle transition-colors">Connect</button>`
-                    }
+        <h3 class="font-bold text-lg">Linked Accounts</h3>
+        <p class="text-sm text-text-secondary mt-1 mb-6">Connect a social account for quick and easy login.</p>
+        <div id="link-accounts-message" class="hidden"></div>
+        <div class="space-y-4 flex-grow flex flex-col justify-center">
+            <div class="flex items-center justify-between bg-primary p-4 rounded-lg">
+                 <div class="flex items-center gap-4">
+                    <svg class="w-6 h-6 text-text-main" fill="currentColor" viewBox="0 0 24 24"><path fill-rule="evenodd" d="M12 2C6.477 2 2 6.477 2 12c0 4.418 2.865 8.165 6.839 9.49.5.092.682-.217.682-.482 0-.237-.009-.868-.014-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.531 1.032 1.531 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.031-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.203 2.398.1 2.651.64.7 1.03 1.595 1.03 2.688 0 3.848-2.338 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.001 10.001 0 0022 12c0-5.523-4.477-10-10-10z" clip-rule="evenodd" /></svg>
+                    <span class="font-medium">GitHub</span>
                 </div>
+                ${user.github_id
+                    ? `<span class="text-sm font-medium text-green-600">Connected</span>`
+                    : `<button data-provider="github" class="link-oauth-btn text-sm font-medium py-1 px-4 rounded-md bg-surface hover:bg-subtle transition-colors">Connect</button>`
+                }
             </div>
         </div>
     `;
@@ -847,10 +841,10 @@ function renderLinkedAccountsCard(user) {
 
 function renderDeleteAccountCard() {
     return `
-        <div class="bg-red-900/20 border border-red-500/30 rounded-xl p-6">
-            <h3 class="font-bold text-lg text-red-300">Danger Zone</h3>
-            <p class="text-sm text-red-400/80 mt-1 mb-4">Be careful, these actions are permanent.</p>
-            <button id="delete-account-btn" class="w-full text-center py-2.5 px-6 border border-red-500/50 rounded-md text-sm font-medium text-red-300 bg-red-900/30 hover:bg-red-900/60 transition-colors">
+        <div class="bg-red-500/10 border border-red-500/20 rounded-lg p-6">
+            <h3 class="font-bold text-lg text-red-700">Danger Zone</h3>
+            <p class="text-sm text-red-600/80 mt-1 mb-4">Be careful, these actions are permanent.</p>
+            <button id="delete-account-btn" class="w-full text-center py-2.5 px-6 border border-red-500/30 rounded-md text-sm font-medium text-red-700 bg-red-500/20 hover:bg-red-500/30 transition-colors">
                 Delete Account
             </button>
         </div>
@@ -863,7 +857,7 @@ export function renderSettingsPage(user) {
     }
     const hasPasswordAuth = user.has_password;
 
-    const gradientButtonClasses = "w-full flex justify-center py-2.5 px-6 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-gradient-to-r from-accent-purple to-accent-pink hover:opacity-90 transition-opacity";
+    const gradientButtonClasses = "w-full flex justify-center py-2.5 px-6 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-accent-primary hover:bg-red-700 transition-colors";
 
     return `
         <header>
@@ -871,86 +865,78 @@ export function renderSettingsPage(user) {
             <p class="text-text-secondary mt-1">Manage your profile and account security.</p>
         </header>
 
-        <div class="mt-8 flex flex-col gap-8">
-            <div class="grid grid-cols-1 lg:grid-cols-5 gap-8 items-stretch">
-                <div class="lg:col-span-3 flex flex-col gap-8">
-                    <form id="profile-settings-form" class="bg-surface border border-primary rounded-xl flex flex-col flex-1">
-                        <div class="p-6 flex flex-col flex-grow">
-                            <h3 class="font-bold text-lg">Profile Information</h3>
-                            <p class="text-text-secondary text-sm mt-1 mb-6">This information may be displayed publicly.</p>
-                            <div class="space-y-6 flex-grow">
-                                <div>
-                                    <label for="display-name" class="block text-sm font-medium text-text-secondary mb-1">Display Name</label>
-                                    <input type="text" id="display-name" value="${user.display_name ?? ''}"
-                                        class="w-full px-3 py-2 bg-primary border border-subtle rounded-md text-text-main focus:ring-2 focus:ring-accent-purple focus:outline-none">
-                                </div>
-                                <div class="flex items-center justify-between pt-2">
-                                    <div>
-                                        <label for="leaderboard-toggle" class="text-sm font-medium text-text-main">Leaderboard Visibility</label>
-                                        <p class="text-xs text-text-secondary">Show my rank on public leaderboards.</p>
-                                    </div>
-                                    <label class="relative inline-flex items-center cursor-pointer">
-                                        <input type="checkbox" id="leaderboard-toggle" class="sr-only peer" ${user.is_in_leaderboard ? 'checked' : ''}>
-                                        <div class="w-11 h-6 bg-primary peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-accent-purple rounded-full peer dark:bg-subtle peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white dark:after:bg-text-secondary after:border-gray-300 dark:after:border-primary after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:peer-checked:bg-gradient-to-r dark:peer-checked:from-accent-purple dark:peer-checked:to-accent-pink"></div>
-                                    </label>
-                                </div>
-                            </div>
-                            <div class="mt-auto pt-6">
-                                <button type="submit" id="save-profile-settings-btn" class="${gradientButtonClasses}">
-                                    Save Changes
-                                </button>
-                                <div id="profile-settings-message" class="hidden text-sm mt-3 text-center"></div>
-                            </div>
+        <div class="mt-8 max-w-4xl mx-auto flex flex-col gap-8">
+            <div class="bg-surface border border-primary rounded-lg p-6">
+                <form id="profile-settings-form" class="flex flex-col flex-1">
+                    <h3 class="font-bold text-lg">Profile Information</h3>
+                    <p class="text-text-secondary text-sm mt-1 mb-6">This information may be displayed publicly.</p>
+                    <div class="space-y-6 flex-grow">
+                        <div>
+                            <label for="display-name" class="block text-sm font-medium text-text-secondary mb-1">Display Name</label>
+                            <input type="text" id="display-name" value="${user.display_name ?? ''}"
+                                class="w-full px-3 py-2 bg-primary border border-subtle rounded-md text-text-main focus:ring-2 focus:ring-accent-primary focus:outline-none">
                         </div>
-                    </form>
-                    
-                    <form id="change-password-form" class="bg-surface border border-primary rounded-xl flex flex-col flex-1">
-                        <div class="p-6 flex flex-col flex-grow">
-                            <h3 class="font-bold text-lg">Change Password</h3>
-                            <p class="text-text-secondary text-sm mt-1 mb-6">Update your password. You will be logged out after this action.</p>
-                            ${!hasPasswordAuth ? `<div class="flex-grow flex items-center justify-center"><p class="text-sm p-4 bg-primary rounded-lg text-text-secondary">Password management is unavailable for accounts created via social login.</p></div>` : `
-                            <div class="space-y-4 flex-grow">
-                                <div>
-                                    <label for="current-password" class="block text-sm font-medium text-text-secondary mb-1">Current Password</label>
-                                    <input type="password" id="current-password" required class="w-full bg-primary border border-subtle rounded-md px-3 py-2 text-text-main focus:ring-2 focus:ring-accent-purple focus:outline-none">
-                                </div>
-                                <div>
-                                    <label for="new-password" class="block text-sm font-medium text-text-secondary mb-1">New Password</label>
-                                    <input type="password" id="new-password" required class="w-full bg-primary border border-subtle rounded-md px-3 py-2 text-text-main focus:ring-2 focus:ring-accent-purple focus:outline-none">
-                                    <div class="strength-bar"><div id="new-password-strength-bar-fill" class="strength-bar-fill"></div></div>
-                                    <div class="error-text h-4"><span id="new-password-strength-text" class="text-xs text-subtle"></span></div>
-                                </div>
-                                <div>
-                                    <label for="confirm-password" class="block text-sm font-medium text-text-secondary mb-1">Confirm New Password</label>
-                                    <input type="password" id="confirm-password" required class="w-full bg-primary border border-subtle rounded-md px-3 py-2 text-text-main focus:ring-2 focus:ring-accent-purple focus:outline-none">
-                                </div>
+                        <div class="flex items-center justify-between pt-2">
+                            <div>
+                                <label for="leaderboard-toggle" class="text-sm font-medium text-text-main">Leaderboard Visibility</label>
+                                <p class="text-xs text-text-secondary">Show my rank on public leaderboards.</p>
                             </div>
-                            `}
+                            <label class="relative inline-flex items-center cursor-pointer">
+                                <input type="checkbox" id="leaderboard-toggle" class="sr-only peer" ${user.is_in_leaderboard ? 'checked' : ''}>
+                                <div class="w-11 h-6 bg-primary peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-accent-primary rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-accent-primary"></div>
+                            </label>
                         </div>
-                        ${hasPasswordAuth ? `
-                        <div class="bg-primary/50 border-t border-primary px-6 py-4 mt-auto">
-                            <button type="submit" class="${gradientButtonClasses}">
-                                Update Password
-                            </button>
-                            <div id="change-password-message" class="hidden text-sm mt-3 text-center"></div>
-                        </div>
-                        ` : ''}
-                    </form>
-                </div>
+                    </div>
+                    <div class="mt-auto pt-6">
+                        <button type="submit" id="save-profile-settings-btn" class="${gradientButtonClasses}">
+                            Save Changes
+                        </button>
+                        <div id="profile-settings-message" class="hidden text-sm mt-3 text-center"></div>
+                    </div>
+                </form>
+            </div>
+            
+            <div id="wallet-management-card" class="bg-surface border border-primary rounded-lg p-6">
+                ${renderWalletManagementCard(user)}
+            </div>
 
-                <div class="lg:col-span-2 flex flex-col gap-8">
-                     <div id="wallet-management-card" class="bg-surface border border-primary rounded-xl flex flex-col flex-1">
-                        ${renderWalletManagementCard(user)}
+            <div class="bg-surface border border-primary rounded-lg p-6">
+                <form id="change-password-form" class="flex flex-col flex-1">
+                    <h3 class="font-bold text-lg">Change Password</h3>
+                    <p class="text-text-secondary text-sm mt-1 mb-6">Update your password. You will be logged out after this action.</p>
+                    ${!hasPasswordAuth ? `<div class="flex-grow flex items-center justify-center"><p class="text-sm p-4 bg-primary rounded-lg text-text-secondary">Password management is unavailable for accounts created via social login.</p></div>` : `
+                    <div class="space-y-4 flex-grow">
+                        <div>
+                            <label for="current-password" class="block text-sm font-medium text-text-secondary mb-1">Current Password</label>
+                            <input type="password" id="current-password" required class="w-full bg-primary border border-subtle rounded-md px-3 py-2 text-text-main focus:ring-2 focus:ring-accent-primary focus:outline-none">
+                        </div>
+                        <div>
+                            <label for="new-password" class="block text-sm font-medium text-text-secondary mb-1">New Password</label>
+                            <input type="password" id="new-password" required class="w-full bg-primary border border-subtle rounded-md px-3 py-2 text-text-main focus:ring-2 focus:ring-accent-primary focus:outline-none">
+                            <div class="strength-bar"><div id="new-password-strength-bar-fill" class="strength-bar-fill"></div></div>
+                            <div class="error-text h-4"><span id="new-password-strength-text" class="text-xs text-subtle"></span></div>
+                        </div>
+                        <div>
+                            <label for="confirm-password" class="block text-sm font-medium text-text-secondary mb-1">Confirm New Password</label>
+                            <input type="password" id="confirm-password" required class="w-full bg-primary border border-subtle rounded-md px-3 py-2 text-text-main focus:ring-2 focus:ring-accent-primary focus:outline-none">
+                        </div>
                     </div>
-                    
-                    <div id="2fa-card" class="bg-surface border border-primary rounded-xl flex flex-col flex-1">
-                        ${render2FACardContent(user)}
+                    <div class="bg-primary/50 -mx-6 -mb-6 border-t border-primary px-6 py-4 mt-6">
+                        <button type="submit" class="${gradientButtonClasses}">
+                            Update Password
+                        </button>
+                        <div id="change-password-message" class="hidden text-sm mt-3 text-center"></div>
                     </div>
+                    `}
+                </form>
+            </div>
 
-                    <div class="bg-surface border border-primary rounded-xl flex flex-col flex-1">
-                        ${renderLinkedAccountsCard(user)}
-                    </div>
-                </div>
+            <div id="2fa-card" class="bg-surface border border-primary rounded-lg p-6">
+                ${render2FACardContent(user)}
+            </div>
+
+            <div class="bg-surface border border-primary rounded-lg p-6">
+                ${renderLinkedAccountsCard(user)}
             </div>
 
             <div id="danger-zone-card" class="w-full mt-4">
