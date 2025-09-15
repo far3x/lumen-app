@@ -95,7 +95,7 @@ function render2FAForm() {
     
     let formContentHtml = `
         <div class="text-center mb-6">
-            <h1 class="text-2xl font-bold text-white">Two-Factor Authentication</h1>
+            <h1 class="text-2xl font-bold text-text-main">Two-Factor Authentication</h1>
             <p class="text-text-secondary mt-2 text-sm">${formState === 'totp' ? 'Enter the code from your authenticator app.' : 'Enter one of your 10 backup codes.'}</p>
         </div>
         <div id="form-error-message" class="hidden text-red-400 bg-red-900/50 p-3 rounded-md mb-4 text-sm"></div>
@@ -103,23 +103,23 @@ function render2FAForm() {
             <form id="2fa-form">
                 <div class="flex justify-center gap-2 my-6">
                     ${Array(6).fill(0).map((_, i) => `
-                        <input type="text" inputmode="numeric" pattern="[0-9]*" maxlength="1" id="code-input-${i}" class="code-input w-12 h-14 text-center text-2xl font-mono bg-primary border border-subtle rounded-md text-text-main focus:ring-2 focus:ring-accent-purple focus:outline-none" autocomplete="one-time-code">
+                        <input type="text" inputmode="numeric" pattern="[0-9]*" maxlength="1" id="code-input-${i}" class="code-input w-12 h-14 text-center text-2xl font-mono bg-primary border border-subtle rounded-md text-text-main focus:ring-2 focus:ring-accent-primary focus:outline-none" autocomplete="one-time-code">
                     `).join('')}
                 </div>
-                 <button type="submit" class="w-full flex justify-center py-3 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-gradient-to-r from-accent-purple to-accent-pink hover:opacity-90 transition-opacity">
+                 <button type="submit" class="w-full flex justify-center py-3 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-accent-primary hover:bg-red-700 transition-colors">
                     Verify
                 </button>
             </form>
         ` : `
             <form id="backup-code-form" class="space-y-4">
-                <input type="text" id="backup-code" name="backup-code" placeholder="xxxx-xxxx" required class="block w-full text-center tracking-widest font-mono bg-primary border border-subtle rounded-md px-3 py-3 text-text-main focus:ring-2 focus:ring-accent-purple focus:outline-none" autocomplete="one-time-code">
-                <button type="submit" class="w-full flex justify-center py-3 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-gradient-to-r from-accent-purple to-accent-pink hover:opacity-90 transition-opacity">
+                <input type="text" id="backup-code" name="backup-code" placeholder="xxxx-xxxx" required class="block w-full text-center tracking-widest font-mono bg-primary border border-subtle rounded-md px-3 py-3 text-text-main focus:ring-2 focus:ring-accent-primary focus:outline-none" autocomplete="one-time-code">
+                <button type="submit" class="w-full flex justify-center py-3 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-accent-primary hover:bg-red-700 transition-colors">
                     Verify Backup Code
                 </button>
             </form>
         `}
         <p class="mt-6 text-center text-sm">
-            <button id="toggle-2fa-method" class="font-medium text-accent-cyan hover:underline">
+            <button id="toggle-2fa-method" class="font-medium text-accent-primary hover:underline">
                 ${formState === 'totp' ? 'Use a backup code' : 'Use an authenticator app'}
             </button>
         </p>
@@ -145,18 +145,16 @@ export function render2FAVerifyPage() {
     }
 
     const content = `
-    <main class="flex-grow flex items-center justify-center p-6 isolate min-h-screen pt-28">
-        <video
-            autoplay
-            loop
-            muted
-            playsinline
-            class="absolute top-0 left-0 w-full h-full object-cover -z-20"
-            src="/plexus-bg.mp4"
-        ></video>
-        <div class="absolute top-0 left-0 w-full h-full bg-black/50 -z-10"></div>
-        <div class="w-full max-w-md mx-auto">
-            <div id="2fa-verify-container" class="bg-surface/80 backdrop-blur-md p-8 rounded-xl border border-primary shadow-2xl shadow-black/20">
+    <main class="flex-grow bg-background text-text-main">
+        <div class="min-h-screen flex items-center justify-center p-6">
+            <div class="container mx-auto grid lg:grid-cols-2 gap-24 items-center">
+                <div class="w-full max-w-md mx-auto">
+                    <div id="2fa-verify-container" class="bg-surface p-8 rounded-xl border border-primary shadow-2xl shadow-black/5">
+                    </div>
+                </div>
+                <div class="hidden lg:flex justify-center">
+                    <img src="/bg.gif" alt="Lumen network visualization" class="w-full h-auto max-w-sm" />
+                </div>
             </div>
         </div>
     </main>`;

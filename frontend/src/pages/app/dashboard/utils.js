@@ -25,11 +25,11 @@ export function renderFeedbackModal() {
                 </div>
                 <div class="mb-4">
                      <label for="feedback-content" class="block text-sm font-medium text-text-secondary mb-2">Your Feedback</label>
-                    <textarea id="feedback-content" rows="4" minlength="10" maxlength="2000" required class="w-full bg-primary border border-subtle rounded-md px-3 py-2 text-text-main focus:ring-2 focus:ring-accent-purple focus:outline-none" placeholder="Tell us about your experience, or suggest an improvement..."></textarea>
+                    <textarea id="feedback-content" rows="4" minlength="10" maxlength="2000" required class="w-full bg-primary border border-subtle rounded-md px-3 py-2 text-text-main focus:ring-2 focus:ring-accent-primary focus:outline-none" placeholder="Tell us about your experience, or suggest an improvement..."></textarea>
                     <div id="char-counter" class="text-right text-xs text-subtle mt-1">0 / 2000</div>
                 </div>
                 <div id="feedback-message" class="hidden text-sm p-3 rounded-md my-4 text-center"></div>
-                <button type="submit" id="submit-feedback-btn" class="w-full flex justify-center py-2.5 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-gradient-to-r from-accent-purple to-accent-pink hover:opacity-90 transition-opacity">
+                <button type="submit" id="submit-feedback-btn" class="w-full flex justify-center py-2.5 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-accent-primary hover:bg-red-700 transition-colors">
                     Submit Feedback
                 </button>
             </form>
@@ -85,7 +85,7 @@ export function renderFeedbackModal() {
             
             formContainer.innerHTML = `
                 <div class="text-center transition-all animate-fade-in-up">
-                    <div class="w-16 h-16 mx-auto mb-4 bg-green-900/50 text-green-300 rounded-full flex items-center justify-center">
+                    <div class="w-16 h-16 mx-auto mb-4 bg-green-500/10 text-green-500 rounded-full flex items-center justify-center">
                         <svg class="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
                     </div>
                     <h3 class="font-bold text-lg text-text-main">Feedback Submitted!</h3>
@@ -196,14 +196,14 @@ export function escapeHtml(unsafe) {
 }
 
 export const icons = {
-    dashboard: `<svg class="w-5 h-5" fill="none" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M3 14h18m-9-4v8m-7 0h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" stroke="url(#dashboard-icon-gradient)" /></svg>`,
-    contributions: `<svg class="w-5 h-5" fill="none" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 9l3 3-3 3m5 0h3M5 20h14a2 2 0 002-2V6a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" stroke="url(#dashboard-icon-gradient)" /></svg>`,
-    feed: `<svg class="w-5 h-5" fill="none" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" stroke="url(#dashboard-icon-gradient)" /></svg>`,
-    referral: `<svg class="w-5 h-5" fill="none" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 12v10H4V12M2 7h20v5H2V7zm10 15V7m0 0H7.5a2.5 2.5 0 0 1 0-5C11 2 12 7 12 7zm0 0h4.5a2.5 2.5 0 0 0 0-5C13 2 12 7 12 7z" stroke="url(#dashboard-icon-gradient)" /></svg>`,
-    settings: `<svg class="w-5 h-5" fill="none" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" stroke="url(#dashboard-icon-gradient)" /><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" stroke="url(#dashboard-icon-gradient)" /></svg>`,
-    view: `<svg class="w-5 h-5" fill="none" viewBox="0 0 24 24"><path d="M2 12C2 12 5 5 12 5C19 5 22 12 22 12C22 12 19 19 12 19C5 19 2 12 2 12Z" stroke="url(#dashboard-icon-gradient)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M15 12C15 13.6569 13.6569 15 12 15C10.3431 15 9 13.6569 9 12C9 10.3431 10.3431 9 12 9C13.6569 9 15 10.3431 15 12Z" stroke="url(#dashboard-icon-gradient)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>`,
-    upload: `<svg class="w-5 h-5" fill="none" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" stroke="url(#dashboard-icon-gradient)"/></svg>`,
-    folder: `<svg class="w-5 h-5 inline-block text-accent-cyan" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z" /></svg>`,
+    dashboard: `<svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M3 10h18M3 14h18m-9-4v8m-7 0h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" /></svg>`,
+    contributions: `<svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M8 9l3 3-3 3m5 0h3M5 20h14a2 2 0 002-2V6a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>`,
+    feed: `<svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z" /></svg>`,
+    referral: `<svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M20 12v10H4V12M2 7h20v5H2V7zm10 15V7m0 0H7.5a2.5 2.5 0 0 1 0-5C11 2 12 7 12 7zm0 0h4.5a2.5 2.5 0 0 0 0-5C13 2 12 7 12 7z" /></svg>`,
+    settings: `<svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" /><path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /></svg>`,
+    view: `<svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path d="M2 12C2 12 5 5 12 5C19 5 22 12 22 12C22 12 19 19 12 19C5 19 2 12 2 12Z" stroke-linecap="round" stroke-linejoin="round"/><path d="M15 12C15 13.6569 13.6569 15 12 15C10.3431 15 9 13.6569 9 12C9 10.3431 10.3431 9 12 9C13.6569 9 15 10.3431 15 12Z" stroke-linecap="round" stroke-linejoin="round"/></svg>`,
+    upload: `<svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"/></svg>`,
+    folder: `<svg class="w-5 h-5 inline-block text-accent-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z" /></svg>`,
     file: `<svg class="w-5 h-5 inline-block text-text-secondary" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z" /></svg>`,
     checkCircle: `<svg class="w-12 h-12" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>`,
     errorCircle: `<svg class="w-12 h-12" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>`
@@ -211,22 +211,23 @@ export const icons = {
 
 export function getStatusClasses(status, is_open_source = false) {
     if (status === 'PROCESSED' && is_open_source) {
-        return 'bg-orange-900/50 text-orange-300';
+        return 'bg-yellow-500/10 text-yellow-600';
     }
     const statuses = {
-        PROCESSED: 'bg-green-900/50 text-green-300',
-        PENDING: 'bg-yellow-900/50 text-yellow-300 animate-pulse',
-        PROCESSING: 'bg-blue-900/50 text-blue-300 animate-pulse',
-        REJECTED_EMPTY: 'bg-red-900/50 text-red-300',
-        REJECTED_NO_REWARD: 'bg-orange-900/50 text-orange-300',
-        DUPLICATE_HIGH_SIMILARITY: 'bg-red-900/50 text-red-300',
-        DUPLICATE_CROSS_USER: 'bg-red-900/50 text-red-300',
-        REJECTED_NO_NEW_CODE: 'bg-orange-900/50 text-orange-300',
-        FAILED: 'bg-red-900/50 text-red-300',
-        FAILED_EMBEDDING: 'bg-red-900/50 text-red-300',
-        FAILED_DIFF_PROCESSING: 'bg-red-900/50 text-red-300',
+        PROCESSED: 'bg-green-500/10 text-green-600',
+        PROCESSED_UPDATE: 'bg-red-500/10 text-red-600',
+        PENDING: 'bg-yellow-500/10 text-yellow-600 animate-pulse',
+        PROCESSING: 'bg-blue-500/10 text-blue-600 animate-pulse',
+        REJECTED_EMPTY: 'bg-red-500/10 text-red-600',
+        REJECTED_NO_REWARD: 'bg-yellow-500/10 text-yellow-600',
+        DUPLICATE_HIGH_SIMILARITY: 'bg-red-500/10 text-red-600',
+        DUPLICATE_CROSS_USER: 'bg-red-500/10 text-red-600',
+        REJECTED_NO_NEW_CODE: 'bg-yellow-500/10 text-yellow-600',
+        FAILED: 'bg-red-500/10 text-red-600',
+        FAILED_EMBEDDING: 'bg-red-500/10 text-red-600',
+        FAILED_DIFF_PROCESSING: 'bg-red-500/10 text-red-600',
     };
-    return statuses[status] || 'bg-gray-700/50 text-gray-300';
+    return statuses[status] || 'bg-gray-500/10 text-gray-600';
 }
 
 export function getStatusText(status, is_open_source = false) {
@@ -234,11 +235,18 @@ export function getStatusText(status, is_open_source = false) {
         return 'Processed (Public)';
     }
     const statusTexts = {
-        PROCESSED: 'Complete', PENDING: 'Pending', PROCESSING: 'Processing',
-        REJECTED_EMPTY: 'Rejected: Empty', REJECTED_NO_REWARD: 'Rejected: No Reward',
-        DUPLICATE_HIGH_SIMILARITY: 'Rejected: Duplicate', DUPLICATE_CROSS_USER: 'Rejected: Plagiarism',
-        REJECTED_NO_NEW_CODE: 'Rejected: No Changes', FAILED: 'Failed',
-        FAILED_EMBEDDING: 'Failed: Embedding', FAILED_DIFF_PROCESSING: 'Failed: Diff',
+        PROCESSED: 'Complete',
+        PROCESSED_UPDATE: 'Update Processed',
+        PENDING: 'Pending',
+        PROCESSING: 'Processing',
+        REJECTED_EMPTY: 'Rejected: Empty',
+        REJECTED_NO_REWARD: 'Rejected: No Reward',
+        DUPLICATE_HIGH_SIMILARITY: 'Rejected: Duplicate',
+        DUPLICATE_CROSS_USER: 'Rejected: Plagiarism',
+        REJECTED_NO_NEW_CODE: 'Rejected: No Changes',
+        FAILED: 'Failed',
+        FAILED_EMBEDDING: 'Failed: Embedding',
+        FAILED_DIFF_PROCESSING: 'Failed: Diff',
     };
     return statusTexts[status] || status;
 }
@@ -256,7 +264,7 @@ export function renderModal(title, content, options = {}) {
 
     const modalHtml = `
         <div id="${modalId}" class="modal-overlay fixed inset-0 bg-black/70 backdrop-blur-sm z-50 flex items-center justify-center p-4 animate-fade-in-up" style="animation-duration: 0.2s;">
-            <div class="modal-content bg-surface w-full ${sizeClasses[size]} rounded-xl border border-primary shadow-2xl shadow-black/50 flex flex-col max-h-full">
+            <div class="modal-content bg-surface w-full ${sizeClasses[size]} rounded-lg border border-primary shadow-2xl shadow-black/50 flex flex-col max-h-full">
                 <header class="p-4 border-b border-primary flex justify-between items-center flex-shrink-0">
                     <h2 class="text-lg font-bold">${title}</h2>
                     <button class="modal-close-btn p-2 text-text-secondary hover:text-text-main rounded-full hover:bg-primary">
