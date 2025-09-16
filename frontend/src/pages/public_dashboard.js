@@ -53,7 +53,7 @@ function renderRecentActivityFeed(contributions) {
                     <div class="flex items-start justify-between space-x-4">
                         <div class="flex-grow text-sm">
                             <p class="text-text-main">
-                                <strong class="font-bold">${item.user_display_name}</strong> contributed new code to the network.
+                                <strong class="font-bold truncate inline-block max-w-[150px]">${item.user_display_name}</strong> contributed new code to the network.
                             </p>
                             <p class="text-text-secondary mt-1">
                                 Reward: <strong class="font-medium text-green-600">+$${item.reward_amount.toFixed(4)} USD</strong>
