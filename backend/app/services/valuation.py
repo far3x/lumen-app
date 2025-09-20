@@ -214,7 +214,7 @@ class HybridValuationService:
           "logical_lines_of_code": {manual_metrics.get('total_lloc', 0)},
         }}
 
-        Critically evaluate the submission and return ONLY a single, minified JSON object with the following schema. Do not add comments or explanations.
+        Critically evaluate the submission and return ONLY a single, minified JSON object with the following schema. Do not add comments or explanations, do not add superfleous informations but only output this json please.
 
         Schema:
         {{
