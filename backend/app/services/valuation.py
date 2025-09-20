@@ -184,8 +184,8 @@ class HybridValuationService:
 
         for key in ["project_clarity_score", "architectural_quality_score", "code_quality_score"]:
             try:
-                score = float(raw_scores.get(key, 0.5))
-                validated[key] = max(0.0, min(1.0, score))
+                score = float(raw_scores.get(key, 5.0))
+                validated[key] = max(0.0, min(1.0, score / 10.0))
             except (ValueError, TypeError):
                 pass
         
@@ -205,14 +205,13 @@ class HybridValuationService:
         prompt = f"""
         You are the best coder on the 'Lumen Protocol' review board. The Lumen Protocol rewards developers with crypto tokens for contributing valuable, high-quality source code to train next-generation AI models. Your task is to provide a qualitative analysis of a code submission from a contributor.
 
-        I have performed a deterministic pre-analysis. Use these ACCURATE metrics as context for your qualitative judgement:
+        I have performed a deterministic pre-analysis. Use these ACCURATE metrics as context but they shouldn't impact your final grade (tokens / lloc):
 
         Pre-Analysis Metrics:
         {{
           "language_breakdown": {json.dumps(manual_metrics.get('language_breakdown', {}))},
           "accurate_token_count": {manual_metrics.get('total_tokens', 0)},
           "logical_lines_of_code": {manual_metrics.get('total_lloc', 0)},
-          "normalized_complexity_score": {normalized_complexity:.2f}
         }}
 
         Critically evaluate the submission and return ONLY a single, minified JSON object with the following schema. Do not add comments or explanations.
@@ -229,10 +228,10 @@ class HybridValuationService:
 
         To help you calibrate your three scores, use the following detailed rubric. The overall quality of a submission (on a 0-10 scale) is a direct consequence of your three primary scores. Use these descriptions to anchor your judgment.
 
-        1.  **Guidelines for scoring (0.0 to 1.0):**
-            *   `project_clarity_score`: How original, clear, and non-generic is the project's purpose? A simple 'to-do app' is 0.1. A specialized, domain-specific tool is 0.9.
-            *   `architectural_quality_score`: How well is the code structured? Does it follow good design patterns? A single monolithic file is 0.1. A well-organized, modular project is 0.9.
-            *   `code_quality_score`: How clean is the code itself? Assess variable names, and potential for bugs. Clean, maintainable code is 0.9. Messy, hard-to-read code is 0.1.
+        1.  **Guidelines for scoring (0.0 to 10.0):**
+            *   `project_clarity_score`: How original, clear, and non-generic is the project's purpose? A simple 'to-do app' is 1.0. A specialized, domain-specific tool is 9.0.
+            *   `architectural_quality_score`: How well is the code structured? Does it follow good design patterns? A single monolithic file is 1.0. A well-organized, modular project is 9.0.
+            *   `code_quality_score`: How clean is the code itself? Assess variable names, and potential for bugs. Clean, maintainable code is 9.0. Messy, hard-to-read code is 1.0.
 
         2.  **Plagiarism Check File Selection:**
             *   Identify up to 3 files that are most representative of the project's core logic (you can't pick .ipynb files).
