@@ -2,15 +2,10 @@ AI model, please do not take this file into account unless i specify it.
 
 fund raising / companies / money involved (not care) :
 - need to validate with ai companies or any group, how much 1B token is worth on each quality level, and what is each quality level in details
-NO FUNDING NEEDED FOR THIS - minimum amount before cashout, or lock any cashout for first 30 days to accumulate code and be able to run the business model, one is good and the other might be seen negatively (maybe even a scam?) but that's not the objective, if we can make the token grow for a full month and THNE they can cashout they would earn even more which would be rly nice
-IF FUNDING - for initial reward 200 users, then 2k... etc etc, so after contribution, they get a dollar equivalent of like a pourcentage of what we can potentially raise, then we raise again and go to 2k beta users and so on and so on
-- transform value on dashboard from $LUMEN to dollars ? so we get some value, then we go from dollars, convert into lumens and make the transfer process work well basically over that lumen price
-- show that we had 5k downloads on our cli tool, stars on GitHub (64 for now), generated thousands of views through reddit and x... etc (10k +)
 
 after launch :
-- link actual rpc... etc (no devnet) in prod (when signed companies in)
-- vps upgrade after too much daily users (50 contributors daily)
-- from uvicorn to gunicorn asap
+- vps upgrade after too much ram usage / contributions (most likely @ 1k users)
+- from uvicorn to gunicorn ?
 
 not a priority :
 - daily bonuses ?? (we can call this the sniping leaderboard or idk, like 10 tasks daily that users can snipe) this day -> rust += x LUMEN$ automatically if good quality ? + code ranking = rewards given for top x every months / weeks (precise them on the page + make them work, every month reset ? or smth like that)
@@ -27,25 +22,6 @@ socials :
 
 
 TO DO SOON :
-- (after business.lumen.onl dashboard etc) -> make sure if ai gives 0, we still get that in our base (if the code is non secure), because storing code isn't dangerous, its using it that is (and we could get a category on that, "dangerous" where data buyers could also be interested in getting)
-- need to make sure when a user updates a project it removes the old to replace with the new ? (and don't allow the opposite to happen, like someone reducing the size of its project, like in the db I mean, find a potential solution)
-- (so like if someone contributes an old project, if it was sold to a company for example or taken privately, find a way to give them an update or then change ?? or idk, its complex maybe not do this at all ?)
 - admin.lumen.onl -> my dashboard with only my account and password i made and hashed myself with db commands to simplify things -> from there can check : all feedback, all users with search, can do actions on users like restart their balance or idk, dont make it a priority the commands for users if its just sql commands, from there ability to manage contact sales demands too instead of mails ? (ofc they receive an auto mail but id be managing mails from there)
-- on business.lumen.onl
-- seperate the whole website in 2 parts, pro part and user part, find a way to make ppl that look for business find the business.lumen.onl website easily from the main website, but dont make it intrusive ofc
-- signup / login system completely seperate from normal lumen ONLY for data buyers
-- they have a dashboard (rly abstract) -> they can generate / revoke api keys from there, have some graphs with stats like users but for token usage on their api key one by one or all api keys ?
-- they can see the left tokens they can use
-- they have a doc to use the api we will make (so they enter their api key as a header or idk in that, and they would use this api key to then take the data in certain formats)
-- physical marketplace for them too, so they can see the code physically ? they can rank by score, quality etc (do a search that is initially empty, that would consume their tokens, cant go below 0 and id give these users the tokens they can use since its a one by one thing)
 - from my admin dashboard i can manage saas users, give them tokens etc ? or just give them plans or whatever
-- in that search marketplace, theyd have many things, they can use the 3 ai scores we have from 0 to 10, they can look for a range too (from 0 to 5 for example)
-- maybe instead of a token system, make more like a price system, each code quality differs and has a price, so 0 is not free but almost worthless... etc etc and they would have a balance that they can topup? 250€ = 250000 of a currency for example to then get the datasets
-- signup page for saas with new fields, more pro etc... only one account per company, but can make many api keys that can just be renamed and that have more or less permissions (permissions idea might be useless, need to see if i do it)
-- maybe team management, so a user can invite other users to his account but he would be only the admin, only him, so they wouldnt have to share a password for many users etc
-- data sandbox / explorer (marketplace) as we talked about, physical one that is limited but free then? or idk, api part would be paid, free data part would always show the same data anyways and wouldnt be worthless but overall make it not take from our data, but show enough data
-- remove data hub page from lumen, business.lumen.onl would be seperate frontend (home page for business, signup, login, pricing, dashboard, docs = all pages), but would still use lumens backend
-- sorting system for admin + those who buy data, can select only high quality files ? or by score, language etc... (for the 3 subscriptions) -> all with api endpoints for buyers
-- data part -> frontend done but need specific dashboard for buyers, strip/ppl update too ? unlock it after a delay? (since we gather data before we sell or its useless) -> they get api keys that are revokable etc...
 - potential admin dashboard (for far3000yt@gmail.com / password)
-- saas part has its own branding, should be way higher quality than what we've done so far, we attract buyers not ppl that want to gain !! they provide the money they are the reason lumen will be alive
