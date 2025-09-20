@@ -13,7 +13,7 @@ function renderNextPayoutCard(account) {
         <div class="flex flex-col md:flex-row items-center justify-between gap-6">
             <div class="flex-grow text-center md:text-left">
                 <h3 class="text-2xl font-bold text-text-main">Payout Batches</h3>
-                <p class="text-text-secondary mt-1 text-sm max-w-md">Payouts are manually processed in batches approximately every 48 hours to ensure security and accuracy.</p>
+                <p class="text-text-secondary mt-1 text-sm max-w-md">Payouts are manually processed in batches every week, to ensure security and accuracy.</p>
             </div>
             <div class="w-full md:w-auto flex flex-col items-center md:items-end bg-primary p-6 rounded-md text-right">
                 <p class="text-sm text-text-secondary">Balance for Next Payout</p>
