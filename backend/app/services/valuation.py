@@ -5,7 +5,8 @@ import json
 import re
 import html
 import tiktoken
-import google.generativeai as genai
+from google import genai 
+from google.genai import types
 from sqlalchemy.orm import Session
 import subprocess
 import tempfile
@@ -26,13 +27,15 @@ class HybridValuationService:
 
     def __init__(self):
         if settings.GEMINI_API_KEY:
-            genai.configure(api_key=settings.GEMINI_API_KEY)
-            self.model = genai.GenerativeModel(settings.GEMINI_MODEL_NAME)
-            self.generation_config = genai.types.GenerationConfig(
-                temperature=settings.GEMINI_TEMPERATURE
+            self.client = genai.Client(api_key=settings.GEMINI_API_KEY)
+            self.generation_config = types.GenerateContentConfig(
+                temperature=settings.GEMINI_TEMPERATURE,
+                thinking_config=types.ThinkingConfig(
+                    thinking_budget=-1,
+                )
             )
         else:
-            self.model = None
+            self.client = None
         
         try:
             self.tokenizer = tiktoken.get_encoding("cl100k_base")
@@ -193,7 +196,7 @@ class HybridValuationService:
         return validated
 
     def _get_ai_qualitative_scores(self, full_codebase: str, manual_metrics: dict) -> dict:
-        if not self.model:
+        if not self.client:
             return {"error": "AI model not configured."}
             
         print("[VALUATION_STEP] Preparing new, context-rich prompt for AI analysis...")
@@ -272,9 +275,22 @@ class HybridValuationService:
         ---
         """
         
+        contents = [
+            types.Content(
+                role="user",
+                parts=[
+                    types.Part.from_text(text=prompt),
+                ],
+            ),
+        ]
+        
         print(f"[VALUATION_STEP] Submitting refined prompt to Gemini...")
         try:
-            response = self.model.generate_content(prompt, generation_config=self.generation_config)
+            response = self.client.models.generate_content(
+                model=settings.GEMINI_MODEL_NAME,
+                contents=contents,
+                config=self.generation_config,
+            )
             print("[VALUATION_STEP] Received response from Gemini.")
             cleaned_response = re.sub(r'^```json\s*|\s*```$', '', response.text.strip(), flags=re.MULTILINE)
             print(json.loads(cleaned_response))
@@ -317,7 +333,7 @@ class HybridValuationService:
         plagiarism_check_files = []
 
         if lloc_for_reward > 0: 
-            if settings.VALUATION_MODE == "AI" and self.model:
+            if settings.VALUATION_MODE == "AI" and self.client:
                 full_codebase_content = "\n".join([f["content"] for f in parsed_current_files])
                 ai_scores_raw = self._get_ai_qualitative_scores(full_codebase_content, current_metrics)
                 
