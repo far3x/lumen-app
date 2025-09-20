@@ -41,11 +41,16 @@ def create_user(db: Session, user: schemas.UserCreate):
     max_id = db.query(func.max(models.User.id)).scalar()
     new_user_id = (max_id or 0) + 1
 
+    reward_multiplier = 1.0
+    if new_user_id <= 1000:
+        reward_multiplier = 1.5
+
     db_user = models.User(
         id=new_user_id,
         email=user.email,
         hashed_password=hashed_password,
-        display_name=display_name
+        display_name=display_name,
+        reward_multiplier=reward_multiplier
     )
     
     expires = timedelta(hours=24)
@@ -106,11 +111,16 @@ def create_oauth_user(db: Session, provider: str, user_info: dict):
     max_id = db.query(func.max(models.User.id)).scalar()
     new_user_id = (max_id or 0) + 1
 
+    reward_multiplier = 1.0
+    if new_user_id <= 1000:
+        reward_multiplier = 1.5
+
     user_data = {
         "id": new_user_id,
         "display_name": clean_name, 
         "email": email, 
-        "is_verified": True
+        "is_verified": True,
+        "reward_multiplier": reward_multiplier
     }
     if provider == "github": user_data["github_id"] = str(user_info["id"])
     
