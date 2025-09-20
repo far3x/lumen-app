@@ -177,7 +177,8 @@ class HybridValuationService:
             "project_clarity_score": 0.5,
             "architectural_quality_score": 0.5,
             "code_quality_score": 0.5,
-            "plagiarism_check_files": []
+            "plagiarism_check_files": [],
+            "working_code_ratio": 1.0
         }
         if not isinstance(raw_scores, dict):
             return validated
@@ -192,6 +193,12 @@ class HybridValuationService:
         files = raw_scores.get("plagiarism_check_files", [])
         if isinstance(files, list) and all(isinstance(f, str) for f in files):
             validated["plagiarism_check_files"] = files
+
+        try:
+            ratio = float(raw_scores.get("working_code_ratio", 100.0))
+            validated["working_code_ratio"] = max(0.0, min(100.0, ratio)) / 100.0
+        except (ValueError, TypeError):
+            validated["working_code_ratio"] = 1.0
 
         return validated
 
@@ -222,7 +229,8 @@ class HybridValuationService:
           "architectural_quality_score": "float",
           "code_quality_score": "float",
           "analysis_summary": "string",
-          "plagiarism_check_files": "array[string]"
+          "plagiarism_check_files": "array[string]",
+          "working_code_ratio": "float (0-100)"
         }}
 
 
@@ -244,6 +252,13 @@ class HybridValuationService:
             *   Focus on the user code, not what they say. They could say "bullshit" or "good to see" content while it's actually not even implemented.
             *   In that summary, focus on making it really deep, not touch technically say things like "this part doesn't work so it's bad" but go deep enough to explain how things are implemented in the code. Show that you are smart and know what you're analyzing.
             
+        4.  **Working Code Ratio (Internal Metric - DO NOT mention this in the summary):**
+            *   Provide a `working_code_ratio` from 0 to 100. This is your estimation of how much of the submitted code is coherent and functional.
+            *   A score of 100 means the code appears to be a complete, working project, even if complex.
+            *   A score of 0 means the code is nonsensical, AI-generated filler that assumes non-existent libraries or functions and has no chance of running (don't nerf too much if there is mistakes in the code, but nerf essentially if the user is sending nonsense with no effort or things really not working that you're sure abotu).
+            *   **Red flags for a low score:** A strange mix of many languages for no reason, huge token counts for a simple stated purpose, incoherent functionalities (e.g., a to-do app that suddenly implements quantitative finance formulas, a web app creating quantum qubits and the future of AGI with no real purpose), or projects that consist only of class definitions with no actual implementation. Be lenient if you're unsure, but be strict if you detect clear "buzzword stuffing."
+            *   Remember that at the end I want a score on 0 to 100 on what works or not, usually getting 0 is really not possible because at some point some things work, but don't hesitate to punish with scores that represent this well !
+
         *   **Score 0: Unsafe, Malicious, or Spam.**
             *   Assign this score if the code is harmful, intentionally obfuscated spam, or poses a security risk. Your three scores should all be 0.0.
 
@@ -335,6 +350,7 @@ class HybridValuationService:
         ai_scores = {}
         analysis_summary_from_ai = None
         plagiarism_check_files = []
+        working_code_ratio = 1.0
 
         if lloc_for_reward > 0: 
             if settings.VALUATION_MODE == "AI" and self.client:
@@ -345,9 +361,10 @@ class HybridValuationService:
                      return {"final_reward": 0.0, "valuation_details": ai_scores_raw}
 
                 ai_scores_validated = self._validate_ai_scores(ai_scores_raw)
-                ai_scores = {k: v for k, v in ai_scores_validated.items() if k != "plagiarism_check_files"}
+                ai_scores = {k: v for k, v in ai_scores_validated.items() if k not in ["plagiarism_check_files", "working_code_ratio"]}
                 plagiarism_check_files = ai_scores_validated.get("plagiarism_check_files", [])
                 analysis_summary_from_ai = ai_scores_raw.get("analysis_summary")
+                working_code_ratio = ai_scores_validated.get("working_code_ratio", 1.0)
 
             else:
                 scope_score = math.log10(current_metrics.get('total_lloc', 1) + 1)
@@ -379,7 +396,7 @@ class HybridValuationService:
         code_ratio = current_metrics.get('code_ratio', 1.0)
         code_ratio_multiplier = (math.tanh(6 * code_ratio - 3) + 1) / 2
         
-        contribution_quality_score = (lloc_for_reward * self.LLOC_TO_POINT_FACTOR) * ai_weighted_multiplier * rarity_multiplier * code_ratio_multiplier
+        contribution_quality_score = (lloc_for_reward * self.LLOC_TO_POINT_FACTOR) * ai_weighted_multiplier * rarity_multiplier * code_ratio_multiplier * working_code_ratio
         
         target_usd_reward = self.BASE_USD_VALUE_PER_POINT * contribution_quality_score
 
@@ -399,6 +416,7 @@ class HybridValuationService:
             "analysis_summary": sanitized_summary,
             "rarity_multiplier": round(rarity_multiplier, 4),
             "code_ratio_multiplier": round(code_ratio_multiplier, 4),
+            "working_code_ratio": round(working_code_ratio, 4),
             "simulated_lum_price_usd": round(simulated_lum_price, 6),
             "target_usd_reward": round(target_usd_reward, 4),
             "final_reward_usd": round(final_reward, 4),
