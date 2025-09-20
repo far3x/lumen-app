@@ -34,8 +34,8 @@ function renderSidebar(activeTab, user) {
     return `
     <div class="p-4 bg-surface rounded-lg border border-primary">
         <div class="text-center mb-6">
-            <img src="/logo.png?v=1" alt="Lumen Logo" class="h-12 w-12 mx-auto mb-4">
-            <h3 class="font-bold text-lg text-text-main">${user?.display_name ?? 'User'}</h3>
+            <img src="/logo.png?v=2" alt="Lumen Logo" class="h-16 w-16 mx-auto mb-4">
+            <h3 class="font-bold text-lg text-text-main truncate max-w-full">${user?.display_name ?? 'User'}</h3>
             <a href="/leaderboard" class="font-semibold text-accent-primary hover:text-red-700 transition">View Leaderboard</a>
         </div>
         <nav class="flex flex-col space-y-1">
