@@ -5,6 +5,14 @@ export function renderFooter(currentPath) {
         <path stroke-linecap="round" stroke-linejoin="round" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
     </svg>`;
 
+    const isDocsSubdomain = window.location.hostname.startsWith('docs.');
+    const getDocsLink = (path) => {
+        if (isDocsSubdomain) {
+            return `/${path}`;
+        }
+        return `/docs/${path}`;
+    };
+
     return `
     <footer class="bg-transparent py-12">
         <div class="container mx-auto px-6">
@@ -26,10 +34,10 @@ export function renderFooter(currentPath) {
                 <div>
                     <h3 class="font-bold text-gray-800 uppercase tracking-wider">Developers</h3>
                     <ul class="mt-4 space-y-3">
-                        <li><a href="/docs/installation" class="text-gray-600 hover:text-gray-800">CLI Guide</a></li>
-                        <li><a href="/docs/faq" class="text-gray-600 hover:text-gray-800">FAQ</a></li>
-                        <li><a href="/docs/security" class="text-gray-600 hover:text-gray-800">Security</a></li>
-                        <li><a href="/docs/whitepaper" class="text-gray-600 hover:text-gray-800">Whitepaper</a></li>
+                        <li><a href="${getDocsLink('installation')}" class="text-gray-600 hover:text-gray-800">CLI Guide</a></li>
+                        <li><a href="${getDocsLink('faq')}" class="text-gray-600 hover:text-gray-800">FAQ</a></li>
+                        <li><a href="${getDocsLink('security')}" class="text-gray-600 hover:text-gray-800">Security</a></li>
+                        <li><a href="${getDocsLink('whitepaper')}" class="text-gray-600 hover:text-gray-800">Whitepaper</a></li>
                     </ul>
                 </div>
                 <div>
@@ -44,10 +52,10 @@ export function renderFooter(currentPath) {
                 <div>
                     <h3 class="font-bold text-gray-800 uppercase tracking-wider">Legal</h3>
                     <ul class="mt-4 space-y-3">
-                        <li><a href="/docs/terms" class="text-gray-600 hover:text-gray-800">Terms & Conditions</a></li>
-                        <li><a href="/docs/privacy-policy" class="text-gray-600 hover:text-gray-800">Privacy Policy</a></li>
-                        <li><a href="/docs/contributor-agreement" class="text-gray-600 hover:text-gray-800">Contributor Agreement</a></li>
-                        <li><a href="/docs/disclaimer" class="text-gray-600 hover:text-gray-800">Disclaimer</a></li>
+                        <li><a href="${getDocsLink('terms')}" class="text-gray-600 hover:text-gray-800">Terms & Conditions</a></li>
+                        <li><a href="${getDocsLink('privacy-policy')}" class="text-gray-600 hover:text-gray-800">Privacy Policy</a></li>
+                        <li><a href="${getDocsLink('contributor-agreement')}" class="text-gray-600 hover:text-gray-800">Contributor Agreement</a></li>
+                        <li><a href="${getDocsLink('disclaimer')}" class="text-gray-600 hover:text-gray-800">Disclaimer</a></li>
                     </ul>
                 </div>
             </div>
