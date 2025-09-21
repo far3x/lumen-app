@@ -100,6 +100,14 @@ task_routes = {
         'queue': 'high_priority',
         'routing_key': 'task.high_priority',
     },
+    'app.tasks.recalculate_contributions_from_id_task': {
+        'queue': 'default',
+        'routing_key': 'task.default',
+    },
+    'app.tasks.find_cross_user_duplicates_task': {
+        'queue': 'default',
+        'routing_key': 'task.default',
+    },
 }
 
 celery_app.conf.beat_schedule = {
