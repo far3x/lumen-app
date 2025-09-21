@@ -392,7 +392,7 @@ class HybridValuationService:
                 z_score = (current_metrics['avg_complexity'] - stats.mean_complexity) / stats.std_dev_complexity
                 rarity_multiplier = 1.0 + (0.5 * math.tanh(z_score))
 
-        ai_weighted_multiplier = (clarity * 0.3) + (architecture * 0.2) + (code_quality * 0.5)
+        ai_weighted_multiplier = (clarity * 0.3) + (architecture * 0.3) + (code_quality * 0.4)
         
         code_ratio = current_metrics.get('code_ratio', 1.0)
         code_ratio_multiplier = (math.tanh(6 * code_ratio - 3) + 1) / 2
