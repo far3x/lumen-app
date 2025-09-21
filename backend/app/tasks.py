@@ -682,8 +682,9 @@ def retry_pending_ai_analysis_task():
 
         logger.info(f"Found {len(contributions_to_retry)} contributions to re-queue for AI analysis.")
         for contrib in contributions_to_retry:
-            logger.info(f"Re-queuing contribution ID: {contrib.id} for user ID: {contrib.user_id}")
+            logger.info(f"Re-queuing contribution ID: {contrib.id} for user ID: {contrib.user_id}. Waiting 60s...")
             process_contribution.delay(contrib.user_id, contrib.id)
+            time.sleep(60)
 
     except Exception as e:
         logger.error(f"Error during AI analysis retry task: {e}", exc_info=True)
@@ -729,7 +730,7 @@ def recalculate_contributions_from_id_task(start_id: int):
         contributions_to_recalculate = db.query(models.Contribution).filter(
             models.Contribution.id >= start_id,
             or_(models.Contribution.reward_amount > 5, models.Contribution.reward_amount == 0),
-            models.Contribution.status.in_(["PROCESSED", "PROCESSED_UPDATE", "REJECTED_NO_REWARD"])
+            models.Contribution.status.in_(["PROCESSED", "PROCESSED_UPDATE", "REJECTED_NO_REWARD", "AI_ANALYSIS_PENDING"])
         ).order_by(models.Contribution.id.asc()).all()
 
         if not contributions_to_recalculate:
@@ -743,7 +744,7 @@ def recalculate_contributions_from_id_task(start_id: int):
             if i > 0:
                 logger.info("Waiting for 60 seconds to respect API rate limits...")
                 time.sleep(60)
-
+            
             logger.info(f"--- Processing Contribution ID: {contribution.id} for User ID: {contribution.user_id} ---")
             
             user = contribution.user
@@ -753,31 +754,52 @@ def recalculate_contributions_from_id_task(start_id: int):
 
             old_reward_usd = contribution.reward_amount
             logger.info(f"Old reward: ${old_reward_usd:.4f}")
+            
+            try:
+                valuation_result = hybrid_valuation_service.calculate(db, current_codebase=contribution.raw_content)
+                
+                if "error" in valuation_result.get("valuation_details", {}):
+                    raise ValueError(f"AI analysis failed: {valuation_result['valuation_details']['error']}")
 
-            valuation_result = hybrid_valuation_service.calculate(db, current_codebase=contribution.raw_content)
-            
-            new_base_reward_usd = valuation_result.get("final_reward", 0.0)
-            
-            if contribution.source == 'web':
-                new_base_reward_usd /= 3.0
-                logger.info(f"[REWARD_MOD] Web contribution reward adjusted by 1/3. New base reward: ${new_base_reward_usd:.4f}")
+                new_base_reward_usd = valuation_result.get("final_reward", 0.0)
+                
+                if contribution.source == 'web':
+                    new_base_reward_usd /= 3.0
+                    logger.info(f"[REWARD_MOD] Web contribution reward adjusted by 1/3. New base reward: ${new_base_reward_usd:.4f}")
 
-            valuation_details = valuation_result.get("valuation_details", {})
+                valuation_details = valuation_result.get("valuation_details", {})
 
-            final_new_reward_usd = new_base_reward_usd * user.reward_multiplier
-            logger.info(f"New reward (after multipliers): ${final_new_reward_usd:.4f}")
+                final_new_reward_usd = new_base_reward_usd * user.reward_multiplier
+                logger.info(f"New reward (after multipliers): ${final_new_reward_usd:.4f}")
 
-            reward_difference = final_new_reward_usd - old_reward_usd
-            total_reward_change += reward_difference
+                reward_difference = final_new_reward_usd - old_reward_usd
+                total_reward_change += reward_difference
+                
+                user.account.usd_balance = max(0, user.account.usd_balance + reward_difference)
+                user.account.total_usd_earned = max(0, user.account.total_usd_earned + reward_difference)
+                
+                contribution.reward_amount = final_new_reward_usd
+                contribution.valuation_results = json.dumps(valuation_details)
+                contribution.status = "PROCESSED"
+                
+                db.commit()
+                logger.info(f"Updated C_ID:{contribution.id}. Reward change: ${reward_difference:+.4f}. User {user.id} balances updated.")
             
-            user.account.usd_balance = max(0, user.account.usd_balance + reward_difference)
-            user.account.total_usd_earned = max(0, user.account.total_usd_earned + reward_difference)
-            
-            contribution.reward_amount = final_new_reward_usd
-            contribution.valuation_results = json.dumps(valuation_details)
-            
-            db.commit()
-            logger.info(f"Updated C_ID:{contribution.id}. Reward change: ${reward_difference:+.4f}. User {user.id} balances updated.")
+            except Exception as e:
+                logger.error(f"Failed to recalculate C_ID:{contribution.id}. Error: {e}. Marking for retry.")
+                db.rollback()
+
+                reward_difference = 0 - old_reward_usd
+                total_reward_change += reward_difference
+                
+                user.account.usd_balance = max(0, user.account.usd_balance + reward_difference)
+                user.account.total_usd_earned = max(0, user.account.total_usd_earned + reward_difference)
+                
+                contribution.reward_amount = 0.0
+                contribution.status = 'AI_ANALYSIS_PENDING'
+                db.commit()
+                logger.warning(f"Reverted reward for C_ID:{contribution.id} and set status to AI_ANALYSIS_PENDING.")
+                continue
 
         logger.info("--- Recalculation Summary ---")
         logger.info(f"Processed {len(contributions_to_recalculate)} contributions.")
@@ -787,7 +809,7 @@ def recalculate_contributions_from_id_task(start_id: int):
         recalculate_network_stats_task.delay()
 
     except Exception as e:
-        logger.error(f"Error during contribution recalculation task: {e}", exc_info=True)
+        logger.error(f"Critical error during contribution recalculation task: {e}", exc_info=True)
         db.rollback()
     finally:
         db.close()
