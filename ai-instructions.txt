@@ -61,6 +61,20 @@ podman compose -f docker-compose.dev.yml exec worker celery -A app.core.celery_a
 dev only + local only (resets id 1) :
 podman compose -f docker-compose.dev.yml exec worker celery -A app.core.celery_app.celery_app call app.tasks.reset_user_limits_task --args='[1]'
 
+recalculate rewards for contributions from a specific ID onwards (for algo updates):
+doppler run -- docker compose exec worker_default celery -A app.core.celery_app.celery_app call app.tasks.recalculate_contributions_from_id_task --args='[START_ID_HERE]'
+
+locally:
+podman compose -f docker-compose.dev.yml exec worker celery -A app.core.celery_app.celery_app call app.tasks.recalculate_contributions_from_id_task --args='[START_ID_HERE]'
+
+
+find and report sources for cross-user plagiarism rejections:
+doppler run -- docker compose exec worker_default celery -A app.core.celery_app.celery_app call app.tasks.find_cross_user_duplicates_task
+
+locally:
+podman compose -f docker-compose.dev.yml exec worker_default celery -A app.core.celery_app.celery_app call app.tasks.find_cross_user_duplicates_task
+
+
 GEMINI PLEASE READ THIS - AI INSTRUCTIONS HERE - PLEASE READ !!
 
 little info if you are reading this as an ai model, the prod environment runs using doppler

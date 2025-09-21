@@ -21,7 +21,7 @@ from app.services.github_service import github_service
 import asyncio
 from datetime import datetime, timezone, timedelta
 from app.db.models import PayoutBatch, BatchPayout, Account, ContributionLanguage, User
-from sqlalchemy import desc
+from sqlalchemy import desc, or_
 from sqlalchemy.exc import IntegrityError
 
 logger = logging.getLogger(__name__)
@@ -718,5 +718,130 @@ def simulate_daily_payout_batch_task():
 
     except Exception as e:
         logger.error(f"Error during payout simulation task: {e}", exc_info=True)
+    finally:
+        db.close()
+
+@celery_app.task(name="app.tasks.recalculate_contributions_from_id_task")
+def recalculate_contributions_from_id_task(start_id: int):
+    logger.info(f"Starting recalculation task for contributions from ID {start_id} onwards with reward > 2.5 - $5.")
+    db = SessionLocal()
+    try:
+        contributions_to_recalculate = db.query(models.Contribution).filter(
+            models.Contribution.id >= start_id,
+            or_(models.Contribution.reward_amount > 5, models.Contribution.reward_amount == 0),
+            models.Contribution.status.in_(["PROCESSED", "PROCESSED_UPDATE", "REJECTED_NO_REWARD"])
+        ).order_by(models.Contribution.id.asc()).all()
+
+        if not contributions_to_recalculate:
+            logger.info("No contributions found matching the criteria. Task finished.")
+            return
+
+        logger.info(f"Found {len(contributions_to_recalculate)} contributions to re-evaluate.")
+        total_reward_change = 0.0
+
+        for contribution in contributions_to_recalculate:
+            logger.info(f"--- Processing Contribution ID: {contribution.id} for User ID: {contribution.user_id} ---")
+            
+            user = contribution.user
+            if not user or not user.account:
+                logger.warning(f"Skipping C_ID:{contribution.id}, user or account not found.")
+                continue
+
+            old_reward_usd = contribution.reward_amount
+            logger.info(f"Old reward: ${old_reward_usd:.4f}")
+
+            valuation_result = hybrid_valuation_service.calculate(db, current_codebase=contribution.raw_content)
+            
+            new_base_reward_usd = valuation_result.get("final_reward", 0.0)
+            valuation_details = valuation_result.get("valuation_details", {})
+
+            final_new_reward_usd = new_base_reward_usd * user.reward_multiplier
+            logger.info(f"New reward (after multipliers): ${final_new_reward_usd:.4f}")
+
+            reward_difference = final_new_reward_usd - old_reward_usd
+            total_reward_change += reward_difference
+            
+            user.account.usd_balance = max(0, user.account.usd_balance + reward_difference)
+            user.account.total_usd_earned = max(0, user.account.total_usd_earned + reward_difference)
+            
+            contribution.reward_amount = final_new_reward_usd
+            contribution.valuation_results = json.dumps(valuation_details)
+            
+            db.commit()
+            logger.info(f"Updated C_ID:{contribution.id}. Reward change: ${reward_difference:+.4f}. User {user.id} balances updated.")
+
+        logger.info("--- Recalculation Summary ---")
+        logger.info(f"Processed {len(contributions_to_recalculate)} contributions.")
+        logger.info(f"Total network reward change: ${total_reward_change:+.4f} USD.")
+        
+        logger.info("Triggering full network stats recalculation to reflect changes.")
+        recalculate_network_stats_task.delay()
+
+    except Exception as e:
+        logger.error(f"Error during contribution recalculation task: {e}", exc_info=True)
+        db.rollback()
+    finally:
+        db.close()
+
+@celery_app.task(name="app.tasks.find_cross_user_duplicates_task")
+def find_cross_user_duplicates_task():
+    logger.info("Starting task to find sources of cross-user duplicates.")
+    db = SessionLocal()
+    try:
+        rejected_contributions = db.query(models.Contribution).filter(
+            models.Contribution.status == 'DUPLICATE_CROSS_USER'
+        ).all()
+
+        if not rejected_contributions:
+            logger.info("No contributions with status 'DUPLICATE_CROSS_USER' found.")
+            return
+
+        logger.info(f"Found {len(rejected_contributions)} rejected contributions to analyze.")
+        logger.info("--- Cross-User Duplicate Report ---")
+        
+        report_found = False
+        for rejected_contrib in rejected_contributions:
+            if not rejected_contrib.raw_content:
+                logger.warning(f"Skipping Rejected C_ID:{rejected_contrib.id} as it has no raw content.")
+                continue
+
+            parsed_files = hybrid_valuation_service._parse_codebase(rejected_contrib.raw_content)
+            full_codebase_content = "\n".join(file_data["content"] for file_data in parsed_files)
+
+            if not full_codebase_content.strip():
+                continue
+                
+            embedding = embedding_service.generate(full_codebase_content)
+            if embedding is None:
+                logger.warning(f"Could not generate embedding for Rejected C_ID:{rejected_contrib.id}.")
+                continue
+
+            nearest_neighbors = crud.get_nearest_neighbors(db, embedding, limit=5)
+            
+            original_contrib = None
+            similarity = 0
+            for neighbor, distance in nearest_neighbors:
+                if neighbor.user_id != rejected_contrib.user_id:
+                    original_contrib = neighbor
+                    similarity = 1 - distance
+                    break
+            
+            if original_contrib:
+                report_found = True
+                logger.info(
+                    f"Rejected C_ID:{rejected_contrib.id} (User ID: {rejected_contrib.user_id}) "
+                    f"is a {similarity:.2%} match to --> "
+                    f"Original C_ID:{original_contrib.id} (User ID: {original_contrib.user_id})"
+                )
+            else:
+                 logger.warning(f"Could not find an original source for Rejected C_ID:{rejected_contrib.id}")
+
+        if not report_found:
+            logger.info("Analysis complete. No cross-user duplicates could be sourced.")
+        
+        logger.info("--- End of Report ---")
+
+    except Exception as e:
+        logger.error(f"Error during cross-user duplicate analysis: {e}", exc_info=True)
     finally:
         db.close()
