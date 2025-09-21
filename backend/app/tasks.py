@@ -739,7 +739,11 @@ def recalculate_contributions_from_id_task(start_id: int):
         logger.info(f"Found {len(contributions_to_recalculate)} contributions to re-evaluate.")
         total_reward_change = 0.0
 
-        for contribution in contributions_to_recalculate:
+        for i, contribution in enumerate(contributions_to_recalculate):
+            if i > 0:
+                logger.info("Waiting for 60 seconds to respect API rate limits...")
+                time.sleep(60)
+
             logger.info(f"--- Processing Contribution ID: {contribution.id} for User ID: {contribution.user_id} ---")
             
             user = contribution.user
@@ -753,6 +757,11 @@ def recalculate_contributions_from_id_task(start_id: int):
             valuation_result = hybrid_valuation_service.calculate(db, current_codebase=contribution.raw_content)
             
             new_base_reward_usd = valuation_result.get("final_reward", 0.0)
+            
+            if contribution.source == 'web':
+                new_base_reward_usd /= 3.0
+                logger.info(f"[REWARD_MOD] Web contribution reward adjusted by 1/3. New base reward: ${new_base_reward_usd:.4f}")
+
             valuation_details = valuation_result.get("valuation_details", {})
 
             final_new_reward_usd = new_base_reward_usd * user.reward_multiplier
