@@ -71,9 +71,8 @@ function renderPageContent(leaderboard, userRank, recentContributions) {
     const yourRankCard = (isAuthenticated() && userRank) ? `
         <div class="animate-fade-in-up" style="animation-delay: 200ms;">
             <div class="bg-surface rounded-xl p-4 flex items-center justify-between gap-4 border border-primary">
-                <div class="flex items-center gap-4">
-                    <span class="text-lg font-bold text-text-main">Your Rank</span>
-                    <div class="w-px h-8 bg-primary"></div>
+                <div class="flex items-baseline gap-3">
+                    <span class="text-lg font-semibold text-text-main">Your Rank</span>
                     <span class="text-3xl font-bold text-text-main">#${userRank.rank.toLocaleString()}</span>
                 </div>
                 <span class="font-mono text-lg text-accent-primary font-bold">$${userRank.total_usd_earned.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
@@ -81,7 +80,7 @@ function renderPageContent(leaderboard, userRank, recentContributions) {
         </div>
     ` : '';
     
-    const leaderboardItems = Array.from({ length: 5 }, (_, i) => {
+    const leaderboardItems = Array.from({ length: 10 }, (_, i) => {
         const entry = leaderboard[i];
         return entry ? renderLeaderboardRow(entry) : renderEmptyRow(i + 1);
     }).join('');

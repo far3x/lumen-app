@@ -133,7 +133,7 @@ async def get_my_rank(
     current_user: models.User = Depends(dependencies.get_current_user),
     db: Session = Depends(database.get_db)
 ):
-    if not current_user.is_verified or not current_user.is_in_leaderboard:
+    if not current_user.is_verified:
         return None
         
     user_rank_data = crud.get_user_rank(db, user_id=current_user.id)
