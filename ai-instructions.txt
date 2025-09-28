@@ -61,8 +61,8 @@ podman compose -f docker-compose.dev.yml exec worker celery -A app.core.celery_a
 dev only + local only (resets id 1) :
 podman compose -f docker-compose.dev.yml exec worker celery -A app.core.celery_app.celery_app call app.tasks.reset_user_limits_task --args='[1]'
 
-recalculate rewards for contributions from a specific ID onwards (for algo updates):
-doppler run -- docker compose exec worker_default celery -A app.core.celery_app.celery_app call app.tasks.recalculate_contributions_from_id_task --args='[START_ID_HERE]'
+recalculate rewards for contributions from a specific ID onwards (for algo updates, from sept 10 batch till 22/09 2:15 am):
+doppler run -- docker compose exec worker_default celery -A app.core.celery_app.celery_app call app.tasks.recalculate_contributions_from_id_task --args='[398]'
 
 locally:
 podman compose -f docker-compose.dev.yml exec worker celery -A app.core.celery_app.celery_app call app.tasks.recalculate_contributions_from_id_task --args='[START_ID_HERE]'
