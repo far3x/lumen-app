@@ -342,6 +342,8 @@ services:
     container_name: lumen_uptime_kuma
     volumes:
       - uptime_kuma_data:/app/data
+      - /var/run/docker.sock:/var/run/docker.sock
+    user: "root"
     restart: unless-stopped
 
 volumes:
