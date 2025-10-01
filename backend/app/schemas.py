@@ -167,6 +167,15 @@ class LeaderboardResponse(BaseModel):
     top_users: List[LeaderboardEntry]
     current_user_rank: Optional[LeaderboardEntry] = None
 
+class NetworkStatsResponse(BaseModel):
+    total_lloc: int
+    total_tokens: int
+    total_usd_distributed: float
+    total_contributions: int
+
+    class Config:
+        from_attributes = True
+
 class WalletLinkRequest(BaseModel):
     solana_address: str
     message: str

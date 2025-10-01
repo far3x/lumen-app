@@ -1,4 +1,4 @@
-import { fetchLeaderboard, fetchRecentContributions, isAuthenticated } from '../lib/auth.js';
+import { fetchLeaderboard, fetchRecentContributions, fetchNetworkStats, isAuthenticated } from '../lib/auth.js';
 import { icons } from './app/dashboard/utils.js';
 import { DateTime } from 'luxon';
 
@@ -67,7 +67,37 @@ function renderRecentActivityFeed(contributions) {
     `;
 }
 
-function renderPageContent(leaderboard, userRank, recentContributions) {
+function renderNetworkStats(stats) {
+    if (!stats) {
+        return '';
+    }
+
+    return `
+        <div class="mt-8 animate-fade-in-up" style="animation-delay: 800ms;">
+            <h2 class="text-2xl font-bold mb-4 text-text-main">Network Statistics</h2>
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                <div class="bg-surface p-6 rounded-xl border border-primary">
+                    <div class="text-text-secondary text-sm uppercase font-medium mb-2">Logical Lines of Code</div>
+                    <div class="text-2xl font-bold text-accent-primary font-mono">${stats.total_lloc.toLocaleString()}</div>
+                </div>
+                <div class="bg-surface p-6 rounded-xl border border-primary">
+                    <div class="text-text-secondary text-sm uppercase font-medium mb-2">Total Tokens</div>
+                    <div class="text-2xl font-bold text-accent-primary font-mono">${stats.total_tokens.toLocaleString()}</div>
+                </div>
+                <div class="bg-surface p-6 rounded-xl border border-primary">
+                    <div class="text-text-secondary text-sm uppercase font-medium mb-2">USD Distributed</div>
+                    <div class="text-2xl font-bold text-accent-primary font-mono">$${stats.total_usd_distributed.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</div>
+                </div>
+                <div class="bg-surface p-6 rounded-xl border border-primary">
+                    <div class="text-text-secondary text-sm uppercase font-medium mb-2">Total Contributions</div>
+                    <div class="text-2xl font-bold text-accent-primary font-mono">${stats.total_contributions.toLocaleString()}</div>
+                </div>
+            </div>
+        </div>
+    `;
+}
+
+function renderPageContent(leaderboard, userRank, recentContributions, networkStats) {
     const yourRankCard = (isAuthenticated() && userRank) ? `
         <div class="animate-fade-in-up" style="animation-delay: 200ms;">
             <div class="bg-surface rounded-xl p-4 flex items-center justify-between gap-4 border border-primary">
@@ -115,6 +145,8 @@ function renderPageContent(leaderboard, userRank, recentContributions) {
                 </div>
             </div>
         </div>
+
+        ${renderNetworkStats(networkStats)}
     `;
 }
 
@@ -122,16 +154,19 @@ export async function renderPublicDashboard() {
     let leaderboardData = [];
     let userRank = null;
     let recentContributions = [];
+    let networkStats = null;
 
     try {
-        const [leaderboardResponse, recentContribResponse] = await Promise.all([
+        const [leaderboardResponse, recentContribResponse, networkStatsResponse] = await Promise.all([
             fetchLeaderboard(),
-            fetchRecentContributions(5)
+            fetchRecentContributions(5),
+            fetchNetworkStats()
         ]);
         
         leaderboardData = leaderboardResponse.top_users || [];
         userRank = leaderboardResponse.current_user_rank || null;
         recentContributions = recentContribResponse || [];
+        networkStats = networkStatsResponse || null;
 
     } catch (error) {
         console.error("Could not load public dashboard data:", error);
@@ -142,7 +177,7 @@ export async function renderPublicDashboard() {
             <div class="container mx-auto px-6 py-24 md:py-32">
                 <div class="grid lg:grid-cols-10 gap-12 items-start">
                     <div class="lg:col-span-6">
-                        ${renderPageContent(leaderboardData, userRank, recentContributions)}
+                        ${renderPageContent(leaderboardData, userRank, recentContributions, networkStats)}
                     </div>
                     <aside class="lg:col-span-4 hidden lg:block">
                         <div class="sticky top-28 p-12">

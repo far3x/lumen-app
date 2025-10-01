@@ -4,7 +4,7 @@ from sqlalchemy.orm import Session
 import json
 
 from app.db import crud, database, models
-from app.schemas import LeaderboardEntry, LeaderboardResponse, FeedbackCreate, PublicContributionResponse
+from app.schemas import LeaderboardEntry, LeaderboardResponse, FeedbackCreate, PublicContributionResponse, NetworkStatsResponse
 from app.api.v1 import dependencies
 from app.core.limiter import limiter
 from app.services.redis_service import redis_service
@@ -102,6 +102,40 @@ def get_recent_contributions(
     redis_service.set_with_ttl(cache_key, response_json, 60)
 
     return response_list
+
+@router.get("/network-stats", response_model=NetworkStatsResponse)
+@limiter.limit("60/minute")
+def get_network_stats(
+    request: Request,
+    db: Session = Depends(database.get_db)
+):
+    cache_key = "cache:network_stats"
+    cached_stats = redis_service.get(cache_key)
+
+    if cached_stats:
+        return JSONResponse(content=json.loads(cached_stats))
+    
+    stats = crud.get_network_stats(db)
+    
+    if not stats:
+        # Retourner des valeurs par défaut si aucune statistique n'existe
+        response_data = NetworkStatsResponse(
+            total_lloc=0,
+            total_tokens=0,
+            total_usd_distributed=0.0,
+            total_contributions=0
+        )
+    else:
+        response_data = NetworkStatsResponse(
+            total_lloc=stats.total_lloc,
+            total_tokens=stats.total_tokens,
+            total_usd_distributed=stats.total_usd_distributed,
+            total_contributions=stats.total_contributions
+        )
+
+    redis_service.set_with_ttl(cache_key, response_data.model_dump_json(), 60)
+
+    return response_data
 
 @router.post("/feedback", status_code=status.HTTP_201_CREATED)
 @limiter.limit("2/day", key_func=get_visitor_id_key)
