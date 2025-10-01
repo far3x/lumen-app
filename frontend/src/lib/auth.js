@@ -175,6 +175,11 @@ export const fetchRecentContributions = async (limit = 10) => {
     return response.data;
 };
 
+export const fetchNetworkStats = async () => {
+    const response = await api.get('/network-stats');
+    return response.data;
+};
+
 export const checkContributionStatus = (id) => {
     return api.get(`/cli/contributions/${id}/status`);
 };
