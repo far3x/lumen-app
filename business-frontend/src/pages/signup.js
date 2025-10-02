@@ -157,7 +157,7 @@ export function renderSignupPage() {
                         </div>
                         <div class="flex justify-center pt-2"><div id="recaptcha-container"></div></div>
                         <div class="pt-2">
-                            <button type="submit" class="w-full px-8 py-3 font-semibold text-white bg-accent-gradient rounded-md transition-all duration-300 hover:scale-105 hover:brightness-110">Create Account</button>
+                            <button type="submit" class="w-full px-8 py-3 font-bold bg-primary text-white hover:bg-accent-red-dark rounded-lg shadow-md hover:shadow-lg transform hover:-translate-y-0.5 transition-all duration-200 ease-out">Create Account</button>
                         </div>
                     </form>
                 </div>
