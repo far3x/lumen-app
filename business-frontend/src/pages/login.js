@@ -59,7 +59,7 @@ export function renderLoginPage() {
                             </div>
                         </div>
                         <div>
-                            <button type="submit" class="w-full px-8 py-3 font-semibold text-white bg-accent-gradient rounded-md transition-all duration-300 hover:scale-105 hover:brightness-110">Sign In</button>
+                            <button type="submit" class="w-full px-8 py-3 font-bold bg-primary text-white hover:bg-accent-red-dark rounded-lg shadow-md hover:shadow-lg transform hover:-translate-y-0.5 transition-all duration-200 ease-out">Sign In</button>
                         </div>
                     </form>
                     <p class="mt-6 text-center text-sm text-text-muted">

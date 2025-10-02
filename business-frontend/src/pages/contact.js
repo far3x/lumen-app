@@ -107,7 +107,7 @@ export function renderContactPage() {
                                     <textarea id="message" name="message" rows="4" class="mt-1 block w-full px-3 py-2.5 bg-gray-50 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-accent-purple focus:border-accent-purple"></textarea>
                                 </div>
                                 <div class="pt-2">
-                                    <button type="submit" class="w-full px-8 py-3 font-semibold text-white bg-accent-gradient rounded-md transition-all duration-300 hover:scale-105 hover:brightness-110">Submit Request</button>
+                                    <button type="submit" class="w-full px-8 py-3 font-bold bg-primary text-white hover:bg-accent-red-dark rounded-lg shadow-md hover:shadow-lg transform hover:-translate-y-0.5 transition-all duration-200 ease-out">Submit Request</button>
                                 </div>
                                 <p class="text-xs text-text-muted text-center pt-2">By submitting this form, you agree to our <a href="/privacy" class="text-text-body hover:underline">Privacy Policy</a>.</p>
                             </form>

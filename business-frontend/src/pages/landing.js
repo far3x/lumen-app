@@ -23,14 +23,14 @@ export function renderLandingPage() {
                 <div class="grid lg:grid-cols-5 gap-16 items-center">
                     <div class="lg:col-span-3 text-center lg:text-left">
                         <h1 class="text-6xl md:text-8xl font-bold text-text-headings tracking-tighter leading-tight">
-                            Your Code. Your Value.<br>Our Mission.
+                            Your Code. Your Value.<br><span class="text-primary">Our Mission.</span>
                         </h1>
                         <p class="mt-8 max-w-xl mx-auto lg:mx-0 text-lg md:text-xl text-text-body">
                             Unlock the value of your proprietary code. We provide the secure data layer for AI leaders to build world-class models without legal risk.
                         </p>
                         <div class="mt-10 flex flex-col sm:flex-row justify-center lg:justify-start items-center gap-4">
-                            <a href="/contact" class="w-full sm:w-auto px-8 py-3 font-semibold text-white bg-accent-gradient rounded-md transition-all duration-300 hover:scale-105 hover:brightness-110">Book a Demo</a>
-                            <a href="/product" class="w-full sm:w-auto px-8 py-3 font-semibold text-white bg-text-headings hover:bg-opacity-90 rounded-md transition-colors">Explore the Platform</a>
+                            <a href="/contact" class="w-full sm:w-auto px-8 py-3 font-bold bg-primary text-white hover:bg-accent-red-dark rounded-lg shadow-md hover:shadow-lg transform hover:-translate-y-0.5 transition-all duration-200 ease-out">Book a Demo</a>
+                            <a href="/product" class="w-full sm:w-auto px-8 py-3 font-bold bg-gray-200 text-text-body hover:bg-gray-300 rounded-lg shadow-md hover:shadow-lg transform hover:-translate-y-0.5 transition-all duration-200 ease-out">Explore the Platform</a>
                         </div>
                     </div>
                     <div class="lg:col-span-2 hidden lg:flex items-center justify-end h-96 w-96 bg-background rounded-lg overflow-hidden">
@@ -59,8 +59,10 @@ export function renderLandingPage() {
         <!-- NEW ADVANTAGE SECTION -->
         <section class="py-24 md:py-32 bg-white">
              <div class="container mx-auto px-6">
-                <div class="grid lg:grid-cols-2 gap-24 items-center">
-                    <div class="scroll-animate" style="transform: translateY(2rem);">
+                <div class="shadow-lg border border-border mx-auto grid md:grid-cols-2 items-center overflow-hidden relative min-h-[28rem] rounded-lg transition-all duration-300 ease-in-out hover:scale-105 hover:shadow-xl scroll-animate" style="transform: translateY(2rem);">
+                    <div class="absolute inset-0"><img src="/platform-advantage.png" alt="Abstract visualization of the Lumen Platform providing a data advantage" class="w-full h-full object-cover"></div>
+                    <div class="absolute inset-0 bg-gradient-to-r from-white via-white/80 to-transparent"></div>
+                    <div class="relative text-left p-12">
                         <p class="section-label">THE LUMEN ADVANTAGE</p>
                         <h2 class="text-3xl md:text-4xl font-bold text-text-headings mt-4">Data-Centric Intelligence</h2>
                         <p class="mt-6 text-lg text-text-body">Great models are built with great data. Lumen provides the tools to create, filter, and deploy high-signal training sets with unparalleled control and privacy.</p>
@@ -69,9 +71,6 @@ export function renderLandingPage() {
                             <li class="flex items-start gap-4"><svg class="w-6 h-6 text-primary shrink-0 mt-1" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg><span><strong>Ethical Sourcing:</strong> Eliminate legal and copyright risks with a fully-transparent data pipeline built on explicit developer consent.</span></li>
                             <li class="flex items-start gap-4"><svg class="w-6 h-6 text-primary shrink-0 mt-1" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg><span><strong>Strategic Advantage:</strong> Integrate seamlessly with your MLOps pipeline via our secure API to build a sustainable data advantage.</span></li>
                         </ul>
-                    </div>
-                    <div class="bg-background rounded-lg border border-border shadow-xl overflow-hidden scroll-animate animate-delay-1" style="transform: translateY(2rem);">
-                         <img src="/platform-advantage.png" alt="Abstract visualization of the Lumen Platform providing a data advantage" class="w-full h-full object-cover object-top">
                     </div>
                 </div>
             </div>
@@ -89,7 +88,7 @@ export function renderLandingPage() {
                         <h3 class="text-3xl font-bold text-text-headings">The Data Explorer</h3>
                         <p class="mt-4 text-lg text-text-body">Our intuitive dashboard allows your team to navigate the entire Lumen dataset with powerful, granular filters. Isolate high-signal code by language, token count, and our proprietary AI-driven scores for quality, clarity, and architecture.</p>
                         <div class="mt-10 flex items-center gap-6">
-                            <a href="/product" class="px-6 py-3 font-semibold text-white bg-text-headings hover:bg-opacity-90 rounded-md transition-colors">Explore the Product</a>
+                            <a href="/product" class="px-6 py-3 font-bold bg-gray-200 text-text-body hover:bg-gray-300 rounded-lg shadow-md hover:shadow-lg transform hover:-translate-y-0.5 transition-all duration-200 ease-out">Explore the Product</a>
                             <a href="/docs" class="font-semibold text-text-body hover:text-text-headings transition-colors">View Documentation &rarr;</a>
                         </div>
                     </div>
@@ -108,7 +107,7 @@ export function renderLandingPage() {
                     <p class="mt-4 text-lg text-text-tertiary">Book a demo or contact our team to learn how Lumen can provide your organization with a strategic data advantage.</p>
                 </div>
                 <div class="mt-12 flex flex-col items-center gap-4 scroll-animate animate-delay-1" style="transform: translateY(2rem);">
-                    <a href="/contact" class="w-full sm:w-auto px-8 py-3 font-semibold text-white bg-accent-gradient rounded-md transition-all duration-300 hover:scale-105 hover:brightness-110">
+                    <a href="/contact" class="w-full sm:w-auto px-8 py-3 font-bold bg-primary text-white hover:bg-accent-red-dark rounded-lg shadow-md hover:shadow-lg transform hover:-translate-y-0.5 transition-all duration-200 ease-out">
                         Contact Sales
                     </a>
                     <p class="text-sm text-text-muted">or <a href="/product" class="text-white font-semibold hover:underline">explore our platform first</a>.</p>

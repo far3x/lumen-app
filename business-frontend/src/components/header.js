@@ -6,8 +6,8 @@ export function renderHeader() {
     const user = getUser();
 
     const navLinkClasses = "text-text-body hover:text-text-headings transition-colors font-medium";
-    const buttonPrimaryClasses = "px-5 py-2.5 text-sm font-semibold text-white bg-accent-gradient rounded-md transition-all duration-300 hover:scale-105 hover:brightness-110";
-    const buttonSecondaryClasses = "px-5 py-2.5 text-sm font-semibold text-text-headings bg-white border border-border hover:bg-background rounded-md transition-colors";
+    const buttonPrimaryClasses = "px-5 py-2.5 text-sm font-semibold bg-primary text-white hover:bg-accent-red-dark rounded-lg shadow-md hover:shadow-lg transform hover:-translate-y-0.5 transition-all duration-200 ease-out";
+    const buttonSecondaryClasses = "px-5 py-2.5 text-sm font-semibold bg-gray-200 text-text-body hover:bg-gray-300 rounded-lg shadow-md hover:shadow-lg transform hover:-translate-y-0.5 transition-all duration-200 ease-out";
 
     const authLinks = authed ? `
         <a href="/app/overview" class="${buttonSecondaryClasses}">Dashboard</a>
