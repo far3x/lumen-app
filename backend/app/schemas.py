@@ -21,6 +21,7 @@ class User(BaseModel):
     has_beta_access: bool
     waitlist_position: Optional[int] = None
     reward_multiplier: float
+    is_banned: bool
 
     class Config:
         from_attributes = True

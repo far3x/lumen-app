@@ -389,7 +389,7 @@ def process_payout_batch_task(batch_id: int):
 
 
 @celery_app.task(name="app.tasks.create_daily_payout_batch_task")
-def create_daily_payout_batch_task():
+def create_daily_payout_batch_task(total_payout_pool_usd: float = None):
     db = SessionLocal()
     try:
         now = datetime.now(timezone.utc)
@@ -402,12 +402,29 @@ def create_daily_payout_batch_task():
             open_batch.end_time = now
             open_batch.status = "CLOSED"
 
-            users_to_pay = db.query(Account).filter(Account.usd_balance > 0).all()
+            users_to_pay = db.query(Account).join(User).filter(
+                Account.usd_balance > 0,
+                User.is_banned == False,
+                User.solana_address.isnot(None)
+            ).all()
             
-            total_batch_amount = 0
-            if users_to_pay:
+            if not users_to_pay:
+                logger.info("No users with a pending balance to pay out.")
+                open_batch.total_amount_usd = 0
+                db.commit()
+            else:
+                total_owed_usd = sum(acc.usd_balance for acc in users_to_pay)
+                payout_ratio = 1.0
+
+                if total_payout_pool_usd is not None and total_payout_pool_usd > 0 and total_payout_pool_usd < total_owed_usd:
+                    payout_ratio = total_payout_pool_usd / total_owed_usd
+                    logger.info(f"Payout pool of ${total_payout_pool_usd} is less than total owed ${total_owed_usd:.4f}. Applying proportional payout ratio of {payout_ratio:.4f}.")
+                else:
+                    logger.info(f"Sufficient funds to pay all pending balances. Payout ratio is 1.0.")
+
+                total_batch_amount = 0
                 for account in users_to_pay:
-                    payout_amount = account.usd_balance
+                    payout_amount = account.usd_balance * payout_ratio
                     total_batch_amount += payout_amount
 
                     new_payout = BatchPayout(
@@ -417,16 +434,16 @@ def create_daily_payout_batch_task():
                     )
                     db.add(new_payout)
                     
-                    account.usd_balance = 0.0
+                    account.usd_balance -= payout_amount
                     db.add(account)
 
-            open_batch.total_amount_usd = total_batch_amount
-            db.commit()
-            
-            logger.info(f"Batch {open_batch.id} closed. Snapshotted {len(users_to_pay)} users for a total of ${total_batch_amount:.2f}.")
+                open_batch.total_amount_usd = total_batch_amount
+                db.commit()
+                
+                logger.info(f"Batch {open_batch.id} closed. Snapshotted {len(users_to_pay)} users for a total of ${total_batch_amount:.2f}.")
 
-            if total_batch_amount > 0:
-                process_payout_batch_task.delay(open_batch.id)
+                if total_batch_amount > 0:
+                    process_payout_batch_task.delay(open_batch.id)
 
         logger.info("Creating new OPEN batch for the next 24-hour cycle.")
         new_batch = PayoutBatch(start_time=now, status="OPEN")
@@ -582,7 +599,7 @@ def process_contribution(self, user_id: int, contribution_db_id: int):
             publish_contribution_update(db, contribution_db_id, user_id)
             return
 
-        base_reward_usd = valuation_result.get("final_reward", 0.0)
+        base_reward_usd = valuation_result.get("final_reward", 0.0) * 0.3 #*0.3 cuz im poor now
         
         if source == 'web':
             base_reward_usd /= 3.0
@@ -874,5 +891,44 @@ def find_cross_user_duplicates_task():
 
     except Exception as e:
         logger.error(f"Error during cross-user duplicate analysis: {e}", exc_info=True)
+    finally:
+        db.close()
+
+@celery_app.task(name="app.tasks.ban_users_task")
+def ban_users_task(user_ids: List[int]):
+    logger.info(f"Starting batch ban task for user IDs: {user_ids}")
+    db = SessionLocal()
+    try:
+        users_to_ban = db.query(models.User).filter(models.User.id.in_(user_ids)).all()
+        
+        if not users_to_ban:
+            logger.warning("No users found for the provided IDs. No action taken.")
+            return
+
+        for user in users_to_ban:
+            user_id = user.id
+            if user.is_banned:
+                logger.info(f"User {user_id} is already banned. Skipping.")
+                continue
+
+            logger.info(f"Banning user {user_id}...")
+            user.is_banned = True
+            
+            account = db.query(models.Account).filter(models.Account.user_id == user_id).first()
+            if account:
+                logger.info(f"Resetting balances for user {user_id}. Old balance: ${account.usd_balance}, Old lifetime earnings: ${account.total_usd_earned}")
+                account.usd_balance = 0.0
+                account.total_usd_earned = 0.0
+            else:
+                logger.warning(f"No account found for user {user_id}. Cannot reset balances.")
+            
+            logger.info(f"User {user_id} has been banned and balances reset.")
+        
+        db.commit()
+        logger.info(f"Successfully processed {len(users_to_ban)} users.")
+
+    except Exception as e:
+        logger.error(f"Error during batch ban task: {e}", exc_info=True)
+        db.rollback()
     finally:
         db.close()

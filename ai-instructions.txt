@@ -30,6 +30,11 @@ podman compose -f docker-compose.dev.yml exec db psql -U lumen_user -d lumen_exc
 to run batch:
 doppler run -- docker compose exec worker_priority celery -A app.core.celery_app.celery_app call app.tasks.create_daily_payout_batch_task
 
+to run batch with proportional payout ($100 total pool):
+doppler run -- docker compose exec worker_priority celery -A app.core.celery_app.celery_app call app.tasks.create_daily_payout_batch_task --kwargs='{"total_payout_pool_usd": 100.0}'
+
+podman compose -f docker-compose.dev.yml exec worker celery -A app.core.celery_app.celery_app call app.tasks.create_daily_payout_batch_task --kwargs='{"total_payout_pool_usd": 100.0}'
+
 to run batch SIMULATOR (read-only check):
 doppler run -- docker compose exec worker_default celery -A app.core.celery_app.celery_app call app.tasks.simulate_daily_payout_batch_task
 
@@ -73,6 +78,13 @@ doppler run -- docker compose exec worker_default celery -A app.core.celery_app.
 
 locally:
 podman compose -f docker-compose.dev.yml exec worker_default celery -A app.core.celery_app.celery_app call app.tasks.find_cross_user_duplicates_task
+
+
+to ban users by id ([1, 5, 12]):
+doppler run -- docker compose exec worker_priority celery -A app.core.celery_app.celery_app call app.tasks.ban_users_task --args='[[1, 5, 12]]'
+
+locally:
+podman compose -f docker-compose.dev.yml exec worker celery -A app.core.celery_app.celery_app call app.tasks.ban_users_task --args='[[1, 5, 12]]'
 
 
 GEMINI PLEASE READ THIS - AI INSTRUCTIONS HERE - PLEASE READ !!

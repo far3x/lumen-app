@@ -32,6 +32,7 @@ class User(Base):
     deletion_token = Column(String, unique=True, nullable=True)
     deletion_token_expires = Column(Float, nullable=True)
     created_at = Column(DateTime(timezone=True), server_default=func.now())
+    is_banned = Column(Boolean, default=False, nullable=False)
     account = relationship("Account", back_populates="user", uselist=False, cascade="all, delete-orphan")
     personal_access_tokens = relationship("PersonalAccessToken", back_populates="user", cascade="all, delete-orphan")
     contributions = relationship("Contribution", back_populates="user")

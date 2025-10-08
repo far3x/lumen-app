@@ -32,6 +32,13 @@ async def get_current_user_from_token(token: str, db: Session) -> models.User:
     user = crud.get_user(db, user_id=int(token_data.id))
     if user is None:
         raise credentials_exception
+    
+    if user.is_banned:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="This account has been suspended.",
+        )
+        
     return user
 
 async def get_current_user(request: Request, db: Session = Depends(get_db)) -> models.User:
@@ -100,6 +107,13 @@ async def get_current_user_from_pat(pat: str = Depends(oauth2_scheme), db: Sessi
     
     if user is None:
         raise credentials_exception
+    
+    if user.is_banned:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="This account has been suspended.",
+        )
+        
     return user
 
 async def get_current_company_from_api_key(
