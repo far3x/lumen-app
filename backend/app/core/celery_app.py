@@ -108,6 +108,10 @@ task_routes = {
         'queue': 'default',
         'routing_key': 'task.default',
     },
+    'app.tasks.ban_users_task': {
+        'queue': 'high_priority',
+        'routing_key': 'task.high_priority',
+    },
 }
 
 celery_app.conf.beat_schedule = {

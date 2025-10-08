@@ -222,6 +222,12 @@ async def login_for_access_token(request: Request, response: Response, form_data
             detail="Incorrect email or password",
         )
     
+    if user.is_banned:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="This account has been suspended.",
+        )
+
     if not user.is_verified:
         raise HTTPException(status_code=status.HTTP_403, detail="Email not verified. Please check your inbox.")
 
@@ -362,6 +368,9 @@ async def auth_callback(request: Request, provider: str, db: Session = Depends(d
     if not user:
         user = crud.create_oauth_user(db, provider, user_info)
     
+    if user.is_banned:
+        return RedirectResponse(url=f"{config.settings.FRONTEND_URL}/login")
+
     if user.is_two_factor_enabled:
         tfa_token_expires = timedelta(minutes=5)
         tfa_token = security.create_access_token(

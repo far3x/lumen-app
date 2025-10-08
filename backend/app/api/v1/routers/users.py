@@ -123,6 +123,7 @@ async def read_users_me(request: Request, current_user: models.User = Depends(de
         "has_beta_access": has_beta_access,
         "waitlist_position": waitlist_position,
         "reward_multiplier": current_user.reward_multiplier,
+        "is_banned": current_user.is_banned,
     }
     return UserSchema(**user_data)
 
