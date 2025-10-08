@@ -877,9 +877,7 @@ def find_cross_user_duplicates_task():
             if original_contrib:
                 report_found = True
                 logger.info(
-                    f"Rejected C_ID:{rejected_contrib.id} (User ID: {rejected_contrib.user_id}) "
-                    f"is a {similarity:.2%} match to --> "
-                    f"Original C_ID:{original_contrib.id} (User ID: {original_contrib.user_id})"
+                    f"(User ID: {rejected_contrib.user_id}), {similarity:.2%} match to --> (User ID: {original_contrib.user_id})"
                 )
             else:
                  logger.warning(f"Could not find an original source for Rejected C_ID:{rejected_contrib.id}")
