@@ -602,8 +602,8 @@ def process_contribution(self, user_id: int, contribution_db_id: int):
         base_reward_usd = valuation_result.get("final_reward", 0.0) * 0.3 #*0.3 cuz im poor now
         
         if source == 'web':
-            base_reward_usd /= 3.0
-            logger.info(f"[REWARD_MOD] Web contribution reward adjusted by 1/3. New base reward: ${base_reward_usd:.4f}")
+            base_reward_usd /= 1.5
+            logger.info(f"[REWARD_MOD] Web contribution reward adjusted by 1/1.5. New base reward: ${base_reward_usd:.4f}")
         
         valuation_details = valuation_result.get("valuation_details", {})
         files_to_check = valuation_details.get("plagiarism_check_files", [])
@@ -782,7 +782,7 @@ def recalculate_contributions_from_id_task(start_id: int):
                 
                 if contribution.source == 'web':
                     new_base_reward_usd /= 3.0
-                    logger.info(f"[REWARD_MOD] Web contribution reward adjusted by 1/3. New base reward: ${new_base_reward_usd:.4f}")
+                    logger.info(f"[REWARD_MOD] Web contribution reward adjusted by 1/1.5. New base reward: ${new_base_reward_usd:.4f}")
 
                 valuation_details = valuation_result.get("valuation_details", {})
 

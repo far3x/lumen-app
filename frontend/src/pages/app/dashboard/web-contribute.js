@@ -146,7 +146,7 @@ function render() {
                                 <div class="flex justify-between"><span>Final payload size:</span><strong class="font-mono">${(state.project.totalSize / 1024 / 1024).toFixed(2)} MB</strong></div>
                             </div>
                             <div class="mt-4 text-xs p-3 bg-amber-500/10 border border-amber-500/20 text-amber-700 rounded-md">
-                                <strong>Reward Notice:</strong> To encourage use of the secure, open-source CLI, contributions made via the web interface receive a modified reward (1/3 of the standard rate).
+                                <strong>Reward Notice:</strong> To encourage use of the secure, open-source CLI, contributions made via the web interface receive a modified reward (1/1.5 of the standard rate).
                             </div>
                         </div>
                         <div class="flex items-center gap-4 mt-6">
