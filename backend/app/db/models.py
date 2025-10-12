@@ -96,7 +96,7 @@ class Contribution(Base):
     raw_content = Column(Text, nullable=False)
     valuation_results = Column(JSONB, nullable=False)
     reward_amount = Column(Float, nullable=False)
-    content_embedding = Column(Vector(384), nullable=True)
+    content_embedding = Column(Vector(1536), nullable=True)
     status = Column(String, default="PENDING", nullable=False)
     transaction_hash = Column(String, nullable=True, index=True)
     is_checked = Column(Boolean, default=False, nullable=False)

@@ -1,6 +1,7 @@
 import numpy as np
 import tiktoken
-import google as genai
+from google import genai
+from google.genai import types
 from app.core.config import settings
 import logging
 
@@ -9,9 +10,10 @@ logger = logging.getLogger(__name__)
 class EmbeddingService:
     def __init__(self):
         if settings.GEMINI_API_KEY:
-            genai.configure(api_key=settings.GEMINI_API_KEY)
-            self.model_name = 'models/embedding-001'
+            self.client = genai.Client(api_key=settings.GEMINI_API_KEY)
+            self.model_name = 'gemini-embedding-001'
         else:
+            self.client = None
             self.model_name = None
             logger.error("[EMBEDDING_SERVICE_ERROR] GEMINI_API_KEY is not configured!")
 
@@ -22,7 +24,7 @@ class EmbeddingService:
             logger.error("[EMBEDDING_SERVICE_ERROR] Could not load tiktoken tokenizer.")
 
     def generate(self, text: str) -> np.ndarray | None:
-        if not self.model_name or not self.tokenizer or not text.strip():
+        if not self.client or not self.tokenizer or not text.strip():
             return None
 
         max_tokens_per_chunk = 2048
@@ -42,23 +44,23 @@ class EmbeddingService:
             return None
         
         try:
-            batch_size = 100
-            all_embeddings = []
+            config = types.EmbedContentConfig(
+                task_type="semantic_similarity",
+                output_dimensionality=1536
+            )
+            
+            result_embeddings = self.client.models.embed_content(
+                model=self.model_name,
+                contents=text_chunks,
+                config=config
+            ).embeddings
 
-            for i in range(0, len(text_chunks), batch_size):
-                batch = text_chunks[i:i+batch_size]
-                result = genai.embed_content(
-                    model=self.model_name,
-                    content=batch,
-                    task_type="semantic_similarity",
-                    output_dimensionality=1536
-                )
-                all_embeddings.extend(result['embedding'])
+            embeddings = [np.array(e.values) for e in result_embeddings]
 
-            if not all_embeddings:
+            if not embeddings:
                 return None
             
-            mean_embedding = np.mean(all_embeddings, axis=0)
+            mean_embedding = np.mean(embeddings, axis=0)
             return mean_embedding
 
         except Exception as e:
