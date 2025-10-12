@@ -49,13 +49,20 @@ class EmbeddingService:
                 output_dimensionality=1536
             )
             
-            result_embeddings = self.client.models.embed_content(
-                model=self.model_name,
-                contents=text_chunks,
-                config=config
-            ).embeddings
+            batch_size = 100
+            all_result_embeddings = []
 
-            embeddings = [np.array(e.values) for e in result_embeddings]
+            for i in range(0, len(text_chunks), batch_size):
+                batch = text_chunks[i:i+batch_size]
+                
+                result = self.client.models.embed_content(
+                    model=self.model_name,
+                    contents=batch,
+                    config=config
+                )
+                all_result_embeddings.extend(result.embeddings)
+
+            embeddings = [np.array(e.values) for e in all_result_embeddings]
 
             if not embeddings:
                 return None
