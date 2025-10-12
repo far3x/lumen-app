@@ -29,7 +29,7 @@ from sqlalchemy.exc import IntegrityError
 logger = logging.getLogger(__name__)
 
 PLAGIARISM_THRESHOLD = 0.99
-INNOVATION_THRESHOLD = 0.97
+INNOVATION_THRESHOLD = 0.95
 
 @celery_app.task(name="app.tasks.reset_user_limits_task")
 def reset_user_limits_task(user_id: int):
@@ -538,6 +538,14 @@ def process_contribution(self, user_id: int, contribution_db_id: int):
         if not contribution_record:
             logger.error(f"Contribution {contribution_db_id} not found. Aborting task.")
             return
+        
+        #REMOVE THIS AFTER DONE
+        logger.warning(f"MAINTENANCE MODE: Automatically rejecting contribution {contribution_db_id}.")
+        contribution_record.status = "REJECTED_NO_REWARD"
+        contribution_record.reward_amount = 0.0
+        db.commit()
+        publish_contribution_update(db, contribution_db_id, user_id)
+        return
 
         codebase = contribution_record.raw_content
         source = contribution_record.source
