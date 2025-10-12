@@ -1,6 +1,7 @@
 import { api, getUser } from '../../../lib/auth.js';
 import { parseAndFilterProject, getAllFilesFromDataTransfer } from '../../../lib/contributionParser.js';
 import { icons } from './utils.js';
+import { navigate } from '../../../router.js';
 
 let state = {
     view: 'upload',
@@ -169,9 +170,11 @@ function render() {
             content = `<div class="text-center p-12">
                 <div class="w-20 h-20 mx-auto mb-6 bg-green-500/10 text-green-600 rounded-full flex items-center justify-center">${icons.checkCircle}</div>
                 <h2 class="text-2xl font-bold text-text-main">Contribution Received!</h2>
-                <p class="text-text-secondary mt-2">Your submission (ID: #${state.project.id}) is now in the processing queue. You can track its status on the "History" page.</p>
-                <button id="contribute-again-btn" class="mt-8 px-8 py-3 font-bold bg-accent-primary text-white rounded-lg hover:bg-red-700">Contribute Another Project</button>
+                <p class="text-text-secondary mt-2">Your submission (ID: #${state.project.id}) is now in the processing queue. Redirecting to your history...</p>
             </div>`;
+            setTimeout(() => {
+                navigate('/app/dashboard?tab=my-contributions');
+            }, 2500);
             break;
 
         case 'error':
@@ -311,7 +314,7 @@ function attachListeners() {
         document.getElementById('submit-btn')?.addEventListener('click', handleSubmit);
         document.getElementById('cancel-btn')?.addEventListener('click', () => setState({ view: 'upload', project: null }));
     } else if (state.view === 'success') {
-        document.getElementById('contribute-again-btn')?.addEventListener('click', () => setState({ view: 'upload', project: null }));
+        // Redirect is handled in render
     } else if (state.view === 'error') {
         document.getElementById('try-again-btn')?.addEventListener('click', () => setState({ view: 'upload', errorMessage: '' }));
     }
