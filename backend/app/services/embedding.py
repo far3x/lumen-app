@@ -45,7 +45,7 @@ class EmbeddingService:
         
         try:
             config = types.EmbedContentConfig(
-                task_type="semantic_similarity",
+                task_type="retrieval_document",
                 output_dimensionality=1536
             )
             
