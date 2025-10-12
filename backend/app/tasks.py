@@ -930,3 +930,46 @@ def ban_users_task(user_ids: List[int]):
         db.rollback()
     finally:
         db.close()
+
+@celery_app.task(name="app.tasks.recalculate_all_embeddings_task")
+def recalculate_all_embeddings_task():
+    logger.info("Starting task to recalculate all contribution embeddings with the new model.")
+    db = SessionLocal()
+    try:
+        all_contributions = db.query(models.Contribution).order_by(models.Contribution.id).all()
+        total = len(all_contributions)
+        logger.info(f"Found {total} contributions to re-process.")
+
+        for i, contribution in enumerate(all_contributions):
+            logger.info(f"Processing contribution {i+1}/{total} (ID: {contribution.id})...")
+            
+            if not contribution.raw_content or not contribution.raw_content.strip():
+                logger.warning(f"Skipping C_ID:{contribution.id} as it has no raw content.")
+                continue
+            
+            parsed_files = hybrid_valuation_service._parse_codebase(contribution.raw_content)
+            full_codebase_content = "\n".join(file_data["content"] for file_data in parsed_files)
+
+            if not full_codebase_content.strip():
+                logger.warning(f"Skipping C_ID:{contribution.id} as it has no effective content after parsing.")
+                continue
+
+            new_embedding = embedding_service.generate(full_codebase_content)
+            
+            if new_embedding is not None:
+                contribution.content_embedding = new_embedding
+            else:
+                logger.error(f"Failed to generate new embedding for C_ID:{contribution.id}.")
+
+            if (i + 1) % 50 == 0:
+                logger.info(f"Committing batch of 50... ({i+1}/{total})")
+                db.commit()
+
+        db.commit()
+        logger.info("Successfully recalculated all embeddings.")
+
+    except Exception as e:
+        logger.error(f"An error occurred during embedding recalculation: {e}", exc_info=True)
+        db.rollback()
+    finally:
+        db.close()

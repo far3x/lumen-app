@@ -112,6 +112,10 @@ task_routes = {
         'queue': 'high_priority',
         'routing_key': 'task.high_priority',
     },
+    'app.tasks.recalculate_all_embeddings_task': {
+        'queue': 'default',
+        'routing_key': 'task.default',
+    },
 }
 
 celery_app.conf.beat_schedule = {
