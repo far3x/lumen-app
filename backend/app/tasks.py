@@ -3,6 +3,7 @@ import numpy as np
 import logging
 import time
 import sys
+import math
 from typing import List
 from sqlalchemy.orm import Session
 from app.core.celery_app import celery_app
@@ -26,8 +27,8 @@ from sqlalchemy.exc import IntegrityError
 
 logger = logging.getLogger(__name__)
 
-PLAGIARISM_THRESHOLD = 0.95
-INNOVATION_THRESHOLD = 0.75
+PLAGIARISM_THRESHOLD = 0.99
+INNOVATION_THRESHOLD = 0.97
 
 @celery_app.task(name="app.tasks.reset_user_limits_task")
 def reset_user_limits_task(user_id: int):
@@ -584,7 +585,7 @@ def process_contribution(self, user_id: int, contribution_db_id: int):
                     return
                 elif own_max_similarity >= INNOVATION_THRESHOLD:
                     is_update = True
-                    innovation_multiplier = 1.0 - own_max_similarity
+                    innovation_multiplier = 0.2 + math.sqrt(1.0 - own_max_similarity)
                     logger.info(f"[INNOVATION_FACTOR] Found similar own contribution (C_ID:{own_closest_neighbor[0].id}) with {own_max_similarity:.4f} similarity. Applying innovation multiplier of {innovation_multiplier:.4f}.")
                 else:
                     logger.info(f"[NEW_VERSION] Similarity to own work ({own_max_similarity:.4f}) is below innovation threshold. Treating as a major new version.")
