@@ -19,7 +19,7 @@ from pydantic import BaseModel
 from typing import List, Optional
 from app.core import security, config
 from app.core.limiter import limiter
-from app.tasks import process_contribution
+from app.tasks import process_contribution, publish_contribution_update
 
 class PaginatedContributions(BaseModel):
     items: List[ContributionResponse]
@@ -93,7 +93,8 @@ async def contribute_data_from_web(
         initial_status="PENDING",
         source='web'
     )
-
+    
+    publish_contribution_update(db, new_contribution.id, current_user.id)
     process_contribution.delay(current_user.id, new_contribution.id)
 
     return {"message": "Contribution received and is being processed.", "contribution_id": new_contribution.id}

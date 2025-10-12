@@ -4,6 +4,7 @@ import logging
 import time
 import sys
 import math
+import tiktoken
 from typing import List
 from sqlalchemy.orm import Session
 from app.core.celery_app import celery_app
@@ -486,7 +487,6 @@ async def _check_for_open_source(parsed_files, files_to_check):
         if full_path:
             content = file_map[full_path]
             print(f"[GITHUB_SERVICE_DEBUG] Checking content of file: {full_path}", file=sys.stderr)
-            print("\n".join(content.splitlines()[:5]), file=sys.stderr)
             
             lines = [line.strip() for line in content.splitlines() if line.strip()]
             
@@ -495,8 +495,28 @@ async def _check_for_open_source(parsed_files, files_to_check):
                 continue
 
             query_lines = lines[:15]
-            search_query = " ".join('"' + line.replace('"', '\\"') + '"' for line in query_lines)
+            
+            MAX_QUERY_LENGTH = 250
+            search_parts = []
+            current_length = 0
 
+            for line in query_lines:
+                if len(line) > 100:
+                    continue
+
+                part = '"' + line.replace('"', '\\"') + '"'
+                
+                if current_length + len(part) + 1 > MAX_QUERY_LENGTH:
+                    break
+                
+                search_parts.append(part)
+                current_length += len(part) + 1
+
+            if not search_parts:
+                print(f"[GITHUB_SERVICE_DEBUG] Could not build a search query for {full_path} within length limits.", file=sys.stderr)
+                continue
+
+            search_query = " ".join(search_parts)
             print(f"[GITHUB_SERVICE_DEBUG] Search query for {full_path}:\n{search_query}", file=sys.stderr)
  
             if await github_service.search_code_snippet(search_query):
@@ -600,7 +620,7 @@ def process_contribution(self, user_id: int, contribution_db_id: int):
             publish_contribution_update(db, contribution_db_id, user_id)
             return
 
-        base_reward_usd = valuation_result.get("final_reward", 0.0) * 0.3 #*0.3 cuz im poor now
+        base_reward_usd = valuation_result.get("final_reward", 0.0) * 0.5 #*0.5 cuz im poor now
         
         if source == 'web':
             base_reward_usd /= 1.5
@@ -937,9 +957,19 @@ def recalculate_all_embeddings_task():
     logger.info("Starting task to recalculate all contribution embeddings with the new model.")
     db = SessionLocal()
     try:
+        tokenizer = tiktoken.get_encoding("cl100k_base")
+    except Exception as e:
+        logger.error(f"Could not load tiktoken tokenizer. Aborting task. Error: {e}")
+        return
+
+    try:
         all_contributions = db.query(models.Contribution).order_by(models.Contribution.id).all()
         total = len(all_contributions)
         logger.info(f"Found {total} contributions to re-process.")
+
+        tokens_processed_this_minute = 0
+        TOKEN_LIMIT_PER_MINUTE = 700000
+        start_time = time.time()
 
         for i, contribution in enumerate(all_contributions):
             logger.info(f"Processing contribution {i+1}/{total} (ID: {contribution.id})...")
@@ -954,8 +984,25 @@ def recalculate_all_embeddings_task():
             if not full_codebase_content.strip():
                 logger.warning(f"Skipping C_ID:{contribution.id} as it has no effective content after parsing.")
                 continue
+            
+            token_count = len(tokenizer.encode(full_codebase_content))
+
+            current_time = time.time()
+            if current_time - start_time > 60:
+                logger.info("One minute window has passed. Resetting token counter.")
+                start_time = current_time
+                tokens_processed_this_minute = 0
+
+            if tokens_processed_this_minute + token_count > TOKEN_LIMIT_PER_MINUTE:
+                sleep_duration = 60 - (current_time - start_time)
+                if sleep_duration > 0:
+                    logger.info(f"Token limit approaching ({tokens_processed_this_minute + token_count}). Sleeping for {sleep_duration:.2f} seconds...")
+                    time.sleep(sleep_duration)
+                start_time = time.time()
+                tokens_processed_this_minute = 0
 
             new_embedding = embedding_service.generate(full_codebase_content)
+            tokens_processed_this_minute += token_count
             
             if new_embedding is not None:
                 contribution.content_embedding = new_embedding
