@@ -540,12 +540,12 @@ def process_contribution(self, user_id: int, contribution_db_id: int):
             return
         
         #REMOVE THIS AFTER DONE
-        logger.warning(f"MAINTENANCE MODE: Automatically rejecting contribution {contribution_db_id}.")
-        contribution_record.status = "REJECTED_NO_REWARD"
-        contribution_record.reward_amount = 0.0
-        db.commit()
-        publish_contribution_update(db, contribution_db_id, user_id)
-        return
+        #logger.warning(f"MAINTENANCE MODE: Automatically rejecting contribution {contribution_db_id}.")
+        #contribution_record.status = "REJECTED_NO_REWARD"
+        #contribution_record.reward_amount = 0.0
+        #db.commit()
+        #publish_contribution_update(db, contribution_db_id, user_id)
+        #return
 
         codebase = contribution_record.raw_content
         source = contribution_record.source
