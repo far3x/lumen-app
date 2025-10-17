@@ -24,7 +24,7 @@ export function renderFooter(currentPath) {
                     <div class="flex space-x-4 mt-4">
                         <a href="https://dexscreener.com/solana/${contractAddress}" target="_blank" rel="noopener noreferrer" aria-label="DexScreener"><img src="/img/footer/dex.svg" class="w-6 h-6 rounded-full" alt="DexScreener"></a>
                         <a href="https://t.me/lumenclient" target="_blank" rel="noopener noreferrer" aria-label="Telegram"><img src="/img/footer/telegram.svg" class="w-6 h-6 rounded-full" alt="Telegram"></a>
-                        <a href="https://github.com/Far3000-YT/lumen" target="_blank" rel="noopener noreferrer" aria-label="GitHub"><img src="/img/footer/github.svg" class="w-6 h-6 rounded-full" alt="GitHub"></a>
+                        <a href="https://github.com/far3x/lumen" target="_blank" rel="noopener noreferrer" aria-label="GitHub"><img src="/img/footer/github.svg" class="w-6 h-6 rounded-full" alt="GitHub"></a>
                         <a href="https://x.com/lumencli" target="_blank" rel="noopener noreferrer" aria-label="X / Twitter"><img src="/img/footer/twitter.svg" class="w-6 h-6 rounded-full" alt="X / Twitter"></a>
                         <a href="https://discord.gg/KHn8FnV99q" target="_blank" rel="noopener noreferrer" aria-label="Discord"><img src="/img/footer/discord.svg" class="w-6 h-6 rounded-full" alt="Discord"></a>
                         <a href="https://www.linkedin.com/company/pylumen/" target="_blank" rel="noopener noreferrer" aria-label="LinkedIn"><img src="/img/footer/linkedin.svg" class="w-6 h-6 rounded-full" alt="LinkedIn"></a>
@@ -43,7 +43,7 @@ export function renderFooter(currentPath) {
                 <div>
                     <h3 class="font-bold text-gray-800 uppercase tracking-wider">Community</h3>
                     <ul class="mt-4 space-y-3">
-                        <li><a href="https://github.com/Far3000-YT/lumen" target="_blank" rel="noopener" data-external="true" class="group flex items-center text-gray-600 hover:text-gray-800">GitHub ${externalLinkIcon}</a></li>
+                        <li><a href="https://github.com/far3x/lumen" target="_blank" rel="noopener" data-external="true" class="group flex items-center text-gray-600 hover:text-gray-800">GitHub ${externalLinkIcon}</a></li>
                         <li><a href="https://x.com/lumencli" target="_blank" rel="noopener" data-external="true" class="group flex items-center text-gray-600 hover:text-gray-800">X / Twitter ${externalLinkIcon}</a></li>
                         <li><a href="https://www.linkedin.com/company/pylumen/" target="_blank" rel="noopener" data-external="true" class="group flex items-center text-gray-600 hover:text-gray-800">LinkedIn ${externalLinkIcon}</a></li>
                         <li><a href="https://discord.gg/KHn8FnV99q" target="_blank" rel="noopener" data-external="true" class="group flex items-center text-gray-600 hover:text-gray-800">Discord ${externalLinkIcon}</a></li>

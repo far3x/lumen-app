@@ -178,7 +178,7 @@ export function renderNavbar(currentPath) {
                     <a href="${docsUrl}" class="${getMobileNavLinkClasses('/docs/introduction')}">Docs</a>
                     <a href="${leaderboardUrl}" class="${getMobileNavLinkClasses('/leaderboard')}">Leaderboard</a>
                     <a href="${roadmapUrl}" class="${getMobileNavLinkClasses('/docs/roadmap')}">Roadmap</a>
-                    <a href="https://github.com/Far3000-YT/lumen" target="_blank" rel="noopener" data-external="true" class="${getMobileNavLinkClasses('')}">GitHub ${externalLinkIcon}</a>
+                    <a href="https://github.com/far3x/lumen" target="_blank" rel="noopener" data-external="true" class="${getMobileNavLinkClasses('')}">GitHub ${externalLinkIcon}</a>
                 </nav>
                 <div class="mt-auto">
                     ${authed ? `
@@ -237,7 +237,7 @@ export function renderNavbar(currentPath) {
                 <a href="${docsUrl}" class="${getNavLinkClasses('/docs/introduction')}">Docs</a>
                 <a href="${leaderboardUrl}" class="${getNavLinkClasses('/leaderboard')}">Leaderboard</a>
                 <a href="${roadmapUrl}" class="${getNavLinkClasses('/docs/roadmap')}">Roadmap</a>
-                <a href="https://github.com/Far3000-YT/lumen" target="_blank" rel="noopener noreferrer" data-external="true" class="${getNavLinkClasses('/github')}">Github ${externalLinkIcon}</a>
+                <a href="https://github.com/far3x/lumen" target="_blank" rel="noopener noreferrer" data-external="true" class="${getNavLinkClasses('/github')}">Github ${externalLinkIcon}</a>
             </nav>
             <div class="flex-1 flex justify-end">
                 ${userAreaHTML}
