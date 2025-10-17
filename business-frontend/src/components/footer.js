@@ -29,7 +29,7 @@ export function renderFooter() {
                         <ul class="mt-4 space-y-3">
                             <li><a href="/about" class="${linkClasses}">About Us</a></li>
                             <li><a href="https://x.com/lumencli" class="${linkClasses}" data-external="true" target="_blank" rel="noopener">X / Twitter ${externalLinkIcon}</a></li>
-                            <li><a href="https://github.com/Far3000-YT/lumen" class="${linkClasses}" data-external="true" target="_blank" rel="noopener">GitHub ${externalLinkIcon}</a></li>
+                            <li><a href="https://github.com/far3x/lumen" class="${linkClasses}" data-external="true" target="_blank" rel="noopener">GitHub ${externalLinkIcon}</a></li>
                             <li><a href="https://www.linkedin.com/company/pylumen/" class="${linkClasses}" data-external="true" target="_blank" rel="noopener">LinkedIn ${externalLinkIcon}</a></li>
                         </ul>
                     </div>

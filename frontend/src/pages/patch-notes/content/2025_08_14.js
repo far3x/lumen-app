@@ -7,7 +7,7 @@ export function renderContent() {
         <p>This is more than just a version bump; it represents the culmination of countless bug fixes, security enhancements, and performance optimizations. The client is now a stable, reliable tool for contributing to the network.</p>
         <ul>
             <li><strong>Available on PyPI:</strong> The client is now officially available for installation via <code>pip install pylumen</code>.</li>
-            <li><strong>Official GitHub Repository:</strong> Our full source code, a professional README, and an issue tracker are now available at our official repository. We believe in full transparency. Find a bug or have a suggestion? Let us know here: <a href="https://github.com/Far3000-YT/lumen" target="_blank" rel="noopener noreferrer" data-external="true">https://github.com/Far3000-YT/lumen</a>.</li>
+            <li><strong>Official GitHub Repository:</strong> Our full source code, a professional README, and an issue tracker are now available at our official repository. We believe in full transparency. Find a bug or have a suggestion? Let us know here: <a href="https://github.com/far3x/lumen" target="_blank" rel="noopener noreferrer" data-external="true">https://github.com/far3x/lumen</a>.</li>
             <li><strong>Key Bug Fixes:</strong> We've resolved numerous small but critical bugs, including a complex issue with <code>.gitignore</code> parsing that sometimes caused the client to ignore more files than intended.</li>
             <li><strong>The Evolution:</strong> This release marks the client's official evolution from a simple local AI tool to a full-fledged, secure data contribution client for the Lumen Protocol.</li>
         </ul>
