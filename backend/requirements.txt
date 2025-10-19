@@ -92,3 +92,4 @@ pgvector==0.2.1
 
 trufflehog3==3.0.10
 scrubadub==2.0.1
+web3==6.11.2
