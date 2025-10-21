@@ -88,7 +88,7 @@ class HybridValuationService:
             ".nim", ".mm", ".ml", ".mli", ".pas", ".p", ".pp", ".pl", ".pm", ".pro", ".py", 
             ".pyi", ".r", ".rb", ".rs", ".scala", ".sc", ".sh", ".sol", ".swift", ".ts", 
             ".tsx", ".vala", ".v", ".sv", ".vhdl", ".vhd", ".vb", ".zig",
-            ".au3", ".bash", ".fish", ".livescript", ".tcl", ".ps1", ".gd", ".gdshader"
+            ".au3", ".bash", ".fish", ".livescript", ".tcl", ".ps1", ".gd", ".gdshader", ".vue"
         }
         
         all_content_str = ""
