@@ -28,7 +28,7 @@ from sqlalchemy.exc import IntegrityError
 
 logger = logging.getLogger(__name__)
 
-PLAGIARISM_THRESHOLD = 0.99
+PLAGIARISM_THRESHOLD = 0.995
 INNOVATION_THRESHOLD = 0.97
 
 @celery_app.task(name="app.tasks.reset_user_limits_task")
