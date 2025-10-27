@@ -6,7 +6,7 @@ import json
 import subprocess
 import sys
 from pygments import lex
-from pygments.lexers import guess_lexer
+from pygments.lexers import get_lexer_for_filename
 from pygments.token import Comment
 from pygments.util import ClassNotFound
 import scrubadub
@@ -42,16 +42,53 @@ if __name__ == "__main__":
 """
 
 class SanitizationService:
-    def _remove_comments(self, content: str) -> str:
-        try:
-            lexer = guess_lexer(content, stripall=True)
-            tokens = lex(content, lexer)
-            return "".join(token[1] for token in tokens if not token[0] in Comment)
-        except ClassNotFound:
-            return content
-        except Exception as e:
-            logger.warning(f"Comment removal failed with unexpected error: {e}")
-            return content
+
+    def _parse_codebase_string(self, codebase: str) -> list[dict]:
+        parsed_files = []
+        delimiter = "---lum--new--file--"
+        
+        parts = codebase.split(delimiter)
+        for part in parts:
+            if not part.strip():
+                continue
+            
+            try:
+                first_newline_index = part.find('\n')
+                if first_newline_index == -1:
+                    file_path = part.strip()
+                    content = ""
+                else:
+                    file_path = part[:first_newline_index].strip()
+                    content = part[first_newline_index+1:]
+                
+                if file_path:
+                    parsed_files.append({"path": file_path, "content": content})
+            except Exception as e:
+                logger.warning(f"Could not parse a file part during sanitization: {e}")
+                pass
+        
+        return parsed_files
+
+    def _remove_comments(self, codebase: str) -> str:
+        parsed_files = self._parse_codebase_string(codebase)
+        rebuilt_parts = []
+
+        for file_data in parsed_files:
+            file_path = file_data["path"]
+            file_content = file_data["content"]
+            sanitized_content = file_content
+            try:
+                lexer = get_lexer_for_filename(file_path, stripall=False)
+                tokens = lex(file_content, lexer)
+                sanitized_content = "".join(token[1] for token in tokens if not token[0] in Comment)
+            except ClassNotFound:
+                pass
+            except Exception as e:
+                logger.warning(f"Comment removal failed for file '{file_path}', keeping original content. Error: {e}")
+            
+            rebuilt_parts.append(f"{file_data['path']}\n{sanitized_content}")
+        
+        return "---lum--new--file--" + "---lum--new--file--".join(rebuilt_parts)
 
     def _redact_secrets(self, content: str) -> str:
         sanitized_content = content
