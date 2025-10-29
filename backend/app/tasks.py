@@ -5,6 +5,8 @@ import time
 import sys
 import math
 import tiktoken
+import csv
+import hashlib
 from typing import List
 from sqlalchemy.orm import Session
 from app.core.celery_app import celery_app
@@ -28,8 +30,63 @@ from sqlalchemy.exc import IntegrityError
 
 logger = logging.getLogger(__name__)
 
-PLAGIARISM_THRESHOLD = 0.99
-INNOVATION_THRESHOLD = 0.97
+PLAGIARISM_THRESHOLD = 0.995
+INNOVATION_THRESHOLD = 0.98
+
+@celery_app.task(name="app.tasks.initialize_airdrop_from_csv_task")
+def initialize_airdrop_from_csv_task(file_path: str = "app/data/airdrop_snapshot.csv"):
+    logger.info(f"Starting airdrop initialization from CSV file: {file_path}")
+    db = SessionLocal()
+    try:
+        logger.info("Clearing existing airdrop recipient data...")
+        db.query(models.AirdropRecipient).delete()
+        db.commit()
+        
+        unique_recipients = {}
+        row_count = 0
+        with open(file_path, mode='r', encoding='utf-8') as csvfile:
+            reader = csv.DictReader(csvfile)
+            for row in reader:
+                row_count += 1
+                try:
+                    address = row['Account']
+                    quantity = row['Quantity']
+                    if address and quantity:
+                        unique_recipients[address] = quantity
+                except KeyError:
+                    logger.error("CSV is missing 'Account' or 'Quantity' columns. Please check the file format.")
+                    db.rollback()
+                    return
+                except Exception as e:
+                    logger.error(f"Error processing row: {row}. Error: {e}")
+                    db.rollback()
+                    return
+
+        duplicate_count = row_count - len(unique_recipients)
+        if duplicate_count > 0:
+            logger.warning(f"Found and ignored {duplicate_count} duplicate addresses in the CSV file.")
+
+        recipients_to_add = [
+            models.AirdropRecipient(solana_address=address, token_amount=amount)
+            for address, amount in unique_recipients.items()
+        ]
+
+        if recipients_to_add:
+            logger.info(f"Adding {len(recipients_to_add)} unique recipients to the database...")
+            db.bulk_save_objects(recipients_to_add)
+            db.commit()
+            logger.info("Airdrop snapshot successfully initialized from CSV.")
+        else:
+            logger.warning("No valid recipients found in the CSV file. The airdrop table is now empty.")
+
+    except FileNotFoundError:
+        logger.error(f"Airdrop snapshot file not found at path: {file_path}. Please ensure it exists.")
+        db.rollback()
+    except Exception as e:
+        logger.error(f"An unexpected error occurred during airdrop initialization: {e}", exc_info=True)
+        db.rollback()
+    finally:
+        db.close()
 
 @celery_app.task(name="app.tasks.reset_user_limits_task")
 def reset_user_limits_task(user_id: int):
@@ -533,6 +590,7 @@ async def _check_for_open_source(parsed_files, files_to_check):
 @celery_app.task(bind=True)
 def process_contribution(self, user_id: int, contribution_db_id: int):
     db = SessionLocal()
+    lock_key = None
     try:
         contribution_record = crud.get_contribution_by_id(db, contribution_db_id)
         if not contribution_record:
@@ -562,13 +620,24 @@ def process_contribution(self, user_id: int, contribution_db_id: int):
             
         final_codebase = codebase
         if source == 'web':
-            logger.info(f"Contribution {contribution_db_id} is from web source. Performing server-side sanitization on the entire payload, CLI-style.")
+            logger.info(f"Contribution {contribution_db_id} is from web source. Performing server-side sanitization.")
             final_codebase = sanitization_service.sanitize_code(codebase)
 
         logger.info(f"Processing contribution {contribution_db_id} for user {user_id}. Starting uniqueness check...")
         
         parsed_files = hybrid_valuation_service._parse_codebase(final_codebase)
         full_codebase_content = "\n".join(file_data["content"] for file_data in parsed_files)
+
+        content_hash = hashlib.sha256(full_codebase_content.encode()).hexdigest()
+        lock_key = f"contrib_lock:user:{user_id}:hash:{content_hash}"
+        
+        is_lock_acquired = redis_service.r.set(lock_key, "1", nx=True, ex=300)
+
+        if not is_lock_acquired:
+            logger.warning(f"[CONCURRENT_REJECT] A contribution with identical content is already being processed. Rejecting C_ID:{contribution_db_id}.")
+            crud.update_contribution_status(db, contribution_db_id, "DUPLICATE_CONCURRENT")
+            publish_contribution_update(db, contribution_db_id, user_id)
+            return
         
         if not full_codebase_content.strip():
             logger.warning(f"[UNIQUENESS_REJECT] Contribution {contribution_db_id} is empty after parsing. Yielding no reward.")
@@ -713,6 +782,8 @@ def process_contribution(self, user_id: int, contribution_db_id: int):
         crud.update_contribution_status(db, contribution_db_id, "FAILED")
         publish_contribution_update(db, contribution_db_id, user_id)
     finally:
+        if lock_key:
+            redis_service.r.delete(lock_key)
         db.close()
 
 @celery_app.task(name="app.tasks.retry_pending_ai_analysis_task")

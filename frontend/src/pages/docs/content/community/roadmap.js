@@ -31,12 +31,11 @@ export const renderRoadmap = () => `
             <ul class="list-none text-text-secondary mt-2 space-y-2">
                 <li class="flex items-start gap-3"><span class="text-green-700">✅</span><span class="text-green-700"><strong>Launch Data Marketplace (business.lumen.onl):</strong> Go live with the commercial data portal, allowing enterprise clients to access data via secure APIs and generate the first wave of protocol revenue.</span></li>
                 <li class="flex items-start gap-3"><span class="text-green-700">✅</span><span class="text-green-700"><strong>Algorithm V2 & Infrastructure Upgrade:</strong> Deployed a more intelligent and scalable valuation engine. This major upgrade introduces open-source code detection to allow for fair, adjusted rewards, a more sophisticated logarithmic uniqueness calculation, and an auto-retry mechanism for AI analysis, preparing the protocol to scale beyond the initial beta phase.</span></li>
-                <li class="flex items-start gap-3"><span class="text-amber-700">▶️</span><span class="text-amber-700"><strong>Secure Seed Funding via Starseed:</strong> In partnership with the Heaven launchpad, we are initiating our first formal funding round through their Starseed program to secure the capital needed for aggressive scaling.</span></li>
+                <li class="flex items-start gap-3"><span class="text-amber-700">▶️</span><span class="text-amber-700"><strong>Achieve Critical Data Mass:</strong> Our primary objective is to accumulate 1 billion tokens of high-quality, AI-analyzed code. This strategic phase focuses on building an unparalleled, proprietary dataset that is orders of magnitude more valuable than any public alternative before initiating large-scale enterprise sales.</span></li>
                 <li class="flex items-start gap-3"><span class="text-amber-700">▶️</span><span class="text-amber-700"><strong>Secure First Data Partnerships:</strong> Convert our pipeline of interested AI companies into our first signed Letters of Intent (LOIs), providing concrete validation of market demand for our proprietary data.</span></li>
                 <li class="flex items-start gap-3"><span class="text-gray-400">●</span><span><strong>Team Expansion:</strong> Scale the organization from a founder-led project to a dedicated team, hiring key personnel in Engineering, Business Development, and Marketing.</span></li>
                 <li class="flex items-start gap-3"><span class="text-gray-400">●</span><span><strong>Developer Ecosystem Tools:</strong> Release official SDKs (Python, TypeScript) and IDE extensions (VS Code, JetBrains) to make contributing a seamless, one-click part of the development workflow.</span></li>
                 <li class="flex items-start gap-3"><span class="text-gray-400">●</span><span><strong>Community Growth & Incentive Programs:</strong> Launch the official referral program, contribution bounties for specific data types, and weekly/monthly leaderboards with bonus rewards to accelerate network growth.</span></li>
-                <li class="flex items-start gap-3"><span class="text-gray-400">●</span><span><strong>Governance V1:</strong> Launch the Lumen Governance Forum and introduce the Lumen Improvement Proposal (LIP) framework, empowering the community to shape the future of the protocol.</span></li>
             </ul>
         </div>
         
@@ -45,12 +44,11 @@ export const renderRoadmap = () => `
             
             <p class="text-sm font-bold text-red-600">PHASE 3: INTELLIGENCE & DECENTRALIZATION (LONG-TERM VISION)</p>
             <h3 id="the-lumen-agent" class="text-xl font-bold mt-1">The Lumen Agent: An Autonomous Software Engineer</h3>
-            <p class="text-text-secondary mt-1">Focus: Leverage our unique dataset to build a category-defining AI tool that goes beyond code completion, while progressively handing over protocol control to the community.</p>
+            <p class="text-text-secondary mt-1">Focus: Leverage our unique dataset to build a category-defining AI tool that goes beyond code completion.</p>
             <p class="text-text-secondary mt-2">The Lumen Agent will not be a monolithic model. It will be an intelligent <strong>orchestration layer</strong> that dynamically utilizes a cascade of powerful, specialized AI models (from efficient ones like Gemini Flash to powerful ones like Gemini Pro). By breaking down complex engineering tasks and assigning sub-tasks to the most appropriate model, it will achieve an optimal balance of speed, cost, and intelligence. This allows the agent to tackle tasks like automated refactoring, complex feature implementation, and intelligent debugging with unprecedented autonomy.</p>
              <ul class="list-none text-text-secondary mt-2 space-y-2">
                 <li class="flex items-start gap-3"><span class="text-gray-400">●</span><span><strong>New Data Verticals:</strong> Explore expansion into other high-value, proprietary data types such as legal documents, scientific research, and financial models.</span></li>
-                <li class="flex items-start gap-3"><span class="text-gray-400">●</span><span><strong>Progressive Decentralization:</strong> Transfer all protocol control and treasury management to a fully on-chain, community-governed DAO, cementing Lumen as a true piece of public infrastructure.</span></li>
-            </ul>
+             </ul>
         </div>
     </div>
 `;

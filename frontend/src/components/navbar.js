@@ -146,6 +146,7 @@ export function renderNavbar(currentPath) {
     const isDocsSubdomain = window.location.hostname.startsWith('docs.');
 
     const homeUrl = isDocsSubdomain ? 'https://lumen.onl/' : '/';
+    const claimUrl = isDocsSubdomain ? 'https://lumen.onl/claim' : '/claim';
     const docsUrl = isDocsSubdomain ? '/introduction' : '/docs/introduction';
     const leaderboardUrl = isDocsSubdomain ? 'https://lumen.onl/leaderboard' : '/leaderboard';
     const roadmapUrl = isDocsSubdomain ? '/roadmap' : '/docs/roadmap';
@@ -175,6 +176,7 @@ export function renderNavbar(currentPath) {
                 </div>
                 <nav class="flex flex-col space-y-2">
                     <a href="${homeUrl}" class="${getMobileNavLinkClasses('/')}">Home</a>
+                    <!-- <a href="${claimUrl}" class="${getMobileNavLinkClasses('/claim')}">Claim</a> -->
                     <a href="${docsUrl}" class="${getMobileNavLinkClasses('/docs/introduction')}">Docs</a>
                     <a href="${leaderboardUrl}" class="${getMobileNavLinkClasses('/leaderboard')}">Leaderboard</a>
                     <a href="${roadmapUrl}" class="${getMobileNavLinkClasses('/docs/roadmap')}">Roadmap</a>
@@ -234,6 +236,7 @@ export function renderNavbar(currentPath) {
             </div>
             <nav class="hidden lg:flex items-center justify-center text-sm font-medium gap-x-8">
                 <a href="${homeUrl}" class="${getNavLinkClasses('/')}">Home</a>
+                <!-- <a href="${claimUrl}" class="${getNavLinkClasses('/claim')}">Claim</a> -->
                 <a href="${docsUrl}" class="${getNavLinkClasses('/docs/introduction')}">Docs</a>
                 <a href="${leaderboardUrl}" class="${getNavLinkClasses('/leaderboard')}">Leaderboard</a>
                 <a href="${roadmapUrl}" class="${getNavLinkClasses('/docs/roadmap')}">Roadmap</a>

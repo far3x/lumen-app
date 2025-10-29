@@ -228,9 +228,9 @@ class AirdropCheckRequest(BaseModel):
 class AirdropStatusResponse(BaseModel):
     is_eligible: bool
     has_claimed: bool
+    original_token_amount: Optional[float] = None
     token_amount: Optional[float] = None
     claim_token: Optional[str] = None
 
 class AirdropClaimRequest(BaseModel):
     claim_token: str
-    bnb_address: str

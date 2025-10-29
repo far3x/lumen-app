@@ -65,9 +65,8 @@ class AppSettings(BaseSettings):
 
     DEV_MODE: bool = os.getenv("DEV_MODE", "False").lower() in ("true", "1", "t")
 
-    BNB_RPC_URL: str = os.getenv("BNB_RPC_URL")
-    AIRDROP_HOT_WALLET_PRIVATE_KEY: str = os.getenv("AIRDROP_HOT_WALLET_PRIVATE_KEY")
-    AIRDROP_TOKEN_CONTRACT_ADDRESS: str = os.getenv("AIRDROP_TOKEN_CONTRACT_ADDRESS")
+    AIRDROP_WALLET_PRIVATE_KEY: str = os.getenv("AIRDROP_WALLET_PRIVATE_KEY")
+    AIRDROP_TOKEN_MINT_ADDRESS: str = os.getenv("AIRDROP_TOKEN_MINT_ADDRESS")
 
 
 settings = AppSettings()
