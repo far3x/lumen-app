@@ -94,6 +94,13 @@ locally:
 podman compose -f docker-compose.dev.yml exec worker_default celery -A app.core.celery_app.celery_app call app.tasks.recalculate_all_embeddings_task
 
 
+initialize/reset airdrop snapshot from csv:
+doppler run -- docker compose exec worker_priority celery -A app.core.celery_app.celery_app call app.tasks.initialize_airdrop_from_csv_task
+
+locally:
+podman compose -f docker-compose.dev.yml exec worker celery -A app.core.celery_app.celery_app call app.tasks.initialize_airdrop_from_csv_task
+
+
 GEMINI PLEASE READ THIS - AI INSTRUCTIONS HERE - PLEASE READ !!
 
 little info if you are reading this as an ai model, the prod environment runs using doppler

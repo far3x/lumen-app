@@ -219,3 +219,18 @@ class ContactSalesCreate(BaseModel):
     job_title: Optional[str] = None
     contact_reason: str
     message: Optional[str] = Field(None, max_length=5000)
+
+class AirdropCheckRequest(BaseModel):
+    solana_address: str
+    message: str
+    signature: str
+
+class AirdropStatusResponse(BaseModel):
+    is_eligible: bool
+    has_claimed: bool
+    original_token_amount: Optional[float] = None
+    token_amount: Optional[float] = None
+    claim_token: Optional[str] = None
+
+class AirdropClaimRequest(BaseModel):
+    claim_token: str

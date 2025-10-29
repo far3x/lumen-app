@@ -184,6 +184,14 @@ export const checkContributionStatus = (id) => {
     return api.get(`/cli/contributions/${id}/status`);
 };
 
+export const checkAirdropEligibility = async (solana_address, message, signature) => {
+    return await api.post('/airdrop/check', { solana_address, message, signature });
+};
+
+export const claimAirdrop = async (claim_token) => {
+    return await api.post('/airdrop/claim', { claim_token });
+};
+
 export async function updateAllBalances() {
     const account = getAccount();
     const user = getUser();

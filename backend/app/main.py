@@ -4,7 +4,7 @@ from starlette.middleware.sessions import SessionMiddleware
 from app.core.limiter import limiter
 from app.core.config import settings
 from app.db.database import engine, SessionLocal
-from app.api.v1.routers import auth, cli, users, public, security, contributions, websockets, business, business_auth, business_data
+from app.api.v1.routers import auth, cli, users, public, security, contributions, websockets, business, business_auth, business_data, airdrop
 import logging
 from slowapi.middleware import SlowAPIMiddleware
 import asyncio
@@ -97,6 +97,7 @@ app.include_router(websockets.router)
 app.include_router(business.router, prefix="/api/v1")
 app.include_router(business_auth.router, prefix="/api/v1")
 app.include_router(business_data.router, prefix="/api/v1")
+app.include_router(airdrop.router, prefix="/api/v1")
 
 @app.get("/", tags=["Root"])
 @limiter.limit("10/minute")

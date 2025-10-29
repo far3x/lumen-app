@@ -1,54 +1,46 @@
 export const renderValuation = () => `
-    <h1 id="valuation-engine">The Valuation Engine: How Your Code is Priced</h1>
-    <p class="lead text-xl text-text-secondary">At the heart of Lumen is a sophisticated, hybrid valuation engine that appraises the objective value of your code as a training asset. This multi-stage process goes far beyond simple line-counting to ensure that high-quality, unique, and complex contributions receive the highest rewards.</p>
+    <h1 id="valuation-engine">The Lumen Quality Engine: How We Quantify Intelligence in Code</h1>
+    <p class="lead text-xl text-text-secondary">Our valuation process is not a black box. It's a sophisticated, multi-stage pipeline designed to transparently and fairly appraise the value of a code contribution as a strategic AI training asset. It combines objective, verifiable metrics with an advanced AI-driven layer for qualitative analysis.</p>
 
     <blockquote>
-        <strong>Our Commitment to Fair Value</strong>
-        <br>
-        This engine is the core of our protocol's intelligence. Your reward is not arbitrary; it is the output of a rigorous, multi-faceted analysis designed to be fair, transparent in its principles, and meritocratic in its results.
+        <strong>Our Philosophy:</strong> We believe that great engineering has objective value. This engine is our attempt to quantify it, rewarding the quality, complexity, and novelty that AI models need to learn genuine reasoning.
     </blockquote>
 
-    <h2 id="phase-one-uniqueness">Phase 1: Uniqueness & Historical Context</h2>
-    <p>The protocol's primary goal is to acquire novel data that AI models have not seen before. This is the most critical phase, where we determine if your contribution adds new, valuable information to the network.</p>
+    <h2 id="phase-one-uniqueness">Phase 1: Signal vs. Noise (Uniqueness & Historical Context)</h2>
+    <p>The first and most critical step is to determine if a contribution adds new, valuable information to the network. We do this by checking for duplication and understanding the context of the submission.</p>
     <ol>
-        <li><strong>Semantic Fingerprinting:</strong> Your entire codebase is processed to create a unique "fingerprint". This captures the logical intent of your code, not just its keywords.</li>
-        <li><strong>Historical Analysis:</strong> This fingerprint is cross-referenced against our entire network index. This tells us if the code is brand new, an update to your previous work, or similar to another user's submission.</li>
+        <li><strong>Semantic Fingerprinting:</strong> The entire codebase is processed into a high-dimensional vector, a mathematical "fingerprint" that captures the code's logical meaning and structure, not just its text.</li>
+        <li><strong>Network Indexing:</strong> This new fingerprint is compared against our entire database of existing contributions using a high-performance vector search (pgvector).</li>
         <li><strong>Decision Logic:</strong>
             <ul>
-                <li>If similarity to another user's code is extremely high, the contribution is flagged as potential plagiarism and rejected.</li>
-                <li>If the code is an update to one of your own previous submissions, the engine intelligently isolates only the new, changed code. Your reward will be based on the "innovation" you've added.</li>
-                <li>If the contribution is novel, it proceeds with a high uniqueness score.</li>
+                <li><strong>Cross-User Plagiarism:</strong> If the similarity to another user's code is extremely high, the contribution is rejected to protect the integrity of the dataset.</li>
+                <li><strong>Project Updates:</strong> If the code is an update to one of your own previous submissions, the engine applies an "innovation multiplier." You are rewarded primarily for the new logic and improvements you've added.</li>
+                <li><strong>Novel Contribution:</strong> If the contribution is novel, it passes with a high uniqueness score and proceeds to the next stage.</li>
             </ul>
         </li>
     </ol>
-    
-    <div class="my-8 p-6 bg-white border border-gray-200 rounded-lg">
-        <h3 class="font-bold text-lg text-text-main mb-2">Our Key Differentiator: Holistic Context Analysis</h3>
-        <p class="text-text-secondary">Unlike systems that analyze isolated snippets, our AI review engine is provided with the <strong>entire context</strong> of your contribution. This allows for a much deeper and more accurate understanding of architectural quality and project clarity, resulting in a valuation that is fundamentally fairer and more precise.</p>
-    </div>
 
-    <h2 id="phase-two-quantitative-analysis">Phase 2: Quantitative Analysis (Code Metrics)</h2>
-    <p>Once uniqueness is established, we perform a deep, language-agnostic analysis of the code's structure to establish an objective baseline of its substance.</p>
+    <h2 id="phase-two-quantitative-analysis">Phase 2: The Objective Foundation (Quantitative Analysis)</h2>
+    <p>This phase establishes a verifiable, mathematical baseline of the code's substance using language-agnostic tools. This is the non-AI part of our analysis.</p>
     <ul>
-        <li><strong>Logical Lines of Code (LLOC):</strong> We measure the actual lines of executable code, ignoring whitespace and comments, to gauge the project's density.</li>
-        <li><strong>Structural Complexity:</strong> We measure the architectural complexity of your code. A project with intricate functions and logic will have a higher complexity score than simple, linear scripts. This score is calculated on a logarithmic scale to reward significant complexity jumps.</li>
-        <li><strong>Language Breakdown:</strong> We identify all programming languages present and their respective file counts.</li>
+        <li><strong>Logical Lines of Code (LLOC):</strong> We measure the actual lines of executable code, ignoring whitespace and comments, to gauge the project's density and substance.</li>
+        <li><strong>Structural Complexity:</strong> We measure the cyclomatic complexity of the code. A project with intricate functions and deep logic will have a higher complexity score than simple, linear scripts. This metric is calculated on a logarithmic scale to heavily reward significant jumps in engineering complexity.</li>
+        <li><strong>Language & Token Analysis:</strong> We identify all programming languages present and perform a precise token count using a standard tokenizer (tiktoken's \`cl100k_base\`).</li>
     </ul>
 
-    <h2 id="phase-three-qualitative-analysis">Phase 3: Qualitative Analysis (AI Review)</h2>
-    <p>Metrics alone do not tell the whole story. To understand the <em>quality</em> of the code's design, we leverage a fine-tuned Large Language Model that acts as an expert senior engineer, reviewing the code on three key qualitative axes:</p>
+    <h2 id="phase-three-qualitative-analysis">Phase 3: The AI Layer (Qualitative Analysis)</h2>
+    <p>After the objective metrics are calculated, we use a fine-tuned Large Language Model for a task that requires contextual understanding: assessing engineering intent. The AI acts as an expert senior engineer, reviewing the code on three key qualitative axes:</p>
     <ul>
-        <li><strong>Project Clarity:</strong> How original and non-generic is the project's purpose? A unique, domain-specific tool is rated higher than a common tutorial project.</li>
-        <li><strong>Architectural Quality:</strong> How well is the code structured? A well-organized, modular project is rated higher than a single monolithic file.</li>
-        <li><strong>Code Quality:</strong> How clean and maintainable is the code itself? This assesses readability, variable names, and best practices.</li>
+        <li><strong>Project Clarity & Novelty:</strong> How original and non-generic is the project's purpose? A unique, domain-specific tool is rated higher than a common tutorial project.</li>
+        <li><strong>Architectural Quality:</strong> How well is the code structured? A well-organized, modular project with clear separation of concerns is rated higher than a single monolithic file.</li>
+        <li><strong>Code Quality & Readability:</strong> How clean and maintainable is the code itself? This assesses variable names, function clarity, and adherence to best practices.</li>
     </ul>
 
-    <h2 id="phase-four-reward-calculation">Phase 4: The Final Reward Calculation</h2>
-    <p>The final reward is a sophisticated synthesis of all previous stages, combined with network-wide factors and special modifiers to ensure fairness and network health.</p>
+    <h2 id="phase-four-reward-calculation">Phase 4: Synthesizing the Final Value</h2>
+    <p>The final reward is a synthesis of all previous stages, combined with network-wide factors to ensure a fair and dynamic system.</p>
     <ul>
-        <li><strong>Base Value:</strong> This is calculated from the substance (LLOC, complexity) and quality (AI scores) of your novel code.</li>
-        <li><strong>Open Source Detection:</strong> The engine checks if snippets of the code are widely available in public repositories. If a strong match is found, the contribution is still accepted, but a "Public Code Modifier" is applied to significantly reduce the reward. This ensures we prioritize and reward truly proprietary and unique data.</li>
-        <li><strong>Personal Reward Multiplier:</strong> Your personal account multiplier (e.g., from the Genesis Contributor program) is applied to the final calculated value.</li>
+        <li><strong>Hybrid Score Calculation:</strong> The objective metrics from Phase 2 are combined with the AI-driven scores from Phase 3 to create a single, comprehensive quality score.</li>
+        <li><strong>Open Source Detection:</strong> Our engine checks if snippets of the code are widely available in public repositories. If a strong match is found, the contribution is still accepted, but a "Public Code Modifier" is applied to significantly reduce the reward. This ensures we prioritize and reward truly proprietary and unique data.</li>
+        <li><strong>Personal Reward Multiplier:</strong> Finally, your account's reward multiplier (e.g., from the Genesis Contributor program) is applied to calculate the final USD value that is credited to your account.</li>
     </ul>
-    <p>This comprehensive process, which includes automated retries for AI analysis to ensure system resilience, guarantees that Lumen rewards are not just a measure of quantity, but a true reflection of the quality, novelty, and engineering skill embodied in the data you provide to the network.</p>
 `;

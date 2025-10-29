@@ -15,7 +15,7 @@ const footerContainer = document.getElementById('footer-container');
 
 const routes = {
     '/': () => import('./pages/landing.js').then(m => m.renderLandingPage()),
-    '/data': () => import('./pages/data-hub.js').then(m => m.renderDataHubPage()),
+    '/claim': () => import('./pages/claim.js').then(m => m.renderClaimPage()),
     '/login': () => import('./pages/login.js').then(m => m.renderLoginPage()),
     '/signup': () => import('./pages/signup.js').then(m => m.renderSignupPage()),
     '/waitlist': () => Promise.resolve(renderWaitlistPage()),
@@ -34,9 +34,9 @@ const routeMeta = {
         title: 'Lumen Protocol | Monetize Your Code, Power AI | Get Rewarded for Your Work',
         description: 'Lumen Protocol rewards developers for their code. Use our secure CLI to contribute anonymized source code from your projects, earn rewards, and help power the next generation of AI.',
     },
-    '/data': {
-        title: 'Lumen Protocol | Acquire Premium AI Training Data',
-        description: 'Access high-quality, anonymized source code datasets for AI training. Ethical, verifiable, and proprietary data to power your models.',
+    '/claim': {
+        title: 'Lumen Protocol | Airdrop Claim',
+        description: 'Claim your airdropped tokens from Lumen\'s migration.',
     },
     '/leaderboard': {
         title: 'Lumen Protocol | Contributor Leaderboard',

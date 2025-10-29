@@ -65,5 +65,8 @@ class AppSettings(BaseSettings):
 
     DEV_MODE: bool = os.getenv("DEV_MODE", "False").lower() in ("true", "1", "t")
 
+    AIRDROP_WALLET_PRIVATE_KEY: str = os.getenv("AIRDROP_WALLET_PRIVATE_KEY")
+    AIRDROP_TOKEN_MINT_ADDRESS: str = os.getenv("AIRDROP_TOKEN_MINT_ADDRESS")
+
 
 settings = AppSettings()
