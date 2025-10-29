@@ -91,6 +91,8 @@ services:
       BETA_MAX_USERS: ${BETA_MAX_USERS}
       BETA_GENESIS_BONUS: ${BETA_GENESIS_BONUS}
       BIRDEYE_API_KEY: ${BIRDEYE_API_KEY}
+      AIRDROP_WALLET_PRIVATE_KEY: ${AIRDROP_WALLET_PRIVATE_KEY}
+      AIRDROP_TOKEN_MINT_ADDRESS: ${AIRDROP_TOKEN_MINT_ADDRESS}
     depends_on:
       pgbouncer:
         condition: service_started
@@ -150,6 +152,8 @@ services:
       BETA_MAX_USERS: ${BETA_MAX_USERS}
       BETA_GENESIS_BONUS: ${BETA_GENESIS_BONUS}
       BIRDEYE_API_KEY: ${BIRDEYE_API_KEY}
+      AIRDROP_WALLET_PRIVATE_KEY: ${AIRDROP_WALLET_PRIVATE_KEY}
+      AIRDROP_TOKEN_MINT_ADDRESS: ${AIRDROP_TOKEN_MINT_ADDRESS}
     depends_on:
       pgbouncer:
         condition: service_started
@@ -205,6 +209,8 @@ services:
       BETA_MAX_USERS: ${BETA_MAX_USERS}
       BETA_GENESIS_BONUS: ${BETA_GENESIS_BONUS}
       BIRDEYE_API_KEY: ${BIRDEYE_API_KEY}
+      AIRDROP_WALLET_PRIVATE_KEY: ${AIRDROP_WALLET_PRIVATE_KEY}
+      AIRDROP_TOKEN_MINT_ADDRESS: ${AIRDROP_TOKEN_MINT_ADDRESS}
     depends_on:
       pgbouncer:
         condition: service_started
@@ -260,6 +266,8 @@ services:
       BETA_MAX_USERS: ${BETA_MAX_USERS}
       BETA_GENESIS_BONUS: ${BETA_GENESIS_BONUS}
       BIRDEYE_API_KEY: ${BIRDEYE_API_KEY}
+      AIRDROP_WALLET_PRIVATE_KEY: ${AIRDROP_WALLET_PRIVATE_KEY}
+      AIRDROP_TOKEN_MINT_ADDRESS: ${AIRDROP_TOKEN_MINT_ADDRESS}
     depends_on:
       pgbouncer:
         condition: service_started
@@ -277,6 +285,7 @@ services:
       args:
         VITE_API_URL: ${API_URL}
         VITE_GOOGLE_RECAPTCHA_SITE_KEY: ${GOOGLE_RECAPTCHA_SITE_KEY}
+        VITE_WALLETCONNECT_PROJECT_ID: ${VITE_WALLETCONNECT_PROJECT_ID}
     restart: unless-stopped
     healthcheck:
       test: ["CMD-SHELL", "curl -f http://localhost:80/ || exit 1"]

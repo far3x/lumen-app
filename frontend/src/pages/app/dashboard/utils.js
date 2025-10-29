@@ -104,47 +104,42 @@ export function renderFeedbackModal() {
     });
 }
 
-export function renderWalletSelectionModal() {
+export function renderWalletSelectionModal(options = {}) {
     const modalId = 'wallet-selection-modal';
     const modalExists = document.getElementById(modalId);
     if (modalExists) return;
 
-    const phantomWallet = walletService.supportedWallets.find(w => w.name === 'Phantom');
-
-    let modalContentHTML;
-
-    if (phantomWallet) {
-        const isInstalled = phantomWallet.readyState === walletService.WalletReadyState.Installed;
-        modalContentHTML = `
-            ${isInstalled ? `
-                <button data-wallet-name="${phantomWallet.name}" class="wallet-option-btn w-full flex items-center gap-4 p-3 rounded-lg bg-primary hover:bg-subtle transition-colors">
-                    <img src="${phantomWallet.icon}" alt="${phantomWallet.name} logo" class="w-8 h-8 rounded-full">
-                    <span class="font-bold text-text-main">${phantomWallet.name}</span>
+    let walletsHtml = walletService.supportedWallets.map(wallet => {
+        const isInstalled = wallet.readyState === walletService.WalletReadyState.Installed;
+        if (isInstalled) {
+            return `
+                <button data-wallet-name="${wallet.name}" class="wallet-option-btn w-full flex items-center gap-4 p-3 rounded-lg bg-primary hover:bg-subtle transition-colors">
+                    <img src="${wallet.icon}" alt="${wallet.name} logo" class="w-8 h-8 rounded-full">
+                    <span class="font-bold text-text-main">${wallet.name}</span>
                 </button>
-            ` : `
-                <a href="${phantomWallet.url}" target="_blank" rel="noopener noreferrer" data-external="true" class="w-full flex items-center gap-4 p-3 rounded-lg bg-primary hover:bg-subtle transition-colors opacity-50">
-                    <img src="${phantomWallet.icon}" alt="${phantomWallet.name} logo" class="w-8 h-8 rounded-full">
-                    <span class="font-bold text-text-main">Install ${phantomWallet.name}</span>
+            `;
+        } else {
+            return `
+                 <a href="${wallet.url}" target="_blank" rel="noopener noreferrer" data-external="true" class="w-full flex items-center gap-4 p-3 rounded-lg bg-primary hover:bg-subtle transition-colors opacity-60">
+                    <img src="${wallet.icon}" alt="${wallet.name} logo" class="w-8 h-8 rounded-full">
+                    <span class="font-bold text-text-main">Install ${wallet.name}</span>
                     <svg class="w-4 h-4 text-text-secondary ml-auto" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" /></svg>
                 </a>
-            `}
-            <p class="text-xs text-center text-subtle mt-4">Only Phantom wallet is currently supported for direct connection. You can set any Solana address manually in Settings.</p>
-        `;
-    } else {
-        modalContentHTML = `<p class="text-text-secondary text-center">No supported wallets found. Please install Phantom or set your address manually in Settings.</p>`;
-    }
+            `;
+        }
+    }).join('');
 
     const modalHTML = `
         <div id="${modalId}" class="modal-overlay fixed inset-0 bg-black/70 backdrop-blur-sm z-50 flex items-center justify-center p-4 animate-fade-in-up" style="animation-duration: 0.2s;">
             <div class="modal-content bg-surface w-full max-w-xs rounded-xl border border-primary shadow-2xl shadow-black/50">
                 <header class="p-4 border-b border-primary flex justify-between items-center">
-                    <h2 class="text-lg font-bold">Connect Phantom Wallet</h2>
+                    <h2 class="text-lg font-bold">Connect Wallet</h2>
                     <button class="modal-close-btn p-2 text-text-secondary hover:text-text-main rounded-full hover:bg-primary">
                         <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
                     </button>
                 </header>
                 <div class="p-4 space-y-3">
-                    ${modalContentHTML}
+                    ${walletsHtml}
                 </div>
             </div>
         </div>
@@ -162,6 +157,9 @@ export function renderWalletSelectionModal() {
                 modal.remove();
                 if (document.querySelectorAll('.modal-overlay').length === 0) {
                     document.body.classList.remove('modal-open');
+                }
+                if (options.onClose) {
+                    options.onClose();
                 }
             }, 200);
         }

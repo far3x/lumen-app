@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, String, Float, ForeignKey, DateTime, Boolean, BigInteger, Text, Enum
+from sqlalchemy import Column, Integer, String, Float, ForeignKey, DateTime, Boolean, BigInteger, Text, Enum, Numeric
 from sqlalchemy.orm import relationship
 from sqlalchemy.sql import func
 from sqlalchemy.dialects.postgresql import JSONB
@@ -236,3 +236,11 @@ class ContributionLanguage(Base):
     __tablename__ = "contribution_languages"
     id = Column(Integer, primary_key=True, index=True)
     name = Column(String, unique=True, nullable=False)
+
+class AirdropRecipient(Base):
+    __tablename__ = "airdrop_recipients"
+    solana_address = Column(String, primary_key=True, index=True)
+    token_amount = Column(Numeric(30, 10), nullable=False)
+    has_claimed = Column(Boolean, default=False, nullable=False)
+    solana_transaction_hash = Column(String, nullable=True, index=True)
+    claimed_at = Column(DateTime(timezone=True), nullable=True)

@@ -53,7 +53,7 @@ function renderRecentActivityFeed(contributions) {
                     <div class="flex items-start justify-between space-x-4">
                         <div class="flex-grow text-sm">
                             <p class="text-text-main">
-                                <strong class="font-bold truncate inline-block max-w-[150px]">${item.user_display_name}</strong> contributed new code to the network.
+                                <strong class="font-bold truncate inline-block max-w-[150px]">${item.user_display_name}</strong> contributed new logic to the network.
                             </p>
                             <p class="text-text-secondary mt-1">
                                 Reward: <strong class="font-medium text-green-600">+$${item.reward_amount.toFixed(4)} USD</strong>
@@ -85,7 +85,7 @@ function renderNetworkStats(stats) {
                     <div class="text-2xl font-bold text-accent-primary font-mono">${stats.total_tokens.toLocaleString()}</div>
                 </div>
                 <div class="bg-surface p-6 rounded-xl border border-primary">
-                    <div class="text-text-secondary text-sm uppercase font-medium mb-2">USD Distributed</div>
+                    <div class="text-text-secondary text-sm uppercase font-medium mb-2">USD To Distribute</div>
                     <div class="text-2xl font-bold text-accent-primary font-mono">$${stats.total_usd_distributed.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</div>
                 </div>
                 <div class="bg-surface p-6 rounded-xl border border-primary">
@@ -117,9 +117,9 @@ function renderPageContent(leaderboard, userRank, recentContributions, networkSt
 
     return `
         <div class="max-w-3xl animate-fade-in-up mb-16">
-            <h1 class="text-5xl md:text-6xl font-bold mb-4 text-accent-primary">Network Hub</h1>
+            <h1 class="text-5xl md:text-6xl font-bold mb-4 text-accent-primary">The Architects of Intelligence</h1>
             <p class="mt-4 text-lg text-text-secondary">
-                The architects of the future of AI. Track top contributors and see the latest network activity live.
+                Meet the developers contributing the high-signal logic that’s training the next generation of AI.
             </p>
         </div>
         

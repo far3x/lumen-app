@@ -25,7 +25,7 @@ async function handleLinkPhantomWallet(user) {
 
     if (!walletService.isWalletConnected() || !walletService.getAdapter() || walletService.getAdapter().name !== 'Phantom') {
         if (messageEl) {
-            messageEl.textContent = 'Please connect your Phantom wallet first.';
+            messageEl.textContent = 'Please connect your wallet first.';
             messageEl.className = 'block text-sm p-3 rounded-md bg-red-500/10 text-red-700 mt-4';
             messageEl.classList.remove('hidden');
         }
@@ -75,7 +75,7 @@ async function handleLinkPhantomWallet(user) {
         }
         if (button) {
             button.disabled = false;
-            button.innerHTML = document.getElementById('link-phantom-wallet-btn').dataset.originalText || 'Link Phantom Wallet';
+            button.innerHTML = document.getElementById('link-phantom-wallet-btn').dataset.originalText || 'Link Wallet';
         }
     }
 }
@@ -159,15 +159,15 @@ function renderWalletManagementCard(user) {
         if (isPhantomSiteConnected) {
             const truncatedSiteAddress = `${siteConnectedPhantomAddress.slice(0,6)}...${siteConnectedPhantomAddress.slice(-6)}`;
             content += `
-                <p class="text-sm text-text-secondary text-center mt-1 mb-4">Phantom wallet <strong class="font-mono text-text-main">${truncatedSiteAddress}</strong> is connected. Link it for rewards, or enter another address manually.</p>
-                <button id="link-phantom-wallet-btn" data-original-text="Link Connected Phantom Wallet" class="${primaryWalletActionClasses}">
-                    Link Connected Phantom Wallet
+                <p class="text-sm text-text-secondary text-center mt-1 mb-4">Wallet <strong class="font-mono text-text-main">${truncatedSiteAddress}</strong> is connected. Link it for rewards, or enter another address manually.</p>
+                <button id="link-phantom-wallet-btn" data-original-text="Link Connected Wallet" class="${primaryWalletActionClasses}">
+                    Link Connected Wallet
                 </button>
             `;
         } else {
             content += `
                 <button id="settings-connect-phantom-btn" class="${primaryWalletActionClasses}">
-                    Connect Phantom Wallet
+                    Connect Wallet
                 </button>
             `;
         }

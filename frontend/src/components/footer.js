@@ -29,7 +29,6 @@ export function renderFooter(currentPath) {
                         <a href="https://discord.gg/KHn8FnV99q" target="_blank" rel="noopener noreferrer" aria-label="Discord"><img src="/img/footer/discord.svg" class="w-6 h-6 rounded-full" alt="Discord"></a>
                         <a href="https://www.linkedin.com/company/pylumen/" target="_blank" rel="noopener noreferrer" aria-label="LinkedIn"><img src="/img/footer/linkedin.svg" class="w-6 h-6 rounded-full" alt="LinkedIn"></a>
                     </div>
-                     <p class="mt-4 text-sm text-gray-500">© ${year} Lumen. All rights reserved.</p>
                 </div>
                 <div>
                     <h3 class="font-bold text-gray-800 uppercase tracking-wider">Developers</h3>
@@ -59,6 +58,16 @@ export function renderFooter(currentPath) {
                     </ul>
                 </div>
             </div>
+            <div class="mt-12 pt-8 border-t border-primary">
+                <div class="bg-surface rounded-lg p-6 flex flex-col md:flex-row items-center justify-between gap-4">
+                    <div>
+                        <h4 class="font-bold text-text-main">Lumen for Business</h4>
+                        <p class="text-sm text-text-secondary">Acquire strategic, ethically-sourced datasets for your AI models.</p>
+                    </div>
+                    <a href="https://business.lumen.onl" data-external="true" target="_blank" rel="noopener noreferrer" class="px-6 py-2 text-sm font-bold bg-gray-800 text-white hover:bg-black rounded-lg transition-colors shrink-0">Explore for Business</a>
+                </div>
+            </div>
+            <p class="mt-8 text-sm text-gray-500 text-center">© ${year} Lumen. All rights reserved.</p>
         </div>
     </footer>
     `;

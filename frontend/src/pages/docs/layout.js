@@ -4,9 +4,8 @@ export const docPages = {
         content: () => import('./content/getting-started/introduction.js').then(m => m.renderIntroduction()), 
         toc: [
             { id: 'introduction', title: 'Introduction' },
-            { id: 'the-data-crisis', title: 'The Data Crisis' },
-            { id: 'the-untapped-reservoir', title: 'The Untapped Reservoir' },
-            { id: 'lumen-the-strategic-solution', title: 'The Strategic Solution' },
+            { id: 'the-lumen-breakthrough', title: 'Lumen\'s Breakthrough' },
+            { id: 'why-code-is-not-a-niche', title: 'Why Code Isn\'t a Niche' },
             { id: 'the-vision', title: 'The Vision' }
         ]
     },
@@ -73,11 +72,11 @@ export const docPages = {
         title: 'The Valuation Engine', 
         content: () => import('./content/protocol/valuation.js').then(m => m.renderValuation()), 
         toc: [
-            { id: 'valuation-engine', title: 'The Valuation Engine' },
-            { id: 'phase-one-uniqueness', title: 'Phase 1: Uniqueness' },
+            { id: 'valuation-engine', title: 'The Lumen Quality Engine' },
+            { id: 'phase-one-uniqueness', title: 'Phase 1: Uniqueness Analysis' },
             { id: 'phase-two-quantitative-analysis', title: 'Phase 2: Quantitative Analysis' },
-            { id: 'phase-three-qualitative-analysis', title: 'Phase 3: Qualitative Analysis' },
-            { id: 'phase-four-reward-calculation', title: 'Phase 4: Reward Calculation' }
+            { id: 'phase-three-qualitative-analysis', title: 'Phase 3: AI Qualitative Analysis' },
+            { id: 'phase-four-reward-calculation', title: 'Phase 4: Final Value Synthesis' }
         ]
     },
     'security': { 
@@ -96,19 +95,9 @@ export const docPages = {
         content: () => import('./content/protocol/tokenomics.js').then(m => m.renderTokenomics()), 
         toc: [
             { id: 'protocol-economy', title: 'The Protocol Economy' },
-            { id: 'genesis-phase', title: 'Phase 1: The Genesis Phase' },
-            { id: 'sustainable-economy', title: 'Phase 2: The Sustainable Economy' },
+            { id: 'genesis-phase', title: 'Phase 1: The Autonomous Flywheel' },
+            { id: 'sustainable-economy', title: 'Phase 2: The Enterprise-Fueled Economy' },
             { id: 'lum-utility', title: 'The Role of the LUMEN Token' }
-        ]
-    },
-    'governance': { 
-        title: 'Governance', 
-        content: () => import('./content/protocol/governance.js').then(m => m.renderGovernance()), 
-        toc: [
-            { id: 'governance', title: 'Protocol Governance' },
-            { id: 'lumen-improvement-proposals', title: 'LIPs' },
-            { id: 'areas-of-governance', title: 'Areas of Governance' },
-            { id: 'progressive-decentralization', title: 'Progressive Decentralization' }
         ]
     },
     'whitepaper': { 
@@ -258,7 +247,6 @@ function renderSidebarContent(activePage) {
                     ${navLink('valuation', 'The Valuation Engine')}
                     ${navLink('security', 'Security')}
                     ${navLink('tokenomics', 'Protocol Economy')}
-                    ${navLink('governance', 'Governance')}
                     ${navLink('whitepaper', 'Whitepaper')}
                 </div>
             </div>
@@ -363,7 +351,7 @@ export async function renderDocsLayout(pageId) {
     const contentHtml = await page.content();
 
     return `
-        <main class="flex-grow bg-[#f0f0f0] text-gray-800 pt-28">
+        <main class="flex-grow bg-background text-text-main pt-28">
             <div class="container mx-auto px-6">
                 <div class="relative flex lg:gap-8">
                     <aside class="hidden lg:block w-64 flex-shrink-0 pr-8">
