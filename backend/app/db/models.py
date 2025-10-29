@@ -242,6 +242,5 @@ class AirdropRecipient(Base):
     solana_address = Column(String, primary_key=True, index=True)
     token_amount = Column(Numeric(30, 10), nullable=False)
     has_claimed = Column(Boolean, default=False, nullable=False)
-    bnb_address = Column(String, nullable=True)
-    claim_transaction_hash = Column(String, nullable=True, index=True)
+    solana_transaction_hash = Column(String, nullable=True, index=True)
     claimed_at = Column(DateTime(timezone=True), nullable=True)

@@ -1,6 +1,7 @@
 import { Connection, clusterApiUrl } from '@solana/web3.js';
 import { WalletAdapterNetwork, WalletReadyState } from '@solana/wallet-adapter-base';
 import { PhantomWalletAdapter } from '@solana/wallet-adapter-phantom';
+import { BackpackWalletAdapter } from '@solana/wallet-adapter-backpack';
 import { EventEmitter } from 'events';
 
 const LAST_USED_WALLET_KEY = 'lumen_last_wallet';
@@ -14,6 +15,7 @@ class WalletService extends EventEmitter {
         this.connection = new Connection(clusterApiUrl(this.network));
         this.supportedWallets = [
             new PhantomWalletAdapter(),
+            new BackpackWalletAdapter(),
         ];
         this.WalletReadyState = WalletReadyState;
     }

@@ -23,16 +23,15 @@ def upgrade() -> None:
     sa.Column('solana_address', sa.String(), nullable=False),
     sa.Column('token_amount', sa.Numeric(precision=30, scale=10), nullable=False),
     sa.Column('has_claimed', sa.Boolean(), nullable=False),
-    sa.Column('bnb_address', sa.String(), nullable=True),
-    sa.Column('claim_transaction_hash', sa.String(), nullable=True),
+    sa.Column('solana_transaction_hash', sa.String(), nullable=True),
     sa.Column('claimed_at', sa.DateTime(timezone=True), nullable=True),
     sa.PrimaryKeyConstraint('solana_address')
     )
-    op.create_index(op.f('ix_airdrop_recipients_claim_transaction_hash'), 'airdrop_recipients', ['claim_transaction_hash'], unique=False)
+    op.create_index(op.f('ix_airdrop_recipients_solana_transaction_hash'), 'airdrop_recipients', ['solana_transaction_hash'], unique=False)
     op.create_index(op.f('ix_airdrop_recipients_solana_address'), 'airdrop_recipients', ['solana_address'], unique=False)
 
 
 def downgrade() -> None:
     op.drop_index(op.f('ix_airdrop_recipients_solana_address'), table_name='airdrop_recipients')
-    op.drop_index(op.f('ix_airdrop_recipients_claim_transaction_hash'), table_name='airdrop_recipients')
+    op.drop_index(op.f('ix_airdrop_recipients_solana_transaction_hash'), table_name='airdrop_recipients')
     op.drop_table('airdrop_recipients')

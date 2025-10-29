@@ -43,9 +43,6 @@ services:
     environment:
       DATABASE_URL: postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@db:5432/${POSTGRES_DB}
       BIRDEYE_API_KEY: ${BIRDEYE_API_KEY}
-      BNB_RPC_URL: ${BNB_RPC_URL}
-      AIRDROP_HOT_WALLET_PRIVATE_KEY: ${AIRDROP_HOT_WALLET_PRIVATE_KEY}
-      AIRDROP_TOKEN_CONTRACT_ADDRESS: ${AIRDROP_TOKEN_CONTRACT_ADDRESS}
     ports:
       - "8000:8000"
     depends_on:
@@ -67,9 +64,6 @@ services:
     environment:
       DATABASE_URL: postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@db:5432/${POSTGRES_DB}
       BIRDEYE_API_KEY: ${BIRDEYE_API_KEY}
-      BNB_RPC_URL: ${BNB_RPC_URL}
-      AIRDROP_HOT_WALLET_PRIVATE_KEY: ${AIRDROP_HOT_WALLET_PRIVATE_KEY}
-      AIRDROP_TOKEN_CONTRACT_ADDRESS: ${AIRDROP_TOKEN_CONTRACT_ADDRESS}
     depends_on:
       db:
         condition: service_healthy
@@ -113,6 +107,7 @@ services:
     environment:
       - VITE_API_URL=${API_URL} 
       - VITE_GOOGLE_RECAPTCHA_SITE_KEY=${GOOGLE_RECAPTCHA_SITE_KEY}
+      - VITE_WALLETCONNECT_PROJECT_ID=${VITE_WALLETCONNECT_PROJECT_ID}
       - NODE_OPTIONS=--max-old-space-size=512
     restart: unless-stopped
 
