@@ -176,7 +176,7 @@ export function renderNavbar(currentPath) {
                 </div>
                 <nav class="flex flex-col space-y-2">
                     <a href="${homeUrl}" class="${getMobileNavLinkClasses('/')}">Home</a>
-                    <!-- <a href="${claimUrl}" class="${getMobileNavLinkClasses('/claim')}">Claim</a> -->
+                    <a href="${claimUrl}" class="${getMobileNavLinkClasses('/claim')}">Claim</a>
                     <a href="${docsUrl}" class="${getMobileNavLinkClasses('/docs/introduction')}">Docs</a>
                     <a href="${leaderboardUrl}" class="${getMobileNavLinkClasses('/leaderboard')}">Leaderboard</a>
                     <a href="${roadmapUrl}" class="${getMobileNavLinkClasses('/docs/roadmap')}">Roadmap</a>

@@ -8,15 +8,10 @@ doppler run -- docker compose up
 
 if crash after rollout update:
 git checkout commit_hash
+
 doppler run -- docker compose up --build
 
-
 doppler run -- docker compose down
-
-
-clear space safely (remove unused then cache i think):
-docker system prune
-docker system prune -a
 
 
 to connect to db locally, never run this on vps
