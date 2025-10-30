@@ -120,6 +120,14 @@ task_routes = {
         'queue': 'high_priority',
         'routing_key': 'task.high_priority',
     },
+    'app.tasks.manual_airdrop_task': {
+        'queue': 'high_priority',
+        'routing_key': 'task.high_priority',
+    },
+    'app.tasks.upsert_airdrop_from_csv_task': {
+    'queue': 'high_priority',
+    'routing_key': 'task.high_priority',
+    },
 }
 
 celery_app.conf.beat_schedule = {

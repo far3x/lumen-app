@@ -94,7 +94,7 @@ export function renderLandingPage() {
                         </div>
                     </div>
                     <div class="shadow-lg overflow-hidden border-2 border-primary relative h-80 rounded-lg transition-all duration-300 ease-in-out hover:scale-101 hover:shadow-xl">
-                        <div class="absolute inset-0"><img src="/img/landing/5.png" alt="Card 5" class="w-full h-full object-cover transition-transform duration-300 ease-out"></div>
+                        <div class="absolute inset-0"><img src="/img/landing/5.png?v=1" alt="Card 5" class="w-full h-full object-cover transition-transform duration-300 ease-out"></div>
                         <div class="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent"></div>
                         <div class="p-8 absolute bottom-0 left-0 text-white">
                              <img src="/img/landing/neige.svg" alt="Icon" class="w-8 h-8 mb-2">
@@ -121,7 +121,7 @@ export function renderLandingPage() {
                 </p>
                 <div class="grid md:grid-cols-3 gap-8">
                     <div class="shadow-lg overflow-hidden border-2 border-primary relative h-80 rounded-lg transition-all duration-300 ease-in-out hover:scale-101 hover:shadow-xl">
-                        <div class="absolute inset-0"><img src="/img/landing/4.png" alt="Card 4" class="w-full h-full object-cover transition-transform duration-300 ease-out"></div>
+                        <div class="absolute inset-0"><img src="/img/landing/4.png?v=1" alt="Card 4" class="w-full h-full object-cover transition-transform duration-300 ease-out"></div>
                         <div class="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent"></div>
                         <div class="p-8 absolute bottom-0 left-0 text-white">
                              <img src="/img/landing/neige.svg" alt="Icon" class="w-8 h-8 mb-2">
@@ -130,7 +130,7 @@ export function renderLandingPage() {
                         </div>
                     </div>
                     <div class="shadow-lg overflow-hidden border-2 border-primary relative h-80 rounded-lg transition-all duration-300 ease-in-out hover:scale-101 hover:shadow-xl">
-                        <div class="absolute inset-0"><img src="/img/landing/3.png" alt="Card 3" class="w-full h-full object-cover transition-transform duration-300 ease-out"></div>
+                        <div class="absolute inset-0"><img src="/img/landing/3.png?v=1" alt="Card 3" class="w-full h-full object-cover transition-transform duration-300 ease-out"></div>
                         <div class="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent"></div>
                         <div class="p-8 absolute bottom-0 left-0 text-white">
                              <img src="/img/landing/neige.svg" alt="Icon" class="w-8 h-8 mb-2">
@@ -139,7 +139,7 @@ export function renderLandingPage() {
                         </div>
                     </div>
                      <div class="shadow-lg overflow-hidden border-2 border-primary relative h-80 rounded-lg transition-all duration-300 ease-in-out hover:scale-101 hover:shadow-xl">
-                        <div class="absolute inset-0"><img src="/img/landing/6.png" alt="Card 6" class="w-full h-full object-cover transition-transform duration-300 ease-out"></div>
+                        <div class="absolute inset-0"><img src="/img/landing/6.png?v=1" alt="Card 6" class="w-full h-full object-cover transition-transform duration-300 ease-out"></div>
                         <div class="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent"></div>
                         <div class="p-8 absolute bottom-0 left-0 text-white">
                              <img src="/img/landing/neige.svg" alt="Icon" class="w-8 h-8 mb-2">

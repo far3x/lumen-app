@@ -22,6 +22,7 @@ from app.services.email_service import email_service
 from app.services.sanitization_service import sanitization_service
 from app.services.price_service import price_service
 from app.services.github_service import github_service
+from decimal import Decimal
 import asyncio
 from datetime import datetime, timezone, timedelta
 from app.db.models import PayoutBatch, BatchPayout, Account, ContributionLanguage, User
@@ -32,6 +33,138 @@ logger = logging.getLogger(__name__)
 
 PLAGIARISM_THRESHOLD = 0.995
 INNOVATION_THRESHOLD = 0.98
+
+@celery_app.task(name="app.tasks.manual_airdrop_task")
+def manual_airdrop_task(addresses: List[str]):
+    logger.info(f"Starting manual airdrop task for {len(addresses)} addresses.")
+    db = SessionLocal()
+    try:
+        for address in addresses:
+            try:
+                recipient = db.query(models.AirdropRecipient).filter(
+                    models.AirdropRecipient.solana_address == address
+                ).with_for_update().first()
+
+                if not recipient:
+                    logger.warning(f"[MANUAL_AIRDROP] SKIPPED: Address {address} is not eligible (not found in snapshot).")
+                    continue
+
+                if recipient.has_claimed:
+                    logger.warning(f"[MANUAL_AIRDROP] SKIPPED: Address {address} has already claimed.")
+                    continue
+
+                claimable_amount = float(recipient.token_amount) * 0.70
+                logger.info(f"[MANUAL_AIRDROP] PROCESSING: Sending {claimable_amount} tokens to eligible address {address}.")
+
+                tx_hash = solana_service.airdrop_lumen_tokens(
+                    recipient_address_str=address,
+                    amount_tokens=claimable_amount
+                )
+
+                recipient.has_claimed = True
+                recipient.solana_transaction_hash = tx_hash
+                recipient.claimed_at = datetime.now(timezone.utc)
+                db.commit()
+
+                logger.info(f"[MANUAL_AIRDROP] SUCCESS: Sent {claimable_amount} tokens to {address}. Tx: {tx_hash}")
+                time.sleep(0.5)
+
+            except Exception as e:
+                logger.error(f"[MANUAL_AIRDROP] FAILED for address {address}: {e}", exc_info=True)
+                db.rollback()
+        
+        logger.info("Manual airdrop task finished.")
+
+    finally:
+        db.close()
+
+@celery_app.task(name="app.tasks.upsert_airdrop_from_csv_task")
+def upsert_airdrop_from_csv_task(file_path: str = "app/data/airdrop_snapshot.csv"):
+    """
+    Reads the airdrop CSV and reconciles it with the database.
+    - If a recipient from the CSV is missing in the DB, it will be INSERTED.
+    - If a recipient is already in the DB, it will be UPDATED if the total amount has changed.
+    - This task handles duplicates in the CSV by SUMMING their quantities.
+    - This is a NON-DESTRUCTIVE operation (it does not delete any records).
+    """
+    logger.info(f"Starting airdrop UPSERT/reconciliation from CSV file: {file_path}")
+    db = SessionLocal()
+    try:
+        # Step 1: Process the entire CSV, summing quantities for duplicate addresses.
+        csv_balances = {}
+        with open(file_path, mode='r', encoding='utf-8') as csvfile:
+            reader = csv.DictReader(csvfile)
+            for row in reader:
+                try:
+                    address = row.get('Account', '').strip()
+                    quantity_str = row.get('Quantity')
+                    if address and quantity_str:
+                        quantity = Decimal(quantity_str)
+                        if address in csv_balances:
+                            csv_balances[address] += quantity
+                        else:
+                            csv_balances[address] = quantity
+                except Exception as e:
+                    logger.error(f"Error processing CSV row: {row}. Error: {e}")
+                    continue
+        
+        logger.info(f"Processed CSV: Found {len(csv_balances)} unique addresses with summed balances.")
+
+        # Step 2: Get all current recipients from the database for comparison.
+        db_recipients = db.query(models.AirdropRecipient).all()
+        db_balances = {r.solana_address: r for r in db_recipients}
+        logger.info(f"Found {len(db_balances)} existing recipients in the database.")
+
+        # Step 3: Identify who to add and who to update.
+        recipients_to_add = []
+        updated_count = 0
+        added_count = 0
+        unchanged_count = 0
+
+        for address, total_quantity in csv_balances.items():
+            if address not in db_balances:
+                # This address is missing from the DB, prepare to add it.
+                recipients_to_add.append(
+                    models.AirdropRecipient(solana_address=address, token_amount=total_quantity)
+                )
+                logger.info(f"[UPSERT_AIRDROP] ADDING new address: {address} with amount {total_quantity}")
+                added_count += 1
+            else:
+                # This address exists, check if the amount needs updating.
+                existing_recipient = db_balances[address]
+                if existing_recipient.token_amount != total_quantity:
+                    logger.warning(
+                        f"[UPSERT_AIRDROP] UPDATING address: {address}. "
+                        f"Old amount: {existing_recipient.token_amount}, New summed amount: {total_quantity}"
+                    )
+                    existing_recipient.token_amount = total_quantity
+                    updated_count += 1
+                else:
+                    unchanged_count += 1
+
+        # Step 4: Perform the database operations in a single transaction.
+        if not recipients_to_add and updated_count == 0:
+            logger.info("Database is already in sync with the CSV. No changes needed.")
+            return
+
+        if recipients_to_add:
+            db.bulk_save_objects(recipients_to_add)
+        
+        db.commit()
+        logger.info("--- Airdrop Reconciliation Complete ---")
+        logger.info(f"Added: {added_count} new recipients.")
+        logger.info(f"Updated: {updated_count} existing recipients.")
+        logger.info(f"Unchanged: {unchanged_count} recipients.")
+
+    except FileNotFoundError:
+        logger.error(f"Airdrop snapshot file not found at path: {file_path}. Please ensure it exists.")
+        db.rollback()
+    except Exception as e:
+        logger.error(f"An unexpected error occurred during airdrop upsert: {e}", exc_info=True)
+        db.rollback()
+    finally:
+        db.close()
+
 
 @celery_app.task(name="app.tasks.initialize_airdrop_from_csv_task")
 def initialize_airdrop_from_csv_task(file_path: str = "app/data/airdrop_snapshot.csv"):
