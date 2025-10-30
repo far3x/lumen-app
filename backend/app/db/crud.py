@@ -562,7 +562,7 @@ def unlock_contribution(db: Session, company_id: int, contribution_id: int, api_
     token_cost = details.get("total_tokens", 0)
     
     if company.token_balance < token_cost:
-        raise HTTPException(status_code=status.HTTP_402_PAYMENT_REQUIRED, detail="Insufficient token balance")
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Insufficient token balance")
 
     company.token_balance -= token_cost
     
@@ -606,7 +606,7 @@ def unlock_all_contributions_for_company(db: Session, company_id: int):
         total_cost += details.get("total_tokens", 0)
 
     if company.token_balance < total_cost:
-        raise HTTPException(status_code=status.HTTP_402_PAYMENT_REQUIRED, detail=f"Insufficient token balance. Required: {total_cost}, Available: {company.token_balance}")
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=f"Insufficient token balance. Required: {total_cost}, Available: {company.token_balance}")
 
     company.token_balance -= total_cost
     
@@ -856,3 +856,6 @@ def decline_invitation(db: Session, user: models.BusinessUser, token: str):
     invitation.status = 'declined'
     db.add(invitation)
     db.commit()
+
+def get_billing_history_for_company(db: Session, company_id: int) -> List[models.BillingHistory]:
+    return db.query(models.BillingHistory).filter(models.BillingHistory.company_id == company_id).order_by(models.BillingHistory.date.desc()).all()

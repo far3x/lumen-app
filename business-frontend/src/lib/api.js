@@ -17,7 +17,9 @@ api.interceptors.request.use(config => {
 api.interceptors.response.use(
   response => response,
   error => {
-    if (error.response?.status === 401) {
+    // The x402.js script will handle 402 errors automatically.
+    // We only need to handle our app-specific logic, like logging out on 401.
+    if (error.response?.status === 401 && !error.config.url.includes('/business/login')) {
       logout();
     }
     return Promise.reject(error);

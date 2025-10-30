@@ -93,6 +93,8 @@ services:
       BIRDEYE_API_KEY: ${BIRDEYE_API_KEY}
       AIRDROP_WALLET_PRIVATE_KEY: ${AIRDROP_WALLET_PRIVATE_KEY}
       AIRDROP_TOKEN_MINT_ADDRESS: ${AIRDROP_TOKEN_MINT_ADDRESS}
+      FACILITATOR_URL: ${FACILITATOR_URL}
+      MERCHANT_WALLET_ADDRESS: ${MERCHANT_WALLET_ADDRESS}
     depends_on:
       pgbouncer:
         condition: service_started
@@ -154,6 +156,8 @@ services:
       BIRDEYE_API_KEY: ${BIRDEYE_API_KEY}
       AIRDROP_WALLET_PRIVATE_KEY: ${AIRDROP_WALLET_PRIVATE_KEY}
       AIRDROP_TOKEN_MINT_ADDRESS: ${AIRDROP_TOKEN_MINT_ADDRESS}
+      FACILITATOR_URL: ${FACILITATOR_URL}
+      MERCHANT_WALLET_ADDRESS: ${MERCHANT_WALLET_ADDRESS}
     depends_on:
       pgbouncer:
         condition: service_started
@@ -211,6 +215,8 @@ services:
       BIRDEYE_API_KEY: ${BIRDEYE_API_KEY}
       AIRDROP_WALLET_PRIVATE_KEY: ${AIRDROP_WALLET_PRIVATE_KEY}
       AIRDROP_TOKEN_MINT_ADDRESS: ${AIRDROP_TOKEN_MINT_ADDRESS}
+      FACILITATOR_URL: ${FACILITATOR_URL}
+      MERCHANT_WALLET_ADDRESS: ${MERCHANT_WALLET_ADDRESS}
     depends_on:
       pgbouncer:
         condition: service_started
@@ -268,6 +274,8 @@ services:
       BIRDEYE_API_KEY: ${BIRDEYE_API_KEY}
       AIRDROP_WALLET_PRIVATE_KEY: ${AIRDROP_WALLET_PRIVATE_KEY}
       AIRDROP_TOKEN_MINT_ADDRESS: ${AIRDROP_TOKEN_MINT_ADDRESS}
+      FACILITATOR_URL: ${FACILITATOR_URL}
+      MERCHANT_WALLET_ADDRESS: ${MERCHANT_WALLET_ADDRESS}
     depends_on:
       pgbouncer:
         condition: service_started
@@ -302,6 +310,7 @@ services:
       args:
         VITE_API_URL: ${API_URL}
         VITE_GOOGLE_RECAPTCHA_SITE_KEY: ${GOOGLE_RECAPTCHA_SITE_KEY}
+        VITE_SOLANA_RPC_URL: ${SOLANA_RPC_URL}
     restart: unless-stopped
     healthcheck:
       test: ["CMD-SHELL", "curl -f http://localhost:80/ || exit 1"]

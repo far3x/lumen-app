@@ -8,7 +8,7 @@ from app.business_schemas import (
     FullContribution, DashboardStats, UsageDataPoint, UnlockedContributionDetail,
     TeamMember, InviteCreate, CompanyUpdate, BusinessUserUpdate, BusinessUser as BusinessUserSchema,
     Company as CompanySchema, ApiKeyUsageSummary, PaginatedContributionPreview, TeamInvitationInfo,
-    BusinessToken
+    BusinessToken, BillingHistory as BillingHistorySchema
 )
 from app.tasks import send_team_invitation_email_task, unlock_all_contributions_task
 from typing import List
@@ -226,3 +226,10 @@ async def download_unlocked_contribution(
         media_type="text/plain",
         headers={"Content-Disposition": f"attachment; filename=lumen_contribution_{contribution_id}.txt"}
     )
+
+@router.get("/billing-history", response_model=List[BillingHistorySchema])
+async def get_billing_history(
+    company: models.Company = Depends(get_current_company_from_user),
+    db: Session = Depends(database.get_db)
+):
+    return crud.get_billing_history_for_company(db, company_id=company.id)

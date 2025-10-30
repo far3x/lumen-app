@@ -61,7 +61,7 @@ export const renderWhitepaper = () => `
     <p>Our launch plan for the next 3 to 6 months is focused on validating both sides of our marketplace:</p>
     <ul>
         <li><strong>Genesis Contributor Program:</strong> Launch the beta to onboard the first 200 developers, deploying the initial reward pool and building our foundational dataset.</li>
-        <li><strong>Secure Strategic Launch Partners:</strong> We are in discussions with established developer communities and platforms like Heaven to ensure a successful launch and immediate, high quality supply.</li>
+        <li><strong>Secure Strategic Launch Partners:</strong> We are in discussions with established developer communities and platforms like Pump.fun to ensure a successful launch and immediate, high quality supply.</li>
         <li><strong>Secure First Data Partnerships:</strong> Convert our pipeline of interested AI companies into our first signed Letters of Intent (LOIs), validating the demand for our asset.</li>
     </ul>
 

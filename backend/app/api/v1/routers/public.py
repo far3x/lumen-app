@@ -8,6 +8,7 @@ from app.schemas import LeaderboardEntry, LeaderboardResponse, FeedbackCreate, P
 from app.api.v1 import dependencies
 from app.core.limiter import limiter
 from app.services.redis_service import redis_service
+from app.services.price_service import price_service
 
 router = APIRouter(tags=["Public"])
 
@@ -16,6 +17,14 @@ def get_visitor_id_key(request: Request) -> str:
     if visitor_id:
         return visitor_id
     return request.client.host
+
+@router.get("/token-price/sol")
+@limiter.limit("120/minute")
+async def get_sol_price(request: Request):
+    price = await price_service.get_sol_price_usd()
+    if price is None:
+        raise HTTPException(status_code=status.HTTP_503_SERVICE_UNAVAILABLE, detail="Could not retrieve SOL price.")
+    return {"symbol": "SOL", "price_usd": price}
 
 @router.get("/token-price/{token_symbol}")
 @limiter.limit("120/minute")

@@ -46,6 +46,8 @@ export const stateService = {
         state.stats = statsData;
         if (state.company) {
             state.company.token_balance = statsData.token_balance;
+            state.company.plan = statsData.current_plan;
+            localStorage.setItem('business_company', JSON.stringify(state.company));
         }
         stateService.notify();
     },
