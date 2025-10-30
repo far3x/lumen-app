@@ -1,10 +1,14 @@
 import axios from 'axios';
 import { logout } from './auth';
+import { withPaymentInterceptor } from '@payai/x402-axios';
+import { walletService } from './wallet.js';
 
-const api = axios.create({
+const baseAxios = axios.create({
   baseURL: (import.meta.env.VITE_API_URL || 'http://localhost:8000') + '/api/v1',
   withCredentials: true,
 });
+
+const api = withPaymentInterceptor(baseAxios, walletService);
 
 api.interceptors.request.use(config => {
   const token = localStorage.getItem('business_token');
@@ -17,8 +21,6 @@ api.interceptors.request.use(config => {
 api.interceptors.response.use(
   response => response,
   error => {
-    // The x402.js script will handle 402 errors automatically.
-    // We only need to handle our app-specific logic, like logging out on 401.
     if (error.response?.status === 401 && !error.config.url.includes('/business/login')) {
       logout();
     }
