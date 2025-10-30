@@ -70,6 +70,30 @@ async def get_current_business_user(
         raise credentials_exception
     return user
 
+async def get_current_business_user_optional(
+    request: Request, db: Session = Depends(get_db)
+) -> models.BusinessUser | None:
+    auth_header = request.headers.get("Authorization")
+    if not auth_header or not auth_header.startswith("Bearer "):
+        return None
+    
+    token = auth_header.split(" ")[1]
+
+    try:
+        payload = jwt.decode(token, config.settings.SECRET_KEY, algorithms=[config.settings.ALGORITHM])
+        if payload.get("type") != "business":
+            return None
+        user_id: str = payload.get("sub")
+        if user_id is None:
+            return None
+    except JWTError:
+        return None
+    
+    user = crud.get_business_user_by_id(db, user_id=int(user_id))
+    if user is None or not user.is_verified:
+        return None
+    return user
+
 async def get_current_admin_user(
     current_user: models.BusinessUser = Depends(get_current_business_user)
 ) -> models.BusinessUser:

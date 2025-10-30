@@ -147,6 +147,17 @@ class UnlockedContributionDetail(BaseModel):
     class Config:
         from_attributes = True
 
+class BillingHistory(BaseModel):
+    id: int
+    date: datetime
+    description: str
+    amount_usd: float
+    status: str
+    invoice_url: Optional[str] = None
+
+    class Config:
+        from_attributes = True
+
 class TeamMember(BaseModel):
     id: int
     full_name: str
@@ -170,3 +181,6 @@ class CompanyUpdate(BaseModel):
 class BusinessUserUpdate(BaseModel):
     full_name: Optional[str] = Field(None, min_length=2)
     job_title: Optional[str] = None
+
+class ChargeRequest(BaseModel):
+    usd_amount: float = Field(..., gt=0)

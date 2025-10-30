@@ -9,8 +9,13 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@solana/wallet-adapter-base": "^0.9.27",
+    "@solana/wallet-adapter-phantom": "^0.9.28",
+    "@solana/web3.js": "^1.98.2",
     "axios": "^1.7.2",
+    "bs58": "^5.0.0",
     "chart.js": "^4.4.3",
+    "events": "^3.3.0",
     "zxcvbn": "^4.4.2"
   },
   "devDependencies": {

@@ -41,21 +41,21 @@ async function initializeOverview() {
     }
 
     const chartContainer = document.getElementById('chart-container');
-    if (usage.status === 'fulfilled') {
+    if (usage.status === 'fulfilled' && usage.value.data) {
         initializeChart(usage.value.data);
     } else if(chartContainer) {
         chartContainer.innerHTML = `<div class="p-8 text-center text-text-muted">Could not load usage data.</div>`;
     }
 
     const apiKeyUsageContainer = document.getElementById('api-key-usage-container');
-    if (apiKeyUsage.status === 'fulfilled') {
+    if (apiKeyUsage.status === 'fulfilled' && apiKeyUsage.value.data) {
         if(apiKeyUsageContainer) apiKeyUsageContainer.innerHTML = renderApiKeyUsage(apiKeyUsage.value.data);
     } else if(apiKeyUsageContainer) {
         apiKeyUsageContainer.innerHTML = `<div class="p-8 text-center text-text-muted">Could not load API key usage.</div>`;
     }
 
     const recentlyUnlockedContainer = document.getElementById('recently-unlocked-container');
-    if (unlocked.status === 'fulfilled') {
+    if (unlocked.status === 'fulfilled' && unlocked.value.data) {
         if(recentlyUnlockedContainer) recentlyUnlockedContainer.innerHTML = renderRecentlyUnlocked(unlocked.value.data);
     } else if(recentlyUnlockedContainer) {
         recentlyUnlockedContainer.innerHTML = `<div class="p-8 text-center text-text-muted">Could not load recent unlocks.</div>`;
@@ -72,19 +72,22 @@ function initializeChart(usageData) {
     
     const now = new Date();
     const labels = Array.from({ length: 7 }, (_, i) => {
-        const d = new Date(now.getFullYear(), now.getMonth() - (6 - i), 1);
-        return d.toLocaleString('default', { month: 'short' });
+        const d = new Date();
+        d.setMonth(now.getMonth() - (6 - i));
+        return d.toLocaleString('default', { month: 'short', year: 'numeric' });
     });
 
     const dataMap = new Map();
-    usageData.forEach(d => {
-        const monthKey = new Date(d.date).toISOString().slice(5, 7);
-        const yearMonthKey = `${new Date(d.date).getFullYear()}-${monthKey}`;
-        dataMap.set(yearMonthKey, (dataMap.get(yearMonthKey) || 0) + d.tokens_used);
-    });
+    if (usageData) {
+        usageData.forEach(d => {
+            const date = new Date(d.date);
+            const yearMonthKey = `${date.getFullYear()}-${(date.getMonth() + 1).toString().padStart(2, '0')}`;
+            dataMap.set(yearMonthKey, (dataMap.get(yearMonthKey) || 0) + d.tokens_used);
+        });
+    }
     
     const dataPoints = labels.map(label => {
-        const monthDate = new Date(Date.parse(label +" 1, " + now.getFullYear()));
+        const monthDate = new Date(label);
         const yearMonthKey = `${monthDate.getFullYear()}-${(monthDate.getMonth() + 1).toString().padStart(2, '0')}`;
         return dataMap.get(yearMonthKey) || 0;
     });

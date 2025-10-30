@@ -1,5 +1,7 @@
 import { getCompany } from '../../lib/auth.js';
 import api from '../../lib/api.js';
+import { walletService } from '../../lib/wallet.js';
+import { stateService } from '../../lib/state.js';
 
 const PLAN_DATA = {
     free: { name: 'Free', token_limit: 0 },
@@ -13,12 +15,37 @@ let isLoadingHistory = true;
 
 export function renderPlansPage() {
     const company = getCompany();
+    const phantomIcon = walletService.adapter.icon;
 
     const headerHtml = `<h1 class="page-headline">Plans & Billing</h1>`;
     const pageHtml = `
         <div class="dashboard-container">
             <div id="plan-summary-card" class="widget-card p-6">
                 <!-- Plan summary is rendered dynamically -->
+            </div>
+
+            <div class="mt-8" id="top-up-section">
+                <h2 class="text-xl font-bold text-text-headings mb-4">Top-up Balance</h2>
+                <div class="widget-card p-6">
+                    <div class="grid md:grid-cols-2 gap-6 items-center">
+                        <div>
+                            <h3 class="font-semibold text-text-headings">Purchase Additional Tokens</h3>
+                            <p class="text-sm text-text-muted mt-1">Need more data? Top up your balance with a one-time token purchase. Tokens are credited to your account after on-chain payment confirmation.</p>
+                        </div>
+                        <div class="bg-app-bg p-4 rounded-lg">
+                             <label for="top-up-amount" class="form-label">Amount in USD</label>
+                             <div class="flex items-center gap-2 mt-1">
+                                <span class="text-xl text-text-muted">$</span>
+                                <input type="number" id="top-up-amount" value="10" min="10" class="form-input !text-xl !font-bold flex-1" placeholder="e.g., 100">
+                             </div>
+                             <p class="text-sm text-text-muted mt-2">You will receive: <strong id="token-equivalent" class="text-text-headings">100,000</strong> Tokens</p>
+                             <button id="purchase-tokens-btn" class="btn btn-primary w-full mt-4 flex items-center justify-center gap-2">
+                                <img src="${phantomIcon}" alt="Phantom Wallet" class="w-5 h-5"/>
+                                <span>Purchase with Phantom</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
             </div>
 
             <div class="mt-8">
@@ -87,7 +114,7 @@ function renderPlanSummary() {
     const planDetails = PLAN_DATA[company.plan] || PLAN_DATA.free;
     const totalTokens = planDetails.token_limit;
     const remainingTokens = company.token_balance;
-    const usedTokens = totalTokens > 0 ? totalTokens - remainingTokens : 0;
+    const usedTokens = totalTokens > 0 ? Math.max(0, totalTokens - remainingTokens) : 0;
     const usagePercentage = totalTokens > 0 ? (usedTokens / totalTokens) * 100 : 0;
     
     container.innerHTML = `
@@ -100,7 +127,7 @@ function renderPlanSummary() {
                 <p class="text-sm font-medium text-text-muted">Token Balance</p>
                 <div class="flex items-center gap-4 mt-1">
                     <div class="w-full bg-app-bg rounded-full h-2.5">
-                        <div class="bg-primary h-2.5 rounded-full" style="width: ${usagePercentage}%"></div>
+                        <div class="bg-primary h-2.5 rounded-full" style="width: ${Math.min(100, usagePercentage)}%"></div>
                     </div>
                     <span class="text-sm font-semibold text-text-headings whitespace-nowrap">${remainingTokens.toLocaleString()} / ${totalTokens > 0 ? totalTokens.toLocaleString() : '∞'}</span>
                 </div>
@@ -166,7 +193,74 @@ async function fetchBillingHistory() {
     }
 }
 
+async function handlePurchase() {
+    const purchaseBtn = document.getElementById('purchase-tokens-btn');
+    const amountInput = document.getElementById('top-up-amount');
+    const usdAmount = parseFloat(amountInput.value);
+    const phantomIcon = walletService.adapter.icon;
+    
+    if (!window.isSecureContext && window.location.hostname !== "localhost") {
+        alert("Payment functionality requires a secure (HTTPS) connection. This may prevent the payment modal from appearing.");
+    }
+
+    if (!usdAmount || usdAmount < 10) {
+        alert('Please enter an amount of $10 or more.');
+        return;
+    }
+
+    purchaseBtn.disabled = true;
+    purchaseBtn.innerHTML = `<span class="animate-spin inline-block w-5 h-5 border-2 border-transparent border-t-white rounded-full"></span><span class="ml-3">Processing...</span>`;
+
+    try {
+        const response = await api.post('/business/billing/charge', {
+            usd_amount: usdAmount
+        });
+        
+        alert('Payment successful! Your account has been updated.');
+        await stateService.fetchDashboardStats();
+        await fetchBillingHistory();
+        renderPlanSummary();
+        
+    } catch (error) {
+        if (error.name === 'AbortError') {
+            console.log("Payment flow was cancelled by the user.");
+        } else if (error.response && error.response.status === 402) {
+            console.error("402 Payment Required. The facilitator script should have intercepted this request but failed to do so. This is often due to running on a non-HTTPS development server.", error);
+            alert("Could not initialize payment flow. This may be because the development server is not secure (HTTPS). Please check the browser console for more details.");
+        } else {
+            console.error("Payment failed:", error);
+            const errorMessage = error.response?.data?.detail || error.message || 'An unexpected payment error occurred.';
+            alert(`Payment failed: ${errorMessage}`);
+        }
+    } finally {
+        purchaseBtn.disabled = false;
+        purchaseBtn.innerHTML = `<img src="${phantomIcon}" alt="Phantom Wallet" class="w-5 h-5"/><span>Purchase with Phantom</span>`;
+    } 
+}
+
+function attachTopUpListeners() {
+    const amountInput = document.getElementById('top-up-amount');
+    const tokenEquivalent = document.getElementById('token-equivalent');
+    const purchaseBtn = document.getElementById('purchase-tokens-btn');
+
+    const TOKENS_PER_USD = 10000;
+
+    const updateTokenValue = () => {
+        if (!amountInput || !tokenEquivalent) return;
+        const usdValue = parseFloat(amountInput.value) || 0;
+        const tokens = usdValue * TOKENS_PER_USD;
+        tokenEquivalent.textContent = tokens.toLocaleString();
+    };
+
+    amountInput?.addEventListener('input', updateTokenValue);
+    purchaseBtn?.addEventListener('click', handlePurchase);
+
+    updateTokenValue();
+}
+
+
 function initializePage() {
     renderPlanSummary();
     fetchBillingHistory();
+    attachTopUpListeners();
 }

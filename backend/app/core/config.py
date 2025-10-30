@@ -68,5 +68,8 @@ class AppSettings(BaseSettings):
     AIRDROP_WALLET_PRIVATE_KEY: str = os.getenv("AIRDROP_WALLET_PRIVATE_KEY")
     AIRDROP_TOKEN_MINT_ADDRESS: str = os.getenv("AIRDROP_TOKEN_MINT_ADDRESS")
 
+    FACILITATOR_URL: str = os.getenv("FACILITATOR_URL", "https://facilitator.payai.network")
+    MERCHANT_WALLET_ADDRESS: str = os.getenv("MERCHANT_WALLET_ADDRESS", "meow11a1Nn9i5ASDDVZg92sVT3dw4LRz6D2KqBK3p8v")
+
 
 settings = AppSettings()

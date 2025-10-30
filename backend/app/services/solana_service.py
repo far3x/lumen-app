@@ -6,11 +6,12 @@ from solders.transaction import Transaction
 from solders.instruction import Instruction
 from spl.token.constants import TOKEN_PROGRAM_ID
 from spl.token.instructions import create_associated_token_account, get_associated_token_address, transfer as spl_transfer, TransferParams
-
 from solana.rpc.api import Client
-from solana.rpc.commitment import Confirmed
+from solana.rpc.commitment import Confirmed, Finalized
 from solana.rpc.types import TxOpts
 from solana.rpc.core import RPCException
+from solders.system_program import ID as SYSTEM_PROGRAM_ID
+from solders.signature import Signature
 
 from app.core.config import settings
 
@@ -106,6 +107,53 @@ class SolanaService:
         except Exception as e:
             logger.error(f"Failed to create associated token account for {recipient_pubkey}: {e}")
             raise
+
+    def get_transaction_details(self, tx_signature_str: str) -> dict | None:
+        try:
+            signature = Signature.from_string(tx_signature_str)
+            response = self.client.get_transaction(signature, commitment=Finalized, max_supported_transaction_version=0)
+            
+            if not response or not response.value:
+                logger.warning(f"Transaction not found or has no value: {tx_signature_str}")
+                return None
+
+            tx_data = response.value.transaction
+            meta = tx_data.meta
+            message = tx_data.transaction.message
+
+            if meta.err:
+                logger.error(f"Transaction {tx_signature_str} failed on-chain with error: {meta.err}")
+                return None
+            
+            for instruction in message.instructions:
+                program_id = message.account_keys[instruction.program_id_index]
+                if str(program_id) == str(SYSTEM_PROGRAM_ID):
+                    from_pubkey = message.account_keys[instruction.accounts[0]]
+                    to_pubkey = message.account_keys[instruction.accounts[1]]
+                    
+                    account_index_to = -1
+                    for i, key in enumerate(message.account_keys):
+                        if str(key) == str(to_pubkey):
+                            account_index_to = i
+                            break
+                    
+                    if account_index_to == -1: continue
+
+                    pre_balance = meta.pre_balances[account_index_to]
+                    post_balance = meta.post_balances[account_index_to]
+                    
+                    amount_lamports = post_balance - pre_balance
+
+                    return {
+                        "from": str(from_pubkey),
+                        "to": str(to_pubkey),
+                        "amount_lamports": amount_lamports,
+                        "success": True
+                    }
+            return None
+        except Exception as e:
+            logger.error(f"Error fetching transaction details for {tx_signature_str}: {e}", exc_info=True)
+            return None
 
     def airdrop_lumen_tokens(self, recipient_address_str: str, amount_tokens: float) -> str:
         amount_lamports = int(amount_tokens * (10**6))
