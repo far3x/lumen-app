@@ -1,7 +1,9 @@
 FROM node:18-alpine AS build
 WORKDIR /app
 COPY package*.json ./
-RUN npm install
+RUN apk add --no-cache python3 make g++ && \
+    npm install && \
+    apk del python3 make g++
 COPY . .
 
 ARG VITE_API_URL

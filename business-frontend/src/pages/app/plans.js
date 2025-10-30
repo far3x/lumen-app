@@ -15,7 +15,8 @@ let isLoadingHistory = true;
 
 export function renderPlansPage() {
     const company = getCompany();
-    const phantomIcon = walletService.adapter.icon;
+    const phantomWallet = walletService.wallets.find(w => w.name === 'Phantom');
+    const phantomIcon = phantomWallet ? phantomWallet.icon : '';
 
     const headerHtml = `<h1 class="page-headline">Plans & Billing</h1>`;
     const pageHtml = `
@@ -197,11 +198,8 @@ async function handlePurchase() {
     const purchaseBtn = document.getElementById('purchase-tokens-btn');
     const amountInput = document.getElementById('top-up-amount');
     const usdAmount = parseFloat(amountInput.value);
-    const phantomIcon = walletService.adapter.icon;
-    
-    if (!window.isSecureContext && window.location.hostname !== "localhost") {
-        alert("Payment functionality requires a secure (HTTPS) connection. This may prevent the payment modal from appearing.");
-    }
+    const phantomWallet = walletService.wallets.find(w => w.name === 'Phantom');
+    const phantomIcon = phantomWallet ? phantomWallet.icon : '';
 
     if (!usdAmount || usdAmount < 10) {
         alert('Please enter an amount of $10 or more.');
@@ -212,7 +210,7 @@ async function handlePurchase() {
     purchaseBtn.innerHTML = `<span class="animate-spin inline-block w-5 h-5 border-2 border-transparent border-t-white rounded-full"></span><span class="ml-3">Processing...</span>`;
 
     try {
-        const response = await api.post('/business/billing/charge', {
+        await api.post('/business/billing/charge', {
             usd_amount: usdAmount
         });
         
@@ -224,9 +222,6 @@ async function handlePurchase() {
     } catch (error) {
         if (error.name === 'AbortError') {
             console.log("Payment flow was cancelled by the user.");
-        } else if (error.response && error.response.status === 402) {
-            console.error("402 Payment Required. The facilitator script should have intercepted this request but failed to do so. This is often due to running on a non-HTTPS development server.", error);
-            alert("Could not initialize payment flow. This may be because the development server is not secure (HTTPS). Please check the browser console for more details.");
         } else {
             console.error("Payment failed:", error);
             const errorMessage = error.response?.data?.detail || error.message || 'An unexpected payment error occurred.';
