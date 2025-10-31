@@ -1,4 +1,5 @@
 from fastapi import APIRouter, Depends, HTTPException, status, Request, Response
+from fastapi.responses import JSONResponse
 from sqlalchemy.orm import Session
 from app.db import crud, database, models
 from app.schemas import ContactSalesCreate
@@ -11,6 +12,7 @@ from datetime import datetime, timedelta, timezone
 from jose import jwt, JWTError
 import httpx
 import math
+import json
 
 router = APIRouter(prefix="/business", tags=["Business"])
 
@@ -99,7 +101,30 @@ async def create_charge(
         }
         encoded_data = jwt.encode(data_to_encode, config.settings.SECRET_KEY, algorithm=config.settings.ALGORITHM)
 
-        headers = {
-            "WWW-Authenticate": f'x402 network="solana", recipient="{config.settings.MERCHANT_WALLET_ADDRESS}", amount="{payload.usd_amount}", currency="usd", data="{encoded_data}"'
+        usdc_micro_units = int(payload.usd_amount * 1_000_000)
+        
+        base_url = str(request.base_url).rstrip('/')
+        resource_url = f"{base_url}{request.url.path}"
+        
+        x402_response = {
+            "x402Version": 1,
+            "error": "Payment required",
+            "accepts": [{
+                "scheme": "exact",
+                "network": "solana",
+                "maxAmountRequired": str(usdc_micro_units),
+                "asset": "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v",
+                "payTo": config.settings.MERCHANT_WALLET_ADDRESS,
+                "resource": resource_url,
+                "description": f"Token purchase: ${payload.usd_amount:.2f} USD",
+                "mimeType": "application/json",
+                "maxTimeoutSeconds": 900,
+                "data": encoded_data
+            }]
         }
-        return Response(status_code=402, headers=headers)
+        
+        return JSONResponse(
+            status_code=status.HTTP_402_PAYMENT_REQUIRED,
+            content=x402_response,
+            headers={"Content-Type": "application/json"}
+        )
