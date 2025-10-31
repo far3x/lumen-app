@@ -10,7 +10,7 @@ class WalletService extends EventEmitter {
         super();
         this.adapter = null;
         this.publicKey = null;
-        this.network = WalletAdapterNetwork.Mainnet;
+        this.network = WalletAdapterNetwork.Devnet;
         const rpcUrl = import.meta.env.VITE_SOLANA_RPC_URL || clusterApiUrl(this.network);
         this.connection = new Connection(rpcUrl, 'confirmed');
         

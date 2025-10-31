@@ -11,6 +11,7 @@ from datetime import datetime, timedelta, timezone
 from jose import jwt, JWTError
 import httpx
 import math
+import json
 
 router = APIRouter(prefix="/business", tags=["Business"])
 
@@ -99,7 +100,35 @@ async def create_charge(
         }
         encoded_data = jwt.encode(data_to_encode, config.settings.SECRET_KEY, algorithm=config.settings.ALGORITHM)
 
-        headers = {
-            "WWW-Authenticate": f'x402 network="solana", recipient="{config.settings.MERCHANT_WALLET_ADDRESS}", amount="{payload.usd_amount}", currency="usd", data="{encoded_data}"'
+        # USDC has 6 decimals, so 1 USDC = 1,000,000 micro-units
+        usdc_micro_units = int(payload.usd_amount * 1_000_000)
+        
+        # Construire l'URL complète pour la resource
+        base_url = str(request.base_url).rstrip('/')
+        resource_url = f"{base_url}{request.url.path}"
+        
+        x402_response = {
+            "x402Version": 1,
+            "error": "Payment required",
+            "accepts": [{
+                "scheme": "exact",
+                "network": "solana-devnet",
+                "maxAmountRequired": str(usdc_micro_units),
+                "asset": "4zMMC9srt5Ri5X14GAgXhaHii3GnPAEERYPJgZJDncDU",
+                "payTo": config.settings.MERCHANT_WALLET_ADDRESS,
+                "resource": resource_url,
+                "description": f"Token purchase: ${payload.usd_amount:.2f} USD",
+                "mimeType": "application/json",
+                "maxTimeoutSeconds": 900,
+                "data": encoded_data
+            }]
         }
-        return Response(status_code=402, headers=headers)
+        
+        response_json = json.dumps(x402_response)
+        print(f"X402 Response: {response_json}")
+        
+        return Response(
+            status_code=402,
+            content=response_json,
+            media_type="application/json"
+        )
