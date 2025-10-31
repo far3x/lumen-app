@@ -206,6 +206,17 @@ async function handlePurchase() {
         return;
     }
 
+    // Vérifier et connecter le wallet
+    if (!walletService.isWalletConnected()) {
+        try {
+            await walletService.connect('Phantom');
+        } catch (error) {
+            alert('Failed to connect Phantom wallet. Please make sure it is installed and try again.');
+            console.error('Wallet connection error:', error);
+            return;
+        }
+    }
+
     purchaseBtn.disabled = true;
     purchaseBtn.innerHTML = `<span class="animate-spin inline-block w-5 h-5 border-2 border-transparent border-t-white rounded-full"></span><span class="ml-3">Processing...</span>`;
 

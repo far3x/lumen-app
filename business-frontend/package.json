@@ -10,6 +10,7 @@
   },
   "dependencies": {
     "@payai/x402-axios": "^0.5.1-nightly.20250919.d259b58",
+    "@solana/kit": "^2.1.1",
     "@solana/wallet-adapter-base": "^0.9.27",
     "@solana/wallet-adapter-phantom": "^0.9.28",
     "@solana/web3.js": "^1.98.2",
@@ -17,6 +18,7 @@
     "bs58": "^5.0.0",
     "chart.js": "^4.4.3",
     "events": "^3.3.0",
+    "x402": "^0.7.1",
     "zxcvbn": "^4.4.2"
   },
   "devDependencies": {
