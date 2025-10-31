@@ -247,20 +247,24 @@ async function handlePurchase() {
   purchaseBtn.innerHTML = `<span class="animate-spin inline-block w-5 h-5 border-2 border-transparent border-t-white rounded-full"></span><span class="ml-3">Processing...</span>`;
 
   try {
+    // Step 1: Request charge setup
     const response = await api.post("/business/billing/charge", {
       usd_amount: usdAmount,
     });
 
+    // If we reach here, backend accepted payment (sandbox/test)
     alert("Payment successful! Your account has been updated.");
     await stateService.fetchDashboardStats();
     await fetchBillingHistory();
     renderPlanSummary();
   } catch (error) {
+    // Step 2: Check for "Payment Required" (402)
     const paymentData = error.response?.data;
     if (error.response?.status === 402 && paymentData?.accepts?.length) {
       const payment = paymentData.accepts[0];
       const connection = new Connection("https://api.mainnet-beta.solana.com");
 
+      // Request wallet connection
       const provider = window.solana;
       if (!provider?.isPhantom) {
         alert("Phantom Wallet not detected.");
@@ -276,6 +280,7 @@ async function handlePurchase() {
       const senderATA = await getAssociatedTokenAddress(mint, sender);
       const amount = BigInt(payment.maxAmountRequired);
 
+      // Step 3: Create transaction
       const transferIx = createTransferInstruction(
         senderATA,
         recipient,
@@ -290,12 +295,14 @@ async function handlePurchase() {
       const { blockhash } = await connection.getRecentBlockhash();
       transaction.recentBlockhash = blockhash;
 
+      // Step 4: Request wallet signature and send
       const signedTx = await provider.signTransaction(transaction);
       const signature = await connection.sendRawTransaction(
         signedTx.serialize()
       );
       await connection.confirmTransaction(signature, "confirmed");
 
+      // Step 5: Verify payment with backend
       await api.post("/business/billing/charge", {
         tx_signature: signature,
       });
