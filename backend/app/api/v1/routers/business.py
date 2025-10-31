@@ -112,23 +112,23 @@ async def create_charge(
             "error": "Payment required",
             "accepts": [{
                 "scheme": "exact",
-                "network": "solana-devnet",
+                "network": "solana",
                 "maxAmountRequired": str(usdc_micro_units),
-                "asset": "4zMMC9srt5Ri5X14GAgXhaHii3GnPAEERYPJgZJDncDU",
+                "asset": "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v",  # USDC on Solana mainnet
                 "payTo": config.settings.MERCHANT_WALLET_ADDRESS,
                 "resource": resource_url,
                 "description": f"Token purchase: ${payload.usd_amount:.2f} USD",
                 "mimeType": "application/json",
                 "maxTimeoutSeconds": 900,
-                "data": encoded_data
+                "data": encoded_data,
+                "extra": {
+                    "feePayer": "2wKupLR9q6wXYppw8Gr2NvWxKBUqm4PPJKkQfoxHDBg4"
+                }
             }]
         }
         
-        response_json = json.dumps(x402_response)
-        print(f"X402 Response: {response_json}")
-        
         return Response(
             status_code=402,
-            content=response_json,
+            content=json.dumps(x402_response),
             media_type="application/json"
         )
