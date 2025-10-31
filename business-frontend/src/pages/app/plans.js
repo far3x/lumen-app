@@ -1,25 +1,25 @@
-import { getCompany } from '../../lib/auth.js';
-import api from '../../lib/api.js';
-import { walletService } from '../../lib/wallet.js';
-import { stateService } from '../../lib/state.js';
+import { getCompany } from "../../lib/auth.js";
+import api from "../../lib/api.js";
+import { walletService } from "../../lib/wallet.js";
+import { stateService } from "../../lib/state.js";
 
 const PLAN_DATA = {
-    free: { name: 'Free', token_limit: 0 },
-    researcher: { name: 'Researcher', token_limit: 10000000 },
-    startup: { name: 'Startup', token_limit: 75000000 },
-    enterprise: { name: 'Enterprise', token_limit: Infinity }
+  free: { name: "Free", token_limit: 0 },
+  researcher: { name: "Researcher", token_limit: 10000000 },
+  startup: { name: "Startup", token_limit: 75000000 },
+  enterprise: { name: "Enterprise", token_limit: Infinity },
 };
 
 let billingHistory = [];
 let isLoadingHistory = true;
 
 export function renderPlansPage() {
-    const company = getCompany();
-    const phantomWallet = walletService.wallets.find(w => w.name === 'Phantom');
-    const phantomIcon = phantomWallet ? phantomWallet.icon : '';
+  const company = getCompany();
+  const phantomWallet = walletService.wallets.find((w) => w.name === "Phantom");
+  const phantomIcon = phantomWallet ? phantomWallet.icon : "";
 
-    const headerHtml = `<h1 class="page-headline">Plans & Billing</h1>`;
-    const pageHtml = `
+  const headerHtml = `<h1 class="page-headline">Plans & Billing</h1>`;
+  const pageHtml = `
         <div class="dashboard-container">
             <div id="plan-summary-card" class="widget-card p-6">
                 <!-- Plan summary is rendered dynamically -->
@@ -103,34 +103,43 @@ export function renderPlansPage() {
             </div>
         </div>
     `;
-    setTimeout(initializePage, 0);
-    return { pageHtml, headerHtml };
+  setTimeout(initializePage, 0);
+  return { pageHtml, headerHtml };
 }
 
 function renderPlanSummary() {
-    const container = document.getElementById('plan-summary-card');
-    if (!container) return;
-    
-    const company = getCompany();
-    const planDetails = PLAN_DATA[company.plan] || PLAN_DATA.free;
-    const totalTokens = planDetails.token_limit;
-    const remainingTokens = company.token_balance;
-    const usedTokens = totalTokens > 0 ? Math.max(0, totalTokens - remainingTokens) : 0;
-    const usagePercentage = totalTokens > 0 ? (usedTokens / totalTokens) * 100 : 0;
-    
-    container.innerHTML = `
+  const container = document.getElementById("plan-summary-card");
+  if (!container) return;
+
+  const company = getCompany();
+  const planDetails = PLAN_DATA[company.plan] || PLAN_DATA.free;
+  const totalTokens = planDetails.token_limit;
+  const remainingTokens = company.token_balance;
+  const usedTokens =
+    totalTokens > 0 ? Math.max(0, totalTokens - remainingTokens) : 0;
+  const usagePercentage =
+    totalTokens > 0 ? (usedTokens / totalTokens) * 100 : 0;
+
+  container.innerHTML = `
         <div class="grid md:grid-cols-3 gap-6 items-center">
             <div>
                 <h2 class="text-lg font-semibold text-text-headings">Current Plan</h2>
-                <p class="text-5xl font-bold text-primary mt-2 capitalize">${company.plan}</p>
+                <p class="text-5xl font-bold text-primary mt-2 capitalize">${
+                  company.plan
+                }</p>
             </div>
             <div class="md:col-span-2">
                 <p class="text-sm font-medium text-text-muted">Token Balance</p>
                 <div class="flex items-center gap-4 mt-1">
                     <div class="w-full bg-app-bg rounded-full h-2.5">
-                        <div class="bg-primary h-2.5 rounded-full" style="width: ${Math.min(100, usagePercentage)}%"></div>
+                        <div class="bg-primary h-2.5 rounded-full" style="width: ${Math.min(
+                          100,
+                          usagePercentage
+                        )}%"></div>
                     </div>
-                    <span class="text-sm font-semibold text-text-headings whitespace-nowrap">${remainingTokens.toLocaleString()} / ${totalTokens > 0 ? totalTokens.toLocaleString() : '∞'}</span>
+                    <span class="text-sm font-semibold text-text-headings whitespace-nowrap">${remainingTokens.toLocaleString()} / ${
+    totalTokens > 0 ? totalTokens.toLocaleString() : "∞"
+  }</span>
                 </div>
                 <p class="text-xs text-text-tertiary mt-2">Your balance resets on the 1st of each month. <a href="/contact" class="text-primary font-medium hover:underline">Contact us</a> to upgrade.</p>
             </div>
@@ -139,15 +148,17 @@ function renderPlanSummary() {
 }
 
 function renderBillingHistory() {
-    const container = document.getElementById('billing-history-container');
-    if (!container) return;
+  const container = document.getElementById("billing-history-container");
+  if (!container) return;
 
-    if (isLoadingHistory) {
-        container.innerHTML = `<div class="p-8 text-center text-text-muted">Loading billing history...</div>`;
-        return;
-    }
+  if (isLoadingHistory) {
+    container.innerHTML = `<div class="p-8 text-center text-text-muted">Loading billing history...</div>`;
+    return;
+  }
 
-    const historyContent = billingHistory.length === 0 ? `
+  const historyContent =
+    billingHistory.length === 0
+      ? `
         <tbody>
             <tr>
                 <td colspan="5" class="text-center p-12 text-text-muted">
@@ -157,21 +168,34 @@ function renderBillingHistory() {
                 </td>
             </tr>
         </tbody>
-    ` : `
+    `
+      : `
         <tbody>
-            ${billingHistory.map(item => `
+            ${billingHistory
+              .map(
+                (item) => `
                 <tr class="hover:bg-app-accent-hover">
                     <td>${new Date(item.date).toLocaleDateString()}</td>
                     <td>${item.description}</td>
-                    <td class="font-mono text-right">$${item.amount_usd.toFixed(2)}</td>
-                    <td><span class="px-2 py-1 text-xs font-semibold ${item.status === 'paid' ? 'text-green-800 bg-green-100' : 'text-yellow-800 bg-yellow-100'} rounded-full capitalize">${item.status}</span></td>
-                    <td class="text-center"><a href="${item.invoice_url}" target="_blank" rel="noopener" class="text-primary font-semibold hover:underline" data-external="true">View</a></td>
+                    <td class="font-mono text-right">$${item.amount_usd.toFixed(
+                      2
+                    )}</td>
+                    <td><span class="px-2 py-1 text-xs font-semibold ${
+                      item.status === "paid"
+                        ? "text-green-800 bg-green-100"
+                        : "text-yellow-800 bg-yellow-100"
+                    } rounded-full capitalize">${item.status}</span></td>
+                    <td class="text-center"><a href="${
+                      item.invoice_url
+                    }" target="_blank" rel="noopener" class="text-primary font-semibold hover:underline" data-external="true">View</a></td>
                 </tr>
-            `).join('')}
+            `
+              )
+              .join("")}
         </tbody>
     `;
 
-    container.innerHTML = `
+  container.innerHTML = `
         <table class="data-table">
             <thead><tr><th>Date</th><th>Description</th><th class="text-right">Amount</th><th>Status</th><th class="text-center">Invoice</th></tr></thead>
             ${historyContent}
@@ -180,109 +204,134 @@ function renderBillingHistory() {
 }
 
 async function fetchBillingHistory() {
-    isLoadingHistory = true;
+  isLoadingHistory = true;
+  renderBillingHistory();
+  try {
+    const response = await api.get("/business/billing-history");
+    billingHistory = response.data;
+  } catch (error) {
+    console.error("Failed to fetch billing history:", error);
+    billingHistory = [];
+  } finally {
+    isLoadingHistory = false;
     renderBillingHistory();
-    try {
-        const response = await api.get('/business/billing-history');
-        billingHistory = response.data;
-    } catch (error) {
-        console.error("Failed to fetch billing history:", error);
-        billingHistory = [];
-    } finally {
-        isLoadingHistory = false;
-        renderBillingHistory();
-    }
+  }
 }
 
+import {
+  Connection,
+  PublicKey,
+  Transaction,
+  SystemProgram,
+} from "@solana/web3.js";
+
 async function handlePurchase() {
-    const purchaseBtn = document.getElementById('purchase-tokens-btn');
-    const amountInput = document.getElementById('top-up-amount');
-    const usdAmount = parseFloat(amountInput.value);
-    const phantomWallet = walletService.wallets.find(w => w.name === 'Phantom');
-    const phantomIcon = phantomWallet ? phantomWallet.icon : '';
+  const purchaseBtn = document.getElementById("purchase-tokens-btn");
+  const amountInput = document.getElementById("top-up-amount");
+  const usdAmount = parseFloat(amountInput.value);
+  const phantomWallet = walletService.wallets.find((w) => w.name === "Phantom");
+  const phantomIcon = phantomWallet ? phantomWallet.icon : "";
 
-    if (!usdAmount || usdAmount < 10) {
-        alert('Please enter an amount of $10 or more.');
-        return;
+  if (!usdAmount || usdAmount < 10) {
+    alert("Please enter an amount of $10 or more.");
+    return;
+  }
+
+  purchaseBtn.disabled = true;
+  purchaseBtn.innerHTML = `<span class="animate-spin inline-block w-5 h-5 border-2 border-transparent border-t-white rounded-full"></span><span class="ml-3">Processing...</span>`;
+
+  try {
+    const response = await api.post("/business/billing/charge", {
+      usd_amount: usdAmount,
+    });
+
+    alert("Payment successful! Your account has been updated.");
+    await stateService.fetchDashboardStats();
+    await fetchBillingHistory();
+    renderPlanSummary();
+  } catch (error) {
+    const paymentData = error.response?.data;
+    if (error.response?.status === 402 && paymentData?.accepts?.length) {
+      const payment = paymentData.accepts[0];
+      const connection = new Connection("https://api.mainnet-beta.solana.com");
+
+      const provider = window.solana;
+      if (!provider?.isPhantom) {
+        alert("Phantom Wallet not detected.");
+        throw new Error("Phantom not found");
+      }
+
+      await provider.connect();
+
+      const sender = provider.publicKey;
+      const recipient = new PublicKey(payment.payTo);
+
+      const lamports = parseInt(payment.maxAmountRequired);
+
+      const transaction = new Transaction().add(
+        SystemProgram.transfer({
+          fromPubkey: sender,
+          toPubkey: recipient,
+          lamports,
+        })
+      );
+
+      transaction.feePayer = sender;
+      const { blockhash } = await connection.getRecentBlockhash();
+      transaction.recentBlockhash = blockhash;
+
+      const signedTx = await provider.signTransaction(transaction);
+      const signature = await connection.sendRawTransaction(
+        signedTx.serialize()
+      );
+      await connection.confirmTransaction(signature, "confirmed");
+
+      await api.post("/business/billing/charge", {
+        tx_signature: signature,
+      });
+
+      alert("✅ Payment confirmed! Your account has been updated.");
+      await stateService.fetchDashboardStats();
+      await fetchBillingHistory();
+      renderPlanSummary();
+    } else if (error.name === "AbortError") {
+      console.log("Payment flow was cancelled by the user.");
+    } else {
+      console.error("Payment failed:", error);
+      const errorMessage =
+        error.response?.data?.detail ||
+        error.message ||
+        "An unexpected payment error occurred.";
+      alert(`Payment failed: ${errorMessage}`);
     }
-
-    if (!walletService.isWalletConnected()) {
-        try {
-            await walletService.connect('Phantom');
-        } catch (error) {
-            alert('Failed to connect Phantom wallet. Please make sure it is installed and try again.');
-            console.error('Wallet connection error:', error);
-            return;
-        }
-    }
-
-    purchaseBtn.disabled = true;
-    purchaseBtn.innerHTML = `<span class="animate-spin inline-block w-5 h-5 border-2 border-transparent border-t-white rounded-full"></span><span class="ml-3">Processing...</span>`;
-
-    try {
-        await api.post('/business/billing/charge', {
-            usd_amount: usdAmount
-        });
-        
-        alert('Payment successful! Your account has been updated.');
-        await stateService.fetchDashboardStats();
-        await fetchBillingHistory();
-        renderPlanSummary();
-        
-    } catch (error) {
-        console.log("--- PAYMENT FAILED ---");
-        console.log("Full Error Object:", error);
-        console.log("Error Name:", error.name);
-        console.log("Error Message:", error.message);
-        if (error.response) {
-            console.log("Response Data:", error.response.data);
-            console.log("Response Status:", error.response.status);
-        }
-        if (error.cause) {
-            console.log("Error Cause:", error.cause);
-        }
-        
-        let errorMessage = 'An unexpected payment error occurred.';
-        if (error.name === 'AbortError') {
-            errorMessage = "Payment flow was cancelled by the user.";
-        } else if (error.response?.data?.detail) {
-            errorMessage = error.response.data.detail;
-        } else if (error.cause?.message) {
-            errorMessage = error.cause.message;
-        } else if (error.message) {
-            errorMessage = error.message;
-        }
-        alert(`Payment failed: ${errorMessage}`);
-
-    } finally {
-        purchaseBtn.disabled = false;
-        purchaseBtn.innerHTML = `<img src="${phantomIcon}" alt="Phantom Wallet" class="w-5 h-5"/><span>Purchase with Phantom</span>`;
-    } 
+  } finally {
+    purchaseBtn.disabled = false;
+    purchaseBtn.innerHTML = `<img src="${phantomIcon}" alt="Phantom Wallet" class="w-5 h-5"/><span>Purchase with Phantom</span>`;
+  }
 }
 
 function attachTopUpListeners() {
-    const amountInput = document.getElementById('top-up-amount');
-    const tokenEquivalent = document.getElementById('token-equivalent');
-    const purchaseBtn = document.getElementById('purchase-tokens-btn');
+  const amountInput = document.getElementById("top-up-amount");
+  const tokenEquivalent = document.getElementById("token-equivalent");
+  const purchaseBtn = document.getElementById("purchase-tokens-btn");
 
-    const TOKENS_PER_USD = 10000;
+  const TOKENS_PER_USD = 10000;
 
-    const updateTokenValue = () => {
-        if (!amountInput || !tokenEquivalent) return;
-        const usdValue = parseFloat(amountInput.value) || 0;
-        const tokens = usdValue * TOKENS_PER_USD;
-        tokenEquivalent.textContent = tokens.toLocaleString();
-    };
+  const updateTokenValue = () => {
+    if (!amountInput || !tokenEquivalent) return;
+    const usdValue = parseFloat(amountInput.value) || 0;
+    const tokens = usdValue * TOKENS_PER_USD;
+    tokenEquivalent.textContent = tokens.toLocaleString();
+  };
 
-    amountInput?.addEventListener('input', updateTokenValue);
-    purchaseBtn?.addEventListener('click', handlePurchase);
+  amountInput?.addEventListener("input", updateTokenValue);
+  purchaseBtn?.addEventListener("click", handlePurchase);
 
-    updateTokenValue();
+  updateTokenValue();
 }
 
-
 function initializePage() {
-    renderPlanSummary();
-    fetchBillingHistory();
-    attachTopUpListeners();
+  renderPlanSummary();
+  fetchBillingHistory();
+  attachTopUpListeners();
 }
