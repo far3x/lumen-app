@@ -184,3 +184,7 @@ class BusinessUserUpdate(BaseModel):
 
 class ChargeRequest(BaseModel):
     usd_amount: float = Field(..., gt=0)
+
+class VerifyPaymentRequest(BaseModel):
+    tx_signature: str
+    data: str
