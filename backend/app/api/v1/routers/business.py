@@ -112,9 +112,9 @@ async def create_charge(
             "error": "Payment required",
             "accepts": [{
                 "scheme": "exact",
-                "network": "solana",
+                "network": "solana-devnet",
                 "maxAmountRequired": str(usdc_micro_units),
-                "asset": "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v",  # USDC on Solana mainnet
+                "asset": "4zMMC9srt5Ri5X14GAgXhaHii3GnPAEERYPJgZJDncDU",  # USDC on Solana devnet
                 "payTo": config.settings.MERCHANT_WALLET_ADDRESS,
                 "resource": resource_url,
                 "description": f"Token purchase: ${payload.usd_amount:.2f} USD",
