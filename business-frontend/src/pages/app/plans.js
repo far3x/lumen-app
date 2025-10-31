@@ -225,6 +225,12 @@ import {
   SystemProgram,
 } from "@solana/web3.js";
 
+import {
+  TOKEN_PROGRAM_ID,
+  createTransferInstruction,
+  getAssociatedTokenAddress,
+} from "@solana/spl-token";
+
 async function handlePurchase() {
   const purchaseBtn = document.getElementById("purchase-tokens-btn");
   const amountInput = document.getElementById("top-up-amount");
@@ -270,17 +276,20 @@ async function handlePurchase() {
       const sender = provider.publicKey;
       const recipient = new PublicKey(payment.payTo);
 
-      // Convert lamports from string to number
-      const lamports = parseInt(payment.maxAmountRequired);
+      const mint = new PublicKey(payment.asset);
+      const senderATA = await getAssociatedTokenAddress(mint, sender);
+      const amount = BigInt(payment.maxAmountRequired);
 
       // Step 3: Create transaction
-      const transaction = new Transaction().add(
-        SystemProgram.transfer({
-          fromPubkey: sender,
-          toPubkey: recipient,
-          lamports,
-        })
+      const transferIx = createTransferInstruction(
+        senderATA,
+        recipient,
+        sender,
+        amount,
+        [],
+        TOKEN_PROGRAM_ID
       );
+      const transaction = new Transaction().add(transferIx);
 
       transaction.feePayer = sender;
       const { blockhash } = await connection.getRecentBlockhash();
