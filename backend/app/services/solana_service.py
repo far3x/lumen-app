@@ -119,37 +119,30 @@ class SolanaService:
 
             tx_data = response.value.transaction
             meta = tx_data.meta
-            message = tx_data.transaction.message
 
             if meta.err:
                 logger.error(f"Transaction {tx_signature_str} failed on-chain with error: {meta.err}")
                 return None
             
-            for instruction in message.instructions:
-                program_id = message.account_keys[instruction.program_id_index]
-                if str(program_id) == str(SYSTEM_PROGRAM_ID):
-                    from_pubkey = message.account_keys[instruction.accounts[0]]
-                    to_pubkey = message.account_keys[instruction.accounts[1]]
-                    
-                    account_index_to = -1
-                    for i, key in enumerate(message.account_keys):
-                        if str(key) == str(to_pubkey):
-                            account_index_to = i
-                            break
-                    
-                    if account_index_to == -1: continue
+            pre_balances = {item.account_index: item for item in meta.pre_token_balances}
+            post_balances = {item.account_index: item for item in meta.post_token_balances}
 
-                    pre_balance = meta.pre_balances[account_index_to]
-                    post_balance = meta.post_balances[account_index_to]
-                    
-                    amount_lamports = post_balance - pre_balance
+            for account_index, post_balance in post_balances.items():
+                pre_balance = pre_balances.get(account_index)
+                
+                pre_amount = int(pre_balance.ui_token_amount.amount) if pre_balance and pre_balance.ui_token_amount.amount else 0
+                post_amount = int(post_balance.ui_token_amount.amount) if post_balance and post_balance.ui_token_amount.amount else 0
 
+                if post_amount > pre_amount:
+                    amount_transferred = post_amount - pre_amount
                     return {
-                        "from": str(from_pubkey),
-                        "to": str(to_pubkey),
-                        "amount_lamports": amount_lamports,
+                        "to": str(post_balance.owner),
+                        "mint": str(post_balance.mint),
+                        "amount_raw": amount_transferred,
                         "success": True
                     }
+            
+            logger.warning(f"Could not determine token transfer details for tx: {tx_signature_str}")
             return None
         except Exception as e:
             logger.error(f"Error fetching transaction details for {tx_signature_str}: {e}", exc_info=True)
