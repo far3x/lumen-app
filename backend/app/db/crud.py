@@ -4,7 +4,7 @@ import re
 import secrets
 import sqlalchemy as sa
 from sqlalchemy.orm import Session
-from sqlalchemy import func, text, case, desc
+from sqlalchemy import func, text, case, desc, or_
 from sqlalchemy.dialects import postgresql
 from fastapi import HTTPException, status
 from typing import Optional, List, Dict
@@ -436,7 +436,7 @@ def get_distinct_contribution_languages(db: Session) -> List[str]:
     return [row[0] for row in results]
 
 def search_contributions(db: Session, company_id: int, skip: int, limit: int, **kwargs) -> dict:
-    print(f"\n--- [DEBUG] Starting search_contributions ---")
+    print(f"\n--- [DEBUG] Starting DB-optimized search_contributions ---")
     print(f"[DEBUG] Params: skip={skip}, limit={limit}, filters={kwargs}")
 
     unlocked_subquery = sa.select(models.UnlockedContribution.contribution_id).filter(models.UnlockedContribution.company_id == company_id)
@@ -446,80 +446,67 @@ def search_contributions(db: Session, company_id: int, skip: int, limit: int, **
         case((models.Contribution.id.in_(unlocked_subquery), True), else_=False).label("is_unlocked")
     ).filter(models.Contribution.status == "PROCESSED")
 
-    all_matching_results = query.order_by(models.Contribution.created_at.desc()).all()
-    print(f"[DEBUG] Fetched {len(all_matching_results)} total processed records from DB before Python filtering.")
+    # This CASE statement now correctly handles the double-encoded JSON string format
+    parsed_results = case(
+        (func.jsonb_typeof(models.Contribution.valuation_results) == 'string',
+         sa.cast(sa.cast(models.Contribution.valuation_results, sa.Text), postgresql.JSONB)),
+        else_=models.Contribution.valuation_results
+    )
+
+    keywords = kwargs.get('keywords')
+    if keywords:
+        for keyword in keywords.split():
+            query = query.filter(parsed_results.op('->>')('analysis_summary').ilike(f'%{keyword}%'))
+
+    languages = kwargs.get('languages')
+    if languages:
+        conditions = [parsed_results['language_breakdown'].has_key(lang) for lang in languages]
+        query = query.filter(or_(*conditions))
+
+    min_tokens = kwargs.get('min_tokens')
+    if min_tokens is not None:
+        query = query.filter(parsed_results.op('->>')('total_tokens').cast(sa.Integer) >= min_tokens)
+    
+    max_tokens = kwargs.get('max_tokens')
+    if max_tokens is not None:
+        query = query.filter(parsed_results.op('->>')('total_tokens').cast(sa.Integer) <= max_tokens)
+    
+    score_map = {
+        'min_clarity': 'project_clarity_score',
+        'min_arch': 'architectural_quality_score',
+        'min_quality': 'code_quality_score'
+    }
+    for key, json_key in score_map.items():
+        min_score = kwargs.get(key)
+        if min_score is not None and min_score > 0:
+            query = query.filter(
+                (parsed_results.op('->>')(json_key).cast(sa.Float)) >= (min_score / 10.0)
+            )
+
+    total = query.count()
+    print(f"[DEBUG] Found {total} total matching records in DB after filtering.")
+
+    paginated_results = query.order_by(models.Contribution.created_at.desc()).offset(skip).limit(limit).all()
+    print(f"[DEBUG] Fetched {len(paginated_results)} records for this page.")
 
     filtered_previews = []
-    for i, (contrib, is_unlocked) in enumerate(all_matching_results):
-        print(f"\n[DEBUG] --- Python Processing record {i+1} (ID: {contrib.id}) ---")
-        
+    for contrib, is_unlocked in paginated_results:
         raw_details = contrib.valuation_results
-        
         details = raw_details
         try:
             while isinstance(details, str):
                 details = json.loads(details)
-        except json.JSONDecodeError as e:
-            print(f"[DEBUG] ERROR: JSON decoding failed for record {contrib.id}. Skipping. Error: {e}")
-            continue
+        except (json.JSONDecodeError, TypeError):
+            details = {}
         
         if not isinstance(details, dict):
-            print(f"[DEBUG] SKIPPING record {contrib.id}: Parsed data is not a dictionary.")
             continue
         
         analysis_summary = details.get("analysis_summary")
         if isinstance(analysis_summary, str):
             analysis_summary = html.unescape(analysis_summary)
-            print(f"[DEBUG] Unescaped summary for ID {contrib.id}: {analysis_summary[:100]}...")
-        
-        keywords_to_search = kwargs.get('keywords')
-        if keywords_to_search:
-            if not analysis_summary:
-                print(f"[DEBUG] SKIPPING record {contrib.id}: No summary to search for keywords.")
-                continue
-            
-            all_keywords_found = all(
-                keyword.lower() in analysis_summary.lower() 
-                for keyword in keywords_to_search.split()
-            )
-            if not all_keywords_found:
-                print(f"[DEBUG] SKIPPING record {contrib.id}: Did not match all keywords.")
-                continue
-
-        languages_to_search = kwargs.get('languages')
-        if languages_to_search:
-            lang_breakdown = details.get("language_breakdown", {})
-            if not lang_breakdown:
-                print(f"[DEBUG] SKIPPING record {contrib.id}: No language breakdown to search.")
-                continue
-
-            found_lang = any(
-                search_lang.lower() == existing_lang.lower()
-                for search_lang in languages_to_search
-                for existing_lang in lang_breakdown.keys()
-            )
-            if not found_lang:
-                print(f"[DEBUG] SKIPPING record {contrib.id}: Did not match any language.")
-                continue
-
-        if kwargs.get('min_tokens') is not None and details.get('total_tokens', 0) < kwargs['min_tokens']:
-            print(f"[DEBUG] SKIPPING record {contrib.id}: Fails min_tokens.")
-            continue
-        if kwargs.get('max_tokens') is not None and details.get('total_tokens', 0) > kwargs['max_tokens']:
-            print(f"[DEBUG] SKIPPING record {contrib.id}: Fails max_tokens.")
-            continue
-        if kwargs.get('min_clarity') is not None and (details.get('project_clarity_score', 0) or 0) * 10 < kwargs['min_clarity']:
-            print(f"[DEBUG] SKIPPING record {contrib.id}: Fails min_clarity.")
-            continue
-        if kwargs.get('min_arch') is not None and (details.get('architectural_quality_score', 0) or 0) * 10 < kwargs['min_arch']:
-            print(f"[DEBUG] SKIPPING record {contrib.id}: Fails min_arch.")
-            continue
-        if kwargs.get('min_quality') is not None and (details.get('code_quality_score', 0) or 0) * 10 < kwargs['min_quality']:
-            print(f"[DEBUG] SKIPPING record {contrib.id}: Fails min_quality.")
-            continue
         
         first_lang = next(iter(details.get("language_breakdown", {"Unknown": 0})), "Unknown")
-        
         files_preview = [{"path": "Full Project Preview", "content": "\n".join(contrib.raw_content.splitlines()[:50])}]
         
         filtered_previews.append({
@@ -534,15 +521,9 @@ def search_contributions(db: Session, company_id: int, skip: int, limit: int, **
             "files_preview": files_preview,
             "language_breakdown": details.get("language_breakdown", {})
         })
-        print(f"[DEBUG] Record {contrib.id} PASSED all filters.")
-
-    total = len(filtered_previews)
-    print(f"[DEBUG] Total previews after Python filtering: {total}")
-
-    paginated_previews = filtered_previews[skip : skip + limit]
-    print(f"[DEBUG] Returning {len(paginated_previews)} previews for this page.")
-    print(f"--- [DEBUG] Ending search_contributions ---\n")
-    return {"items": paginated_previews, "total": total}
+        
+    print(f"--- [DEBUG] Ending search_contributions ---")
+    return {"items": filtered_previews, "total": total}
 
 def unlock_contribution(db: Session, company_id: int, contribution_id: int, api_key_id: Optional[int] = None) -> models.Contribution:
     company = db.query(models.Company).filter(models.Company.id == company_id).first()

@@ -45,7 +45,7 @@ app.add_middleware(
     ],
     allow_credentials=True,
     allow_methods=["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
-    allow_headers=["Authorization", "Content-Type", "X-Lumen-Challenge", "X-Lumen-Signature", "X-Lumen-Timestamp", "X-Visitor-ID"],
+    allow_headers=["Authorization", "Content-Type", "X-Lumen-Challenge", "X-Lumen-Signature", "X-Lumen-Timestamp", "X-Visitor-ID", "X-Payment-Signature"],
 )
 app.add_middleware(SessionMiddleware, secret_key=settings.SECRET_KEY)
 
