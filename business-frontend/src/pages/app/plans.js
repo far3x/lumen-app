@@ -2,6 +2,17 @@ import { getCompany } from "../../lib/auth.js";
 import api from "../../lib/api.js";
 import { walletService } from "../../lib/wallet.js";
 import { stateService } from "../../lib/state.js";
+import {
+  Connection,
+  PublicKey,
+  Transaction,
+  clusterApiUrl,
+} from "@solana/web3.js";
+import {
+  TOKEN_PROGRAM_ID,
+  createTransferInstruction,
+  getAssociatedTokenAddress,
+} from "@solana/spl-token";
 
 const PLAN_DATA = {
   free: { name: "Free", token_limit: 0 },
@@ -218,28 +229,15 @@ async function fetchBillingHistory() {
   }
 }
 
-import {
-  Connection,
-  PublicKey,
-  Transaction,
-  SystemProgram,
-} from "@solana/web3.js";
-
-import {
-  TOKEN_PROGRAM_ID,
-  createTransferInstruction,
-  getAssociatedTokenAddress,
-} from "@solana/spl-token";
-
-export async function processSolanaPayment(payment, connectionUrl = "https://api.mainnet-beta.solana.com") {
-  const connection = new Connection(connectionUrl);
+export async function processSolanaPayment(payment) {
+  const connectionUrl = import.meta.env.VITE_SOLANA_RPC_URL || clusterApiUrl('mainnet-beta');
+  const connection = new Connection(connectionUrl, "confirmed");
 
   // Request wallet connection
   const provider = window.solana;
   if (!provider?.isPhantom) {
-    throw new Error("Phantom not found");
+    throw new Error("Phantom wallet not found. Please install it to continue.");
   }
-
   await provider.connect();
 
   const sender = provider.publicKey;
@@ -249,7 +247,6 @@ export async function processSolanaPayment(payment, connectionUrl = "https://api
   const recipientATA = await getAssociatedTokenAddress(mint, recipient);
   const amount = BigInt(payment.maxAmountRequired);
 
-  // Create transaction
   const transferIx = createTransferInstruction(
     senderATA,
     recipientATA,
@@ -267,15 +264,8 @@ export async function processSolanaPayment(payment, connectionUrl = "https://api
 
   // Request wallet signature and send
   const signedTx = await provider.signTransaction(transaction);
-  const signature = await connection.sendRawTransaction(
-    signedTx.serialize()
-  );
+  const signature = await connection.sendRawTransaction(signedTx.serialize());
   await connection.confirmTransaction(signature, "confirmed");
-
-  // Verify payment with backend
-  await api.post("/business/billing/charge", {
-    tx_signature: signature,
-  });
 
   return signature;
 }
@@ -296,36 +286,42 @@ async function handlePurchase() {
   purchaseBtn.innerHTML = `<span class="animate-spin inline-block w-5 h-5 border-2 border-transparent border-t-white rounded-full"></span><span class="ml-3">Processing...</span>`;
 
   try {
-    // Step 1: Request charge setup
-    const response = await api.post("/business/billing/charge", {
+    await api.post("/business/billing/charge", {
       usd_amount: usdAmount,
     });
-
-    // If we reach here, backend accepted payment (sandbox/test)
     alert("Payment successful! Your account has been updated.");
     await stateService.fetchDashboardStats();
     await fetchBillingHistory();
     renderPlanSummary();
   } catch (error) {
-    // Step 2: Check for "Payment Required" (402)
     const paymentData = error.response?.data;
     if (error.response?.status === 402 && paymentData?.accepts?.length) {
-      const payment = paymentData.accepts[0];
-      const signature = await processSolanaPayment(payment);
+        try {
+            const payment = paymentData.accepts[0];
+            const signature = await processSolanaPayment(payment);
 
-      alert("✅ Payment confirmed! Your account has been updated.");
-      await stateService.fetchDashboardStats();
-      await fetchBillingHistory();
-      renderPlanSummary();
-    } else if (error.name === "AbortError") {
-      console.log("Payment flow was cancelled by the user.");
+            await api.post('/business/billing/charge', { usd_amount: usdAmount }, {
+                headers: {
+                    'Authorization': `x402 svm/1; signature=${signature}`
+                }
+            });
+
+            alert("✅ Payment confirmed! Your account has been updated.");
+            await stateService.fetchDashboardStats();
+            await fetchBillingHistory();
+            renderPlanSummary();
+
+        } catch (paymentError) {
+            console.error("Payment flow failed:", paymentError);
+            alert(`Payment failed: ${paymentError.message}`);
+        }
     } else {
-      console.error("Payment failed:", error);
+      console.error("Purchase failed:", error);
       const errorMessage =
         error.response?.data?.detail ||
         error.message ||
-        "An unexpected payment error occurred.";
-      alert(`Payment failed: ${errorMessage}`);
+        "An unexpected payment error occurred during purchase.";
+      alert(`Purchase failed: ${errorMessage}`);
     }
   } finally {
     purchaseBtn.disabled = false;
@@ -333,7 +329,6 @@ async function handlePurchase() {
   }
 }
 
-// Test function to simulate 402 error - can be called from browser console
 window.testPaymentError = async function() {
   console.log('Testing 402 Payment Required error...');
 
@@ -352,7 +347,7 @@ window.testPaymentError = async function() {
 
   try {
     console.log('Payment details:', mockPayment);
-    const signature = await processSolanaPayment(mockPayment, "https://api.devnet.solana.com");
+    const signature = await processSolanaPayment(mockPayment);
     console.log('Test payment successful, signature:', signature);
     alert("✅ Test payment confirmed!");
   } catch (error) {
