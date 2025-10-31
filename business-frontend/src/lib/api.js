@@ -8,7 +8,6 @@ const baseAxios = axios.create({
   withCredentials: true,
 });
 
-// Créer un TransactionSigner compatible avec @solana/kit pour x402
 const TransactionSignerSymbol = Symbol.for('solana:transaction-signer');
 
 const x402WalletAdapter = {
@@ -50,7 +49,16 @@ const x402WalletAdapter = {
   }
 };
 
-const api = withPaymentInterceptor(baseAxios, x402WalletAdapter);
+const api = withPaymentInterceptor(
+    baseAxios,
+    x402WalletAdapter,
+    (error) => error?.response?.data?.accepts || [],
+    {
+        svmConfig: {
+            rpcUrl: import.meta.env.VITE_SOLANA_RPC_URL
+        }
+    }
+);
 
 api.interceptors.request.use(config => {
   const token = localStorage.getItem('business_token');

@@ -206,7 +206,6 @@ async function handlePurchase() {
         return;
     }
 
-    // Vérifier et connecter le wallet
     if (!walletService.isWalletConnected()) {
         try {
             await walletService.connect('Phantom');
@@ -231,17 +230,30 @@ async function handlePurchase() {
         renderPlanSummary();
         
     } catch (error) {
-        if (error.name === 'AbortError') {
-            console.log("Payment flow was cancelled by the user.");
-        } else {
-            console.error("Payment failed:", error);
-            console.error("Error cause:", error.cause);
-            if (error.cause && Array.isArray(error.cause.InstructionError)) {
-                console.error("Instruction error details:", error.cause.InstructionError);
-            }
-            const errorMessage = error.response?.data?.detail || error.cause?.message || error.message || 'An unexpected payment error occurred.';
-            alert(`Payment failed: ${errorMessage}`);
+        console.log("--- PAYMENT FAILED ---");
+        console.log("Full Error Object:", error);
+        console.log("Error Name:", error.name);
+        console.log("Error Message:", error.message);
+        if (error.response) {
+            console.log("Response Data:", error.response.data);
+            console.log("Response Status:", error.response.status);
         }
+        if (error.cause) {
+            console.log("Error Cause:", error.cause);
+        }
+        
+        let errorMessage = 'An unexpected payment error occurred.';
+        if (error.name === 'AbortError') {
+            errorMessage = "Payment flow was cancelled by the user.";
+        } else if (error.response?.data?.detail) {
+            errorMessage = error.response.data.detail;
+        } else if (error.cause?.message) {
+            errorMessage = error.cause.message;
+        } else if (error.message) {
+            errorMessage = error.message;
+        }
+        alert(`Payment failed: ${errorMessage}`);
+
     } finally {
         purchaseBtn.disabled = false;
         purchaseBtn.innerHTML = `<img src="${phantomIcon}" alt="Phantom Wallet" class="w-5 h-5"/><span>Purchase with Phantom</span>`;
