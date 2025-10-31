@@ -231,6 +231,55 @@ import {
   getAssociatedTokenAddress,
 } from "@solana/spl-token";
 
+export async function processSolanaPayment(payment, connectionUrl = "https://api.mainnet-beta.solana.com") {
+  const connection = new Connection(connectionUrl);
+
+  // Request wallet connection
+  const provider = window.solana;
+  if (!provider?.isPhantom) {
+    throw new Error("Phantom not found");
+  }
+
+  await provider.connect();
+
+  const sender = provider.publicKey;
+  const recipient = new PublicKey(payment.payTo);
+  const mint = new PublicKey(payment.asset);
+  const senderATA = await getAssociatedTokenAddress(mint, sender);
+  const recipientATA = await getAssociatedTokenAddress(mint, recipient);
+  const amount = BigInt(payment.maxAmountRequired);
+
+  // Create transaction
+  const transferIx = createTransferInstruction(
+    senderATA,
+    recipientATA,
+    sender,
+    amount,
+    [],
+    TOKEN_PROGRAM_ID
+  );
+  const transaction = new Transaction().add(transferIx);
+
+  transaction.feePayer = sender;
+  const { blockhash, lastValidBlockHeight } = await connection.getLatestBlockhash();
+  transaction.recentBlockhash = blockhash;
+  transaction.lastValidBlockHeight = lastValidBlockHeight;
+
+  // Request wallet signature and send
+  const signedTx = await provider.signTransaction(transaction);
+  const signature = await connection.sendRawTransaction(
+    signedTx.serialize()
+  );
+  await connection.confirmTransaction(signature, "confirmed");
+
+  // Verify payment with backend
+  await api.post("/business/billing/charge", {
+    tx_signature: signature,
+  });
+
+  return signature;
+}
+
 async function handlePurchase() {
   const purchaseBtn = document.getElementById("purchase-tokens-btn");
   const amountInput = document.getElementById("top-up-amount");
@@ -262,50 +311,7 @@ async function handlePurchase() {
     const paymentData = error.response?.data;
     if (error.response?.status === 402 && paymentData?.accepts?.length) {
       const payment = paymentData.accepts[0];
-      const connection = new Connection("https://api.mainnet-beta.solana.com");
-
-      // Request wallet connection
-      const provider = window.solana;
-      if (!provider?.isPhantom) {
-        alert("Phantom Wallet not detected.");
-        throw new Error("Phantom not found");
-      }
-
-      await provider.connect();
-
-      const sender = provider.publicKey;
-      const recipient = new PublicKey(payment.payTo);
-
-      const mint = new PublicKey(payment.asset);
-      const senderATA = await getAssociatedTokenAddress(mint, sender);
-      const amount = BigInt(payment.maxAmountRequired);
-
-      // Step 3: Create transaction
-      const transferIx = createTransferInstruction(
-        senderATA,
-        recipient,
-        sender,
-        amount,
-        [],
-        TOKEN_PROGRAM_ID
-      );
-      const transaction = new Transaction().add(transferIx);
-
-      transaction.feePayer = sender;
-      const { blockhash } = await connection.getLatestBlockhash();
-      transaction.blockhash = blockhash;
-
-      // Step 4: Request wallet signature and send
-      const signedTx = await provider.signTransaction(transaction);
-      const signature = await connection.sendRawTransaction(
-        signedTx.serialize()
-      );
-      await connection.confirmTransaction(signature, "confirmed");
-
-      // Step 5: Verify payment with backend
-      await api.post("/business/billing/charge", {
-        tx_signature: signature,
-      });
+      const signature = await processSolanaPayment(payment);
 
       alert("✅ Payment confirmed! Your account has been updated.");
       await stateService.fetchDashboardStats();
@@ -331,60 +337,29 @@ async function handlePurchase() {
 window.testPaymentError = async function() {
   console.log('Testing 402 Payment Required error...');
 
-  const mockError = {
-    response: {
-      status: 402,
-      data: {
-        "x402Version": 1,
-        "error": "Payment required",
-        "accepts": [
-          {
-            "scheme": "exact",
-            "network": "solana",
-            "maxAmountRequired": "10000000",
-            "asset": "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v",
-            "payTo": "meow11a1Nn9i5ASDDVZg92sVT3dw4LRz6D2KqBK3p8v",
-            "resource": "http://localhost:8000/api/v1/business/billing/charge",
-            "description": "Token purchase: $10.00 USD",
-            "mimeType": "application/json",
-            "maxTimeoutSeconds": 900,
-            "data": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxIiwiYW1vdW50IjoxMC4wLCJleHAiOjE3NjE5MDc1ODF9.ocNZdyhP1yN_fKfq3Gmv7n5s_yOP9Lyv7jk4inLD4Lw"
-          }
-        ]
-      }
-    }
+  const mockPayment = {
+    "scheme": "exact",
+    "network": "solana",
+    "maxAmountRequired": "10000000",
+    "asset": "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v",
+    "payTo": "meow11a1Nn9i5ASDDVZg92sVT3dw4LRz6D2KqBK3p8v",
+    "resource": "http://localhost:8000/api/v1/business/billing/charge",
+    "description": "Token purchase: $10.00 USD",
+    "mimeType": "application/json",
+    "maxTimeoutSeconds": 900,
+    "data": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxIiwiYW1vdW50IjoxMC4wLCJleHAiOjE3NjE5MDc1ODF9.ocNZdyhP1yN_fKfq3Gmv7n5s_yOP9Lyv7jk4inLD4Lw"
   };
 
   try {
-    await handlePurchaseError(mockError);
+    console.log('Payment details:', mockPayment);
+    const signature = await processSolanaPayment(mockPayment, "https://api.devnet.solana.com");
+    console.log('Test payment successful, signature:', signature);
+    alert("✅ Test payment confirmed!");
   } catch (error) {
-    console.error('Test error handling failed:', error);
+    console.error('Test payment failed:', error);
+    alert(`Test payment failed: ${error.message}`);
   }
 };
-
-// Extract error handling logic for testing
-async function handlePurchaseError(error) {
-  const phantomWallet = walletService.wallets.find((w) => w.name === "Phantom");
-  const phantomIcon = phantomWallet ? phantomWallet.icon : "";
-
-  // Step 2: Check for "Payment Required" (402)
-  const paymentData = error.response?.data;
-  if (error.response?.status === 402 && paymentData?.accepts?.length) {
-    console.log('✅ 402 error detected, processing payment...');
-    const payment = paymentData.accepts[0];
-    console.log('Payment details:', payment);
-
-    // For testing, we'll simulate the wallet flow without actually connecting
-    console.log('Simulating wallet connection...');
-    console.log('Would create transaction for:', payment.maxAmountRequired, 'tokens');
-    console.log('Payment description:', payment.description);
-
-    // In real flow, this would proceed with wallet interaction
-    alert('✅ 402 error handled successfully! Payment flow would start here.');
-  } else {
-    console.error('Unexpected error:', error);
-  }
-}
 
 function attachTopUpListeners() {
   const amountInput = document.getElementById("top-up-amount");
