@@ -317,7 +317,10 @@ async function handlePurchase() {
                     purchaseBtn.innerHTML = `<span class="animate-spin inline-block w-5 h-5 border-2 border-transparent border-t-white rounded-full"></span><span class="ml-3">Verifying (${i+1}/${maxRetries})...</span>`;
 
                     try {
-                        await api.post('/business/billing/charge', { usd_amount: usdAmount }, {
+                        await api.post('/business/billing/charge', { 
+                            usd_amount: usdAmount,
+                            payment_data_token: payment.data
+                        }, {
                             headers: { 'Authorization': `x402 svm/1; signature=${signature}` }
                         });
                         success = true;
