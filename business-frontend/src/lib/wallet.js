@@ -1,4 +1,4 @@
-import { Connection, SystemProgram, Transaction, clusterApiUrl, LAMPORTS_PER_SOL } from '@solana/web3.js';
+import { Connection, clusterApiUrl } from '@solana/web3.js';
 import { WalletAdapterNetwork, WalletReadyState } from '@solana/wallet-adapter-base';
 import { PhantomWalletAdapter } from '@solana/wallet-adapter-phantom';
 import { EventEmitter } from 'events';
@@ -11,7 +11,7 @@ class WalletService extends EventEmitter {
         this.adapter = null;
         this.publicKey = null;
         this.network = WalletAdapterNetwork.Mainnet;
-        const rpcUrl = import.meta.env.VITE_SOLANA_RPC_URL || clusterApiUrl(this.network);
+        const rpcUrl = import.meta.env.VITE_SOLANA_RPC_URL || 'https://solana-rpc.publicnode.com';
         this.connection = new Connection(rpcUrl, 'confirmed');
         
         this.wallets = [

@@ -6,12 +6,12 @@ import {
   Connection,
   PublicKey,
   Transaction,
-  clusterApiUrl,
 } from "@solana/web3.js";
 import {
   TOKEN_PROGRAM_ID,
   createTransferInstruction,
   getAssociatedTokenAddress,
+  createAssociatedTokenAccountInstruction,
 } from "@solana/spl-token";
 
 const PLAN_DATA = {
@@ -230,131 +230,132 @@ async function fetchBillingHistory() {
 }
 
 export async function processSolanaPayment(payment) {
-  const connectionUrl = import.meta.env.VITE_SOLANA_RPC_URL || clusterApiUrl('mainnet-beta');
-  const connection = new Connection(connectionUrl, "confirmed");
+    const connection = walletService.connection;
+    const provider = window.solana;
 
-  // Request wallet connection
-  const provider = window.solana;
-  if (!provider?.isPhantom) {
-    throw new Error("Phantom wallet not found. Please install it to continue.");
-  }
-  await provider.connect();
+    if (!provider?.isPhantom) {
+        throw new Error("Phantom wallet not found. Please install it to continue.");
+    }
+    await provider.connect();
+    
+    const sender = provider.publicKey;
+    if (!sender) {
+        throw new Error("Wallet not connected or public key not available.");
+    }
+    const recipient = new PublicKey(payment.payTo);
+    const mint = new PublicKey(payment.asset);
 
-  const sender = provider.publicKey;
-  const recipient = new PublicKey(payment.payTo);
-  const mint = new PublicKey(payment.asset);
-  const senderATA = await getAssociatedTokenAddress(mint, sender);
-  const recipientATA = await getAssociatedTokenAddress(mint, recipient);
-  const amount = BigInt(payment.maxAmountRequired);
+    const senderATA = await getAssociatedTokenAddress(mint, sender);
+    const recipientATA = await getAssociatedTokenAddress(mint, recipient);
 
-  const transferIx = createTransferInstruction(
-    senderATA,
-    recipientATA,
-    sender,
-    amount,
-    [],
-    TOKEN_PROGRAM_ID
-  );
-  const transaction = new Transaction().add(transferIx);
+    const transaction = new Transaction();
 
-  transaction.feePayer = sender;
-  const { blockhash, lastValidBlockHeight } = await connection.getLatestBlockhash();
-  transaction.recentBlockhash = blockhash;
-  transaction.lastValidBlockHeight = lastValidBlockHeight;
+    const recipientATAInfo = await connection.getAccountInfo(recipientATA);
+    if (!recipientATAInfo) {
+        const createATAInstruction = createAssociatedTokenAccountInstruction(
+            sender, recipientATA, recipient, mint
+        );
+        transaction.add(createATAInstruction);
+    }
 
-  // Request wallet signature and send
-  const signedTx = await provider.signTransaction(transaction);
-  const signature = await connection.sendRawTransaction(signedTx.serialize());
-  await connection.confirmTransaction(signature, "confirmed");
+    const amount = BigInt(payment.maxAmountRequired);
 
-  return signature;
+    const transferIx = createTransferInstruction(
+        senderATA, recipientATA, sender, amount, [], TOKEN_PROGRAM_ID
+    );
+    transaction.add(transferIx);
+
+    transaction.feePayer = sender;
+    const { blockhash, lastValidBlockHeight } = await connection.getLatestBlockhash();
+    transaction.recentBlockhash = blockhash;
+    transaction.lastValidBlockHeight = lastValidBlockHeight;
+
+    const signedTx = await provider.signTransaction(transaction);
+    const signature = await connection.sendRawTransaction(signedTx.serialize());
+
+    return signature;
 }
+
 
 async function handlePurchase() {
-  const purchaseBtn = document.getElementById("purchase-tokens-btn");
-  const amountInput = document.getElementById("top-up-amount");
-  const usdAmount = parseFloat(amountInput.value);
-  const phantomWallet = walletService.wallets.find((w) => w.name === "Phantom");
-  const phantomIcon = phantomWallet ? phantomWallet.icon : "";
+    const purchaseBtn = document.getElementById("purchase-tokens-btn");
+    const amountInput = document.getElementById("top-up-amount");
+    const usdAmount = parseFloat(amountInput.value);
+    const phantomWallet = walletService.wallets.find((w) => w.name === "Phantom");
+    const phantomIcon = phantomWallet ? phantomWallet.icon : "";
 
-  if (!usdAmount || usdAmount < 10) {
-    alert("Please enter an amount of $10 or more.");
-    return;
-  }
-
-  purchaseBtn.disabled = true;
-  purchaseBtn.innerHTML = `<span class="animate-spin inline-block w-5 h-5 border-2 border-transparent border-t-white rounded-full"></span><span class="ml-3">Processing...</span>`;
-
-  try {
-    await api.post("/business/billing/charge", {
-      usd_amount: usdAmount,
-    });
-    alert("Payment successful! Your account has been updated.");
-    await stateService.fetchDashboardStats();
-    await fetchBillingHistory();
-    renderPlanSummary();
-  } catch (error) {
-    const paymentData = error.response?.data;
-    if (error.response?.status === 402 && paymentData?.accepts?.length) {
-        try {
-            const payment = paymentData.accepts[0];
-            const signature = await processSolanaPayment(payment);
-
-            await api.post('/business/billing/charge', { usd_amount: usdAmount }, {
-                headers: {
-                    'Authorization': `x402 svm/1; signature=${signature}`
-                }
-            });
-
-            alert("✅ Payment confirmed! Your account has been updated.");
-            await stateService.fetchDashboardStats();
-            await fetchBillingHistory();
-            renderPlanSummary();
-
-        } catch (paymentError) {
-            console.error("Payment flow failed:", paymentError);
-            alert(`Payment failed: ${paymentError.message}`);
-        }
-    } else {
-      console.error("Purchase failed:", error);
-      const errorMessage =
-        error.response?.data?.detail ||
-        error.message ||
-        "An unexpected payment error occurred during purchase.";
-      alert(`Purchase failed: ${errorMessage}`);
+    if (!usdAmount || usdAmount < 10) {
+        alert("Please enter an amount of $10 or more.");
+        return;
     }
-  } finally {
-    purchaseBtn.disabled = false;
-    purchaseBtn.innerHTML = `<img src="${phantomIcon}" alt="Phantom Wallet" class="w-5 h-5"/><span>Purchase with Phantom</span>`;
-  }
+
+    purchaseBtn.disabled = true;
+    purchaseBtn.innerHTML = `<span class="animate-spin inline-block w-5 h-5 border-2 border-transparent border-t-white rounded-full"></span><span class="ml-3">Processing...</span>`;
+
+    try {
+        await api.post("/business/billing/charge", {
+            usd_amount: usdAmount,
+        });
+        alert("Payment successful! Your account has been updated.");
+        await stateService.fetchDashboardStats();
+        await fetchBillingHistory();
+        renderPlanSummary();
+    } catch (error) {
+        const paymentData = error.response?.data;
+        if (error.response?.status === 402 && paymentData?.accepts?.length) {
+            try {
+                const payment = paymentData.accepts[0];
+                const signature = await processSolanaPayment(payment);
+
+                const maxRetries = 12; 
+                const retryInterval = 5000;
+                let success = false;
+
+                for (let i = 0; i < maxRetries; i++) {
+                    await new Promise(resolve => setTimeout(resolve, retryInterval));
+                    
+                    purchaseBtn.innerHTML = `<span class="animate-spin inline-block w-5 h-5 border-2 border-transparent border-t-white rounded-full"></span><span class="ml-3">Verifying (${i+1}/${maxRetries})...</span>`;
+
+                    try {
+                        await api.post('/business/billing/charge', { usd_amount: usdAmount }, {
+                            headers: { 'Authorization': `x402 svm/1; signature=${signature}` }
+                        });
+                        success = true;
+                        break;
+                    } catch (pollError) {
+                        if (pollError.response?.status !== 402) {
+                            throw pollError;
+                        }
+                    }
+                }
+
+                if (!success) {
+                    throw new Error("Transaction verification timed out. Please check your wallet and try again. If the issue persists, contact support.");
+                }
+
+                alert("✅ Payment confirmed! Your account has been updated.");
+                await stateService.fetchDashboardStats();
+                await fetchBillingHistory();
+                renderPlanSummary();
+
+            } catch (paymentError) {
+                console.error("Payment flow failed:", paymentError);
+                alert(`Payment failed: ${paymentError.message}`);
+            }
+        } else {
+            console.error("Purchase failed:", error);
+            const errorMessage =
+                error.response?.data?.detail ||
+                error.message ||
+                "An unexpected payment error occurred during purchase.";
+            alert(`Purchase failed: ${errorMessage}`);
+        }
+    } finally {
+        purchaseBtn.disabled = false;
+        purchaseBtn.innerHTML = `<img src="${phantomIcon}" alt="Phantom Wallet" class="w-5 h-5"/><span>Purchase with Phantom</span>`;
+    }
 }
 
-window.testPaymentError = async function() {
-  console.log('Testing 402 Payment Required error...');
-
-  const mockPayment = {
-    "scheme": "exact",
-    "network": "solana",
-    "maxAmountRequired": "10000000",
-    "asset": "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v",
-    "payTo": "meow11a1Nn9i5ASDDVZg92sVT3dw4LRz6D2KqBK3p8v",
-    "resource": "http://localhost:8000/api/v1/business/billing/charge",
-    "description": "Token purchase: $10.00 USD",
-    "mimeType": "application/json",
-    "maxTimeoutSeconds": 900,
-    "data": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxIiwiYW1vdW50IjoxMC4wLCJleHAiOjE3NjE5MDc1ODF9.ocNZdyhP1yN_fKfq3Gmv7n5s_yOP9Lyv7jk4inLD4Lw"
-  };
-
-  try {
-    console.log('Payment details:', mockPayment);
-    const signature = await processSolanaPayment(mockPayment);
-    console.log('Test payment successful, signature:', signature);
-    alert("✅ Test payment confirmed!");
-  } catch (error) {
-    console.error('Test payment failed:', error);
-    alert(`Test payment failed: ${error.message}`);
-  }
-};
 
 function attachTopUpListeners() {
   const amountInput = document.getElementById("top-up-amount");
