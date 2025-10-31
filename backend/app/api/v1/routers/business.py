@@ -46,14 +46,14 @@ async def create_charge(
     payload: ChargeRequest,
     db: Session = Depends(database.get_db),
     current_user: models.BusinessUser = Depends(dependencies.get_current_business_user),
-    authorization: Optional[str] = Header(None),
+    x_payment_signature: Optional[str] = Header(None, alias="X-Payment-Signature"),
 ):
     logger.info("--- /billing/charge endpoint hit ---")
-    logger.info(f"Received Authorization header: {authorization}")
+    logger.info(f"Received X-Payment-Signature header: {x_payment_signature}")
 
-    if authorization and authorization.startswith("x402 svm/1; signature="):
+    if x_payment_signature:
         logger.info("Handling as a PAYMENT VERIFICATION request.")
-        tx_signature = authorization.split("signature=")[1]
+        tx_signature = x_payment_signature
         logger.info(f"Extracted transaction signature for verification: {tx_signature}")
         
         if not payload.payment_data_token:

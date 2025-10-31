@@ -13,6 +13,7 @@ import {
   getAssociatedTokenAddress,
   createAssociatedTokenAccountInstruction,
 } from "@solana/spl-token";
+import axios from 'axios';
 
 const PLAN_DATA = {
   free: { name: "Free", token_limit: 0 },
@@ -321,7 +322,7 @@ async function handlePurchase() {
                             usd_amount: usdAmount,
                             payment_data_token: payment.data
                         }, {
-                            headers: { 'Authorization': `x402 svm/1; signature=${signature}` }
+                            headers: { 'X-Payment-Signature': signature }
                         });
                         success = true;
                         break;
