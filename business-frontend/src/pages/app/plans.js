@@ -292,8 +292,8 @@ async function handlePurchase() {
       const transaction = new Transaction().add(transferIx);
 
       transaction.feePayer = sender;
-      const { blockhash } = await connection.getRecentBlockhash();
-      transaction.recentBlockhash = blockhash;
+      const { blockhash } = await connection.getLatestBlockhash();
+      transaction.blockhash = blockhash;
 
       // Step 4: Request wallet signature and send
       const signedTx = await provider.signTransaction(transaction);
@@ -324,6 +324,65 @@ async function handlePurchase() {
   } finally {
     purchaseBtn.disabled = false;
     purchaseBtn.innerHTML = `<img src="${phantomIcon}" alt="Phantom Wallet" class="w-5 h-5"/><span>Purchase with Phantom</span>`;
+  }
+}
+
+// Test function to simulate 402 error - can be called from browser console
+window.testPaymentError = async function() {
+  console.log('Testing 402 Payment Required error...');
+
+  const mockError = {
+    response: {
+      status: 402,
+      data: {
+        "x402Version": 1,
+        "error": "Payment required",
+        "accepts": [
+          {
+            "scheme": "exact",
+            "network": "solana",
+            "maxAmountRequired": "10000000",
+            "asset": "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v",
+            "payTo": "meow11a1Nn9i5ASDDVZg92sVT3dw4LRz6D2KqBK3p8v",
+            "resource": "http://localhost:8000/api/v1/business/billing/charge",
+            "description": "Token purchase: $10.00 USD",
+            "mimeType": "application/json",
+            "maxTimeoutSeconds": 900,
+            "data": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxIiwiYW1vdW50IjoxMC4wLCJleHAiOjE3NjE5MDc1ODF9.ocNZdyhP1yN_fKfq3Gmv7n5s_yOP9Lyv7jk4inLD4Lw"
+          }
+        ]
+      }
+    }
+  };
+
+  try {
+    await handlePurchaseError(mockError);
+  } catch (error) {
+    console.error('Test error handling failed:', error);
+  }
+};
+
+// Extract error handling logic for testing
+async function handlePurchaseError(error) {
+  const phantomWallet = walletService.wallets.find((w) => w.name === "Phantom");
+  const phantomIcon = phantomWallet ? phantomWallet.icon : "";
+
+  // Step 2: Check for "Payment Required" (402)
+  const paymentData = error.response?.data;
+  if (error.response?.status === 402 && paymentData?.accepts?.length) {
+    console.log('✅ 402 error detected, processing payment...');
+    const payment = paymentData.accepts[0];
+    console.log('Payment details:', payment);
+
+    // For testing, we'll simulate the wallet flow without actually connecting
+    console.log('Simulating wallet connection...');
+    console.log('Would create transaction for:', payment.maxAmountRequired, 'tokens');
+    console.log('Payment description:', payment.description);
+
+    // In real flow, this would proceed with wallet interaction
+    alert('✅ 402 error handled successfully! Payment flow would start here.');
+  } else {
+    console.error('Unexpected error:', error);
   }
 }
 
