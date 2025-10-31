@@ -235,7 +235,11 @@ async function handlePurchase() {
             console.log("Payment flow was cancelled by the user.");
         } else {
             console.error("Payment failed:", error);
-            const errorMessage = error.response?.data?.detail || error.message || 'An unexpected payment error occurred.';
+            console.error("Error cause:", error.cause);
+            if (error.cause && Array.isArray(error.cause.InstructionError)) {
+                console.error("Instruction error details:", error.cause.InstructionError);
+            }
+            const errorMessage = error.response?.data?.detail || error.cause?.message || error.message || 'An unexpected payment error occurred.';
             alert(`Payment failed: ${errorMessage}`);
         }
     } finally {
