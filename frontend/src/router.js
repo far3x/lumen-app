@@ -15,6 +15,7 @@ const footerContainer = document.getElementById('footer-container');
 
 const routes = {
     '/': () => import('./pages/landing.js').then(m => m.renderLandingPage()),
+    '/demo': () => import('./pages/demo.js').then(m => m.renderDemoPage()),
     '/claim': () => import('./pages/claim.js').then(m => m.renderClaimPage()),
     '/login': () => import('./pages/login.js').then(m => m.renderLoginPage()),
     '/signup': () => import('./pages/signup.js').then(m => m.renderSignupPage()),
@@ -33,6 +34,10 @@ const routeMeta = {
     '/': {
         title: 'Lumen Protocol | Monetize Your Code, Power AI | Get Rewarded for Your Work',
         description: 'Lumen Protocol rewards developers for their code. Use our secure CLI to contribute anonymized source code from your projects, earn rewards, and help power the next generation of AI.',
+    },
+    '/demo': {
+        title: 'Lumen Protocol | Live Demo',
+        description: 'Experience the Lumen Protocol\'s AI valuation engine in real-time. See how we analyze and value source code in our interactive, no-code-required demo.',
     },
     '/claim': {
         title: 'Lumen Protocol | Airdrop Claim',
