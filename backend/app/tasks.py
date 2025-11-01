@@ -39,7 +39,7 @@ def analyze_demo_project_task(codebase: str) -> dict:
     logger.info("Executing read-only demo analysis task...")
     db = SessionLocal()
     try:
-        valuation_result = hybrid_valuation_service.calculate(db, current_codebase=codebase, force_ai=True)
+        valuation_result = hybrid_valuation_service.calculate(db, current_codebase=codebase)
         logger.info("Demo analysis complete.")
         return valuation_result.get("valuation_details", {})
     except Exception as e:
