@@ -34,6 +34,20 @@ logger = logging.getLogger(__name__)
 PLAGIARISM_THRESHOLD = 0.995
 INNOVATION_THRESHOLD = 0.98
 
+@celery_app.task(name="app.tasks.analyze_demo_project_task")
+def analyze_demo_project_task(codebase: str) -> dict:
+    logger.info("Executing read-only demo analysis task...")
+    db = SessionLocal()
+    try:
+        valuation_result = hybrid_valuation_service.calculate(db, current_codebase=codebase, force_ai=True)
+        logger.info("Demo analysis complete.")
+        return valuation_result.get("valuation_details", {})
+    except Exception as e:
+        logger.error(f"Error during demo analysis task: {e}", exc_info=True)
+        return {"error": "An unexpected error occurred during analysis."}
+    finally:
+        db.close()
+
 @celery_app.task(name="app.tasks.manual_airdrop_task")
 def manual_airdrop_task(addresses: List[str]):
     logger.info(f"Starting manual airdrop task for {len(addresses)} addresses.")

@@ -44,6 +44,10 @@ task_routes = {
         'queue': 'default',
         'routing_key': 'task.default',
     },
+    'app.tasks.analyze_demo_project_task': {
+        'queue': 'default',
+        'routing_key': 'task.default',
+    },
     'app.tasks.send_contact_sales_email_task': {
         'queue': 'high_priority',
         'routing_key': 'task.high_priority',

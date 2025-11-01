@@ -1,1 +1,13 @@
-.env
+# IDE files
+.idea/
+.vscode/
+
+# Python cache
+__pycache__/
+*.pyc
+
+# Celery temp files
+celerybeat-schedule
+
+# User-provided demo project
+/app/demo/*
