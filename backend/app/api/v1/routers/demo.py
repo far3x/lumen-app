@@ -1,4 +1,5 @@
 from fastapi import APIRouter, Depends, HTTPException, Request
+from fastapi.responses import JSONResponse
 from sqlalchemy.orm import Session
 from pydantic import BaseModel
 import os
@@ -10,6 +11,7 @@ from app.db import database
 from app.core.limiter import limiter
 from app.api.v1.routers.public import get_visitor_id_key
 from app.tasks import analyze_demo_project_task
+from app.services.redis_service import redis_service
 
 router = APIRouter(prefix="/demo", tags=["Demo"])
 
@@ -91,11 +93,19 @@ def analyze_demo_project(
     Analyzes a pre-defined demo project using a background task.
     This is a public, rate-limited endpoint for demonstration purposes.
     It does NOT create any database records.
+    Results are cached for 5 minutes to improve performance.
     """
     project_id = analyze_request.project_id
     
     if project_id not in DEMO_PROJECTS:
         raise HTTPException(status_code=400, detail=f"Project '{project_id}' not found. Available projects: {list(DEMO_PROJECTS.keys())}")
+    
+    # Vérifier le cache d'abord (5 minutes = 300 secondes)
+    cache_key = f"cache:demo_analysis:{project_id}"
+    cached_result = redis_service.get(cache_key)
+    
+    if cached_result:
+        return JSONResponse(content=json.loads(cached_result))
     
     project_info = DEMO_PROJECTS[project_id]
     project_path = DEMO_BASE_PATH / project_info["folder"]
@@ -115,6 +125,10 @@ def analyze_demo_project(
         result = task_result.get(timeout=90)
         if "error" in result:
             raise HTTPException(status_code=500, detail=result["error"])
+        
+        # Mettre en cache le résultat pour 5 minutes (300 secondes)
+        redis_service.set_with_ttl(cache_key, json.dumps(result), 300)
+        
         return result
     except Exception as e:
         task_result.forget()
