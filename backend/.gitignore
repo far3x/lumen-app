@@ -8,6 +8,3 @@ __pycache__/
 
 # Celery temp files
 celerybeat-schedule
-
-# User-provided demo project
-/app/demo/*
