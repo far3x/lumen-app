@@ -175,10 +175,5 @@ async def trigger_recalculate_stats(request: Request):
 
 @router.post("/dev/reset-user-limits/{user_id}", status_code=status.HTTP_202_ACCEPTED, dependencies=[Depends(dependencies.verify_dev_mode)])
 async def dev_reset_user_limits(request: Request, user_id: int):
-    """
-    (DEV ONLY) Resets all contribution and rate limits for a specific user.
-    - Deletes recent contributions to reset the 24-hour logical limit.
-    - Clears all Redis keys associated with the user for slowapi rate limiting.
-    """
     task = reset_user_limits_task.delay(user_id)
     return {"message": f"User limit reset task has been triggered for user ID {user_id}.", "task_id": task.id}

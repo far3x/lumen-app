@@ -16,7 +16,15 @@ const loadingSteps = [
 ];
 
 function setState(newState) {
+    const oldView = state.view;
     Object.assign(state, newState);
+    const newView = state.view;
+
+    // Fix for re-animating text: If we are already loading, just update the text content.
+    if (oldView === 'loading' && newView === 'loading' && document.getElementById('loading-text')) {
+        document.getElementById('loading-text').textContent = loadingSteps[state.loadingStep];
+        return; 
+    }
     render();
 }
 
@@ -53,19 +61,23 @@ async function loadProjects() {
         const projects = response.data.projects;
         setState({ 
             projects,
-            selectedProjectId: projects.length > 0 ? projects[0].id : null  // Premier projet sélectionné par défaut
+            selectedProjectId: projects.length > 0 ? projects[0].id : null,
+            view: 'initial'
         });
     } catch (error) {
         console.error('Failed to load projects:', error);
+        setState({ view: 'error', errorMessage: 'Failed to load demo projects.' });
     }
 }
 
 function selectProject(projectId) {
-    setState({ selectedProjectId: projectId });
-    
-    // Si on a déjà lancé une analyse (pas en état initial), relancer automatiquement
-    if (state.view === 'results' || state.view === 'error') {
-        handleStartDemo();
+    if (state.selectedProjectId !== projectId) {
+        // Fix for auto-triggering analysis: Reset view to initial when project changes.
+        if (state.view === 'results' || state.view === 'error') {
+            setState({ selectedProjectId: projectId, view: 'initial' });
+        } else {
+            setState({ selectedProjectId: projectId });
+        }
     }
 }
 
@@ -142,21 +154,32 @@ function render() {
                 <div class="text-center p-12 transition-all duration-500 animate-fade-in-up">
                     <span class="animate-spin inline-block w-16 h-16 border-4 border-transparent border-t-accent-primary rounded-full mb-8"></span>
                     <h2 class="text-3xl font-bold text-text-main">Analyzing...</h2>
-                    <p class="text-text-secondary mt-4 text-lg">${loadingSteps[state.loadingStep]}</p>
+                    <p id="loading-text" class="text-text-secondary mt-4 text-lg">${loadingSteps[state.loadingStep]}</p>
                 </div>
             `;
             break;
         case 'results':
-            const reward = state.results.final_reward_usd || 0.0;
+            let reward = state.results.final_reward_usd || 0.0;
             const isOpenSource = state.results.is_open_source || false;
             const languageBreakdown = state.results.language_breakdown || {};
             const languageEntries = Object.entries(languageBreakdown);
             
-            const openSourceWarningHtml = isOpenSource ? `
-                <div class="mb-6 p-4 bg-yellow-400/10 border border-yellow-500/20 text-yellow-700 rounded-md text-sm">
-                    <strong>⚠️ Public Code Detected:</strong> Our engine found a high similarity with public code. To prioritize novel data, the reward for this submission has been significantly reduced.
-                </div>
-            ` : '';
+            let openSourceWarningHtml = '';
+
+            if (state.selectedProjectId === 'java-app') {
+                reward *= 50;
+                openSourceWarningHtml = `
+                    <div class="mb-6 p-4 bg-yellow-400/10 border border-yellow-500/20 text-yellow-700 rounded-md text-sm">
+                        <strong>Note:</strong> To showcase the full potential value of a high-quality, non-public project, this demo reward has been multiplied. The actual reward for public code would be significantly lower.
+                    </div>
+                `;
+            } else if (isOpenSource) {
+                openSourceWarningHtml = `
+                    <div class="mb-6 p-4 bg-yellow-400/10 border border-yellow-500/20 text-yellow-700 rounded-md text-sm">
+                        <strong>⚠️ Public Code Detected:</strong> Our engine found a high similarity with public code. To prioritize novel data, the reward for this submission has been significantly reduced.
+                    </div>
+                `;
+            }
             
             mainContent = `
                 <div class="bg-surface p-8 rounded-lg border border-primary animate-fade-in-up">
@@ -217,21 +240,20 @@ function render() {
                     ` : ''}
                     
                     <div class="mt-8 text-center flex flex-col sm:flex-row items-center justify-center gap-6">
-                        <button id="run-again-btn" class="w-full sm:w-auto px-8 py-3 font-bold bg-primary text-text-main hover:bg-subtle/80 rounded-lg">Run Again</button>
+                        <button id="run-again-btn" class="w-full sm:w-auto px-8 py-3 font-bold bg-primary text-text-main hover:bg-subtle/80 rounded-lg">Try Another Project</button>
                         <a href="/signup" class="w-full sm:w-auto px-8 py-3 font-bold bg-accent-primary text-white hover:bg-red-700 rounded-lg">Create Account & Start Earning</a>
                     </div>
                 </div>
             `;
             break;
         case 'error':
-            mainContent = `
-                <div class="text-center p-16 animate-fade-in-up">
-                    <h2 class="text-3xl font-bold text-red-600">An Error Occurred</h2>
-                    <p class="text-text-secondary mt-4 text-lg">${state.errorMessage}</p>
-                    <button id="run-again-btn" class="mt-10 px-8 py-3 font-bold bg-primary text-text-main rounded-lg">Try Again</button>
-                </div>
-            `;
+             mainContent = `<div class="text-center p-16 animate-fade-in-up">
+                <h2 class="text-3xl font-bold text-red-600">An Error Occurred</h2>
+                <p class="text-text-secondary mt-4 text-lg">${state.errorMessage}</p>
+                <button id="run-again-btn" class="mt-10 px-8 py-3 font-bold bg-primary text-text-main rounded-lg">Try Again</button>
+            </div>`;
             break;
+
         case 'initial':
         default:
             mainContent = `
@@ -271,9 +293,7 @@ function render() {
     // Attach event listeners
     document.getElementById('start-demo-btn')?.addEventListener('click', handleStartDemo);
     document.getElementById('run-again-btn')?.addEventListener('click', () => {
-        // Retour à l'état initial avec le premier projet sélectionné
-        const firstProjectId = state.projects.length > 0 ? state.projects[0].id : null;
-        setState({ view: 'initial', selectedProjectId: firstProjectId });
+        setState({ view: 'initial' });
     });
     
     // Attach project selector listeners
@@ -285,11 +305,12 @@ function render() {
     });
 }
 
+async function initializeDemo() {
+    await loadProjects();
+}
+
 export function renderDemoPage() {
-    setTimeout(() => {
-        loadProjects();
-        setState({ view: 'initial' });
-    }, 0);
+    setTimeout(initializeDemo, 0);
     return `
         <main class="flex-grow bg-background pt-28">
             <div class="container mx-auto px-6 py-12 md:py-20">

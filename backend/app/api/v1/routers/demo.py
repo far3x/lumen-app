@@ -17,30 +17,28 @@ router = APIRouter(prefix="/demo", tags=["Demo"])
 
 DEMO_BASE_PATH = Path(__file__).parent.parent.parent.parent / "demo"
 
-# Configuration des projets de démo disponibles
 DEMO_PROJECTS = {
-    "lumen": {
-        "display_name": "Lumen CLI Tool",
-        "folder": "lumen",
-        "description": "Open-source CLI tool for code analysis"
+    "lumen-app": {
+        "display_name": "Lumen App",
+        "folder": "lumen-app",
+        "description": "The Lumen Protocol full-stack application."
     },
-    "project2": {
-        "display_name": "CopytradeSimulator",
-        "folder": "CopytradeSimulator",
-        "description": "Second demo project"
+    "java-app": {
+        "display_name": "Java Full-Stack App",
+        "folder": "java-app",
+        "description": "A complete Java application with a PostgreSQL backend."
     },
-    "project3": {
-        "display_name": "Python-project",
-        "folder": "Python-project",
-        "description": "Third demo project"
+    "intelligent-parking": {
+        "display_name": "Intelligent Parking System",
+        "folder": "intelligent-parking",
+        "description": "A full-stack project to control a robotic parking system."
     }
 }
 
 class AnalyzeRequest(BaseModel):
-    project_id: str = "lumen"
+    project_id: str = "lumen-app"
 
 def _load_project_as_codebase(root_path: Path) -> str:
-    """Walks a directory and builds a single string in the Lumen codebase format."""
     codebase_parts = []
     
     exclude_dirs = {'.git', '__pycache__', 'node_modules', '.vscode', 'dist', 'build'}
@@ -63,14 +61,11 @@ def _load_project_as_codebase(root_path: Path) -> str:
                 codebase_parts.append(f"---lum--new--file--{relative_path.as_posix()}\n{content}")
             except Exception:
                 pass
-                
+    
     return "".join(codebase_parts)
 
 @router.get("/projects")
 def get_demo_projects():
-    """
-    Returns the list of available demo projects.
-    """
     return {
         "projects": [
             {
@@ -83,24 +78,17 @@ def get_demo_projects():
     }
 
 @router.post("/analyze")
-@limiter.limit("10/hour", key_func=get_visitor_id_key)
+@limiter.limit("10/minute", key_func=get_visitor_id_key)
 def analyze_demo_project(
     request: Request,
     analyze_request: AnalyzeRequest,
     db: Session = Depends(database.get_db)
 ):
-    """
-    Analyzes a pre-defined demo project using a background task.
-    This is a public, rate-limited endpoint for demonstration purposes.
-    It does NOT create any database records.
-    Results are cached for 5 minutes to improve performance.
-    """
     project_id = analyze_request.project_id
     
     if project_id not in DEMO_PROJECTS:
         raise HTTPException(status_code=400, detail=f"Project '{project_id}' not found. Available projects: {list(DEMO_PROJECTS.keys())}")
     
-    # Vérifier le cache d'abord (5 minutes = 300 secondes)
     cache_key = f"cache:demo_analysis:{project_id}"
     cached_result = redis_service.get(cache_key)
     
@@ -121,12 +109,10 @@ def analyze_demo_project(
     task_result = analyze_demo_project_task.delay(codebase)
     
     try:
-        # Wait up to 90 seconds for the full analysis to complete
         result = task_result.get(timeout=90)
         if "error" in result:
             raise HTTPException(status_code=500, detail=result["error"])
         
-        # Mettre en cache le résultat pour 5 minutes (300 secondes)
         redis_service.set_with_ttl(cache_key, json.dumps(result), 300)
         
         return result
