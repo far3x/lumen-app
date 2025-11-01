@@ -1,5 +1,6 @@
 from fastapi import APIRouter, Depends, HTTPException, Request
 from sqlalchemy.orm import Session
+from pydantic import BaseModel
 import os
 from pathlib import Path
 import json
@@ -12,7 +13,29 @@ from app.tasks import analyze_demo_project_task
 
 router = APIRouter(prefix="/demo", tags=["Demo"])
 
-DEMO_PROJECT_PATH = Path(__file__).parent.parent.parent.parent / "demo"
+DEMO_BASE_PATH = Path(__file__).parent.parent.parent.parent / "demo"
+
+# Configuration des projets de démo disponibles
+DEMO_PROJECTS = {
+    "lumen": {
+        "display_name": "Lumen CLI Tool",
+        "folder": "lumen",
+        "description": "Open-source CLI tool for code analysis"
+    },
+    "project2": {
+        "display_name": "CopytradeSimulator",
+        "folder": "CopytradeSimulator",
+        "description": "Second demo project"
+    },
+    "project3": {
+        "display_name": "Python-project",
+        "folder": "Python-project",
+        "description": "Third demo project"
+    }
+}
+
+class AnalyzeRequest(BaseModel):
+    project_id: str = "lumen"
 
 def _load_project_as_codebase(root_path: Path) -> str:
     """Walks a directory and builds a single string in the Lumen codebase format."""
@@ -41,18 +64,46 @@ def _load_project_as_codebase(root_path: Path) -> str:
                 
     return "".join(codebase_parts)
 
+@router.get("/projects")
+def get_demo_projects():
+    """
+    Returns the list of available demo projects.
+    """
+    return {
+        "projects": [
+            {
+                "id": project_id,
+                "display_name": info["display_name"],
+                "description": info["description"]
+            }
+            for project_id, info in DEMO_PROJECTS.items()
+        ]
+    }
+
 @router.post("/analyze")
 @limiter.limit("10/hour", key_func=get_visitor_id_key)
-def analyze_demo_project(request: Request, db: Session = Depends(database.get_db)):
+def analyze_demo_project(
+    request: Request,
+    analyze_request: AnalyzeRequest,
+    db: Session = Depends(database.get_db)
+):
     """
     Analyzes a pre-defined demo project using a background task.
     This is a public, rate-limited endpoint for demonstration purposes.
     It does NOT create any database records.
     """
-    if not DEMO_PROJECT_PATH.exists() or not any(DEMO_PROJECT_PATH.iterdir()):
-        raise HTTPException(status_code=503, detail="Demo project is not configured on the server.")
+    project_id = analyze_request.project_id
+    
+    if project_id not in DEMO_PROJECTS:
+        raise HTTPException(status_code=400, detail=f"Project '{project_id}' not found. Available projects: {list(DEMO_PROJECTS.keys())}")
+    
+    project_info = DEMO_PROJECTS[project_id]
+    project_path = DEMO_BASE_PATH / project_info["folder"]
+    
+    if not project_path.exists() or not any(project_path.iterdir()):
+        raise HTTPException(status_code=503, detail=f"Demo project '{project_id}' is not configured on the server.")
 
-    codebase = _load_project_as_codebase(DEMO_PROJECT_PATH)
+    codebase = _load_project_as_codebase(project_path)
     
     if not codebase:
         raise HTTPException(status_code=500, detail="Failed to load demo project content.")
