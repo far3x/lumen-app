@@ -5,10 +5,12 @@ let state = {
     loadingStep: 0,
     results: null,
     errorMessage: '',
+    projects: [],
+    selectedProjectId: null,
 };
 
 const loadingSteps = [
-    "Preparing sample project: The Lumen CLI...",
+    "Preparing sample project...",
     "AI is analyzing code quality & architecture...",
     "Calculating final value based on uniqueness & complexity..."
 ];
@@ -30,7 +32,34 @@ function renderScore(label, score) {
     `;
 }
 
+async function loadProjects() {
+    try {
+        const response = await api.get('/demo/projects');
+        const projects = response.data.projects;
+        setState({ 
+            projects,
+            selectedProjectId: projects.length > 0 ? projects[0].id : null  // Premier projet sélectionné par défaut
+        });
+    } catch (error) {
+        console.error('Failed to load projects:', error);
+    }
+}
+
+function selectProject(projectId) {
+    setState({ selectedProjectId: projectId });
+    
+    // Si on a déjà lancé une analyse (pas en état initial), relancer automatiquement
+    if (state.view === 'results' || state.view === 'error') {
+        handleStartDemo();
+    }
+}
+
 async function handleStartDemo() {
+    if (!state.selectedProjectId) {
+        setState({ view: 'error', errorMessage: 'Please select a project first.' });
+        return;
+    }
+
     setState({ view: 'loading', loadingStep: 0 });
     
     let stepInterval;
@@ -40,7 +69,9 @@ async function handleStartDemo() {
     stepInterval = setInterval(advanceStep, 4000);
 
     try {
-        const response = await api.post('/demo/analyze');
+        const response = await api.post('/demo/analyze', {
+            project_id: state.selectedProjectId
+        });
         clearInterval(stepInterval);
         setState({ view: 'results', results: response.data });
     } catch (error) {
@@ -55,15 +86,44 @@ async function handleStartDemo() {
     }
 }
 
+function renderProjectSelector() {
+    if (state.projects.length === 0) {
+        return `
+            <div class="text-center text-text-secondary text-sm">
+                <p>Loading projects...</p>
+            </div>
+        `;
+    }
+
+    return `
+        <div class="space-y-2">
+            <h3 class="text-sm font-bold text-text-secondary uppercase tracking-wider mb-4">Select a demo project</h3>
+            ${state.projects.map(project => `
+                <button 
+                    class="project-selector-btn w-full text-left px-4 py-3 rounded-lg transition-all duration-200 ${
+                        state.selectedProjectId === project.id 
+                            ? 'bg-accent-primary text-white shadow-lg' 
+                            : 'bg-surface text-text-main hover:bg-primary border border-subtle hover:border-primary'
+                    }"
+                    data-project-id="${project.id}"
+                >
+                    <div class="font-semibold">${project.display_name}</div>
+                    <div class="text-xs opacity-80 mt-1">${project.description}</div>
+                </button>
+            `).join('')}
+        </div>
+    `;
+}
+
 function render() {
     const container = document.getElementById('demo-page-container');
     if (!container) return;
 
-    let content = '';
+    let mainContent = '';
 
     switch (state.view) {
         case 'loading':
-            content = `
+            mainContent = `
                 <div class="text-center p-12 transition-all duration-500 animate-fade-in-up">
                     <span class="animate-spin inline-block w-16 h-16 border-4 border-transparent border-t-accent-primary rounded-full mb-8"></span>
                     <h2 class="text-3xl font-bold text-text-main">Analyzing...</h2>
@@ -73,7 +133,7 @@ function render() {
             break;
         case 'results':
             const reward = state.results.final_reward_usd || 0.0;
-            content = `
+            mainContent = `
                 <div class="bg-surface p-8 rounded-lg border border-primary animate-fade-in-up">
                     <div class="text-center mb-8 p-8 bg-primary rounded-lg border border-subtle">
                         <p class="text-sm font-bold text-text-secondary uppercase tracking-widest">Simulated Value</p>
@@ -101,7 +161,7 @@ function render() {
             `;
             break;
         case 'error':
-            content = `
+            mainContent = `
                 <div class="text-center p-16 animate-fade-in-up">
                     <h2 class="text-3xl font-bold text-red-600">An Error Occurred</h2>
                     <p class="text-text-secondary mt-4 text-lg">${state.errorMessage}</p>
@@ -111,15 +171,13 @@ function render() {
             break;
         case 'initial':
         default:
-            content = `
-                <div class="text-center animate-fade-in-up py-16 md:py-24">
-                    <h1 class="text-5xl md:text-6xl font-bold text-accent-primary tracking-tighter">Try the Lumen Engine</h1>
-                    <p class="mt-8 text-lg text-text-secondary max-w-3xl mx-auto">
-                        Experience the Lumen Engine in action. This demo analyzes our own open-source 
-                        <a href="https://github.com/far3x/lumen" target="_blank" rel="noopener noreferrer" data-external="true" class="text-accent-primary font-semibold hover:underline">Lumen CLI tool</a>
-                        to simulate a real contribution. You'll see exactly how our AI appraises code for quality, complexity, and novelty. No account or coding required.
+            mainContent = `
+                <div class="text-center animate-fade-in-up py-8 md:py-16">
+                    <h1 class="text-4xl md:text-5xl font-bold text-accent-primary tracking-tighter">Try the Lumen Engine</h1>
+                    <p class="mt-6 text-base text-text-secondary max-w-2xl mx-auto">
+                        Experience the Lumen Engine in action. Select a demo project on the left and click the button below to see how our AI evaluates code quality, complexity, and novelty.
                     </p>
-                    <div class="mt-12">
+                    <div class="mt-8">
                         <button id="start-demo-btn" class="px-10 py-4 font-bold bg-accent-primary text-white hover:bg-red-700 rounded-lg shadow-lg hover:shadow-xl transform hover:-translate-y-1 transition-all">
                             Start Live Demo
                         </button>
@@ -128,20 +186,51 @@ function render() {
             `;
             break;
     }
-    container.innerHTML = content;
+
+    const fullLayout = `
+        <div class="flex flex-col lg:flex-row gap-6">
+            <!-- Project Selector (Left) -->
+            <div class="lg:w-72 flex-shrink-0">
+                <div class="bg-surface p-6 rounded-lg border border-primary sticky top-32">
+                    ${renderProjectSelector()}
+                </div>
+            </div>
+            
+            <!-- Main Content (Right) -->
+            <div class="flex-1">
+                ${mainContent}
+            </div>
+        </div>
+    `;
+
+    container.innerHTML = fullLayout;
     
+    // Attach event listeners
     document.getElementById('start-demo-btn')?.addEventListener('click', handleStartDemo);
-    document.getElementById('run-again-btn')?.addEventListener('click', () => setState({ view: 'initial' }));
+    document.getElementById('run-again-btn')?.addEventListener('click', () => {
+        // Retour à l'état initial avec le premier projet sélectionné
+        const firstProjectId = state.projects.length > 0 ? state.projects[0].id : null;
+        setState({ view: 'initial', selectedProjectId: firstProjectId });
+    });
+    
+    // Attach project selector listeners
+    document.querySelectorAll('.project-selector-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+            const projectId = btn.getAttribute('data-project-id');
+            selectProject(projectId);
+        });
+    });
 }
 
 export function renderDemoPage() {
     setTimeout(() => {
+        loadProjects();
         setState({ view: 'initial' });
     }, 0);
     return `
         <main class="flex-grow bg-background pt-28">
             <div class="container mx-auto px-6 py-12 md:py-20">
-                <div id="demo-page-container" class="max-w-4xl mx-auto">
+                <div id="demo-page-container" class="max-w-7xl mx-auto">
                     <!-- Dynamic content will be rendered here -->
                 </div>
             </div>
