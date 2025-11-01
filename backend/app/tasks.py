@@ -94,13 +94,6 @@ def manual_airdrop_task(addresses: List[str]):
 
 @celery_app.task(name="app.tasks.upsert_airdrop_from_csv_task")
 def upsert_airdrop_from_csv_task(file_path: str = "app/data/airdrop_snapshot.csv"):
-    """
-    Reads the airdrop CSV and reconciles it with the database.
-    - If a recipient from the CSV is missing in the DB, it will be INSERTED.
-    - If a recipient is already in the DB, it will be UPDATED if the total amount has changed.
-    - This task handles duplicates in the CSV by SUMMING their quantities.
-    - This is a NON-DESTRUCTIVE operation (it does not delete any records).
-    """
     logger.info(f"Starting airdrop UPSERT/reconciliation from CSV file: {file_path}")
     db = SessionLocal()
     try:
