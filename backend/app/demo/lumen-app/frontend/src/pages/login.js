@@ -1,0 +1,308 @@
+import { api, login, fetchAndStoreAccount, fetchAndStoreUser } from '../lib/auth.js';
+import { navigate } from '../router.js';
+
+let formState = 'password';
+let tfa_token = '';
+
+async function onLoginSuccess() {
+    console.log("Login successful, preparing to redirect...");
+    const user = await fetchAndStoreUser();
+    
+    if (user && !user.has_beta_access) {
+        navigate('/waitlist');
+        return;
+    }
+
+    await fetchAndStoreAccount();
+
+    const redirectItem = localStorage.getItem('post_login_redirect');
+    let redirectPath = null;
+    if (redirectItem) {
+        try {
+            const redirectData = JSON.parse(redirectItem);
+            if (redirectData.expires > Date.now()) {
+                redirectPath = redirectData.path;
+            }
+        } catch(e) { /* Ignore parsing errors */ }
+        localStorage.removeItem('post_login_redirect');
+    }
+    
+    console.log('Post-login redirect path determined:', redirectPath);
+    if (redirectPath) {
+        navigate(redirectPath);
+    } else {
+        navigate('/app/dashboard');
+    }
+}
+
+function displayUrlErrors() {
+    const params = new URLSearchParams(window.location.search);
+    const error = params.get('error');
+    const errorMessageElement = document.getElementById('form-error-message');
+
+    if (error === 'oauth_email_exists' && errorMessageElement) {
+        errorMessageElement.innerHTML = `An account with this email already exists with a password. Please sign in with your password, or <a href="/forgot-password" class="font-medium text-accent-primary hover:underline">reset it</a> to link your account.`;
+        errorMessageElement.classList.remove('hidden');
+        window.history.replaceState({}, document.title, "/login");
+    }
+}
+
+function setupEventListeners() {
+    document.querySelectorAll('.oauth-button').forEach(button => {
+        button.addEventListener('click', (e) => {
+            const provider = e.currentTarget.dataset.provider;
+            
+            const redirectItem = localStorage.getItem('post_login_redirect');
+            let redirectPath = '/app/dashboard';
+            if(redirectItem) {
+                try {
+                    const redirectData = JSON.parse(redirectItem);
+                    if (redirectData.expires > Date.now()) {
+                        redirectPath = redirectData.path;
+                    }
+                } catch(e) {}
+            }
+
+            const state = btoa(JSON.stringify({ redirect_path: redirectPath }));
+            const baseUrl = import.meta.env.VITE_API_URL || 'http://localhost:8000';
+            window.location.href = `${baseUrl}/api/v1/auth/login/${provider}?state=${state}`;
+        });
+    });
+
+    if (formState === 'password') {
+        const form = document.getElementById('login-form');
+        form?.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const email = e.target.email.value;
+            const password = e.target.password.value;
+            const submitButton = e.submitter;
+            const errorMessageElement = document.getElementById('form-error-message');
+            errorMessageElement.classList.add('hidden');
+            submitButton.disabled = true;
+            submitButton.innerHTML = `<span class="animate-spin inline-block w-5 h-5 border-2 border-transparent border-t-white rounded-full"></span>`;
+            
+            try {
+                const response = await login(email, password);
+                if (response.data.tfa_required) {
+                    tfa_token = response.data.tfa_token;
+                    formState = 'totp';
+                    renderLoginForm();
+                } else {
+                    await onLoginSuccess();
+                }
+            } catch (error) {
+                if (error.response?.data?.detail === 'USER_ON_WAITLIST') {
+                    await onLoginSuccess();
+                    return;
+                }
+                errorMessageElement.textContent = error.response?.data?.detail || 'Incorrect email or password.';
+                errorMessageElement.classList.remove('hidden');
+                submitButton.disabled = false;
+                submitButton.innerHTML = 'Sign In';
+            }
+        });
+    } else if (formState === 'totp') {
+        const form = document.getElementById('2fa-form');
+        const codeInputs = form.querySelectorAll('.code-input');
+        
+        codeInputs.forEach((input, index) => {
+            input.addEventListener('keydown', (e) => {
+                if (e.key >= 0 && e.key <= 9 && input.value === '') {
+                    setTimeout(() => codeInputs[index + 1]?.focus(), 10);
+                } else if (e.key === 'Backspace') {
+                    setTimeout(() => {
+                        if (index > 0 && input.value === '') {
+                           codeInputs[index - 1].focus();
+                           codeInputs[index - 1].value = '';
+                        }
+                    }, 10);
+                }
+            });
+            input.addEventListener('input', () => {
+                const code = Array.from(codeInputs).map(i => i.value).join('');
+                if (code.length === 6) {
+                    form.querySelector('button[type="submit"]')?.focus();
+                }
+            });
+        });
+
+        form?.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const code = Array.from(codeInputs).map(i => i.value).join('');
+            const submitButton = e.submitter;
+            const errorMessageElement = document.getElementById('form-error-message');
+            
+            errorMessageElement.classList.add('hidden');
+            submitButton.disabled = true;
+            submitButton.innerHTML = `<span class="animate-spin inline-block w-5 h-5 border-2 border-transparent border-t-white rounded-full"></span>`;
+            
+            try {
+                await api.post('/auth/token/2fa', { tfa_token, code });
+                await onLoginSuccess();
+            } catch (error) {
+                errorMessageElement.textContent = error.response?.data?.detail || 'Invalid 2FA code.';
+                errorMessageElement.classList.remove('hidden');
+                submitButton.disabled = false;
+                submitButton.innerHTML = 'Verify';
+                codeInputs.forEach(input => input.value = '');
+                codeInputs[0].focus();
+            }
+        });
+    } else if (formState === 'backup') {
+        const form = document.getElementById('backup-code-form');
+        form?.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const backup_code = e.target['backup-code'].value;
+            const submitButton = e.submitter;
+            const errorMessageElement = document.getElementById('form-error-message');
+
+            errorMessageElement.classList.add('hidden');
+            submitButton.disabled = true;
+            submitButton.innerHTML = `<span class="animate-spin inline-block w-5 h-5 border-2 border-transparent border-t-white rounded-full"></span>`;
+            
+            try {
+                await api.post('/auth/token/2fa-backup', { tfa_token, backup_code });
+                await onLoginSuccess();
+            } catch (error) {
+                 errorMessageElement.textContent = error.response?.data?.detail || 'Invalid backup code.';
+                errorMessageElement.classList.remove('hidden');
+                submitButton.disabled = false;
+                submitButton.innerHTML = 'Verify Backup Code';
+            }
+        });
+    }
+}
+
+function renderLoginForm(successMessage = '') {
+    const container = document.getElementById('login-container');
+    
+    let formContentHtml;
+
+    if (formState === 'totp' || formState === 'backup') {
+        formContentHtml = `
+            <div class="text-center mb-6">
+                <h1 class="text-2xl font-bold text-text-main">Two-Factor Authentication</h1>
+                <p class="text-text-secondary mt-2 text-sm">${formState === 'totp' ? 'Enter the code from your authenticator app.' : 'Enter one of your 10 backup codes.'}</p>
+            </div>
+            <div id="form-error-message" class="hidden text-red-400 bg-red-900/50 p-3 rounded-md mb-4 text-sm"></div>
+            ${formState === 'totp' ? `
+                <form id="2fa-form">
+                    <div class="flex justify-center gap-2 my-6">
+                        ${Array(6).fill(0).map((_, i) => `
+                            <input type="text" inputmode="numeric" pattern="[0-9]*" maxlength="1" id="code-input-${i}" class="code-input w-12 h-14 text-center text-2xl font-mono bg-primary border border-subtle rounded-md text-text-main focus:ring-2 focus:ring-accent-primary focus:outline-none" autocomplete="one-time-code">
+                        `).join('')}
+                    </div>
+                     <button type="submit" class="w-full flex justify-center py-3 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-accent-primary hover:bg-red-700 transition-colors">
+                        Verify
+                    </button>
+                </form>
+            ` : `
+                <form id="backup-code-form" class="space-y-4">
+                    <input type="text" id="backup-code" name="backup-code" placeholder="xxxx-xxxx" required class="block w-full text-center tracking-widest font-mono bg-primary border border-subtle rounded-md px-3 py-3 text-text-main focus:ring-2 focus:ring-accent-primary focus:outline-none" autocomplete="one-time-code">
+                    <button type="submit" class="w-full flex justify-center py-3 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-accent-primary hover:bg-red-700 transition-colors">
+                        Verify Backup Code
+                    </button>
+                </form>
+            `}
+            <p class="mt-6 text-center text-sm">
+                <button id="toggle-2fa-method" class="font-medium text-accent-primary hover:underline">
+                    ${formState === 'totp' ? 'Use a backup code' : 'Use an authenticator app'}
+                </button>
+                 | 
+                <button id="back-to-password" class="font-medium text-accent-primary hover:underline">Back</button>
+            </p>
+        `;
+    } else {
+        formContentHtml = `
+            <div class="text-center mb-6">
+                <h1 class="text-2xl font-bold text-text-main">Sign In to Lumen</h1>
+                <p class="text-text-secondary mt-2 text-sm">Sign in to access your dashboard.</p>
+            </div>
+            <div class="space-y-3">
+                <button data-provider="github" class="oauth-button w-full flex items-center justify-center space-x-3 py-3 px-4 bg-primary hover:bg-subtle/80 transition-colors rounded-lg">
+                    <svg class="w-5 h-5 text-text-secondary group-hover:text-text-main transition-colors" fill="currentColor" viewBox="0 0 24 24"><path fill-rule="evenodd" d="M12 2C6.477 2 2 6.477 2 12c0 4.418 2.865 8.165 6.839 9.49.5.092.682-.217.682-.482 0-.237-.009-.868-.014-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.531 1.032 1.531 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.031-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.203 2.398.1 2.651.64.7 1.03 1.595 1.03 2.688 0 3.848-2.338 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.001 10.001 0 0022 12c0-5.523-4.477-10-10-10z" clip-rule="evenodd" /></svg>
+                    <span class="text-text-secondary hover:text-text-main transition-colors">Continue with GitHub</span>
+                </button>
+            </div>
+            <div class="my-6 flex items-center">
+                <div class="flex-grow border-t border-primary"></div>
+                <span class="flex-shrink mx-4 text-xs text-text-secondary uppercase">Or sign in with email</span>
+                <div class="flex-grow border-t border-primary"></div>
+            </div>
+            <div id="form-error-message" class="hidden text-red-400 bg-red-900/50 p-3 rounded-md mb-4 text-sm"></div>
+            ${successMessage ? `<div class="text-green-400 bg-green-900/50 p-3 rounded-md mb-4 text-sm">${successMessage}</div>` : ''}
+            <form id="login-form" class="space-y-4" novalidate>
+                <div>
+                    <label for="email" class="text-sm font-medium text-text-secondary">Email</label>
+                    <input id="email" name="email" type="email" autocomplete="email" required class="mt-1 block w-full bg-primary border border-subtle rounded-md px-3 py-2 text-text-main focus:ring-2 focus:ring-accent-primary focus:outline-none">
+                </div>
+                <div>
+                    <label for="password" class="text-sm font-medium text-text-secondary">Password</label>
+                    <input id="password" name="password" type="password" autocomplete="current-password" required class="mt-1 block w-full bg-primary border border-subtle rounded-md px-3 py-2 text-text-main focus:ring-2 focus:ring-accent-primary focus:outline-none">
+                </div>
+                <div class="flex items-center justify-between text-sm">
+                    <div class="flex items-center">
+                        <input id="remember-me" name="remember-me" type="checkbox" class="custom-checkbox">
+                        <label for="remember-me" class="ml-3 block text-text-secondary cursor-pointer">Remember me</label>
+                    </div>
+                    <a href="/forgot-password" class="font-medium text-accent-primary hover:underline">Forgot password?</a>
+                </div>
+                <button type="submit" class="w-full flex justify-center py-3 px-4 border border-transparent rounded-lg shadow-sm text-sm font-medium text-white bg-accent-primary hover:bg-red-700 transition-colors">
+                    Sign In
+                </button>
+            </form>
+             <p class="mt-6 text-center text-sm text-text-secondary">
+                Don't have an account?
+                <a href="/signup" class="font-medium text-accent-primary hover:underline">Create one</a>
+            </p>
+        `;
+    }
+
+    container.innerHTML = `
+        <div class="w-full max-w-6xl mx-auto grid lg:grid-cols-2 gap-24 items-center">
+            <div class="w-full max-w-md mx-auto">
+                <div class="bg-surface p-8 rounded-xl border border-primary shadow-2xl shadow-black/5">
+                    ${formContentHtml}
+                </div>
+            </div>
+            <div class="hidden lg:flex flex-col justify-center text-center space-y-12 pl-10">
+                 <div>
+                    <h1 class="text-5xl font-bold tracking-tight text-accent-primary leading-tight">Welcome Back.</h1>
+                    <p class="mt-4 text-lg text-text-secondary">
+                        Sign in to access your dashboard, check your rewards, and see the impact of your contributions.
+                    </p>
+                </div>
+                <img src="/bg.gif" alt="Lumen network visualization" class="w-full h-auto max-w-sm mx-auto" />
+            </div>
+        </div>
+    `;
+
+    document.getElementById('back-to-password')?.addEventListener('click', () => {
+        formState = 'password';
+        renderLoginForm();
+    });
+    document.getElementById('toggle-2fa-method')?.addEventListener('click', () => {
+        formState = (formState === 'totp') ? 'backup' : 'totp';
+        renderLoginForm();
+    });
+    
+    setupEventListeners();
+}
+
+export function renderLoginPage() {
+    formState = 'password';
+    const params = new URLSearchParams(window.location.search);
+    const registrationSuccess = params.get('registered') === 'true';
+    const successMessage = registrationSuccess ? 'Registration successful! Please log in.' : '';
+
+    const content = `
+    <main class="relative flex-grow flex items-center justify-center p-6 bg-background min-h-screen">
+        <div id="login-container" class="w-full"></div>
+    </main>`;
+    
+    setTimeout(() => {
+        renderLoginForm(successMessage);
+        displayUrlErrors();
+    }, 0);
+    return content;
+}

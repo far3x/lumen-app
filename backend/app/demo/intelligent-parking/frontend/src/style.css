@@ -1,0 +1,52 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  body {
+    @apply bg-light-bg text-light-text dark:bg-dark-bg dark:text-dark-text;
+    @apply transition-colors duration-300;
+    font-family: 'Inter', sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+}
+
+@layer utilities {
+  .text-gradient-aurora {
+    @apply bg-aurora-gradient bg-clip-text text-transparent;
+  }
+  
+  .glass-card {
+    @apply bg-light-card border border-light-border dark:bg-dark-card dark:border-dark-border;
+    @apply backdrop-blur-lg rounded-2xl shadow-lg dark:shadow-2xl transition-colors duration-300;
+  }
+}
+
+/* New Rules for the Theme Toggle Icons */
+.dark #theme-icon-sun {
+    display: inline-block;
+}
+.dark #theme-icon-moon {
+    display: none;
+}
+html:not(.dark) #theme-icon-sun {
+    display: none;
+}
+html:not(.dark) #theme-icon-moon {
+    display: inline-block;
+}
+
+/* --- NEW: CSS for Konami Code Easter Egg --- */
+#matrix-canvas {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 9999;
+    background-color: rgba(0, 0, 0, 0.9);
+    cursor: pointer;
+}

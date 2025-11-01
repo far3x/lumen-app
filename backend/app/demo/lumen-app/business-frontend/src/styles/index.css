@@ -1,0 +1,156 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+    body {
+        @apply bg-app-bg text-text-body;
+        position: relative;
+    }
+
+    body::before {
+        content: '';
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='100' height='100'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.5' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100' height='100' filter='url(%23noise)' opacity='0.3'/%3E%3C/svg%3E");
+        pointer-events: none;
+        z-index: 9999;
+        mix-blend-mode: multiply;
+    }
+
+    body.modal-open {
+        overflow: hidden;
+    }
+}
+
+@layer components {
+    .dashboard-container {
+        @apply p-6;
+    }
+    .widget-card {
+        @apply bg-app-surface border border-app-border rounded-lg;
+    }
+    .page-headline {
+        @apply text-2xl font-bold text-text-headings;
+    }
+    .data-table {
+        @apply w-full text-left;
+    }
+    .data-table th {
+        @apply p-4 text-xs font-semibold text-text-muted uppercase tracking-wider border-b border-app-border;
+    }
+    .data-table td {
+        @apply p-4 text-sm text-text-headings border-b border-app-border;
+    }
+    .data-table tbody tr:last-child td {
+        @apply border-b-0;
+    }
+    .form-input {
+        @apply w-full mt-1 px-3 py-2 bg-app-bg border border-app-border rounded-md shadow-sm focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary text-text-headings placeholder:text-text-tertiary;
+    }
+    .form-label {
+        @apply block text-sm font-medium text-text-body;
+    }
+    .btn {
+        @apply inline-flex items-center justify-center px-4 py-2 text-sm font-semibold rounded-md transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 hover:-translate-y-px;
+    }
+    .btn-accent {
+        @apply btn bg-accent-gradient text-white hover:brightness-110 focus:ring-primary;
+    }
+    .btn-primary {
+        @apply btn bg-primary text-white hover:bg-primary/90 focus:ring-primary;
+    }
+    .btn-secondary {
+        @apply btn bg-app-surface text-text-headings border border-app-border hover:bg-app-accent-hover focus:ring-primary;
+    }
+    .btn-danger {
+        @apply btn bg-red-600 text-white hover:bg-red-700 focus:ring-red-500 disabled:bg-red-400 disabled:cursor-not-allowed disabled:hover:translate-y-0;
+    }
+    .modal-overlay {
+        @apply fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 animate-fade-in;
+    }
+
+    .custom-checkbox {
+        @apply h-4 w-4 rounded border-gray-300 text-primary focus:ring-primary;
+    }
+
+    .toggle-switch {
+        @apply relative inline-flex items-center cursor-pointer;
+    }
+    .toggle-switch-input {
+        @apply sr-only;
+    }
+    .toggle-switch-bg {
+        @apply w-11 h-6 bg-gray-200 rounded-full after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all;
+    }
+
+    @keyframes pulse {
+        50% {
+            opacity: .5;
+        }
+    }
+    .skeleton-loader {
+        @apply animate-pulse space-y-2;
+    }
+    .skeleton-line {
+        @apply bg-gray-200 rounded;
+    }
+    .code-preview-block {
+        -ms-overflow-style: none;
+        scrollbar-width: none;
+    }
+    .code-preview-block::-webkit-scrollbar {
+        display: none;
+    }
+    .code-preview-block.locked pre {
+        -webkit-mask-image: linear-gradient(to bottom, black 50%, transparent 100%);
+        mask-image: linear-gradient(to bottom, black 50%, transparent 100%);
+    }
+
+    .prose-docs h1, .prose-docs h2, .prose-docs h3, .prose-docs strong {
+        @apply text-text-headings;
+    }
+
+    .prose-docs p, .prose-docs li, .prose-docs blockquote {
+        @apply text-text-body;
+    }
+
+    .prose-docs a {
+        @apply text-primary no-underline hover:underline;
+    }
+
+    .prose-docs code {
+        @apply bg-gray-100 text-text-body font-normal text-sm px-1.5 py-1 rounded-md;
+    }
+    
+    .prose-docs code::before, .prose-docs code::after {
+      content: none;
+    }
+    
+    .prose-docs blockquote {
+        @apply border-l-primary bg-background;
+    }
+    
+    .code-block {
+        @apply bg-dark-surface my-6 rounded-lg border border-gray-700 shadow-lg overflow-hidden;
+    }
+
+    .code-block-header {
+        @apply bg-gray-700/50 px-4 py-2 text-xs text-text-tertiary font-semibold border-b border-gray-700;
+    }
+
+    .code-block-content {
+        @apply p-4 text-sm font-mono overflow-x-auto;
+    }
+    
+    .code-block-content pre {
+        @apply !bg-transparent !p-0 !m-0;
+    }
+
+    .code-block-content code {
+        @apply !bg-transparent !text-white !p-0 !font-mono !text-sm;
+    }
+}
