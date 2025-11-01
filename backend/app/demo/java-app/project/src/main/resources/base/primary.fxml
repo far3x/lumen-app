@@ -1,0 +1,141 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<BorderPane prefHeight="720.0" prefWidth="1280.0" style="-fx-background-color: linear-gradient(to bottom, #fbe4ef, #f8d7e5);" xmlns="http://javafx.com/javafx/8.0.171" xmlns:fx="http://javafx.com/fxml/1" fx:controller="base.Controllers.PrimaryController">
+    <top>
+        <MenuBar prefHeight="35.0" style="-fx-background-color: #d6a5b7; -fx-border-color: #c785a3;">
+            <menus>
+                <Menu mnemonicParsing="false" style="-fx-text-fill: white; -fx-font-family: 'Georgia'; -fx-font-weight: bold;" text="File">
+                    <items>
+                        <MenuItem fx:id="menuLogout" mnemonicParsing="false" text="Logout" />
+                        <MenuItem fx:id="menuExit" mnemonicParsing="false" text="Exit" />
+                    </items>
+                </Menu>
+                <Menu mnemonicParsing="false" style="-fx-text-fill: white; -fx-font-family: 'Georgia'; -fx-font-weight: bold;" text="View">
+                    <items>
+                        <MenuItem fx:id="menuProjects" mnemonicParsing="false" text="Projects" />
+                        <MenuItem fx:id="menuEmployees" mnemonicParsing="false" text="Employee" />
+                    </items>
+                </Menu>
+            </menus>
+        </MenuBar>
+    </top>
+    <center>
+        <BorderPane>
+            <left>
+                <VBox prefWidth="280" spacing="15" style="-fx-padding: 15; -fx-border-color: #c785a3; -fx-border-width: 2; -fx-background-color: #ffffff; -fx-border-radius: 10; -fx-background-radius: 10;">
+                    <Label style="-fx-font-size: 16px; -fx-font-family: 'Georgia'; -fx-font-weight: bold; -fx-text-fill: #c785a3;" text="Project Management" />
+                    <Button fx:id="createProjectButton" onAction="#handleCreateProject" maxWidth="Infinity" style="-fx-background-color: #d6a5b7; -fx-text-fill: white; -fx-font-family: 'Georgia'; -fx-font-weight: bold; -fx-border-radius: 10;" text="Create Project" />
+                    <ListView fx:id="projectListView" prefHeight="300" style="-fx-background-color: #fbe4ef; -fx-border-color: #c785a3; -fx-border-radius: 5;" />
+                    <HBox spacing="10.0" style="-fx-alignment: center;">
+                        <Button fx:id="editProjectButton" onAction="#handleEditProject" style="-fx-background-color: #d6a5b7; -fx-text-fill: white; -fx-border-radius: 5;" text="Edit" />
+                        <Button fx:id="deleteProjectButton" onAction="#handleDeleteProject" style="-fx-background-color: #d6a5b7; -fx-text-fill: white; -fx-border-radius: 5;" text="Delete" />
+                    </HBox>
+                </VBox>
+            </left>
+            <center>
+                <TabPane style="-fx-border-color: #c785a3;" tabClosingPolicy="UNAVAILABLE">
+                    <tabs>
+                        <Tab text="Dashboard">
+                            <content>
+                                <VBox style="-fx-alignment: center;"  spacing="15.0">
+                                    <Label text="Welcome to the Dashboard" style="-fx-font-size: 20px; -fx-font-family: 'Georgia'; -fx-font-weight: bold; -fx-text-fill: #c785a3;"/>
+                                    <Label text="Select a project or employee to see information"  style="-fx-font-size: 14px; -fx-font-family: 'Georgia'; -fx-text-fill: #c785a3;"/>
+                                </VBox>
+                            </content>
+                        </Tab>
+                        <Tab text="Project Details">
+                            <content>
+                                <VBox fx:id="projectDetailsView" spacing="15.0" style="-fx-padding: 15">
+                                    <Label style="-fx-font-family: 'Georgia'; -fx-font-size: 14px; -fx-text-fill: #c785a3;" text="Project Details" />
+                                    <HBox spacing="10">
+                                        <Label  text="Name: " style="-fx-font-weight: bold;" />
+                                        <Label fx:id="projectDetailsNameLabel" text=""  />
+                                    </HBox>
+                                    <HBox spacing="10">
+                                        <Label  text="ID: " style="-fx-font-weight: bold;" />
+                                        <Label fx:id="projectDetailsIDLabel" text="" />
+                                    </HBox>
+                                    <Label text="Description:" style="-fx-font-weight: bold;"/>
+                                    <TextArea fx:id="projectDetailsTextArea" prefHeight="100.0" style="-fx-border-color: #c785a3; -fx-border-radius: 5; -fx-background-color: #fbe4ef; -fx-background-radius: 5;" />
+                                    <HBox spacing="10">
+                                        <Label  text="Deadline:" style="-fx-font-weight: bold;" />
+                                        <Label fx:id="projectDetailsDeadlineLabel" text="" />
+                                    </HBox>
+                                   <HBox spacing="10">
+                                       <Label  text="Priority:" style="-fx-font-weight: bold;" />
+                                       <Label fx:id="projectDetailsPriorityLabel" text="" />
+                                  </HBox>
+                                    <Label text="Project Members" style="-fx-font-weight: bold;" />
+                                    <ListView fx:id="projectDetailsMembersListView" prefHeight="100.0" style="-fx-background-color: #fbe4ef; -fx-border-color: #c785a3; -fx-border-radius: 5;" />
+                                    <Button fx:id="addMemberButton" onAction="#handleAddMember" maxWidth="Infinity" style="-fx-background-color: #d6a5b7; -fx-text-fill: white; -fx-font-family: 'Georgia'; -fx-border-radius: 10;" text="Add Member" />
+                                    <Label text="Tasks" style="-fx-font-weight: bold;"/>
+                                    <ListView  fx:id="projectDetailsTasksListView" prefHeight="100.0" style="-fx-background-color: #fbe4ef; -fx-border-color: #c785a3; -fx-border-radius: 5;" />
+                                    <Button fx:id="addTaskButton" onAction="#handleAddTask" maxWidth="Infinity" style="-fx-background-color: #d6a5b7; -fx-text-fill: white; -fx-font-family: 'Georgia'; -fx-border-radius: 10;" text="Add Task" />
+                                </VBox>
+                            </content>
+                        </Tab>
+                        <Tab text="Employee Details">
+                            <content>
+                                <VBox fx:id="employeeDetailsView" spacing="15.0" style="-fx-padding: 15">
+                                    <Label style="-fx-font-family: 'Georgia'; -fx-font-size: 14px; -fx-text-fill: #c785a3;" text="Employee Details" />
+                                    <HBox spacing="10">
+                                        <Label  text="Name: " style="-fx-font-weight: bold;" />
+                                        <Label fx:id="employeeDetailsNameLabel" text="" />
+                                    </HBox>
+                                    <HBox spacing="10">
+                                        <Label  text="ID: " style="-fx-font-weight: bold;" />
+                                        <Label fx:id="employeeDetailsIDLabel" text="" />
+                                    </HBox>
+                                    <Label style="-fx-font-weight: bold;" fx:id="employeeDetailsProjectHistoryLabel"  text="Project History" />
+                                    <ListView  fx:id="employeeDetailsProjectListView" prefHeight="100.0" style="-fx-background-color: #fbe4ef; -fx-border-color: #c785a3; -fx-border-radius: 5;" />
+                                </VBox>
+                            </content>
+                        </Tab>
+                         <Tab text="Project Monitoring">
+                            <content>
+                                <TabPane style="-fx-border-color: #c785a3;" tabClosingPolicy="UNAVAILABLE">
+                                    <tabs>
+                                        <Tab text="Kanban View">
+                                            <content>
+                                                <HBox spacing="10.0"  prefHeight="600" >
+                                                    <HBox fx:id="todoView" alignment="TOP_CENTER" prefWidth="200"  spacing="10.0" style="-fx-border-color: #c785a3; -fx-background-color: #fbe4ef; -fx-border-width: 1;">
+                                                        <padding><Insets top="5.0" left="5.0" right="5.0" bottom="5.0" /></padding>
+                                                        <Label style="-fx-font-weight: bold;" text="To Do" />
+                                                    </HBox>
+                                                     <HBox fx:id="inProgressView"  alignment="TOP_CENTER"  prefWidth="200" spacing="10.0" style="-fx-border-color: #c785a3; -fx-background-color: #fbe4ef; -fx-border-width: 1;">
+                                                        <padding><Insets top="5.0" left="5.0" right="5.0" bottom="5.0" /></padding>
+                                                        <Label style="-fx-font-weight: bold;" text="In Progress" />
+                                                    </HBox>
+                                                   <HBox fx:id="doneView"  alignment="TOP_CENTER" prefWidth="200"  spacing="10.0" style="-fx-border-color: #c785a3; -fx-background-color: #fbe4ef; -fx-border-width: 1;">
+                                                        <padding><Insets top="5.0" left="5.0" right="5.0" bottom="5.0" /></padding>
+                                                        <Label style="-fx-font-weight: bold;" text="Done" />
+                                                    </HBox>
+                                                </HBox>
+                                            </content>
+                                        </Tab>
+                                       
+                                    </tabs>
+                                </TabPane>
+                            </content>
+                        </Tab>
+                    </tabs>
+                </TabPane>
+            </center>
+            <right>
+                <VBox prefWidth="280" spacing="15" style="-fx-padding: 15; -fx-border-color: #c785a3; -fx-border-width: 2; -fx-background-color: #ffffff; -fx-border-radius: 10; -fx-background-radius: 10;">
+                    <Label style="-fx-font-size: 16px; -fx-font-family: 'Georgia'; -fx-font-weight: bold; -fx-text-fill: #c785a3;" text="Personnel Management" />
+                    <Button fx:id="createEmployeeButton" onAction="#handleCreateEmployee" maxWidth="Infinity" style="-fx-background-color: #d6a5b7; -fx-text-fill: white; -fx-font-family: 'Georgia'; -fx-font-weight: bold; -fx-border-radius: 10;" text="Create Employee" />
+                    <ListView fx:id="employeeListView" prefHeight="300" style="-fx-background-color: #fbe4ef; -fx-border-color: #c785a3; -fx-border-radius: 5;" />
+                    <HBox spacing="10.0" style="-fx-alignment: center;">
+                        <Button fx:id="editEmployeeButton" onAction="#handleEditEmployee" style="-fx-background-color: #d6a5b7; -fx-text-fill: white; -fx-border-radius: 5;" text="Edit" />
+                        <Button fx:id="deleteEmployeeButton" onAction="#handleDeleteEmployee" style="-fx-background-color: #d6a5b7; -fx-text-fill: white; -fx-border-radius: 5;" text="Delete" />
+                    </HBox>
+                </VBox>
+            </right>
+        </BorderPane>
+    </center>
+</BorderPane>

@@ -1,0 +1,370 @@
+services:
+  db:
+    image: pgvector/pgvector:pg13
+    container_name: lumen_db
+    volumes:
+      - postgres_data:/var/lib/postgresql/data/
+    ports:
+      - "127.0.0.1:5432:5432"
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+
+  pgbouncer:
+    image: bitnami/pgbouncer:latest
+    container_name: lumen_pgbouncer
+    environment:
+      POSTGRESQL_HOST: db
+      POSTGRESQL_USERNAME: ${POSTGRES_USER}
+      POSTGRESQL_PASSWORD: ${POSTGRES_PASSWORD}
+      PGBOUNCER_PORT: 5432
+      PGBOUNCER_DATABASE: ${POSTGRES_DB}
+      PGBOUNCER_AUTH_TYPE: md5
+      PGBOUNCER_POOL_MODE: transaction
+      PGBOUNCER_SERVER_RESET_QUERY: "DISCARD ALL"
+      PGBOUNCER_USER: ${POSTGRES_USER}
+      PGBOUNCER_PASSWORD: ${POSTGRES_PASSWORD}
+    depends_on:
+      db:
+        condition: service_healthy
+    restart: unless-stopped
+
+  redis:
+    image: redis:alpine
+    container_name: lumen_redis
+    volumes: #data only on prod bcs sometimes need to test with no rate limits on dev
+      - redis_data:/data
+    restart: unless-stopped
+
+  api:
+    container_name: lumen_api
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    command: >
+      sh -c "alembic upgrade head &&
+             uvicorn app.main:app --host 0.0.0.0 --port 8000 --proxy-headers --forwarded-allow-ips='*'"
+    environment:
+      DATABASE_URL: postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@pgbouncer:5432/${POSTGRES_DB}
+      FRONTEND_URL: ${FRONTEND_URL}
+      BUSINESS_FRONTEND_URL: ${BUSINESS_FRONTEND_URL}
+      PUBLIC_LOGO_URL: ${PUBLIC_LOGO_URL}
+      API_URL: ${API_URL}
+      ENCRYPTION_KEY: ${ENCRYPTION_KEY}
+      SECRET_KEY: ${SECRET_KEY}
+      ALGORITHM: ${ALGORITHM}
+      ACCESS_TOKEN_EXPIRE_MINUTES: ${ACCESS_TOKEN_EXPIRE_MINUTES}
+      LUMEN_CLIENT_SECRET: ${LUMEN_CLIENT_SECRET}
+      GITHUB_CLIENT_ID: ${GITHUB_CLIENT_ID}
+      GITHUB_CLIENT_SECRET: ${GITHUB_CLIENT_SECRET}
+      REDIS_URL: ${REDIS_URL}
+      CELERY_BROKER_URL: ${CELERY_BROKER_URL}
+      CELERY_RESULT_BACKEND: ${CELERY_RESULT_BACKEND}
+      VALUATION_MODE: ${VALUATION_MODE}
+      GEMINI_API_KEY: ${GEMINI_API_KEY}
+      GEMINI_MODEL_NAME: ${GEMINI_MODEL_NAME}
+      GEMINI_TEMPERATURE: ${GEMINI_TEMPERATURE}
+      GOOGLE_RECAPTCHA_SITE_KEY: ${GOOGLE_RECAPTCHA_SITE_KEY}
+      GOOGLE_RECAPTCHA_SECRET_KEY: ${GOOGLE_RECAPTCHA_SECRET_KEY}
+      GITHUB_SEARCH_PAT: ${GITHUB_SEARCH_PAT}
+      MAIL_USERNAME: ${MAIL_USERNAME}
+      MAIL_PASSWORD: ${MAIL_PASSWORD}
+      MAIL_FROM: ${MAIL_FROM}
+      MAIL_PORT: ${MAIL_PORT}
+      MAIL_SERVER: ${MAIL_SERVER}
+      MAIL_FROM_NAME: ${MAIL_FROM_NAME}
+      MAIL_STARTTLS: ${MAIL_STARTTLS}
+      MAIL_SSL_TLS: ${MAIL_SSL_TLS}
+      SOLANA_RPC_URL: ${SOLANA_RPC_URL}
+      TREASURY_PRIVATE_KEY: ${TREASURY_PRIVATE_KEY}
+      LUM_TOKEN_MINT_ADDRESS: ${LUM_TOKEN_MINT_ADDRESS}
+      USDC_TOKEN_MINT_ADDRESS: ${USDC_TOKEN_MINT_ADDRESS}
+      COOLDOWN_DAYS: ${COOLDOWN_DAYS}
+      BETA_MODE_ENABLED: ${BETA_MODE_ENABLED}
+      BETA_MAX_USERS: ${BETA_MAX_USERS}
+      BETA_GENESIS_BONUS: ${BETA_GENESIS_BONUS}
+      BIRDEYE_API_KEY: ${BIRDEYE_API_KEY}
+      AIRDROP_WALLET_PRIVATE_KEY: ${AIRDROP_WALLET_PRIVATE_KEY}
+      AIRDROP_TOKEN_MINT_ADDRESS: ${AIRDROP_TOKEN_MINT_ADDRESS}
+      FACILITATOR_URL: ${FACILITATOR_URL}
+      MERCHANT_WALLET_ADDRESS: ${MERCHANT_WALLET_ADDRESS}
+    depends_on:
+      pgbouncer:
+        condition: service_started
+      redis:
+        condition: service_started
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:8000/ || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+
+  worker_default:
+    container_name: lumen_worker_default
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    command: celery -A app.core.celery_app.celery_app worker --loglevel=info -Q default --concurrency=4 -P eventlet
+    environment:
+      DATABASE_URL: postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@pgbouncer:5432/${POSTGRES_DB}
+      FRONTEND_URL: ${FRONTEND_URL}
+      BUSINESS_FRONTEND_URL: ${BUSINESS_FRONTEND_URL}
+      PUBLIC_LOGO_URL: ${PUBLIC_LOGO_URL}
+      API_URL: ${API_URL}
+      ENCRYPTION_KEY: ${ENCRYPTION_KEY}
+      SECRET_KEY: ${SECRET_KEY}
+      ALGORITHM: ${ALGORITHM}
+      ACCESS_TOKEN_EXPIRE_MINUTES: ${ACCESS_TOKEN_EXPIRE_MINUTES}
+      LUMEN_CLIENT_SECRET: ${LUMEN_CLIENT_SECRET}
+      GITHUB_CLIENT_ID: ${GITHUB_CLIENT_ID}
+      GITHUB_CLIENT_SECRET: ${GITHUB_CLIENT_SECRET}
+      REDIS_URL: ${REDIS_URL}
+      CELERY_BROKER_URL: ${CELERY_BROKER_URL}
+      CELERY_RESULT_BACKEND: ${CELERY_RESULT_BACKEND}
+      VALUATION_MODE: ${VALUATION_MODE}
+      GEMINI_API_KEY: ${GEMINI_API_KEY}
+      GEMINI_MODEL_NAME: ${GEMINI_MODEL_NAME}
+      GEMINI_TEMPERATURE: ${GEMINI_TEMPERATURE}
+      GITHUB_SEARCH_PAT: ${GITHUB_SEARCH_PAT}
+      GOOGLE_RECAPTCHA_SITE_KEY: ${GOOGLE_RECAPTCHA_SITE_KEY}
+      GOOGLE_RECAPTCHA_SECRET_KEY: ${GOOGLE_RECAPTCHA_SECRET_KEY}
+      MAIL_USERNAME: ${MAIL_USERNAME}
+      MAIL_PASSWORD: ${MAIL_PASSWORD}
+      MAIL_FROM: ${MAIL_FROM}
+      MAIL_PORT: ${MAIL_PORT}
+      MAIL_SERVER: ${MAIL_SERVER}
+      MAIL_FROM_NAME: ${MAIL_FROM_NAME}
+      MAIL_STARTTLS: ${MAIL_STARTTLS}
+      MAIL_SSL_TLS: ${MAIL_SSL_TLS}
+      SOLANA_RPC_URL: ${SOLANA_RPC_URL}
+      TREASURY_PRIVATE_KEY: ${TREASURY_PRIVATE_KEY}
+      LUM_TOKEN_MINT_ADDRESS: ${LUM_TOKEN_MINT_ADDRESS}
+      USDC_TOKEN_MINT_ADDRESS: ${USDC_TOKEN_MINT_ADDRESS}
+      COOLDOWN_DAYS: ${COOLDOWN_DAYS}
+      BETA_MODE_ENABLED: ${BETA_MODE_ENABLED}
+      BETA_MAX_USERS: ${BETA_MAX_USERS}
+      BETA_GENESIS_BONUS: ${BETA_GENESIS_BONUS}
+      BIRDEYE_API_KEY: ${BIRDEYE_API_KEY}
+      AIRDROP_WALLET_PRIVATE_KEY: ${AIRDROP_WALLET_PRIVATE_KEY}
+      AIRDROP_TOKEN_MINT_ADDRESS: ${AIRDROP_TOKEN_MINT_ADDRESS}
+      FACILITATOR_URL: ${FACILITATOR_URL}
+      MERCHANT_WALLET_ADDRESS: ${MERCHANT_WALLET_ADDRESS}
+    depends_on:
+      pgbouncer:
+        condition: service_started
+      redis:
+        condition: service_started
+      api:
+        condition: service_started
+    restart: unless-stopped
+  
+  worker_priority:
+    container_name: lumen_worker_priority
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    command: celery -A app.core.celery_app.celery_app worker --loglevel=info -Q high_priority --concurrency=2 -P eventlet
+    environment:
+      DATABASE_URL: postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@pgbouncer:5432/${POSTGRES_DB}
+      FRONTEND_URL: ${FRONTEND_URL}
+      BUSINESS_FRONTEND_URL: ${BUSINESS_FRONTEND_URL}
+      PUBLIC_LOGO_URL: ${PUBLIC_LOGO_URL}
+      API_URL: ${API_URL}
+      ENCRYPTION_KEY: ${ENCRYPTION_KEY}
+      SECRET_KEY: ${SECRET_KEY}
+      ALGORITHM: ${ALGORITHM}
+      ACCESS_TOKEN_EXPIRE_MINUTES: ${ACCESS_TOKEN_EXPIRE_MINUTES}
+      LUMEN_CLIENT_SECRET: ${LUMEN_CLIENT_SECRET}
+      GITHUB_CLIENT_ID: ${GITHUB_CLIENT_ID}
+      GITHUB_CLIENT_SECRET: ${GITHUB_CLIENT_SECRET}
+      REDIS_URL: ${REDIS_URL}
+      CELERY_BROKER_URL: ${CELERY_BROKER_URL}
+      CELERY_RESULT_BACKEND: ${CELERY_RESULT_BACKEND}
+      VALUATION_MODE: ${VALUATION_MODE}
+      GEMINI_API_KEY: ${GEMINI_API_KEY}
+      GEMINI_MODEL_NAME: ${GEMINI_MODEL_NAME}
+      GEMINI_TEMPERATURE: ${GEMINI_TEMPERATURE}
+      GITHUB_SEARCH_PAT: ${GITHUB_SEARCH_PAT}
+      GOOGLE_RECAPTCHA_SITE_KEY: ${GOOGLE_RECAPTCHA_SITE_KEY}
+      GOOGLE_RECAPTCHA_SECRET_KEY: ${GOOGLE_RECAPTCHA_SECRET_KEY}
+      MAIL_USERNAME: ${MAIL_USERNAME}
+      MAIL_PASSWORD: ${MAIL_PASSWORD}
+      MAIL_FROM: ${MAIL_FROM}
+      MAIL_PORT: ${MAIL_PORT}
+      MAIL_SERVER: ${MAIL_SERVER}
+      MAIL_FROM_NAME: ${MAIL_FROM_NAME}
+      MAIL_STARTTLS: ${MAIL_STARTTLS}
+      MAIL_SSL_TLS: ${MAIL_SSL_TLS}
+      SOLANA_RPC_URL: ${SOLANA_RPC_URL}
+      TREASURY_PRIVATE_KEY: ${TREASURY_PRIVATE_KEY}
+      LUM_TOKEN_MINT_ADDRESS: ${LUM_TOKEN_MINT_ADDRESS}
+      USDC_TOKEN_MINT_ADDRESS: ${USDC_TOKEN_MINT_ADDRESS}
+      COOLDOWN_DAYS: ${COOLDOWN_DAYS}
+      BETA_MODE_ENABLED: ${BETA_MODE_ENABLED}
+      BETA_MAX_USERS: ${BETA_MAX_USERS}
+      BETA_GENESIS_BONUS: ${BETA_GENESIS_BONUS}
+      BIRDEYE_API_KEY: ${BIRDEYE_API_KEY}
+      AIRDROP_WALLET_PRIVATE_KEY: ${AIRDROP_WALLET_PRIVATE_KEY}
+      AIRDROP_TOKEN_MINT_ADDRESS: ${AIRDROP_TOKEN_MINT_ADDRESS}
+      FACILITATOR_URL: ${FACILITATOR_URL}
+      MERCHANT_WALLET_ADDRESS: ${MERCHANT_WALLET_ADDRESS}
+    depends_on:
+      pgbouncer:
+        condition: service_started
+      redis:
+        condition: service_started
+      api:
+        condition: service_started
+    restart: unless-stopped
+  
+  worker-beat:
+    container_name: lumen_worker_beat
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    command: celery -A app.core.celery_app.celery_app beat --loglevel=info
+    environment:
+      DATABASE_URL: postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@pgbouncer:5432/${POSTGRES_DB}
+      FRONTEND_URL: ${FRONTEND_URL}
+      BUSINESS_FRONTEND_URL: ${BUSINESS_FRONTEND_URL}
+      PUBLIC_LOGO_URL: ${PUBLIC_LOGO_URL}
+      API_URL: ${API_URL}
+      ENCRYPTION_KEY: ${ENCRYPTION_KEY}
+      SECRET_KEY: ${SECRET_KEY}
+      ALGORITHM: ${ALGORITHM}
+      ACCESS_TOKEN_EXPIRE_MINUTES: ${ACCESS_TOKEN_EXPIRE_MINUTES}
+      LUMEN_CLIENT_SECRET: ${LUMEN_CLIENT_SECRET}
+      GITHUB_CLIENT_ID: ${GITHUB_CLIENT_ID}
+      GITHUB_CLIENT_SECRET: ${GITHUB_CLIENT_SECRET}
+      REDIS_URL: ${REDIS_URL}
+      CELERY_BROKER_URL: ${CELERY_BROKER_URL}
+      CELERY_RESULT_BACKEND: ${CELERY_RESULT_BACKEND}
+      VALUATION_MODE: ${VALUATION_MODE}
+      GEMINI_API_KEY: ${GEMINI_API_KEY}
+      GEMINI_MODEL_NAME: ${GEMINI_MODEL_NAME}
+      GEMINI_TEMPERATURE: ${GEMINI_TEMPERATURE}
+      GOOGLE_RECAPTCHA_SITE_KEY: ${GOOGLE_RECAPTCHA_SITE_KEY}
+      GOOGLE_RECAPTCHA_SECRET_KEY: ${GOOGLE_RECAPTCHA_SECRET_KEY}
+      GITHUB_SEARCH_PAT: ${GITHUB_SEARCH_PAT}
+      MAIL_USERNAME: ${MAIL_USERNAME}
+      MAIL_PASSWORD: ${MAIL_PASSWORD}
+      MAIL_FROM: ${MAIL_FROM}
+      MAIL_PORT: ${MAIL_PORT}
+      MAIL_SERVER: ${MAIL_SERVER}
+      MAIL_FROM_NAME: ${MAIL_FROM_NAME}
+      MAIL_STARTTLS: ${MAIL_STARTTLS}
+      MAIL_SSL_TLS: ${MAIL_SSL_TLS}
+      SOLANA_RPC_URL: ${SOLANA_RPC_URL}
+      TREASURY_PRIVATE_KEY: ${TREASURY_PRIVATE_KEY}
+      LUM_TOKEN_MINT_ADDRESS: ${LUM_TOKEN_MINT_ADDRESS}
+      USDC_TOKEN_MINT_ADDRESS: ${USDC_TOKEN_MINT_ADDRESS}
+      COOLDOWN_DAYS: ${COOLDOWN_DAYS}
+      BETA_MODE_ENABLED: ${BETA_MODE_ENABLED}
+      BETA_MAX_USERS: ${BETA_MAX_USERS}
+      BETA_GENESIS_BONUS: ${BETA_GENESIS_BONUS}
+      BIRDEYE_API_KEY: ${BIRDEYE_API_KEY}
+      AIRDROP_WALLET_PRIVATE_KEY: ${AIRDROP_WALLET_PRIVATE_KEY}
+      AIRDROP_TOKEN_MINT_ADDRESS: ${AIRDROP_TOKEN_MINT_ADDRESS}
+      FACILITATOR_URL: ${FACILITATOR_URL}
+      MERCHANT_WALLET_ADDRESS: ${MERCHANT_WALLET_ADDRESS}
+    depends_on:
+      pgbouncer:
+        condition: service_started
+      redis:
+        condition: service_started
+      api:
+        condition: service_started
+    restart: unless-stopped
+
+  frontend:
+    container_name: lumen_frontend
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+      args:
+        VITE_API_URL: ${API_URL}
+        VITE_GOOGLE_RECAPTCHA_SITE_KEY: ${GOOGLE_RECAPTCHA_SITE_KEY}
+        VITE_WALLETCONNECT_PROJECT_ID: ${VITE_WALLETCONNECT_PROJECT_ID}
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:80/ || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+
+  business_frontend:
+    container_name: lumen_business_frontend
+    build:
+      context: ./business-frontend
+      dockerfile: Dockerfile
+      args:
+        VITE_API_URL: ${API_URL}
+        VITE_GOOGLE_RECAPTCHA_SITE_KEY: ${GOOGLE_RECAPTCHA_SITE_KEY}
+        VITE_SOLANA_RPC_URL: ${VITE_SOLANA_RPC_URL}
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:80/ || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+
+  nginx:
+    image: nginx:stable-alpine
+    container_name: lumen_nginx
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx/lumen.conf:/etc/nginx/conf.d/default.conf
+      - ./certbot/conf:/etc/letsencrypt
+      - ./certbot/www:/var/www/certbot
+    depends_on:
+      - api
+      - frontend
+      - business_frontend
+    restart: unless-stopped
+  
+  backup:
+    container_name: lumen_backup
+    build:
+      context: ./backup
+      dockerfile: Dockerfile
+    environment:
+      POSTGRES_HOST: db
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      
+      S3_BUCKET_NAME: ${S3_BUCKET_NAME}
+      AWS_ACCESS_KEY_ID: ${AWS_ACCESS_KEY_ID}
+      AWS_SECRET_ACCESS_KEY: ${AWS_SECRET_ACCESS_KEY}
+      AWS_DEFAULT_REGION: ${AWS_DEFAULT_REGION}
+    depends_on:
+      db:
+        condition: service_healthy
+    restart: unless-stopped
+
+  uptime-kuma:
+    image: louislam/uptime-kuma:1
+    container_name: lumen_uptime_kuma
+    volumes:
+      - uptime_kuma_data:/app/data
+      - /var/run/docker.sock:/var/run/docker.sock
+    user: "root"
+    restart: unless-stopped
+
+volumes:
+  postgres_data:
+  uptime_kuma_data:
+  redis_data:

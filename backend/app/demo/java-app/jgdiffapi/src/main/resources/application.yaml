@@ -1,0 +1,12 @@
+spring:
+  application:
+    name: jgdiffapi # Nom de votre application Spring Boot
+
+  jpa:
+    hibernate:
+      ddl-auto: update # Permet de mettre à jour automatiquement la structure des tables
+
+  datasource:
+    url: jdbc:postgresql://localhost:5432/db # URL de connexion à PostgreSQL
+    username: user # Identifiant de l'utilisateur PostgreSQL
+    password: password # Mot de passe de l'utilisateur PostgreSQL

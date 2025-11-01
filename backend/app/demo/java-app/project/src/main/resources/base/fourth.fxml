@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.ComboBox?>
+<?import javafx.scene.control.DatePicker?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.TextArea?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.layout.ColumnConstraints?>
+<?import javafx.scene.layout.GridPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.RowConstraints?>
+<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.text.Font?>
+
+<VBox spacing="15.0" alignment="CENTER" prefWidth="500.0" prefHeight="500.0" style="-fx-background-color: linear-gradient(to bottom, #fbe4ef, #f8d7e5);" xmlns="http://javafx.com/javafx/23.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="base.Controllers.CreateProjectController">
+    <padding>
+        <Insets bottom="20.0" left="20.0" right="20.0" top="20.0" />
+    </padding>
+    <Label text="Create New Project" textFill="#c785a3" style="-fx-font-size: 24px; -fx-font-weight: bold; -fx-font-family: 'Georgia';" />
+    <GridPane hgap="10.0" vgap="20.0">
+        <columnConstraints>
+            <ColumnConstraints minWidth="150.0" />
+            <ColumnConstraints minWidth="300.0" />
+        </columnConstraints>
+        <Label text="Project Name:" textFill="#c785a3" style="-fx-font-size: 16px; -fx-font-family: 'Georgia';" GridPane.columnIndex="0" GridPane.rowIndex="0" />
+        <TextField fx:id="projectNameField" promptText="Enter project name..." style="-fx-border-color: #c785a3; -fx-border-radius: 5; -fx-background-radius: 5;" GridPane.columnIndex="1" GridPane.rowIndex="0" />
+        <Label text="Description:" textFill="#c785a3" style="-fx-font-size: 16px; -fx-font-family: 'Georgia';" GridPane.columnIndex="0" GridPane.rowIndex="1" />
+        <TextArea fx:id="descriptionArea" promptText="Enter project description..." prefHeight="100.0" style="-fx-border-color: #c785a3; -fx-border-radius: 5; -fx-background-radius: 5;" GridPane.columnIndex="1" GridPane.rowIndex="1" />
+        <Label text="Deadline:" textFill="#c785a3" style="-fx-font-size: 16px; -fx-font-family: 'Georgia';" GridPane.columnIndex="0" GridPane.rowIndex="2" />
+        <DatePicker fx:id="deadlinePicker" style="-fx-border-color: #c785a3; -fx-border-radius: 5; -fx-background-radius: 5;" GridPane.columnIndex="1" GridPane.rowIndex="2" />
+        <Label text="Priority:" textFill="#c785a3" style="-fx-font-size: 16px; -fx-font-family: 'Georgia';" GridPane.columnIndex="0" GridPane.rowIndex="3" />
+        <ComboBox fx:id="priorityComboBox" promptText="Select Priority"  style="-fx-border-color: #c785a3; -fx-border-radius: 5; -fx-background-radius: 5;" GridPane.columnIndex="1" GridPane.rowIndex="3" />
+        <rowConstraints>
+            <RowConstraints />
+            <RowConstraints />
+            <RowConstraints />
+            <RowConstraints />
+        </rowConstraints>
+    </GridPane>
+    <HBox spacing="20.0" alignment="CENTER_RIGHT" prefWidth="400.0">
+        <Button text="Create Project" onAction="#handleCreateProject" textFill="white" style="-fx-background-color: #d6a5b7; -fx-font-weight: bold; -fx-background-radius: 10; -fx-padding: 10 20;" />
+        <Button text="Cancel" onAction="#handleCancel" textFill="white" style="-fx-background-color: #d6a5b7; -fx-font-weight: bold; -fx-background-radius: 10; -fx-padding: 10 20;" />
+    </HBox>
+</VBox>

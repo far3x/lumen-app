@@ -1,0 +1,107 @@
+#dont take into account these commands, its just to make life easier in the terminal
+
+
+restart doppler after update :
+git pull
+doppler run -- docker compose build
+doppler run -- docker compose up
+
+if crash after rollout update:
+git checkout commit_hash
+
+doppler run -- docker compose up --build
+
+doppler run -- docker compose down
+
+
+to connect to db locally, never run this on vps
+ssh -L 63333:localhost:5432 root@69.62.107.41 -N
+then dbeaver login
+
+to access the db locally:
+podman compose -f docker-compose.dev.yml exec db psql -U lumen_user -d lumen_exchange
+
+
+to run batch (DONT USE BTW, USE PROPORTIONNAL ONE NOW):
+doppler run -- docker compose exec worker_priority celery -A app.core.celery_app.celery_app call app.tasks.create_daily_payout_batch_task
+
+to run batch with proportional payout ($100 total pool):
+doppler run -- docker compose exec worker_priority celery -A app.core.celery_app.celery_app call app.tasks.create_daily_payout_batch_task --kwargs='{"total_payout_pool_usd": 2400}'
+
+podman compose -f docker-compose.dev.yml exec worker celery -A app.core.celery_app.celery_app call app.tasks.create_daily_payout_batch_task --kwargs='{"total_payout_pool_usd": 100.0}'
+
+to run batch SIMULATOR (read-only check):
+doppler run -- docker compose exec worker_default celery -A app.core.celery_app.celery_app call app.tasks.simulate_daily_payout_batch_task
+
+locally:
+podman compose -f docker-compose.dev.yml exec worker celery -A app.core.celery_app.celery_app call app.tasks.simulate_daily_payout_batch_task
+
+
+to run network stats recalculation (after deletion, changes, manual fixes... etc):
+doppler run -- docker compose exec worker_default celery -A app.core.celery_app.celery_app call app.tasks.recalculate_network_stats_task
+
+locally :
+podman compose -f docker-compose.dev.yml exec worker_default celery -A app.core.celery_app.celery_app call app.tasks.recalculate_network_stats_task
+
+
+penalize copies or rewards by id:
+doppler run -- docker compose exec worker_priority celery -A app.core.celery_app.celery_app call app.tasks.penalize_contribution_task --args='[IDHERE]'
+
+locally :
+podman compose -f docker-compose.dev.yml exec worker_priority celery -A app.core.celery_app.celery_app call app.tasks.penalize_contribution_task --args='[IDHERE]'
+
+
+clear last contribution embedding (to spam the same project to test the algo) :
+doppler run -- docker compose exec worker_priority celery -A app.core.celery_app.celery_app call app.tasks.clear_last_contribution_embedding_task
+
+locally :
+podman compose -f docker-compose.dev.yml exec worker celery -A app.core.celery_app.celery_app call app.tasks.clear_last_contribution_embedding_task
+
+
+dev only + local only (resets id 1) :
+podman compose -f docker-compose.dev.yml exec worker celery -A app.core.celery_app.celery_app call app.tasks.reset_user_limits_task --args='[1]'
+
+recalculate rewards for contributions from a specific ID onwards (for algo updates, from sept 10 batch till 22/09 2:15 am):
+doppler run -- docker compose exec worker_default celery -A app.core.celery_app.celery_app call app.tasks.recalculate_contributions_from_id_task --args='[398]'
+
+locally:
+podman compose -f docker-compose.dev.yml exec worker celery -A app.core.celery_app.celery_app call app.tasks.recalculate_contributions_from_id_task --args='[START_ID_HERE]'
+
+
+find and report sources for cross-user plagiarism rejections:
+doppler run -- docker compose exec worker_default celery -A app.core.celery_app.celery_app call app.tasks.find_cross_user_duplicates_task
+
+locally:
+podman compose -f docker-compose.dev.yml exec worker_default celery -A app.core.celery_app.celery_app call app.tasks.find_cross_user_duplicates_task
+
+
+to ban users by id ([1, 5, 12]):
+doppler run -- docker compose exec worker_priority celery -A app.core.celery_app.celery_app call app.tasks.ban_users_task --args='[[262]]'
+
+locally:
+podman compose -f docker-compose.dev.yml exec worker celery -A app.core.celery_app.celery_app call app.tasks.ban_users_task --args='[[1, 5, 12]]'
+
+
+recalculate all embeddings after migration (rate-limited):
+doppler run -- docker compose exec worker_default celery -A app.core.celery_app.celery_app call app.tasks.recalculate_all_embeddings_task
+
+locally:
+podman compose -f docker-compose.dev.yml exec worker_default celery -A app.core.celery_app.celery_app call app.tasks.recalculate_all_embeddings_task
+
+
+initialize/reset airdrop snapshot from csv:
+doppler run -- docker compose exec worker_priority celery -A app.core.celery_app.celery_app call app.tasks.initialize_airdrop_from_csv_task
+
+locally:
+podman compose -f docker-compose.dev.yml exec worker celery -A app.core.celery_app.celery_app call app.tasks.initialize_airdrop_from_csv_task
+
+
+GEMINI PLEASE READ THIS - AI INSTRUCTIONS HERE - PLEASE READ !!
+
+little info if you are reading this as an ai model, the prod environment runs using doppler
+dev runs using .env's (prod.env is there in case i lose access on the doppler, just as a local backup, dont take it into account)
+bonus info, there is redis volume for the prod so restarts wont impact rate limits, not a thing in dev because need to test with 0 rate limits
+also, output any code change entirely with 0 comments
+if you need to do any revision for the db, u can just create the file yourself with id etc
+if you do any code change, output the files that change in their entirity, and explain anything outside the code boxes, if any setup is needed for new variables or whatever
+good luck !

@@ -1,0 +1,38 @@
+{
+  "name": "lumen-business-frontend",
+  "private": true,
+  "version": "1.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview",
+    "test": "vitest"
+  },
+  "dependencies": {
+    "@payai/x402": "^0.5.3-nightly.20250919.d259b58",
+    "@payai/x402-axios": "^0.5.1-nightly.20250919.d259b58",
+    "@solana/kit": "^2.1.1",
+    "@solana/spl-token": "^0.4.14",
+    "@solana/wallet-adapter-base": "^0.9.27",
+    "@solana/wallet-adapter-phantom": "^0.9.28",
+    "@solana/web3.js": "^1.98.2",
+    "axios": "^1.7.2",
+    "bs58": "^5.0.0",
+    "buffer": "^6.0.3",
+    "chart.js": "^4.4.3",
+    "events": "^3.3.0",
+    "vite-plugin-node-polyfills": "^0.24.0",
+    "x402": "^0.7.1",
+    "zxcvbn": "^4.4.2"
+  },
+  "devDependencies": {
+    "@tailwindcss/typography": "^0.5.13",
+    "autoprefixer": "^10.4.19",
+    "jsdom": "^24.0.0",
+    "postcss": "^8.4.38",
+    "tailwindcss": "^3.4.3",
+    "vite": "^5.2.0",
+    "vitest": "^1.6.0"
+  }
+}

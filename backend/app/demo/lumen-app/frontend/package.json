@@ -1,0 +1,33 @@
+{
+  "name": "lumen-protocol-frontend",
+  "private": true,
+  "version": "1.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview"
+  },
+  "devDependencies": {
+    "@tailwindcss/typography": "^0.5.16",
+    "autoprefixer": "^10.4.19",
+    "postcss": "^8.4.38",
+    "tailwindcss": "^3.4.3",
+    "vite": "^5.2.0"
+  },
+  "dependencies": {
+    "@fingerprintjs/fingerprintjs": "^4.4.1",
+    "@solana/wallet-adapter-base": "^0.9.27",
+    "@solana/wallet-adapter-phantom": "^0.9.28",
+    "@solana/wallet-adapter-backpack": "^0.1.14",
+    "@solana/web3.js": "^1.98.2",
+    "lenis": "^1.3.4",
+    "axios": "^1.6.8",
+    "bs58": "^5.0.0",
+    "chart.js": "^4.4.3",
+    "events": "^3.3.0",
+    "luxon": "^3.6.1",
+    "qrcode": "^1.5.3",
+    "zxcvbn": "^4.4.2"
+  }
+}
