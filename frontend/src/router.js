@@ -16,7 +16,7 @@ const footerContainer = document.getElementById('footer-container');
 const routes = {
     '/': () => import('./pages/landing.js').then(m => m.renderLandingPage()),
     '/demo': () => import('./pages/demo.js').then(m => m.renderDemoPage()),
-    '/claim': () => import('./pages/claim.js').then(m => m.renderClaimPage()),
+    //'/claim': () => import('./pages/claim.js').then(m => m.renderClaimPage()),
     '/login': () => import('./pages/login.js').then(m => m.renderLoginPage()),
     '/signup': () => import('./pages/signup.js').then(m => m.renderSignupPage()),
     '/waitlist': () => Promise.resolve(renderWaitlistPage()),
@@ -39,10 +39,10 @@ const routeMeta = {
         title: 'Lumen Protocol | Live Demo',
         description: 'Experience the Lumen Protocol\'s AI valuation engine in real-time. See how we analyze and value source code in our interactive, no-code-required demo.',
     },
-    '/claim': {
-        title: 'Lumen Protocol | Airdrop Claim',
-        description: 'Claim your airdropped tokens from Lumen\'s migration.',
-    },
+    //'/claim': {
+    //    title: 'Lumen Protocol | Airdrop Claim',
+    //    description: 'Claim your airdropped tokens from Lumen\'s migration.',
+    //},
     '/leaderboard': {
         title: 'Lumen Protocol | Contributor Leaderboard',
         description: 'See the top contributors powering the Lumen network and earning $LUMEN rewards.',

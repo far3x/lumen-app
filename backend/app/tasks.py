@@ -67,7 +67,7 @@ def manual_airdrop_task(addresses: List[str]):
                     logger.warning(f"[MANUAL_AIRDROP] SKIPPED: Address {address} has already claimed.")
                     continue
 
-                claimable_amount = float(recipient.token_amount) * 0.70
+                claimable_amount = float(recipient.token_amount) * 0.60
                 logger.info(f"[MANUAL_AIRDROP] PROCESSING: Sending {claimable_amount} tokens to eligible address {address}.")
 
                 tx_hash = solana_service.airdrop_lumen_tokens(
