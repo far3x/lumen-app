@@ -170,7 +170,7 @@ function render() {
                 reward *= 50;
                 openSourceWarningHtml = `
                     <div class="mb-6 p-4 bg-yellow-400/10 border border-yellow-500/20 text-yellow-700 rounded-md text-sm">
-                        <strong>Note:</strong> To showcase the full potential value of a high-quality, non-public project, this demo reward has been multiplied. The actual reward for public code would be significantly lower.
+                        <strong>Note:</strong> This project has been identified as a public, open-source project. To showcase the full potential value of a high-quality, non-public project, this demo reward has been multiplied. The actual reward for public code would be significantly lower.
                     </div>
                 `;
             } else if (isOpenSource) {
