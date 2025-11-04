@@ -237,4 +237,50 @@
     animation: text-shimmer 6s infinite linear;
     animation-delay: 1.5s;
   }
+  
+  .tooltip-trigger {
+    position: relative;
+  }
+
+  .tooltip-trigger::before,
+  .tooltip-trigger::after {
+      position: absolute;
+      left: 50%;
+      transform: translateX(-50%);
+      bottom: 150%;
+      opacity: 0;
+      visibility: hidden;
+      pointer-events: none;
+      transition: opacity 0.2s ease-in-out, bottom 0.2s ease-in-out;
+      z-index: 10;
+  }
+
+  .tooltip-trigger::before {
+      content: attr(data-tooltip);
+      background-color: #1f2937; /* text-main */
+      color: #f0f0f0; /* background */
+      padding: 8px 12px;
+      border-radius: 6px;
+      font-size: 12px;
+      font-weight: normal;
+      font-family: 'Satoshi', sans-serif;
+      line-height: 1.5;
+      width: 240px;
+      text-align: left;
+  }
+
+  .tooltip-trigger::after {
+      content: '';
+      border-style: solid;
+      border-width: 6px 6px 0 6px;
+      border-color: #1f2937 transparent transparent transparent;
+      bottom: calc(150% - 6px);
+  }
+
+  .tooltip-trigger:hover::before,
+  .tooltip-trigger:hover::after {
+      opacity: 1;
+      visibility: visible;
+      bottom: 170%;
+  }
 }
