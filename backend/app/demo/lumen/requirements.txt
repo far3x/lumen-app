@@ -1,9 +1,0 @@
-requests
-pyperclip
-chardet
-tiktoken
-colorama
-Pygments
-trufflehog3
-websockets
-scrubadub
