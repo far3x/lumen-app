@@ -837,7 +837,7 @@ def process_contribution(self, user_id: int, contribution_db_id: int):
             publish_contribution_update(db, contribution_db_id, user_id)
             return
 
-        base_reward_usd = valuation_result.get("final_reward", 0.0) * 0.5 #*0.5 cuz im poor now
+        base_reward_usd = valuation_result.get("final_reward", 0.0) * 0.3 #*0.3 cuz im poor now
         
         if source == 'web':
             base_reward_usd /= 1.5
