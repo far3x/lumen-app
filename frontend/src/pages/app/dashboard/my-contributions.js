@@ -74,7 +74,7 @@ function triggerContextualFeedback() {
     }
 }
 
-function renderScoreBar(label, score) {
+function renderScoreBar(label, score, tooltipText) {
     const normalizedScore = (score === undefined || score === null) ? 0 : Math.max(0, Math.min(1, score));
     const percentage = normalizedScore * 100;
     const scoreText = (normalizedScore * 10).toFixed(1);
@@ -82,12 +82,27 @@ function renderScoreBar(label, score) {
     return `
         <div>
             <div class="flex justify-between items-center text-sm mb-1">
-                <span class="font-medium text-text-secondary">${label}</span>
+                <span class="font-medium text-text-secondary flex items-center">
+                    ${label}
+                    ${tooltipText ? `<span class="tooltip-trigger ml-1.5 w-4 h-4 flex items-center justify-center bg-subtle text-text-main rounded-full text-xs font-bold cursor-help" data-tooltip="${tooltipText}">?</span>` : ''}
+                </span>
                 <span class="font-mono font-bold text-text-main">${scoreText}<span class="text-text-secondary font-sans">/10</span></span>
             </div>
             <div class="w-full bg-primary rounded-full h-2.5">
                 <div class="bg-accent-primary h-2.5 rounded-full" style="width: ${percentage}%"></div>
             </div>
+        </div>
+    `;
+}
+
+function renderKeyMetric(label, value, tooltipText) {
+    return `
+        <div class="flex justify-between items-center text-sm py-2 border-b border-primary/50">
+            <span class="text-text-secondary flex items-center">
+                ${label}
+                ${tooltipText ? `<span class="tooltip-trigger ml-1.5 w-4 h-4 flex items-center justify-center bg-subtle text-text-main rounded-full text-xs font-bold cursor-help" data-tooltip="${tooltipText}">?</span>` : ''}
+            </span>
+            <span class="font-mono text-text-main bg-primary px-2 py-1 rounded-md">${value}</span>
         </div>
     `;
 }
@@ -107,13 +122,6 @@ function renderAndOpenDetailPanel(item) {
             <strong>Public Code Detected:</strong> Our engine found a high similarity with public code. To prioritize novel data, the reward for this submission has been significantly reduced.
         </div>
     ` : '';
-
-    const renderKeyMetric = (label, value) => `
-        <div class="flex justify-between items-center text-sm py-2 border-b border-primary/50">
-            <span class="text-text-secondary">${label}</span>
-            <span class="font-mono text-text-main bg-primary px-2 py-1 rounded-md">${value}</span>
-        </div>
-    `;
     
     const panelHtml = `
         <div id="${panelId}" class="fixed inset-0 z-50 overflow-hidden" aria-labelledby="slide-over-title" role="dialog" aria-modal="true">
@@ -156,17 +164,29 @@ function renderAndOpenDetailPanel(item) {
                                         <div class="bg-primary/50 p-6 rounded-lg border border-primary">
                                             <h3 class="font-bold text-lg text-text-main mb-4">Valuation Scores</h3>
                                             <div class="space-y-4">
-                                                ${renderScoreBar('Project Clarity', details.project_clarity_score)}
-                                                ${renderScoreBar('Architecture', details.architectural_quality_score)}
-                                                ${renderScoreBar('Code Quality', details.code_quality_score)}
+                                                ${renderScoreBar('Project Clarity', details.project_clarity_score, "The AI's score for how original, clear, and non-generic the project's purpose is. A simple 'to-do app' is low, while a specialized tool is high.")}
+                                                ${renderScoreBar('Architecture', details.architectural_quality_score, "The AI's score for how well the code is structured. Well-organized, modular projects score higher than monolithic files.")}
+                                                ${renderScoreBar('Code Quality', details.code_quality_score, "The AI's score for the code's cleanliness and maintainability, assessing variable names, potential for bugs, and adherence to best practices.")}
                                             </div>
                                         </div>
                                         <div class="bg-primary/50 p-6 rounded-lg border border-primary">
                                             <h3 class="font-bold text-lg text-text-main mb-3">Key Metrics</h3>
                                             <div class="space-y-1">
-                                                ${renderKeyMetric('Tokens Analyzed', details.total_tokens?.toLocaleString() ?? 'N/A')}
-                                                ${renderKeyMetric('Avg. Complexity', details.avg_complexity?.toFixed(2) ?? 'N/A')}
-                                                ${renderKeyMetric('Uniqueness Multiplier', `${details.rarity_multiplier?.toFixed(2) ?? 'N/A'}x`)}
+                                                ${renderKeyMetric('Tokens Analyzed', details.total_tokens?.toLocaleString() ?? 'N/A', "The number of tokens in the code, measured by a standard tokenizer (tiktoken's cl100k_base). On average, one line of code is 8-12 tokens.")}
+                                                ${renderKeyMetric('Avg. Complexity', details.avg_complexity?.toFixed(2) ?? 'N/A', "A measure of the code's structural complexity. Higher values indicate more intricate logic and decision paths.")}
+                                                ${details.innovation_multiplier ? renderKeyMetric('Innovation Multiplier', `${details.innovation_multiplier.toFixed(2)}x`, "Applied to updates of your own projects. A higher value indicates more significant changes and new logic were added.") : ''}
+                                                ${renderKeyMetric('Uniqueness Multiplier', `${details.rarity_multiplier?.toFixed(2) ?? 'N/A'}x`, "A score based on how unique your code is compared to all other contributions on the network. Highly novel code gets a higher multiplier.")}
+                                            </div>
+                                        </div>
+                                        <div class="bg-primary/50 p-6 rounded-lg border border-primary">
+                                            <h3 class="font-bold text-lg text-text-main mb-3">Detailed Valuation Factors</h3>
+                                            <div class="space-y-1">
+                                                ${details.ai_weighted_multiplier ? renderKeyMetric('AI Weighted Score', details.ai_weighted_multiplier.toFixed(4), "The combined, weighted average of the three AI-driven quality scores (Clarity, Architecture, Quality).") : ''}
+                                                ${details.code_ratio ? renderKeyMetric('Code Ratio', details.code_ratio.toFixed(2), "The proportion of the codebase identified as high-value code versus other text types like markdown or configuration files.") : ''}
+                                                ${details.code_ratio_multiplier ? renderKeyMetric('Code Ratio Multiplier', `${details.code_ratio_multiplier.toFixed(2)}x`, "A multiplier applied based on the Code Ratio. Projects with a higher concentration of pure code receive a higher multiplier.") : ''}
+                                                ${details.working_code_ratio ? renderKeyMetric('Working Code Ratio', `${(details.working_code_ratio * 100).toFixed(0)}%`, "The AI's estimation of how much of the submitted code is coherent and functional versus being boilerplate or non-functional filler.") : ''}
+                                                ${details.compression_ratio ? renderKeyMetric('Compression Ratio', details.compression_ratio.toFixed(3), "A measure of the code's entropy. A lower ratio indicates less repetitive code and higher information density, which is more valuable.") : ''}
+                                                ${details.total_lloc ? renderKeyMetric('Logical Lines of Code', details.total_lloc.toLocaleString(), "The total number of executable lines of code, ignoring comments and blank lines.") : ''}
                                             </div>
                                         </div>
                                     </div>
