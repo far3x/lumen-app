@@ -237,7 +237,6 @@
     animation: text-shimmer 6s infinite linear;
     animation-delay: 1.5s;
   }
-<<<<<<< HEAD
 
   @keyframes subtle-float {
     0%, 100% {
@@ -250,7 +249,7 @@
 
   .animate-subtle-float {
       animation: subtle-float 6s ease-in-out infinite;
-=======
+  }
   
   .tooltip-trigger {
     position: relative;
@@ -296,6 +295,5 @@
       opacity: 1;
       visibility: visible;
       bottom: 170%;
->>>>>>> c96ef8b9dbc2ec31038904213ac99707adc9665f
   }
 }
