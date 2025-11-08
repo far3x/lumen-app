@@ -63,7 +63,7 @@
     }
 
     .animate-fade-in-up {
-        transform: translateY(2rem);
+        transform: translateY(4rem);
     }
     .animate-fade-in-left {
         transform: translateX(-2rem);
@@ -236,5 +236,18 @@
     );
     animation: text-shimmer 6s infinite linear;
     animation-delay: 1.5s;
+  }
+
+  @keyframes subtle-float {
+    0%, 100% {
+      transform: translateY(0);
+    }
+    50% {
+      transform: translateY(-8px);
+    }
+  }
+
+  .animate-subtle-float {
+      animation: subtle-float 6s ease-in-out infinite;
   }
 }

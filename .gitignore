@@ -53,3 +53,6 @@ priv_key_to_json.py
 .vscode/
 *.swp
 *~
+
+python-sdk/
+Irys-docs-v2/
