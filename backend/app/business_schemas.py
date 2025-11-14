@@ -112,6 +112,10 @@ class FullContribution(BaseModel):
     created_at: datetime
     raw_content: str
 
+    class Config:
+        from_attributes = True
+
+
 class ContributionSearchResult(BaseModel):
     keywords: Optional[str] = Field(None, max_length=255)
     languages: Optional[List[str]] = None

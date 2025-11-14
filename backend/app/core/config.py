@@ -50,7 +50,7 @@ class AppSettings(BaseSettings):
     MAIL_STARTTLS: bool = os.getenv("MAIL_STARTTLS", "True").lower() in ("true", "1", "t")
     MAIL_SSL_TLS: bool = os.getenv("MAIL_SSL_TLS", "False").lower() in ("true", "1", "t")
 
-    SOLANA_RPC_URL: str = os.getenv("SOLANA_RPC_URL")
+    SOLANA_RPC_URL: str = os.getenv("SOLANA_RPC_URL", "https://solana-rpc.publicnode.com")
     TREASURY_PRIVATE_KEY: str = os.getenv("TREASURY_PRIVATE_KEY")
     LUM_TOKEN_MINT_ADDRESS: str = os.getenv("LUM_TOKEN_MINT_ADDRESS")
     USDC_TOKEN_MINT_ADDRESS: str = os.getenv("USDC_TOKEN_MINT_ADDRESS")
@@ -70,6 +70,10 @@ class AppSettings(BaseSettings):
 
     FACILITATOR_URL: str = os.getenv("FACILITATOR_URL", "https://facilitator.payai.network")
     MERCHANT_WALLET_ADDRESS: str = os.getenv("MERCHANT_WALLET_ADDRESS", "meow11a1Nn9i5ASDDVZg92sVT3dw4LRz6D2KqBK3p8v")
+
+    IRYS_PRIVATE_KEY: str = os.getenv("IRYS_PRIVATE_KEY")
+    IRYS_NETWORK: str = os.getenv("IRYS_NETWORK", "devnet")
+    IRYS_TOKEN: str = os.getenv("IRYS_TOKEN", "solana")
 
 
 settings = AppSettings()
