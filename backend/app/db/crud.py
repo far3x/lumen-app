@@ -10,10 +10,12 @@ from fastapi import HTTPException, status
 from typing import Optional, List, Dict
 from datetime import datetime, timedelta, timezone
 import html
+import asyncio
 
 from app.core import security, config
 from app import schemas, business_schemas
 from . import models
+from app.services.irys_service import irys_service
 
 
 def get_user(db: Session, user_id: int):
@@ -241,7 +243,8 @@ def update_contribution_status(db: Session, contribution_id: int, status: str):
 def create_contribution_record(db: Session, user: models.User, codebase: str, valuation_results: dict, reward: float, embedding: list[float] | None, initial_status: str = "PENDING", source: str = "cli"):
     db_contribution = models.Contribution(
         user_id=user.id,
-        raw_content=codebase,
+        raw_content=codebase, # Stored temporarily until Irys upload
+        content_preview="\n".join(codebase.splitlines()[:50]),
         valuation_results=json.dumps(valuation_results),
         reward_amount=reward,
         content_embedding=embedding,
@@ -507,7 +510,8 @@ def search_contributions(db: Session, company_id: int, skip: int, limit: int, **
             analysis_summary = html.unescape(analysis_summary)
         
         first_lang = next(iter(details.get("language_breakdown", {"Unknown": 0})), "Unknown")
-        files_preview = [{"path": "Full Project Preview", "content": "\n".join(contrib.raw_content.splitlines()[:50])}]
+        
+        files_preview = [{"path": "Full Project Preview", "content": contrib.content_preview or ""}]
         
         filtered_previews.append({
             "id": contrib.id, "created_at": contrib.created_at, "language": first_lang,
@@ -525,7 +529,7 @@ def search_contributions(db: Session, company_id: int, skip: int, limit: int, **
     print(f"--- [DEBUG] Ending search_contributions ---")
     return {"items": filtered_previews, "total": total}
 
-def unlock_contribution(db: Session, company_id: int, contribution_id: int, api_key_id: Optional[int] = None) -> models.Contribution:
+def unlock_contribution(db: Session, company_id: int, contribution_id: int, api_key_id: Optional[int] = None) -> Dict:
     company = db.query(models.Company).filter(models.Company.id == company_id).first()
     contribution = db.query(models.Contribution).filter(models.Contribution.id == contribution_id).first()
 
@@ -534,7 +538,10 @@ def unlock_contribution(db: Session, company_id: int, contribution_id: int, api_
     
     is_unlocked = db.query(models.UnlockedContribution).filter_by(company_id=company_id, contribution_id=contribution_id).first()
     if is_unlocked:
-        return contribution
+        raw_content = asyncio.run(irys_service.get_data(contribution.irys_tx_id))
+        if not raw_content:
+            raise HTTPException(status_code=503, detail="Could not retrieve already unlocked data.")
+        return { "id": contribution.id, "created_at": contribution.created_at, "raw_content": raw_content }
 
     details = contribution.valuation_results
     while isinstance(details, str):
@@ -543,7 +550,7 @@ def unlock_contribution(db: Session, company_id: int, contribution_id: int, api_
     token_cost = details.get("total_tokens", 0)
     
     if company.token_balance < token_cost:
-        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Insufficient token balance")
+        raise HTTPException(status_code=status.HTTP_402_PAYMENT_REQUIRED, detail="Insufficient token balance")
 
     company.token_balance -= token_cost
     
@@ -560,7 +567,11 @@ def unlock_contribution(db: Session, company_id: int, contribution_id: int, api_
     db.commit()
     db.refresh(company)
 
-    return contribution
+    raw_content = asyncio.run(irys_service.get_data(contribution.irys_tx_id))
+    if not raw_content:
+        raise HTTPException(status_code=503, detail="Unlocked contribution, but failed to retrieve content from storage.")
+
+    return { "id": contribution.id, "created_at": contribution.created_at, "raw_content": raw_content }
 
 def unlock_all_contributions_for_company(db: Session, company_id: int):
     company = db.query(models.Company).filter(models.Company.id == company_id).first()
@@ -609,10 +620,14 @@ def unlock_all_contributions_for_company(db: Session, company_id: int):
         
     db.commit()
 
-def get_unlocked_contribution_content(db: Session, company_id: int, contribution_id: int) -> Optional[models.Contribution]:
+def get_unlocked_contribution_content(db: Session, company_id: int, contribution_id: int) -> Optional[Dict]:
     unlocked = db.query(models.UnlockedContribution).filter_by(company_id=company_id, contribution_id=contribution_id).first()
-    if unlocked:
-        return unlocked.contribution
+    if unlocked and unlocked.contribution:
+        contribution = unlocked.contribution
+        raw_content = asyncio.run(irys_service.get_data(contribution.irys_tx_id))
+        if not raw_content:
+            return None 
+        return { "id": contribution.id, "created_at": contribution.created_at, "raw_content": raw_content }
     return None
 
 def get_dashboard_stats(db: Session, company_id: int):

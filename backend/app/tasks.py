@@ -22,6 +22,7 @@ from app.services.email_service import email_service
 from app.services.sanitization_service import sanitization_service
 from app.services.price_service import price_service
 from app.services.github_service import github_service
+from app.services.irys_service import irys_service
 from decimal import Decimal
 import asyncio
 from datetime import datetime, timezone, timedelta
@@ -763,6 +764,22 @@ def process_contribution(self, user_id: int, contribution_db_id: int):
             logger.info(f"Contribution {contribution_db_id} is from web source. Performing server-side sanitization.")
             final_codebase = sanitization_service.sanitize_code(codebase)
 
+        try:
+            logger.info(f"Uploading contribution {contribution_db_id} to Irys...")
+            irys_tx_id = irys_service.upload_code(final_codebase)
+            if not irys_tx_id:
+                raise ValueError("Failed to get a transaction ID from Irys.")
+            contribution_record.irys_tx_id = irys_tx_id
+            contribution_record.content_preview = "\n".join(final_codebase.splitlines()[:50])
+            contribution_record.raw_content = None # Stop storing the content locally
+            db.commit()
+            logger.info(f"Contribution {contribution_db_id} stored on Irys: {irys_tx_id}")
+        except Exception as e:
+            logger.error(f"Fatal error uploading to Irys for C_ID {contribution_db_id}: {e}", exc_info=True)
+            crud.update_contribution_status(db, contribution_db_id, "FAILED_STORAGE")
+            publish_contribution_update(db, contribution_db_id, user_id)
+            return
+
         logger.info(f"Processing contribution {contribution_db_id} for user {user_id}. Starting uniqueness check...")
         
         parsed_files = hybrid_valuation_service._parse_codebase(final_codebase)
@@ -919,6 +936,9 @@ def process_contribution(self, user_id: int, contribution_db_id: int):
 
     except Exception as e:
         logger.error(f"Unhandled error in process_contribution for c_id {contribution_db_id}: {e}", exc_info=True)
+        contribution_record = crud.get_contribution_by_id(db, contribution_db_id)
+        if contribution_record and contribution_record.irys_tx_id:
+            contribution_record.raw_content = None
         crud.update_contribution_status(db, contribution_db_id, "FAILED")
         publish_contribution_update(db, contribution_db_id, user_id)
     finally:
@@ -1013,7 +1033,11 @@ def recalculate_contributions_from_id_task(start_id: int):
             logger.info(f"Old reward: ${old_reward_usd:.4f}")
             
             try:
-                valuation_result = hybrid_valuation_service.calculate(db, current_codebase=contribution.raw_content)
+                raw_content = asyncio.run(irys_service.get_data(contribution.irys_tx_id))
+                if not raw_content:
+                    raise ValueError(f"Could not fetch content from Irys for tx {contribution.irys_tx_id}")
+
+                valuation_result = hybrid_valuation_service.calculate(db, current_codebase=raw_content)
                 
                 if "error" in valuation_result.get("valuation_details", {}):
                     raise ValueError(f"AI analysis failed: {valuation_result['valuation_details']['error']}")
@@ -1089,15 +1113,11 @@ def find_cross_user_duplicates_task():
         
         report_found = False
         for rejected_contrib in rejected_contributions:
-            if not rejected_contrib.raw_content:
-                logger.warning(f"Skipping Rejected C_ID:{rejected_contrib.id} as it has no raw content.")
+            if not rejected_contrib.content_preview:
+                logger.warning(f"Skipping Rejected C_ID:{rejected_contrib.id} as it has no content.")
                 continue
 
-            parsed_files = hybrid_valuation_service._parse_codebase(rejected_contrib.raw_content)
-            full_codebase_content = "\n".join(file_data["content"] for file_data in parsed_files)
-
-            if not full_codebase_content.strip():
-                continue
+            full_codebase_content = rejected_contrib.content_preview
                 
             embedding = embedding_service.generate(full_codebase_content)
             if embedding is None:
@@ -1193,17 +1213,11 @@ def recalculate_all_embeddings_task():
         for i, contribution in enumerate(all_contributions):
             logger.info(f"Processing contribution {i+1}/{total} (ID: {contribution.id})...")
             
-            if not contribution.raw_content or not contribution.raw_content.strip():
-                logger.warning(f"Skipping C_ID:{contribution.id} as it has no raw content.")
+            full_codebase_content = asyncio.run(irys_service.get_data(contribution.irys_tx_id))
+            if not full_codebase_content:
+                logger.warning(f"Skipping C_ID:{contribution.id} as content could not be fetched from Irys.")
                 continue
-            
-            parsed_files = hybrid_valuation_service._parse_codebase(contribution.raw_content)
-            full_codebase_content = "\n".join(file_data["content"] for file_data in parsed_files)
 
-            if not full_codebase_content.strip():
-                logger.warning(f"Skipping C_ID:{contribution.id} as it has no effective content after parsing.")
-                continue
-            
             token_count = len(tokenizer.encode(full_codebase_content))
 
             current_time = time.time()
