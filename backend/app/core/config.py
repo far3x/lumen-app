@@ -74,6 +74,7 @@ class AppSettings(BaseSettings):
     IRYS_PRIVATE_KEY: str = os.getenv("IRYS_PRIVATE_KEY")
     IRYS_NETWORK: str = os.getenv("IRYS_NETWORK", "devnet")
     IRYS_TOKEN: str = os.getenv("IRYS_TOKEN", "solana")
+    IRYS_SERVICE_URL: str = os.getenv("IRYS_SERVICE_URL", "http://localhost:3001")
 
 
 settings = AppSettings()

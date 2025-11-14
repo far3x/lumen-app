@@ -1,5 +1,0 @@
-.devcontainer
-**/__pycache__/**/*
-test.py
-.vscode
-dist
