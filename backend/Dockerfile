@@ -16,9 +16,6 @@ COPY requirements.txt .
 
 RUN pip install -r requirements.txt
 
-COPY ./python-sdk /usr/src/app/python-sdk
-RUN pip install /usr/src/app/python-sdk
-
 
 FROM python:3.11-slim
 
@@ -29,7 +26,6 @@ RUN apt-get update && apt-get install -y curl git && \
 
 COPY --from=builder /opt/venv /opt/venv
 COPY --from=builder /usr/local/bin/scc /usr/local/bin/scc
-COPY --from=builder /usr/src/app/python-sdk /usr/src/app/python-sdk
 
 ENV PATH="/opt/venv/bin:$PATH"
 
