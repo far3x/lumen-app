@@ -54,7 +54,5 @@ priv_key_to_json.py
 *.swp
 *~
 
-python-sdk/
-python-sdk
 Irys-docs-v2/
 Irys-docs-v2
