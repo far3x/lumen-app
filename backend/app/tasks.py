@@ -33,7 +33,7 @@ from sqlalchemy.exc import IntegrityError
 logger = logging.getLogger(__name__)
 
 PLAGIARISM_THRESHOLD = 0.995
-INNOVATION_THRESHOLD = 0.98
+INNOVATION_THRESHOLD = 0.985
 
 @celery_app.task(name="app.tasks.analyze_demo_project_task")
 def analyze_demo_project_task(codebase: str) -> dict:
@@ -1252,5 +1252,51 @@ def recalculate_all_embeddings_task():
     except Exception as e:
         logger.error(f"An error occurred during embedding recalculation: {e}", exc_info=True)
         db.rollback()
+    finally:
+        db.close()
+
+@celery_app.task(name="app.tasks.backfill_irys_storage_task")
+def backfill_irys_storage_task():
+    logger.info("Starting backfill task for Irys storage.")
+    db = SessionLocal()
+    try:
+        contributions_to_backfill = db.query(models.Contribution).filter(
+            models.Contribution.irys_tx_id.is_(None),
+            models.Contribution.raw_content.is_not(None)
+        ).order_by(models.Contribution.id).all()
+
+        total = len(contributions_to_backfill)
+        logger.info(f"Found {total} contributions with raw_content to migrate to Irys.")
+
+        for i, contribution in enumerate(contributions_to_backfill):
+            logger.info(f"Processing contribution {i+1}/{total} (ID: {contribution.id})...")
+            
+            if not contribution.raw_content:
+                logger.warning(f"Skipping C_ID:{contribution.id} as raw_content is empty.")
+                continue
+            
+            try:
+                tx_id = irys_service.upload_code(contribution.raw_content)
+                if not tx_id:
+                    raise ValueError("Upload to Irys did not return a transaction ID.")
+                
+                contribution.irys_tx_id = tx_id
+                if not contribution.content_preview:
+                    contribution.content_preview = "\n".join(contribution.raw_content.splitlines()[:50])
+                contribution.raw_content = None
+                
+                db.commit()
+                logger.info(f"Successfully migrated C_ID:{contribution.id} to Irys. TX: {tx_id}")
+                
+                time.sleep(1.5)
+
+            except Exception as e:
+                logger.error(f"Failed to migrate C_ID:{contribution.id}. Error: {e}", exc_info=True)
+                db.rollback()
+        
+        logger.info("Irys storage backfill task complete.")
+
+    except Exception as e:
+        logger.error(f"A critical error occurred during the Irys backfill task: {e}", exc_info=True)
     finally:
         db.close()
