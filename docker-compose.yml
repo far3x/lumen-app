@@ -43,6 +43,23 @@ services:
       - redis_data:/data
     restart: unless-stopped
 
+  irys:
+    container_name: lumen_irys_service
+    build:
+      context: ./backend/irys-service
+      dockerfile: Dockerfile
+    environment:
+      IRYS_PRIVATE_KEY: ${IRYS_PRIVATE_KEY}
+      IRYS_NETWORK: ${IRYS_NETWORK}
+      IRYS_TOKEN: ${IRYS_TOKEN}
+      SOLANA_RPC_URL: ${SOLANA_RPC_URL}
+    healthcheck:
+      test: ["CMD", "wget", "--spider", "-q", "http://localhost:3001/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+    restart: unless-stopped
+
   api:
     container_name: lumen_api
     build:
@@ -95,14 +112,14 @@ services:
       AIRDROP_TOKEN_MINT_ADDRESS: ${AIRDROP_TOKEN_MINT_ADDRESS}
       FACILITATOR_URL: ${FACILITATOR_URL}
       MERCHANT_WALLET_ADDRESS: ${MERCHANT_WALLET_ADDRESS}
-      IRYS_PRIVATE_KEY: ${IRYS_PRIVATE_KEY}
-      IRYS_NETWORK: ${IRYS_NETWORK}
-      IRYS_TOKEN: ${IRYS_TOKEN}
+      IRYS_SERVICE_URL: http://irys:3001
     depends_on:
       pgbouncer:
         condition: service_started
       redis:
         condition: service_started
+      irys:
+        condition: service_healthy
     restart: unless-stopped
     healthcheck:
       test: ["CMD-SHELL", "curl -f http://localhost:8000/ || exit 1"]
@@ -161,9 +178,7 @@ services:
       AIRDROP_TOKEN_MINT_ADDRESS: ${AIRDROP_TOKEN_MINT_ADDRESS}
       FACILITATOR_URL: ${FACILITATOR_URL}
       MERCHANT_WALLET_ADDRESS: ${MERCHANT_WALLET_ADDRESS}
-      IRYS_PRIVATE_KEY: ${IRYS_PRIVATE_KEY}
-      IRYS_NETWORK: ${IRYS_NETWORK}
-      IRYS_TOKEN: ${IRYS_TOKEN}
+      IRYS_SERVICE_URL: http://irys:3001
     depends_on:
       pgbouncer:
         condition: service_started
@@ -171,6 +186,8 @@ services:
         condition: service_started
       api:
         condition: service_started
+      irys:
+        condition: service_healthy
     restart: unless-stopped
   
   worker_priority:
@@ -223,9 +240,7 @@ services:
       AIRDROP_TOKEN_MINT_ADDRESS: ${AIRDROP_TOKEN_MINT_ADDRESS}
       FACILITATOR_URL: ${FACILITATOR_URL}
       MERCHANT_WALLET_ADDRESS: ${MERCHANT_WALLET_ADDRESS}
-      IRYS_PRIVATE_KEY: ${IRYS_PRIVATE_KEY}
-      IRYS_NETWORK: ${IRYS_NETWORK}
-      IRYS_TOKEN: ${IRYS_TOKEN}
+      IRYS_SERVICE_URL: http://irys:3001
     depends_on:
       pgbouncer:
         condition: service_started
@@ -233,6 +248,8 @@ services:
         condition: service_started
       api:
         condition: service_started
+      irys:
+        condition: service_healthy
     restart: unless-stopped
   
   worker-beat:
@@ -285,9 +302,7 @@ services:
       AIRDROP_TOKEN_MINT_ADDRESS: ${AIRDROP_TOKEN_MINT_ADDRESS}
       FACILITATOR_URL: ${FACILITATOR_URL}
       MERCHANT_WALLET_ADDRESS: ${MERCHANT_WALLET_ADDRESS}
-      IRYS_PRIVATE_KEY: ${IRYS_PRIVATE_KEY}
-      IRYS_NETWORK: ${IRYS_NETWORK}
-      IRYS_TOKEN: ${IRYS_TOKEN}
+      IRYS_SERVICE_URL: http://irys:3001
     depends_on:
       pgbouncer:
         condition: service_started
@@ -295,6 +310,8 @@ services:
         condition: service_started
       api:
         condition: service_started
+      irys:
+        condition: service_healthy
     restart: unless-stopped
 
   frontend:
