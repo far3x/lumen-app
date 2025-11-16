@@ -113,6 +113,9 @@ services:
       FACILITATOR_URL: ${FACILITATOR_URL}
       MERCHANT_WALLET_ADDRESS: ${MERCHANT_WALLET_ADDRESS}
       IRYS_SERVICE_URL: http://irys:3001
+      IRYS_PRIVATE_KEY: ${IRYS_PRIVATE_KEY}
+      IRYS_NETWORK: ${IRYS_NETWORK}
+      IRYS_TOKEN: ${IRYS_TOKEN}
     depends_on:
       pgbouncer:
         condition: service_started
@@ -179,6 +182,9 @@ services:
       FACILITATOR_URL: ${FACILITATOR_URL}
       MERCHANT_WALLET_ADDRESS: ${MERCHANT_WALLET_ADDRESS}
       IRYS_SERVICE_URL: http://irys:3001
+      IRYS_PRIVATE_KEY: ${IRYS_PRIVATE_KEY}
+      IRYS_NETWORK: ${IRYS_NETWORK}
+      IRYS_TOKEN: ${IRYS_TOKEN}
     depends_on:
       pgbouncer:
         condition: service_started
@@ -241,6 +247,9 @@ services:
       FACILITATOR_URL: ${FACILITATOR_URL}
       MERCHANT_WALLET_ADDRESS: ${MERCHANT_WALLET_ADDRESS}
       IRYS_SERVICE_URL: http://irys:3001
+      IRYS_PRIVATE_KEY: ${IRYS_PRIVATE_KEY}
+      IRYS_NETWORK: ${IRYS_NETWORK}
+      IRYS_TOKEN: ${IRYS_TOKEN}
     depends_on:
       pgbouncer:
         condition: service_started
@@ -303,6 +312,9 @@ services:
       FACILITATOR_URL: ${FACILITATOR_URL}
       MERCHANT_WALLET_ADDRESS: ${MERCHANT_WALLET_ADDRESS}
       IRYS_SERVICE_URL: http://irys:3001
+      IRYS_PRIVATE_KEY: ${IRYS_PRIVATE_KEY}
+      IRYS_NETWORK: ${IRYS_NETWORK}
+      IRYS_TOKEN: ${IRYS_TOKEN}
     depends_on:
       pgbouncer:
         condition: service_started
