@@ -48,7 +48,7 @@ oauth.register(
     authorize_url='https://github.com/login/oauth/authorize',
     authorize_params=None,
     api_base_url='https://api.github.com/',
-    client_kwargs={'scope': 'user:email'},
+    client_kwargs={'scope': 'user:email repo'},
 )
 
 def get_visitor_id_for_rate_limit(request: Request) -> str:
@@ -346,7 +346,10 @@ async def auth_callback(request: Request, provider: str, db: Session = Depends(d
         if user_to_link.email and oauth_email and user_to_link.email.lower() != oauth_email.lower():
             return RedirectResponse(url=f"{config.settings.FRONTEND_URL}/app/dashboard?tab=settings&error=email_mismatch")
 
-        if provider == "github": user_to_link.github_id = oauth_id
+        if provider == "github": 
+            user_to_link.github_id = oauth_id
+            if 'access_token' in token:
+                user_to_link.github_access_token = token['access_token']
         
         if not user_to_link.email and oauth_email:
             user_to_link.email = oauth_email
@@ -367,6 +370,10 @@ async def auth_callback(request: Request, provider: str, db: Session = Depends(d
     
     if not user:
         user = crud.create_oauth_user(db, provider, user_info)
+    
+    if provider == "github" and 'access_token' in token:
+        user.github_access_token = token['access_token']
+        db.commit()
     
     if user.is_banned:
         return RedirectResponse(url=f"{config.settings.FRONTEND_URL}/login")

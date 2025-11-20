@@ -8,9 +8,11 @@ class GithubService:
         self.api_base_url = "https://api.github.com"
         self.headers = {
             "Accept": "application/vnd.github.v3+json",
-            "Authorization": f"Bearer {settings.GITHUB_SEARCH_PAT}",
             "X-GitHub-Api-Version": "2022-11-28"
         }
+        if settings.GITHUB_SEARCH_PAT:
+             self.headers["Authorization"] = f"Bearer {settings.GITHUB_SEARCH_PAT}"
+
         if not settings.GITHUB_SEARCH_PAT:
             print("[GITHUB_SERVICE_ERROR] GITHUB_SEARCH_PAT is not set in environment variables!", file=sys.stderr)
 
@@ -51,5 +53,58 @@ class GithubService:
         except Exception as e:
             print(f"[GITHUB_SERVICE_ERROR] Unexpected error during GitHub code search: {e}", file=sys.stderr)
             return False
+
+    async def get_user_repos(self, access_token: str) -> list[dict]:
+        """Fetch a list of repositories for the user."""
+        url = f"{self.api_base_url}/user/repos"
+        headers = {
+            "Authorization": f"Bearer {access_token}",
+            "Accept": "application/vnd.github.v3+json",
+            "X-GitHub-Api-Version": "2022-11-28"
+        }
+        params = {
+            "sort": "updated",
+            "direction": "desc",
+            "per_page": 100,
+            "visibility": "all" 
+        }
+        try:
+            async with httpx.AsyncClient() as client:
+                response = await client.get(url, headers=headers, params=params, timeout=10.0)
+                response.raise_for_status()
+                repos = response.json()
+                return [
+                    {
+                        "id": repo["id"],
+                        "name": repo["name"],
+                        "full_name": repo["full_name"],
+                        "private": repo["private"],
+                        "description": repo["description"],
+                        "language": repo["language"],
+                        "updated_at": repo["updated_at"],
+                        "default_branch": repo["default_branch"]
+                    }
+                    for repo in repos
+                ]
+        except Exception as e:
+            print(f"[GITHUB_SERVICE_ERROR] Failed to fetch user repos: {e}", file=sys.stderr)
+            return []
+
+    async def download_repo_zip(self, access_token: str, full_name: str, default_branch: str) -> bytes | None:
+        """Download the repository as a zip archive."""
+        url = f"{self.api_base_url}/repos/{full_name}/zipball/{default_branch}"
+        headers = {
+            "Authorization": f"Bearer {access_token}",
+            "Accept": "application/vnd.github+json",
+            "X-GitHub-Api-Version": "2022-11-28"
+        }
+        try:
+            async with httpx.AsyncClient(follow_redirects=True) as client:
+                response = await client.get(url, headers=headers, timeout=60.0)
+                response.raise_for_status()
+                return response.content
+        except Exception as e:
+            print(f"[GITHUB_SERVICE_ERROR] Failed to download repo zip: {e}", file=sys.stderr)
+            return None
 
 github_service = GithubService()

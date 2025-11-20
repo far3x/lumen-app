@@ -15,6 +15,7 @@ class User(Base):
     email = Column(String, unique=True, index=True, nullable=True)
     hashed_password = Column(String, nullable=True)
     github_id = Column(String, unique=True, nullable=True)
+    github_access_token = Column(String, nullable=True)
     display_name = Column(String)
     solana_address = Column(String, unique=True, nullable=True, index=True)
     is_beta_bonus_claimed = Column(Boolean, default=False, nullable=False)

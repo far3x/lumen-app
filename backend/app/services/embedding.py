@@ -4,6 +4,7 @@ from google import genai
 from google.genai import types
 from app.core.config import settings
 import logging
+import time
 
 logger = logging.getLogger(__name__)
 
@@ -54,6 +55,9 @@ class EmbeddingService:
 
             for i in range(0, len(text_chunks), batch_size):
                 batch = text_chunks[i:i+batch_size]
+                
+                if i > 0:
+                    time.sleep(3.0)
                 
                 result = self.client.models.embed_content(
                     model=self.model_name,

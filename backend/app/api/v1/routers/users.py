@@ -11,19 +11,34 @@ from solders.message import Message
 from nacl.signing import VerifyKey
 import nacl.exceptions
 from fastapi_mail import FastMail, MessageSchema, ConnectionConfig
+from pydantic import BaseModel
+from typing import List, Optional
 
 from app.db import crud, models, database
 from app.api.v1 import dependencies
 from app.schemas import User as UserSchema, AccountDetails, ContributionResponse, UserUpdate, ValuationMetrics, AiAnalysis, ChangePasswordRequest, WalletLinkRequest, BatchPayoutResponse, SetWalletAddressRequest, UserDeletePayload, LeaderboardEntry, ContributionCreate
-from pydantic import BaseModel
-from typing import List, Optional
 from app.core import security, config
 from app.core.limiter import limiter
-from app.tasks import process_contribution, publish_contribution_update
+from app.tasks import process_contribution, publish_contribution_update, process_github_contribution
+from app.services.github_service import github_service
 
 class PaginatedContributions(BaseModel):
     items: List[ContributionResponse]
     total: int
+
+class GithubRepo(BaseModel):
+    id: int
+    name: str
+    full_name: str
+    private: bool
+    description: Optional[str]
+    language: Optional[str]
+    updated_at: str
+    default_branch: str
+
+class GithubContributionRequest(BaseModel):
+    repo_full_name: str
+    default_branch: str
 
 router = APIRouter(prefix="/users", tags=["Users"])
 
@@ -42,7 +57,7 @@ mail_conf = ConnectionConfig(
 )
 
 oauth = OAuth()
-oauth.register( name='github', client_id=config.settings.GITHUB_CLIENT_ID, client_secret=config.settings.GITHUB_CLIENT_SECRET, access_token_url='https://github.com/login/oauth/access_token', authorize_url='https://github.com/login/oauth/authorize', api_base_url='https://api.github.com/', client_kwargs={'scope': 'user:email'} )
+oauth.register( name='github', client_id=config.settings.GITHUB_CLIENT_ID, client_secret=config.settings.GITHUB_CLIENT_SECRET, access_token_url='https://github.com/login/oauth/access_token', authorize_url='https://github.com/login/oauth/authorize', api_base_url='https://api.github.com/', client_kwargs={'scope': 'user:email repo'} )
 
 try:
     tokenizer = tiktoken.get_encoding("cl100k_base")
@@ -98,6 +113,61 @@ async def contribute_data_from_web(
     process_contribution.delay(current_user.id, new_contribution.id)
 
     return {"message": "Contribution received and is being processed.", "contribution_id": new_contribution.id}
+
+@router.get("/me/github/repos", response_model=List[GithubRepo], dependencies=[Depends(dependencies.verify_beta_access)])
+@limiter.limit("10/minute")
+async def get_my_github_repos(
+    request: Request,
+    current_user: models.User = Depends(dependencies.get_current_user)
+):
+    if not current_user.github_access_token:
+        raise HTTPException(status_code=400, detail="GitHub account not connected or token missing. Please relink your GitHub account.")
+    
+    repos = await github_service.get_user_repos(current_user.github_access_token)
+    return repos
+
+@router.post("/me/contribute/github", status_code=status.HTTP_202_ACCEPTED, dependencies=[Depends(dependencies.verify_beta_access)])
+@limiter.limit("5/day")
+async def contribute_github_repo(
+    request: Request,
+    payload: GithubContributionRequest,
+    current_user: models.User = Depends(dependencies.get_current_user),
+    db: Session = Depends(database.get_db)
+):
+    if not current_user.github_access_token:
+        raise HTTPException(status_code=400, detail="GitHub account not connected.")
+
+    one_day_ago = datetime.now(timezone.utc) - timedelta(days=1)
+    counted_statuses = ['PENDING', 'PROCESSING', 'PROCESSED']
+    
+    contributions_in_last_24h = db.query(models.Contribution).filter(
+        models.Contribution.user_id == current_user.id,
+        models.Contribution.status.in_(counted_statuses),
+        models.Contribution.created_at >= one_day_ago
+    ).count()
+
+    if contributions_in_last_24h >= 3:
+        raise HTTPException(
+            status_code=status.HTTP_429_TOO_MANY_REQUESTS,
+            detail="You have reached your daily limit of 3 successful or pending contributions."
+        )
+
+    # Create a placeholder contribution record
+    new_contribution = crud.create_contribution_record(
+        db,
+        user=current_user,
+        codebase="", # Will be filled by the background task
+        valuation_results={},
+        reward=0.0,
+        embedding=None,
+        initial_status="PROCESSING_GITHUB",
+        source='github'
+    )
+    
+    # Trigger background task
+    process_github_contribution.delay(current_user.id, new_contribution.id, current_user.github_access_token, payload.repo_full_name, payload.default_branch)
+
+    return {"message": "GitHub repository queued for processing.", "contribution_id": new_contribution.id}
 
 
 @router.get("/me", response_model=UserSchema)

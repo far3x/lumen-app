@@ -7,6 +7,8 @@ import math
 import tiktoken
 import csv
 import hashlib
+import zipfile
+import io
 from typing import List
 from sqlalchemy.orm import Session
 from app.core.celery_app import celery_app
@@ -33,7 +35,27 @@ from sqlalchemy.exc import IntegrityError
 logger = logging.getLogger(__name__)
 
 PLAGIARISM_THRESHOLD = 0.995
-INNOVATION_THRESHOLD = 0.985
+INNOVATION_THRESHOLD = 0.987
+
+
+SKIPPED_FOLDERS = [
+    ".git", ".svn", ".hg", "node_modules", "__pycache__", "venv", ".venv", "env", 
+    ".idea", ".vscode", "nbproject", ".settings", "DerivedData", "coverage",
+    "build", "dist", "out", "output", "target", "bin", "obj", "site", "docs/_build",
+    ".angular", ".next", ".nuxt", ".parcel-cache", ".pytest_cache", "log",
+    "vendor", "deps", "Pods", "bower_components", "jspm_packages", "web_modules",
+    ".svelte-kit", "storage", "bootstrap/cache", "public/build", "public/hot",
+    "var", ".serverless", ".terraform", "storybook-static", "ios/Pods", "dump"
+]
+
+SKIPPED_FILES = [
+    "package-lock.json", "yarn.lock", "pnpm-lock.yaml", "Pipfile.lock", 
+    "poetry.lock", "composer.lock", "Gemfile.lock", "Cargo.lock", "Podfile.lock", "go.sum",
+    ".DS_Store", "Thumbs.db", ".Rhistory", ".node_repl_history", "yarn-debug.log", ".tfstate",
+    ".sublime-workspace", ".sublime-project", ".env", ".tfstate.backup", "yarn-error.log",
+    "a.out", "main.exe", "celerybeat-schedule", "npm-debug.log", ".eslintcache"
+]
+
 
 @celery_app.task(name="app.tasks.analyze_demo_project_task")
 def analyze_demo_project_task(codebase: str) -> dict:
@@ -98,7 +120,6 @@ def upsert_airdrop_from_csv_task(file_path: str = "app/data/airdrop_snapshot.csv
     logger.info(f"Starting airdrop UPSERT/reconciliation from CSV file: {file_path}")
     db = SessionLocal()
     try:
-        # Step 1: Process the entire CSV, summing quantities for duplicate addresses.
         csv_balances = {}
         with open(file_path, mode='r', encoding='utf-8') as csvfile:
             reader = csv.DictReader(csvfile)
@@ -118,12 +139,10 @@ def upsert_airdrop_from_csv_task(file_path: str = "app/data/airdrop_snapshot.csv
         
         logger.info(f"Processed CSV: Found {len(csv_balances)} unique addresses with summed balances.")
 
-        # Step 2: Get all current recipients from the database for comparison.
         db_recipients = db.query(models.AirdropRecipient).all()
         db_balances = {r.solana_address: r for r in db_recipients}
         logger.info(f"Found {len(db_balances)} existing recipients in the database.")
 
-        # Step 3: Identify who to add and who to update.
         recipients_to_add = []
         updated_count = 0
         added_count = 0
@@ -131,14 +150,12 @@ def upsert_airdrop_from_csv_task(file_path: str = "app/data/airdrop_snapshot.csv
 
         for address, total_quantity in csv_balances.items():
             if address not in db_balances:
-                # This address is missing from the DB, prepare to add it.
                 recipients_to_add.append(
                     models.AirdropRecipient(solana_address=address, token_amount=total_quantity)
                 )
                 logger.info(f"[UPSERT_AIRDROP] ADDING new address: {address} with amount {total_quantity}")
                 added_count += 1
             else:
-                # This address exists, check if the amount needs updating.
                 existing_recipient = db_balances[address]
                 if existing_recipient.token_amount != total_quantity:
                     logger.warning(
@@ -150,7 +167,6 @@ def upsert_airdrop_from_csv_task(file_path: str = "app/data/airdrop_snapshot.csv
                 else:
                     unchanged_count += 1
 
-        # Step 4: Perform the database operations in a single transaction.
         if not recipients_to_add and updated_count == 0:
             logger.info("Database is already in sync with the CSV. No changes needed.")
             return
@@ -760,8 +776,8 @@ def process_contribution(self, user_id: int, contribution_db_id: int):
             return
             
         final_codebase = codebase
-        if source == 'web':
-            logger.info(f"Contribution {contribution_db_id} is from web source. Performing server-side sanitization.")
+        if source == 'web' or source == 'github':
+            logger.info(f"Contribution {contribution_db_id} is from {source} source. Performing server-side sanitization.")
             final_codebase = sanitization_service.sanitize_code(codebase)
 
         try:
@@ -771,7 +787,7 @@ def process_contribution(self, user_id: int, contribution_db_id: int):
                 raise ValueError("Failed to get a transaction ID from Irys.")
             contribution_record.irys_tx_id = irys_tx_id
             contribution_record.content_preview = "\n".join(final_codebase.splitlines()[:50])
-            contribution_record.raw_content = None # Stop storing the content locally
+            contribution_record.raw_content = None
             db.commit()
             logger.info(f"Contribution {contribution_db_id} stored on Irys: {irys_tx_id}")
         except Exception as e:
@@ -854,7 +870,7 @@ def process_contribution(self, user_id: int, contribution_db_id: int):
             publish_contribution_update(db, contribution_db_id, user_id)
             return
 
-        base_reward_usd = valuation_result.get("final_reward", 0.0) * 0.3 #*0.3 cuz im poor now
+        base_reward_usd = valuation_result.get("final_reward", 0.0) * 0.3
         
         if source == 'web':
             base_reward_usd /= 1.5
@@ -1298,5 +1314,87 @@ def backfill_irys_storage_task():
 
     except Exception as e:
         logger.error(f"A critical error occurred during the Irys backfill task: {e}", exc_info=True)
+    finally:
+        db.close()
+
+@celery_app.task(name="app.tasks.process_github_contribution")
+def process_github_contribution(user_id: int, contribution_id: int, access_token: str, repo_full_name: str, default_branch: str):
+    logger.info(f"Processing GitHub contribution {contribution_id} for repo {repo_full_name}...")
+    db = SessionLocal()
+    try:
+        zip_content = asyncio.run(github_service.download_repo_zip(access_token, repo_full_name, default_branch))
+        
+        if not zip_content:
+            logger.error(f"Failed to download repo archive for {repo_full_name}")
+            crud.update_contribution_status(db, contribution_id, "FAILED_DOWNLOAD")
+            publish_contribution_update(db, contribution_id, user_id)
+            return
+
+        formatted_payload = ""
+        total_size = 0
+        PAYLOAD_LIMIT = 5 * 1024 * 1024
+        
+        try:
+            with zipfile.ZipFile(io.BytesIO(zip_content)) as z:
+                file_list = z.namelist()
+                root_folder = file_list[0].split('/')[0] + '/' if '/' in file_list[0] else ""
+
+                for file_path in file_list:
+                    if file_path.endswith('/'): continue
+                    
+                    clean_path = file_path[len(root_folder):] if file_path.startswith(root_folder) else file_path
+                    
+                    path_parts = clean_path.split('/')
+                    filename = path_parts[-1]
+                    
+                    if any(part.startswith('.') and part != '.' for part in path_parts): continue
+                    if any(s in path_parts for s in SKIPPED_FOLDERS): continue
+                    if filename in SKIPPED_FILES: continue
+                    
+                    try:
+                        content_bytes = z.read(file_path)
+                        content_str = content_bytes.decode('utf-8')
+                        
+                        content_str = content_str.replace('\x00', '')
+                        
+                        part = f"\n\n---lum--new--file--{clean_path}\n{content_str}"
+                        part_size = len(part.encode('utf-8'))
+                        
+                        if total_size + part_size > PAYLOAD_LIMIT:
+                            logger.warning(f"Repo {repo_full_name} exceeds payload limit. Truncating.")
+                            break
+                            
+                        formatted_payload += part
+                        total_size += part_size
+                        
+                    except UnicodeDecodeError:
+                        continue
+        except Exception as e:
+            logger.error(f"Error processing zip file for {repo_full_name}: {e}")
+            crud.update_contribution_status(db, contribution_id, "FAILED_PROCESSING")
+            publish_contribution_update(db, contribution_id, user_id)
+            return
+
+        if not formatted_payload.strip():
+             logger.warning(f"Repo {repo_full_name} resulted in empty payload.")
+             crud.update_contribution_status(db, contribution_id, "REJECTED_EMPTY")
+             publish_contribution_update(db, contribution_id, user_id)
+             return
+
+        contribution = crud.get_contribution_by_id(db, contribution_id)
+        if contribution:
+            contribution.raw_content = formatted_payload.strip().replace('\x00', '')
+            preview_lines = formatted_payload.strip().splitlines()[:50]
+            contribution.content_preview = "\n".join(preview_lines).replace('\x00', '')
+            contribution.status = "PENDING"
+            db.commit()
+        
+        logger.info(f"GitHub payload prepared. Triggering standard processing for contribution {contribution_id}.")
+        process_contribution.delay(user_id, contribution_id)
+
+    except Exception as e:
+        logger.error(f"Unexpected error in process_github_contribution: {e}", exc_info=True)
+        crud.update_contribution_status(db, contribution_id, "FAILED")
+        publish_contribution_update(db, contribution_id, user_id)
     finally:
         db.close()
