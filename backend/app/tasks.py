@@ -1125,7 +1125,7 @@ def find_cross_user_duplicates_task():
             return
 
         logger.info(f"Found {len(rejected_contributions)} rejected contributions to analyze.")
-        logger.info("--- Cross-User Duplicate Report ---")
+        logger.info("--- Cross-User Duplicate Report (Similarity >= 99.5%) ---")
         
         report_found = False
         for rejected_contrib in rejected_contributions:
@@ -1150,16 +1150,16 @@ def find_cross_user_duplicates_task():
                     similarity = 1 - distance
                     break
             
-            if original_contrib:
+            if original_contrib and similarity >= 0.995:
+                if original_contrib and similarity == 1:
+                    logger.info("=============================--- DUPLICATE INSTANT BAN ---=============================")
                 report_found = True
                 logger.info(
                     f"(User ID: {rejected_contrib.user_id}), {similarity:.2%} match to --> (User ID: {original_contrib.user_id})"
                 )
-            else:
-                 logger.warning(f"Could not find an original source for Rejected C_ID:{rejected_contrib.id}")
 
         if not report_found:
-            logger.info("Analysis complete. No cross-user duplicates could be sourced.")
+            logger.info("Analysis complete. No cross-user duplicates >= 99.5% similarity could be sourced.")
         
         logger.info("--- End of Report ---")
 
