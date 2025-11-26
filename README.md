@@ -22,7 +22,7 @@
 
 ### Table of Contents
 
--   [Overview](#overview)
+-   [About & Evolution](#about--evolution)
 -   [Architecture](#architecture)
 -   [Project Structure](#project-structure)
 -   [Prerequisites](#prerequisites)
@@ -34,37 +34,34 @@
     -   [Accessing Services](#accessing-services)
     -   [Celery Tasks & Workers](#celery-tasks--workers)
 -   [The Valuation Engine](#the-valuation-engine)
+-   [Security Note](#security-note)
 -   [License](#license)
 
 ---
 
-<h2 id="overview">Overview</h2>
+<h2 id="about--evolution">About & Evolution</h2>
 
-**Lumen Exchange** is the monolithic repository powering the Lumen Protocol. It handles the ingestion of code contributions from the CLI, manages user identities, processes on-chain rewards (Solana/USDC), and hosts the hybrid AI valuation engine.
+**Lumen Protocol** began as `pylumen`, a simple local CLI tool designed to help developers generate context prompts for LLMs. As usage grew, it became clear that this high-quality, human-written code was the missing link in the AI data economy.
 
-This repository contains:
-1.  **The Core API:** FastAPI backend handling auth, rate-limiting, and business logic.
-2.  **The Valuation Engine:** A hybrid system using `pgvector` and Google Gemini to score code quality.
-3.  **The Frontends:** Both the Contributor Dashboard (B2C) and the Business Data Explorer (B2B).
-4.  **The Worker Nodes:** Celery distributed task queues for processing massive codebases asynchronously.
+**Lumen App v2.0** is the evolution of that idea into a robust, decentralized platform. This repository acts as the "Mothership"—it handles the ingestion of code contributions from the CLI, manages user identities, processes on-chain rewards (Solana/USDC), and hosts the hybrid AI valuation engine that appraises code quality in real-time.
 
 <h2 id="architecture">Architecture</h2>
 
-The system is containerized using Docker Compose and consists of the following services:
+The system is containerized using Docker Compose and consists of the following microservices:
 
-*   **`api`**: FastAPI (Python 3.11) application serving REST endpoints and WebSockets.
-*   **`worker`**: Celery workers for heavy lifting (valuation, unzip, sanitization).
-*   **`db`**: PostgreSQL 16 equipped with the **`pgvector`** extension for high-performance semantic code search.
-*   **`redis`**: In-memory data store for caching, rate-limiting, and Celery message brokering.
-*   **`frontend`**: Contributor dashboard built with React, Vite, and TailwindCSS.
-*   **`business_frontend`**: B2B Data Explorer dashboard.
-*   **`irys`**: A local microservice/gateway for interacting with the Irys decentralized storage network.
-*   **`nginx`**: Reverse proxy handling SSL termination and routing.
+*   **`api`**: The core backend built with **FastAPI (Python 3.11)**. It handles authentication, rate-limiting, and serves the REST API.
+*   **`worker`**: Distributed **Celery** workers that handle heavy lifting: unpacking codebases, running local analysis, generating embeddings, and querying the AI valuation engine.
+*   **`db`**: **PostgreSQL 16** equipped with the **`pgvector`** extension for high-performance semantic code search and uniqueness verification.
+*   **`redis`**: In-memory data store used for caching, rate-limiting, and as the Celery message broker.
+*   **`frontend`**: The Contributor Dashboard (B2C) built with **React, Vite, and TailwindCSS**.
+*   **`business_frontend`**: The Data Explorer Dashboard (B2B) for enterprise data customers.
+*   **`irys`**: A local Node.js gateway for interacting with the **Irys** decentralized storage network.
+*   **`nginx`**: Reverse proxy handling routing, SSL termination, and static file serving.
 
 <h2 id="project-structure">Project Structure</h2>
 
 ```text
-lumen-exchange/
+lumen-app/
 ├── backend/              # Core Python API & Workers
 │   ├── app/
 │   │   ├── api/          # V1 Endpoints (Auth, Users, Contributions)
@@ -84,70 +81,113 @@ lumen-exchange/
 <h2 id="prerequisites">Prerequisites</h2>
 
 *   **Docker** & **Docker Compose** (Essential)
-*   **Node.js 18+** (Only if developing frontends locally without Docker)
-*   **Python 3.11+** (Only if developing backend locally without Docker)
-*   **Solana Wallet Keypair** (For handling payouts)
-*   **Google Gemini API Key** (For the valuation engine)
+*   **Python 3.11+** (If running scripts locally)
+*   **Node.js 18+** (If building frontends locally)
+*   **Solana Wallet** (Phantom/Backpack for testing payments)
+*   **Google Gemini API Key** (Required for the valuation engine)
 
 <h2 id="installation--setup">Installation & Setup</h2>
 
 ### 1. Clone the repository
 ```bash
-git clone https://github.com/YOUR_USERNAME/lumen-exchange.git
-cd lumen-exchange
+git clone https://github.com/Far3000-YT/lumen.git
+cd lumen
 ```
 
 <h3 id="environment-configuration">2. Environment Configuration</h3>
 
-Create a `.env` file in the root directory. You can base it on the example below.
-**Note:** Never commit your real `.env` to version control.
+Create a `.env` file in the root directory. Copy the block below and fill in your keys.
+**Note:** Default values are provided for local development where applicable.
 
 ```ini
+# --- General Settings ---
+DEV_MODE=True
+FRONTEND_URL=http://localhost:5173
+BUSINESS_FRONTEND_URL=http://localhost:5174
+VITE_API_URL=http://localhost:8000
+API_URL=http://localhost:8000
+PUBLIC_LOGO_URL=https://i.imgur.com/8IqIjIS.jpeg
+
+# --- Security (Generate new keys for prod: openssl rand -hex 32) ---
+SECRET_KEY=xxx
+ENCRYPTION_KEY=xxx=
+LUMEN_CLIENT_SECRET=xxx
+
+# --- Valuation Engine ---
+VALUATION_MODE=AI
+GEMINI_MODEL_NAME=gemini-2.5-flash
+GEMINI_TEMPERATURE=0.2
+GEMINI_API_KEY=xxx
+
 # --- Database ---
 POSTGRES_USER=lumen_user
-POSTGRES_PASSWORD=secure_password
+POSTGRES_PASSWORD=xxx
 POSTGRES_DB=lumen_exchange
-DATABASE_URL=postgresql://lumen_user:secure_password@db:5432/lumen_exchange
+DATABASE_URL=postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@db:5432/${POSTGRES_DB}
+PGBOUNCER_PASSWORD=xxx
 
-# --- Security ---
-SECRET_KEY=your_generated_openssl_secret_key
-ALGORITHM=HS256
-ACCESS_TOKEN_EXPIRE_MINUTES=1440
-ENCRYPTION_KEY=your_fernet_key_for_2fa_secrets
+# --- Redis & Celery ---
+REDIS_URL=redis://redis:6379/0
+CELERY_BROKER_URL=redis://redis:6379/0
+CELERY_RESULT_BACKEND=redis://redis:6379/0
 
-# --- External APIs ---
-GEMINI_API_KEY=your_google_gemini_key
-GITHUB_CLIENT_ID=your_github_id
-GITHUB_CLIENT_SECRET=your_github_secret
-GITHUB_SEARCH_PAT=your_github_pat_for_search
+# --- Protocol Settings ---
+COOLDOWN_DAYS=14
+BETA_MODE_ENABLED=True
+BETA_MAX_USERS=200
+BETA_GENESIS_BONUS=1000
+
+# --- Email (Mailjet) ---
+MAIL_SERVER=in-v3.mailjet.com
+MAIL_PORT=587
+MAIL_FROM=noreply@lumen.onl
+MAIL_FROM_NAME=Lumen Protocol
+MAIL_STARTTLS=True
+MAIL_SSL_TLS=False
+MAIL_USERNAME=xxx
+MAIL_PASSWORD=xxx
+
+# --- Third Party Services ---
+GOOGLE_RECAPTCHA_SITE_KEY=xxx
+GOOGLE_RECAPTCHA_SECRET_KEY=xxx
+GITHUB_CLIENT_ID=xxx
+GITHUB_CLIENT_SECRET=xxx
+GITHUB_SEARCH_PAT=xxx
+BIRDEYE_API_KEY=xxx
+VITE_WALLETCONNECT_PROJECT_ID=xxx
 
 # --- Blockchain (Solana) ---
-SOLANA_RPC_URL=https://api.mainnet-beta.solana.com
-# JSON Array format for private keys
-TREASURY_PRIVATE_KEY=[123, 45, ...] 
-AIRDROP_WALLET_PRIVATE_KEY=[123, 45, ...]
-LUM_TOKEN_MINT_ADDRESS=your_token_mint_address
-USDC_TOKEN_MINT_ADDRESS=usdc_mint_address
+# Use publicnode url for better reliability without auth
+SOLANA_RPC_URL=https://solana-rpc.publicnode.com
+TREASURY_PRIVATE_KEY=[162, xxx, 44, 74]
+AIRDROP_WALLET_PRIVATE_KEY=[xxx]
+USDC_TOKEN_MINT_ADDRESS=aaa
+LUM_TOKEN_MINT_ADDRESS=aaa
+AIRDROP_TOKEN_MINT_ADDRESS=xxx
 
-# --- App Config ---
-VALUATION_MODE=AI  # Options: AI, MANUAL
-BETA_MODE_ENABLED=True
+# --- Irys Storage (Decentralized) ---
+IRYS_PRIVATE_KEY=xxx
+IRYS_NETWORK=mainnet
+IRYS_TOKEN=solana
 ```
 
 <h3 id="docker-deployment">3. Docker Deployment</h3>
 
-We provide a `docker-compose.dev.yml` for local development which includes hot-reloading.
+We provide a `docker-compose.dev.yml` for local development which includes hot-reloading for both Python and React services.
 
 ```bash
 # Build and start all services
 docker-compose -f docker-compose.dev.yml up --build
 ```
 
-This will start the database, Redis, backend API, Celery workers, and both frontends.
+This will spin up the entire stack. You can access:
+*   **Contributor Frontend:** `http://localhost:5173`
+*   **Business Frontend:** `http://localhost:5174`
+*   **API Documentation:** `http://localhost:8000/docs`
 
 <h3 id="database-migrations">4. Database Migrations</h3>
 
-Once the containers are running, you must apply the database schema using Alembic.
+On the first run, you must apply the database schema. The `pgvector` extension is enabled automatically by the Docker image.
 
 ```bash
 # Run inside the 'api' container
@@ -158,44 +198,51 @@ docker-compose -f docker-compose.dev.yml exec api alembic upgrade head
 
 <h3 id="accessing-services">Accessing Services</h3>
 
-Once Docker is running, the services are available at:
-
-| Service | URL | Description |
-| :--- | :--- | :--- |
-| **API Docs** | `http://localhost:8000/docs` | Swagger UI for Backend |
-| **Contributor App** | `http://localhost:5173` | Main user dashboard |
-| **Business App** | `http://localhost:5174` | Data Explorer dashboard |
-| **Database** | `localhost:5433` | Mapped externally (User: lumen_user) |
+To access the database locally (e.g., via DBeaver or TablePlus), use port **5433** (mapped to internal 5432).
+*   **Host:** `localhost`
+*   **Port:** `5433`
+*   **User:** `lumen_user`
+*   **Database:** `lumen_exchange`
 
 <h3 id="celery-tasks--workers">Celery Tasks & Workers</h3>
 
-The system relies heavily on background workers. Here are common commands to trigger tasks manually during development.
+The system relies on background workers for valuation. Here are useful commands for testing and maintenance:
 
 **Trigger Network Stats Recalculation**
-*Useful after wiping DB or massive updates.*
+*Useful after deleting contributions or resetting the DB.*
 ```bash
 docker-compose -f docker-compose.dev.yml exec worker celery -A app.core.celery_app.celery_app call app.tasks.recalculate_network_stats_task
 ```
 
 **Simulate Daily Payout Batch**
-*Runs the logic to calculate payouts without executing on-chain transactions.*
+*Runs the payout logic (reading balances) without executing on-chain transactions.*
 ```bash
 docker-compose -f docker-compose.dev.yml exec worker celery -A app.core.celery_app.celery_app call app.tasks.simulate_daily_payout_batch_task
 ```
 
 **Reset User Limits (Dev Only)**
-*Resets the daily contribution limit for a specific user ID (e.g., ID 1).*
+*Resets the daily contribution limit for a specific user ID (e.g., User 1).*
 ```bash
 docker-compose -f docker-compose.dev.yml exec worker celery -A app.core.celery_app.celery_app call app.tasks.reset_user_limits_task --args='[1]'
 ```
 
 <h2 id="the-valuation-engine">The Valuation Engine</h2>
 
-Located in `backend/app/services/valuation.py`, this is the heart of the protocol.
+Located in `backend/app/services/valuation.py`, this is the proprietary heart of the protocol. It assesses code value in three stages:
 
-1.  **Quantitative Analysis:** Calculates Logical Lines of Code (LLOC), cyclomatic complexity, and compression ratios.
-2.  **Uniqueness Check:** Generates embeddings for the submitted code and queries `pgvector` to find semantic duplicates in the network history.
-3.  **Qualitative Analysis:** Sends a sanitized prompt to **Google Gemini 2.5** to assess architectural quality, clarity, and potential plagiarism.
+1.  **Quantitative Analysis:** Calculates Logical Lines of Code (LLOC), cyclomatic complexity, and compression ratios to determine "substance."
+2.  **Uniqueness Check:** Generates high-dimensional embeddings for the code and queries `pgvector` to find semantic duplicates across the entire network history, preventing plagiarism.
+3.  **Qualitative Analysis:** Sends a sanitized, context-aware prompt to **Google Gemini 2.5** to assess architectural quality, clarity, and potential open-source copying.
+
+<h2 id="security-note">Security Note</h2>
+
+This repository has been sanitized using `git-filter-repo` to remove all historical traces of:
+*   Production API keys (`.env` files).
+*   SSL Certificates (`certbot/`).
+*   Database dumps (`.sql`).
+*   Internal logs and instructions.
+
+The commit history has been rewritten. If you are a previous contributor, please re-clone the repository to ensure a clean state.
 
 <h2 id="license">License</h2>
 
