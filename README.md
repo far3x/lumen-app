@@ -18,7 +18,7 @@
     <a href="https://opensource.org/licenses/MIT"><img src="https://img.shields.io/badge/License-MIT-yellow.svg" alt="License: MIT"></a>
 </p>
 
----
+
 
 ### Table of Contents
 
@@ -37,13 +37,13 @@
 -   [Security Note](#security-note)
 -   [License](#license)
 
----
+
 
 <h2 id="about--evolution">About & Evolution</h2>
 
 **Lumen Protocol** began as `pylumen`, a simple local CLI tool designed to help developers generate context prompts for LLMs. As usage grew, it became clear that this high-quality, human-written code was the missing link in the AI data economy.
 
-**Lumen App v2.0** is the evolution of that idea into a robust, decentralized platform. This repository acts as the "Mothership"—it handles the ingestion of code contributions from the CLI, manages user identities, processes on-chain rewards (Solana/USDC), and hosts the hybrid AI valuation engine that appraises code quality in real-time.
+**Lumen App v2.0** is the evolution of that idea into a robust, decentralized platform. This repository acts as the "Mothership": it handles the ingestion of code contributions from the CLI, manages user identities, processes on-chain rewards (Solana/USDC), and hosts the hybrid AI valuation engine that appraises code quality in real-time.
 
 <h2 id="architecture">Architecture</h2>
 
@@ -75,7 +75,7 @@ lumen-app/
 ├── business-frontend/    # B2B Data Explorer (React)
 ├── certbot/              # SSL Configuration
 ├── nginx/                # Nginx Configs
-└── docker-compose.yml    # Production orchestration
+└── docker compose.yml    # Production orchestration
 ```
 
 <h2 id="prerequisites">Prerequisites</h2>
@@ -90,7 +90,7 @@ lumen-app/
 
 ### 1. Clone the repository
 ```bash
-git clone https://github.com/Far3000-YT/lumen.git
+git clone https://github.com/far3x/lumen-app.git
 cd lumen
 ```
 
@@ -100,7 +100,9 @@ Create a `.env` file in the root directory. Copy the block below and fill in you
 **Note:** Default values are provided for local development where applicable.
 
 ```ini
-# --- General Settings ---
+# -----------------------------------------------------------------------------
+# GENERAL SETTINGS
+# -----------------------------------------------------------------------------
 DEV_MODE=True
 FRONTEND_URL=http://localhost:5173
 BUSINESS_FRONTEND_URL=http://localhost:5174
@@ -108,76 +110,114 @@ VITE_API_URL=http://localhost:8000
 API_URL=http://localhost:8000
 PUBLIC_LOGO_URL=https://i.imgur.com/8IqIjIS.jpeg
 
-# --- Security (Generate new keys for prod: openssl rand -hex 32) ---
-SECRET_KEY=xxx
-ENCRYPTION_KEY=xxx=
-LUMEN_CLIENT_SECRET=xxx
+# -----------------------------------------------------------------------------
+# SECURITY
+# Use 'openssl rand -hex 32' to generate secure keys
+# -----------------------------------------------------------------------------
+SECRET_KEY=09d25e094faa6ca2556c818166b7a9563b93f7099f6f0f4caa6cf63b88e8d3e7
+# Use a Fernet key for 2FA encryption
+ENCRYPTION_KEY=bi1rX2V4YW1wbGVfa2V5X2dlbmVyYXRlZF9mb3JfZGVtb189
+LUMEN_CLIENT_SECRET=cli_client_secret_example_123
 
-# --- Valuation Engine ---
+# -----------------------------------------------------------------------------
+# VALUATION ENGINE (AI)
+# -----------------------------------------------------------------------------
 VALUATION_MODE=AI
 GEMINI_MODEL_NAME=gemini-2.5-flash
 GEMINI_TEMPERATURE=0.2
-GEMINI_API_KEY=xxx
+# Your Google AI Studio API Key
+GEMINI_API_KEY=AIzaSyD_ExampleKeyForGeminiModel_12345
 
-# --- Database ---
+# -----------------------------------------------------------------------------
+# DATABASE (PostgreSQL)
+# -----------------------------------------------------------------------------
 POSTGRES_USER=lumen_user
-POSTGRES_PASSWORD=xxx
+POSTGRES_PASSWORD=secure_db_password_123
 POSTGRES_DB=lumen_exchange
+# Connection string for the backend
 DATABASE_URL=postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@db:5432/${POSTGRES_DB}
-PGBOUNCER_PASSWORD=xxx
+# Password for PgBouncer (Connection Pooler)
+PGBOUNCER_PASSWORD=secure_db_password_123
 
-# --- Redis & Celery ---
+# -----------------------------------------------------------------------------
+# REDIS & CELERY
+# -----------------------------------------------------------------------------
 REDIS_URL=redis://redis:6379/0
 CELERY_BROKER_URL=redis://redis:6379/0
 CELERY_RESULT_BACKEND=redis://redis:6379/0
 
-# --- Protocol Settings ---
+# -----------------------------------------------------------------------------
+# PROTOCOL SETTINGS
+# -----------------------------------------------------------------------------
 COOLDOWN_DAYS=14
 BETA_MODE_ENABLED=True
 BETA_MAX_USERS=200
 BETA_GENESIS_BONUS=1000
 
-# --- Email (Mailjet) ---
+# -----------------------------------------------------------------------------
+# EMAIL SERVICE (Mailjet)
+# -----------------------------------------------------------------------------
 MAIL_SERVER=in-v3.mailjet.com
 MAIL_PORT=587
 MAIL_FROM=noreply@lumen.onl
 MAIL_FROM_NAME=Lumen Protocol
 MAIL_STARTTLS=True
 MAIL_SSL_TLS=False
-MAIL_USERNAME=xxx
-MAIL_PASSWORD=xxx
+MAIL_USERNAME=your_mailjet_public_key
+MAIL_PASSWORD=your_mailjet_secret_key
 
-# --- Third Party Services ---
-GOOGLE_RECAPTCHA_SITE_KEY=xxx
-GOOGLE_RECAPTCHA_SECRET_KEY=xxx
-GITHUB_CLIENT_ID=xxx
-GITHUB_CLIENT_SECRET=xxx
-GITHUB_SEARCH_PAT=xxx
-BIRDEYE_API_KEY=xxx
-VITE_WALLETCONNECT_PROJECT_ID=xxx
+# -----------------------------------------------------------------------------
+# THIRD PARTY SERVICES
+# -----------------------------------------------------------------------------
+# Google reCAPTCHA v2 keys
+GOOGLE_RECAPTCHA_SITE_KEY=6LeIxAcTAAAAAJcZVRqyHh71UMIEGNQ_MXjiZKhI
+GOOGLE_RECAPTCHA_SECRET_KEY=6LeIxAcTAAAAAGG-vFI1TnRWxMZNFuojJ4WifJWe
 
-# --- Blockchain (Solana) ---
+# GitHub OAuth Application Keys
+GITHUB_CLIENT_ID=Ov23li...
+GITHUB_CLIENT_SECRET=a1b2c3d4...
+# GitHub Personal Access Token for code search (classic token)
+GITHUB_SEARCH_PAT=ghp_example_token_for_searching_code
+
+# Birdeye API for Token Prices
+BIRDEYE_API_KEY=def456...
+
+# WalletConnect Project ID (Reown)
+VITE_WALLETCONNECT_PROJECT_ID=a1b2c3d4e5f6...
+
+# -----------------------------------------------------------------------------
+# BLOCKCHAIN (Solana)
+# -----------------------------------------------------------------------------
 # Use publicnode url for better reliability without auth
 SOLANA_RPC_URL=https://solana-rpc.publicnode.com
-TREASURY_PRIVATE_KEY=[162, xxx, 44, 74]
-AIRDROP_WALLET_PRIVATE_KEY=[xxx]
-USDC_TOKEN_MINT_ADDRESS=aaa
-LUM_TOKEN_MINT_ADDRESS=aaa
-AIRDROP_TOKEN_MINT_ADDRESS=xxx
 
-# --- Irys Storage (Decentralized) ---
-IRYS_PRIVATE_KEY=xxx
+# Keypair for the Treasury Wallet (JSON Array Format)
+TREASURY_PRIVATE_KEY=[162, 25, 44, 74, 22, 11, 200, 199, ...]
+
+# Keypair for the Airdrop Wallet (JSON Array Format)
+AIRDROP_WALLET_PRIVATE_KEY=[12, 44, 66, 88, ...]
+
+# Token Mint Addresses (Mainnet or Devnet)
+USDC_TOKEN_MINT_ADDRESS=EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v
+LUM_TOKEN_MINT_ADDRESS=LUMEN111111111111111111111111111111111111
+AIRDROP_TOKEN_MINT_ADDRESS=DROP11111111111111111111111111111111111
+
+# -----------------------------------------------------------------------------
+# IRYS STORAGE (Decentralized)
+# -----------------------------------------------------------------------------
+# Private key for the wallet paying for Irys storage
+IRYS_PRIVATE_KEY=a1b2c3d4...
 IRYS_NETWORK=mainnet
 IRYS_TOKEN=solana
 ```
 
 <h3 id="docker-deployment">3. Docker Deployment</h3>
 
-We provide a `docker-compose.dev.yml` for local development which includes hot-reloading for both Python and React services.
+We provide a `docker compose.dev.yml` for local development which includes hot-reloading for both Python and React services.
 
 ```bash
 # Build and start all services
-docker-compose -f docker-compose.dev.yml up --build
+docker compose -f docker compose.dev.yml up --build
 ```
 
 This will spin up the entire stack. You can access:
@@ -191,7 +231,7 @@ On the first run, you must apply the database schema. The `pgvector` extension i
 
 ```bash
 # Run inside the 'api' container
-docker-compose -f docker-compose.dev.yml exec api alembic upgrade head
+docker compose -f docker compose.dev.yml exec api alembic upgrade head
 ```
 
 <h2 id="development-workflow">Development Workflow</h2>
@@ -211,19 +251,19 @@ The system relies on background workers for valuation. Here are useful commands 
 **Trigger Network Stats Recalculation**
 *Useful after deleting contributions or resetting the DB.*
 ```bash
-docker-compose -f docker-compose.dev.yml exec worker celery -A app.core.celery_app.celery_app call app.tasks.recalculate_network_stats_task
+docker compose -f docker compose.dev.yml exec worker celery -A app.core.celery_app.celery_app call app.tasks.recalculate_network_stats_task
 ```
 
 **Simulate Daily Payout Batch**
 *Runs the payout logic (reading balances) without executing on-chain transactions.*
 ```bash
-docker-compose -f docker-compose.dev.yml exec worker celery -A app.core.celery_app.celery_app call app.tasks.simulate_daily_payout_batch_task
+docker compose -f docker compose.dev.yml exec worker celery -A app.core.celery_app.celery_app call app.tasks.simulate_daily_payout_batch_task
 ```
 
 **Reset User Limits (Dev Only)**
 *Resets the daily contribution limit for a specific user ID (e.g., User 1).*
 ```bash
-docker-compose -f docker-compose.dev.yml exec worker celery -A app.core.celery_app.celery_app call app.tasks.reset_user_limits_task --args='[1]'
+docker compose -f docker compose.dev.yml exec worker celery -A app.core.celery_app.celery_app call app.tasks.reset_user_limits_task --args='[1]'
 ```
 
 <h2 id="the-valuation-engine">The Valuation Engine</h2>
@@ -237,12 +277,11 @@ Located in `backend/app/services/valuation.py`, this is the proprietary heart of
 <h2 id="security-note">Security Note</h2>
 
 This repository has been sanitized using `git-filter-repo` to remove all historical traces of:
-*   Production API keys (`.env` files).
 *   SSL Certificates (`certbot/`).
 *   Database dumps (`.sql`).
 *   Internal logs and instructions.
 
-The commit history has been rewritten. If you are a previous contributor, please re-clone the repository to ensure a clean state.
+The commit history has been rewritten. If you have any question, do not hesitate to DM @far3000 (on discord) or @Far3k (on telegram) or @far3xbt (on X) (i never dm first !)
 
 <h2 id="license">License</h2>
 
