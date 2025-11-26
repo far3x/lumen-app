@@ -16,7 +16,6 @@
     <a href="https://reactjs.org/"><img src="https://img.shields.io/badge/React-18-61DAFB.svg" alt="React"></a>
     <a href="https://www.postgresql.org/"><img src="https://img.shields.io/badge/PostgreSQL-16-336791.svg" alt="Postgres"></a>
     <a href="https://opensource.org/licenses/MIT"><img src="https://img.shields.io/badge/License-MIT-yellow.svg" alt="License: MIT"></a>
-    <a href="https://github.com/Far3000-YT/lumen/actions"><img src="https://img.shields.io/badge/build-passing-brightgreen.svg" alt="Build Status"></a>
 </p>
 
 ---
