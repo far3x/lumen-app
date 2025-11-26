@@ -870,7 +870,7 @@ def process_contribution(self, user_id: int, contribution_db_id: int):
             publish_contribution_update(db, contribution_db_id, user_id)
             return
 
-        base_reward_usd = valuation_result.get("final_reward", 0.0) * 0.3
+        base_reward_usd = valuation_result.get("final_reward", 0.0) * 0.2
         
         if source == 'web':
             base_reward_usd /= 1.5
@@ -882,7 +882,7 @@ def process_contribution(self, user_id: int, contribution_db_id: int):
         valuation_details["is_open_source"] = is_open_source
 
         if is_open_source:
-            base_reward_usd /= 50.0
+            base_reward_usd /= 35
             logger.warning(f"[REWARD_PENALTY] Open source detected. Reward nerfed by 50x. New base reward: ${base_reward_usd:.4f}")
 
         final_base_reward_with_innovation = base_reward_usd * innovation_multiplier
