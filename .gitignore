@@ -56,3 +56,10 @@ priv_key_to_json.py
 
 Irys-docs-v2/
 Irys-docs-v2
+
+stats_for_dashboard.sql
+tdl.txt
+ai-instructions.txt
+commands.txt
+fundraising/
+certbot/conf/
