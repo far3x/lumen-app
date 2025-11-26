@@ -1,9 +1,9 @@
 <p align="center">
-  <img src="./frontend/public/logo.png" alt="Lumen Exchange Logo" width="200">
+  <img src="./frontend/public/logo2.png" alt="Lumen Exchange Logo" width="200">
 </p>
 
 <h1 align="center">
-  Lumen Exchange v1.0
+  Lumen App - v2.0
 </h1>
 
 <h3 align="center">
