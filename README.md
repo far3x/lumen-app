@@ -91,7 +91,7 @@ lumen-app/
 ### 1. Clone the repository
 ```bash
 git clone https://github.com/far3x/lumen-app.git
-cd lumen
+cd lumen-app/
 ```
 
 <h3 id="environment-configuration">2. Environment Configuration</h3>
