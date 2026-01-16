@@ -10,8 +10,6 @@
     "test": "vitest"
   },
   "dependencies": {
-    "@payai/x402": "^0.5.3-nightly.20250919.d259b58",
-    "@payai/x402-axios": "^0.5.1-nightly.20250919.d259b58",
     "@solana/kit": "^2.1.1",
     "@solana/spl-token": "^0.4.14",
     "@solana/wallet-adapter-base": "^0.9.27",
@@ -23,7 +21,6 @@
     "chart.js": "^4.4.3",
     "events": "^3.3.0",
     "vite-plugin-node-polyfills": "^0.24.0",
-    "x402": "^0.7.1",
     "zxcvbn": "^4.4.2"
   },
   "devDependencies": {

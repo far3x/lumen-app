@@ -74,6 +74,12 @@ function triggerContextualFeedback() {
     }
 }
 
+function formatAnnotationText(text) {
+    if (!text) return '';
+    // Escape HTML first, then replace backticked content with styled code tags
+    return escapeHtml(text).replace(/`([^`]+)`/g, '<code class="bg-gray-200 text-gray-800 px-1.5 py-0.5 rounded text-xs font-mono border border-gray-300">$1</code>');
+}
+
 function renderScoreBar(label, score, tooltipText) {
     const normalizedScore = (score === undefined || score === null) ? 0 : Math.max(0, Math.min(1, score));
     const percentage = normalizedScore * 100;
@@ -116,6 +122,7 @@ function renderAndOpenDetailPanel(item) {
     const languageEntries = Object.entries(languageBreakdown);
     const rewardUsd = item.reward_amount ?? 0;
     const lumenEquivalent = (details.simulated_lum_price_usd && details.simulated_lum_price_usd > 0) ? (rewardUsd / details.simulated_lum_price_usd) : 0;
+    const codeAnnotations = details.code_annotations || [];
 
     const openSourceWarningHtml = item.is_open_source ? `
         <div class="mb-6 p-4 bg-yellow-400/10 border border-yellow-500/20 text-yellow-700 rounded-md text-sm">
@@ -123,6 +130,46 @@ function renderAndOpenDetailPanel(item) {
         </div>
     ` : '';
     
+    let annotationsHtml = '';
+    if (codeAnnotations.length > 0) {
+        annotationsHtml = `
+            <div class="mt-6 bg-primary/50 p-6 rounded-lg border border-primary">
+                <h3 class="font-bold text-lg text-text-main mb-4">AI Code Insights</h3>
+                <div class="space-y-4">
+                    ${codeAnnotations.map(ann => {
+                        let borderColor = 'border-primary';
+                        let textColor = 'text-text-secondary';
+                        let typeBadgeColor = 'bg-primary text-text-secondary';
+                        
+                        const typeLower = ann.type.toLowerCase();
+                        if (typeLower.includes('security') || typeLower.includes('bug')) {
+                            borderColor = 'border-red-500/30';
+                            typeBadgeColor = 'bg-red-500/10 text-red-600';
+                        } else if (typeLower.includes('optimization') || typeLower.includes('perf')) {
+                            borderColor = 'border-yellow-500/30';
+                            typeBadgeColor = 'bg-yellow-500/10 text-yellow-600';
+                        } else if (typeLower.includes('praise') || typeLower.includes('good')) {
+                             borderColor = 'border-green-500/30';
+                            typeBadgeColor = 'bg-green-500/10 text-green-600';
+                        }
+
+                        return `
+                        <div class="p-4 bg-surface rounded-md border ${borderColor}">
+                            <div class="flex items-center justify-between mb-2">
+                                <div class="flex items-center gap-2">
+                                    <span class="text-xs font-mono font-bold text-text-main bg-primary px-1.5 py-0.5 rounded">${escapeHtml(ann.file)}:${ann.line}</span>
+                                    <span class="text-xs font-bold px-2 py-0.5 rounded-full ${typeBadgeColor}">${escapeHtml(ann.type)}</span>
+                                </div>
+                            </div>
+                            <p class="text-sm ${textColor}">${formatAnnotationText(ann.message)}</p>
+                        </div>
+                        `;
+                    }).join('')}
+                </div>
+            </div>
+        `;
+    }
+
     const panelHtml = `
         <div id="${panelId}" class="fixed inset-0 z-50 overflow-hidden" aria-labelledby="slide-over-title" role="dialog" aria-modal="true">
             <div class="absolute inset-0 overflow-hidden">
@@ -191,6 +238,8 @@ function renderAndOpenDetailPanel(item) {
                                         </div>
                                     </div>
                                 </div>
+                                
+                                ${annotationsHtml}
                                 
                                 ${languageEntries.length > 0 ? `
                                     <div class="mt-6 bg-primary/50 p-6 rounded-lg border border-primary">

@@ -85,16 +85,21 @@ class IrysService:
             logger.error(f"Irys upload failed: {e}", exc_info=True)
             raise e
 
-    async def get_data(self, tx_id: str) -> str | None:
+    async def get_data(self, tx_id: str | None, db_content: str | None = None) -> str | None:
         """
         Récupération de données depuis Irys via le microservice.
         
         Args:
             tx_id: L'ID de transaction Irys
+            db_content: Fallback content from database if Irys fails or tx_id is missing
             
         Returns:
             str: Le contenu récupéré, ou None si erreur
         """
+        if db_content and len(db_content) > 0:
+            logger.info("Retrieving content from local database fallback.")
+            return db_content
+
         if not tx_id:
             return None
         

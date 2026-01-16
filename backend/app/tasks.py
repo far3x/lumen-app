@@ -754,14 +754,6 @@ def process_contribution(self, user_id: int, contribution_db_id: int):
             logger.error(f"Contribution {contribution_db_id} not found. Aborting task.")
             return
         
-        #REMOVE THIS AFTER DONE
-        #logger.warning(f"MAINTENANCE MODE: Automatically rejecting contribution {contribution_db_id}.")
-        #contribution_record.status = "REJECTED_NO_REWARD"
-        #contribution_record.reward_amount = 0.0
-        #db.commit()
-        #publish_contribution_update(db, contribution_db_id, user_id)
-        #return
-
         codebase = contribution_record.raw_content
         source = contribution_record.source
         
@@ -791,10 +783,11 @@ def process_contribution(self, user_id: int, contribution_db_id: int):
             db.commit()
             logger.info(f"Contribution {contribution_db_id} stored on Irys: {irys_tx_id}")
         except Exception as e:
-            logger.error(f"Fatal error uploading to Irys for C_ID {contribution_db_id}: {e}", exc_info=True)
-            crud.update_contribution_status(db, contribution_db_id, "FAILED_STORAGE")
-            publish_contribution_update(db, contribution_db_id, user_id)
-            return
+            logger.warning(f"Irys upload failed for {contribution_db_id} ({e}). FALLING BACK TO DB STORAGE.")
+            if not contribution_record.content_preview:
+                contribution_record.content_preview = "\n".join(final_codebase.splitlines()[:50])
+            contribution_record.irys_tx_id = None
+            db.commit()
 
         logger.info(f"Processing contribution {contribution_db_id} for user {user_id}. Starting uniqueness check...")
         
@@ -952,9 +945,10 @@ def process_contribution(self, user_id: int, contribution_db_id: int):
 
     except Exception as e:
         logger.error(f"Unhandled error in process_contribution for c_id {contribution_db_id}: {e}", exc_info=True)
-        contribution_record = crud.get_contribution_by_id(db, contribution_db_id)
-        if contribution_record and contribution_record.irys_tx_id:
-            contribution_record.raw_content = None
+        # If we failed but we have raw_content, we keep it in DB for retry
+        # contribution_record = crud.get_contribution_by_id(db, contribution_db_id)
+        # if contribution_record and contribution_record.irys_tx_id:
+        #     contribution_record.raw_content = None
         crud.update_contribution_status(db, contribution_db_id, "FAILED")
         publish_contribution_update(db, contribution_db_id, user_id)
     finally:
@@ -1049,9 +1043,13 @@ def recalculate_contributions_from_id_task(start_id: int):
             logger.info(f"Old reward: ${old_reward_usd:.4f}")
             
             try:
-                raw_content = asyncio.run(irys_service.get_data(contribution.irys_tx_id))
+                raw_content = asyncio.run(irys_service.get_data(
+                    contribution.irys_tx_id, 
+                    db_content=contribution.raw_content
+                ))
                 if not raw_content:
-                    raise ValueError(f"Could not fetch content from Irys for tx {contribution.irys_tx_id}")
+                    logger.warning(f"Skipping C_ID:{contribution.id}: No content found in Irys or DB.")
+                    continue
 
                 valuation_result = hybrid_valuation_service.calculate(db, current_codebase=raw_content)
                 
@@ -1229,9 +1227,13 @@ def recalculate_all_embeddings_task():
         for i, contribution in enumerate(all_contributions):
             logger.info(f"Processing contribution {i+1}/{total} (ID: {contribution.id})...")
             
-            full_codebase_content = asyncio.run(irys_service.get_data(contribution.irys_tx_id))
+            full_codebase_content = asyncio.run(irys_service.get_data(
+                contribution.irys_tx_id,
+                db_content=contribution.raw_content
+            ))
+
             if not full_codebase_content:
-                logger.warning(f"Skipping C_ID:{contribution.id} as content could not be fetched from Irys.")
+                logger.warning(f"Skipping C_ID:{contribution.id} as content could not be fetched from Irys or DB.")
                 continue
 
             token_count = len(tokenizer.encode(full_codebase_content))

@@ -538,7 +538,10 @@ def unlock_contribution(db: Session, company_id: int, contribution_id: int, api_
     
     is_unlocked = db.query(models.UnlockedContribution).filter_by(company_id=company_id, contribution_id=contribution_id).first()
     if is_unlocked:
-        raw_content = asyncio.run(irys_service.get_data(contribution.irys_tx_id))
+        raw_content = asyncio.run(irys_service.get_data(
+            contribution.irys_tx_id, 
+            db_content=contribution.raw_content
+        ))
         if not raw_content:
             raise HTTPException(status_code=503, detail="Could not retrieve already unlocked data.")
         return { "id": contribution.id, "created_at": contribution.created_at, "raw_content": raw_content }
@@ -567,7 +570,11 @@ def unlock_contribution(db: Session, company_id: int, contribution_id: int, api_
     db.commit()
     db.refresh(company)
 
-    raw_content = asyncio.run(irys_service.get_data(contribution.irys_tx_id))
+    raw_content = asyncio.run(irys_service.get_data(
+        contribution.irys_tx_id,
+        db_content=contribution.raw_content
+    ))
+    
     if not raw_content:
         raise HTTPException(status_code=503, detail="Unlocked contribution, but failed to retrieve content from storage.")
 
@@ -624,7 +631,10 @@ def get_unlocked_contribution_content(db: Session, company_id: int, contribution
     unlocked = db.query(models.UnlockedContribution).filter_by(company_id=company_id, contribution_id=contribution_id).first()
     if unlocked and unlocked.contribution:
         contribution = unlocked.contribution
-        raw_content = asyncio.run(irys_service.get_data(contribution.irys_tx_id))
+        raw_content = asyncio.run(irys_service.get_data(
+            contribution.irys_tx_id, 
+            db_content=contribution.raw_content
+        ))
         if not raw_content:
             return None 
         return { "id": contribution.id, "created_at": contribution.created_at, "raw_content": raw_content }

@@ -16,10 +16,9 @@ export default defineConfig({
   resolve: {
     alias: {
       buffer: 'buffer',
-      x402: '@payai/x402',
     },
   },
   optimizeDeps: {
-    include: ['buffer', '@payai/x402-axios'],
+    include: ['buffer'],
   },
 });

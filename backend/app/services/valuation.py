@@ -178,7 +178,8 @@ class HybridValuationService:
             "architectural_quality_score": 0.5,
             "code_quality_score": 0.5,
             "plagiarism_check_files": [],
-            "working_code_ratio": 1.0
+            "working_code_ratio": 1.0,
+            "code_annotations": []
         }
         if not isinstance(raw_scores, dict):
             return validated
@@ -199,6 +200,19 @@ class HybridValuationService:
             validated["working_code_ratio"] = max(0.0, min(100.0, ratio)) / 100.0
         except (ValueError, TypeError):
             validated["working_code_ratio"] = 1.0
+            
+        annotations = raw_scores.get("code_annotations", [])
+        if isinstance(annotations, list):
+            valid_annotations = []
+            for ann in annotations:
+                if isinstance(ann, dict) and "message" in ann and "type" in ann:
+                    valid_annotations.append({
+                        "file": str(ann.get("file", "unknown")),
+                        "line": ann.get("line", 0),
+                        "type": str(ann.get("type", "General")),
+                        "message": str(ann.get("message", ""))
+                    })
+            validated["code_annotations"] = valid_annotations
 
         return validated
 
@@ -230,7 +244,15 @@ class HybridValuationService:
           "code_quality_score": "float",
           "analysis_summary": "string",
           "plagiarism_check_files": "array[string]",
-          "working_code_ratio": "float (0-100)"
+          "working_code_ratio": "float (0-100)",
+          "code_annotations": [
+             {{
+                "file": "string (filename)",
+                "line": "int",
+                "type": "string (Security, Optimization, Best Practice, Praise)",
+                "message": "string"
+             }}
+          ]
         }}
 
 
@@ -252,8 +274,13 @@ class HybridValuationService:
             *   Do not justify the grade you are putting, or justify anything. Do not give any detail about how your analysis impacted your grade.
             *   Focus on the user code, not what they say. They could say "bullshit" or "good to see" content while it's actually not even implemented.
             *   In that summary, focus on making it really deep, not touch technically say things like "this part doesn't work so it's bad" but go deep enough to explain how things are implemented in the code. Show that you are smart and know what you're analyzing.
+
+        4.  **Code Annotations (The Insight):**
+            *   Identify 3 to 5 specific, impactful snippets in the code.
+            *   These can be suggestions for improvement (Security risk, Optimization, Style) OR specific praise for clever implementation.
+            *   Be technical and concise.
             
-        4.  **Working Code Ratio (Internal Metric - DO NOT mention this in the summary):**
+        5.  **Working Code Ratio (Internal Metric - DO NOT mention this in the summary):**
             *   Provide a `working_code_ratio` from 0 to 100. This is your estimation of how much of the submitted code is coherent and functional.
             *   A ratio of 100 means the code appears to be a complete, working project, even if complex.
             *   A ratio of 0 means the code is nonsensical, AI-generated filler that assumes non-existent libraries or functions and has no chance of running (don't nerf too much if there is mistakes in the code, but nerf essentially if the user is sending nonsense with no effort or just simulations or things that are similar that you're sure about).
@@ -352,6 +379,7 @@ class HybridValuationService:
         analysis_summary_from_ai = None
         plagiarism_check_files = []
         working_code_ratio = 1.0
+        code_annotations = []
 
         if lloc_for_reward > 0: 
             if settings.VALUATION_MODE == "AI" and self.client:
@@ -362,10 +390,11 @@ class HybridValuationService:
                      return {"final_reward": 0.0, "valuation_details": ai_scores_raw}
 
                 ai_scores_validated = self._validate_ai_scores(ai_scores_raw)
-                ai_scores = {k: v for k, v in ai_scores_validated.items() if k not in ["plagiarism_check_files", "working_code_ratio"]}
+                ai_scores = {k: v for k, v in ai_scores_validated.items() if k not in ["plagiarism_check_files", "working_code_ratio", "code_annotations"]}
                 plagiarism_check_files = ai_scores_validated.get("plagiarism_check_files", [])
                 analysis_summary_from_ai = ai_scores_raw.get("analysis_summary")
                 working_code_ratio = ai_scores_validated.get("working_code_ratio", 1.0)
+                code_annotations = ai_scores_validated.get("code_annotations", [])
 
             else:
                 scope_score = math.log10(current_metrics.get('total_lloc', 1) + 1)
@@ -421,7 +450,8 @@ class HybridValuationService:
             "simulated_lum_price_usd": round(simulated_lum_price, 6),
             "target_usd_reward": round(target_usd_reward, 4),
             "final_reward_usd": round(final_reward, 4),
-            "plagiarism_check_files": plagiarism_check_files
+            "plagiarism_check_files": plagiarism_check_files,
+            "code_annotations": code_annotations
         })
 
         return {"final_reward": final_reward, "valuation_details": valuation_details}
